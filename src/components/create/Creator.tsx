@@ -1,8 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { CardPlayer } from "@/components/card/CardPlayer";
+import { Logo } from "@/components/Logo";
+import { PhoneFrame } from "@/components/PhoneFrame";
 import { OCCASIONS, THEMES, type CardData, type Effect, type Occasion, type Screen } from "@/lib/card";
 import { buildTemplate, occasions } from "@/lib/templates";
 import { themes } from "@/lib/themes";
@@ -131,9 +132,7 @@ export function Creator({ initialOccasion }: { initialOccasion?: Occasion }) {
   return (
     <div className="min-h-dvh">
       <header className="flex items-center justify-between border-b border-line px-4 py-3 sm:px-6">
-        <Link href="/" className="font-display text-xl font-bold text-brand">
-          Sending Vibes 💌
-        </Link>
+        <Logo textClass="text-foreground" />
         {step === "edit" && (
           <button onClick={startOver} className="text-sm font-semibold opacity-70 hover:opacity-100">
             Start over
@@ -273,7 +272,7 @@ export function Creator({ initialOccasion }: { initialOccasion?: Occasion }) {
 
           <aside className="hidden lg:block">
             <div className="sticky top-6">
-              <PhoneFrame>
+              <PhoneFrame className="mx-auto h-[680px] w-[340px]">
                 <CardPlayer card={card} preview focusScreenId={selected} />
               </PhoneFrame>
               <p className="mt-3 text-center text-xs opacity-60">Live preview. Tap through it like they will.</p>
@@ -362,13 +361,5 @@ function IconButton({ label, onClick, disabled, children }: { label: string; onC
     <button aria-label={label} onClick={onClick} disabled={disabled} className="grid h-8 w-8 place-items-center rounded-full text-sm hover:bg-brand-soft disabled:opacity-25">
       {children}
     </button>
-  );
-}
-
-function PhoneFrame({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="mx-auto h-[720px] w-[360px] overflow-hidden rounded-[2.75rem] border-[10px] border-neutral-900 bg-neutral-900 shadow-2xl">
-      <div className="h-full w-full overflow-hidden rounded-[2rem]">{children}</div>
-    </div>
   );
 }

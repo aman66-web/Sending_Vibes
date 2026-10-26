@@ -30,6 +30,15 @@
   --font-sans: var(--font-body);
   --font-display: var(--font-display-face);
   --font-hand: var(--font-hand-face);
+  --font-serif: var(--font-serif-face);
+
+  /* Fixed brand palette for the marketing pages (doesn't flip in dark mode). */
+  --color-ink: #1d0b17;
+  --color-cream: #fff7f1;
+  --color-hot: #ff2e7e;
+  --color-tangerine: #ff8a3d;
+  --color-grape: #7c3aed;
+  --color-sun: #ffc23d;
 
   --animate-float-up: float-up 10s linear infinite;
   --animate-fall: fall 3s linear forwards;
@@ -39,6 +48,11 @@
   --animate-smoke: smoke 1.2s ease-out forwards;
   --animate-wiggle: wiggle 2.4s ease-in-out infinite;
   --animate-screen-in: screen-in 0.45s ease-out both;
+  --animate-blob: blob 18s ease-in-out infinite;
+  --animate-marquee: marquee 40s linear infinite;
+  --animate-bob: bob 5s ease-in-out infinite;
+  --animate-shimmer: shimmer 6s linear infinite;
+  --animate-glow: glow 2.4s ease-in-out infinite;
 
   @keyframes float-up {
     from { transform: translateY(0) rotate(0deg); }
@@ -68,10 +82,36 @@
     0%, 100% { transform: rotate(-6deg); }
     50% { transform: rotate(6deg) scale(1.06); }
   }
+  @keyframes blob {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(6%, -8%) scale(1.12); }
+    66% { transform: translate(-6%, 6%) scale(0.92); }
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @keyframes bob {
+    0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); }
+    50% { transform: translateY(-12px) rotate(var(--r, 0deg)); }
+  }
+  @keyframes shimmer {
+    from { background-position: 0% 50%; }
+    to { background-position: 200% 50%; }
+  }
+  @keyframes glow {
+    0%, 100% { opacity: 0.35; filter: saturate(0.6); }
+    50% { opacity: 1; filter: saturate(1.2) drop-shadow(0 0 12px rgba(255, 190, 60, 0.9)); }
+  }
   @keyframes screen-in {
     from { transform: translateY(16px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
   }
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
 }
 
 body {
