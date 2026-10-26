@@ -1,18 +1,14 @@
 import Link from "next/link";
-import { CardPlayer } from "@/components/card/CardPlayer";
 import { Particles } from "@/components/card/effects";
+import { HeroShowcase } from "@/components/landing/HeroShowcase";
 import { OccasionShowcase } from "@/components/landing/OccasionShowcase";
 import { AiPromptDemo, RunawayDemo, TypewriterLoop } from "@/components/landing/widgets";
 import { CatalogGrid } from "@/components/catalog/CatalogGrid";
 import { Logo } from "@/components/Logo";
-import { LaptopFrame } from "@/components/LaptopFrame";
-import { PhoneFrame } from "@/components/PhoneFrame";
 import { Reveal } from "@/components/Reveal";
 import { SiteHeader } from "@/components/SiteHeader";
 import { TEMPLATES } from "@/lib/catalog";
 import { PRICES } from "@/lib/pricing";
-import { OCCASIONS, type Occasion } from "@/lib/card";
-import { buildDemo, occasions } from "@/lib/templates";
 
 const MARQUEE = [
   { emoji: "💘", label: "Valentine's" },
@@ -27,8 +23,6 @@ const MARQUEE = [
   { emoji: "🧵", label: "Raksha Bandhan", soon: true },
   { emoji: "👶", label: "New baby", soon: true },
 ];
-
-const HERO_OCCASIONS: Occasion[] = ["valentine", "birthday", "diwali", "christmas", "eid"];
 
 const TIERS = [
   {
@@ -75,24 +69,17 @@ export default function Home() {
         <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 pb-10 pt-10 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-6 lg:pt-14">
           <div className="text-center lg:text-left">
             <span className="inline-flex items-center gap-2 rounded-full bg-white/80 px-3.5 py-1.5 text-sm font-bold text-ink/70 shadow-sm ring-1 ring-ink/5 backdrop-blur">
-              💌 Sent as a link · no app needed
+              ✏️ Just fill in the blanks · no coding
             </span>
             <h1 className="mt-5 font-display text-[clamp(2.75rem,6.2vw,4.6rem)] font-bold leading-[0.92] tracking-tight">
-              <span className="animate-shimmer bg-gradient-to-r from-hot via-tangerine to-grape bg-[length:200%_auto] bg-clip-text text-transparent">
-                Interactive cards
+              <span className="animate-shimmer bg-gradient-to-r from-hot via-tangerine to-grape bg-[length:200%_auto] bg-clip-text pb-1 text-transparent">
+                Personalised
               </span>
               <br />
-              they can{" "}
-              <span className="relative inline-block whitespace-nowrap pr-1 font-serif font-normal italic">
-                play
-                <svg viewBox="0 0 300 24" className="absolute -bottom-1 left-0 w-full" aria-hidden>
-                  <path d="M4 16 C 60 4, 120 22, 180 10 S 270 8, 296 14" fill="none" stroke="#ff2e7e" strokeWidth="6" strokeLinecap="round" />
-                </svg>
-              </span>
-              .
+              interactive cards.
             </h1>
             <p className="mx-auto mt-5 max-w-lg text-base leading-relaxed text-ink/70 sm:mt-6 sm:text-xl lg:mx-0">
-              Not a picture. A little experience they tap through: mini games, your photos, a No button that runs away and a big finale.
+              Pick a design and fill in the blanks: their name, your photos, your message. That&apos;s it. We turn it into a card they can play, with games and a big finale.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3 lg:justify-start">
               <Link
@@ -106,48 +93,14 @@ export default function Home() {
                 See all {TEMPLATES.length} designs
               </Link>
             </div>
-            <div className="mt-7 hidden flex-wrap items-center justify-center gap-2 sm:flex lg:justify-start">
-              {HERO_OCCASIONS.map((o) => (
-                <Link
-                  key={o}
-                  href={`/cards?occasion=${o}`}
-                  className="rounded-full bg-white/80 px-3 py-1.5 text-sm font-bold text-ink/70 ring-1 ring-ink/5 transition hover:bg-white hover:text-ink"
-                >
-                  {occasions[o].emoji} {occasions[o].label}
-                </Link>
-              ))}
-              <Link href="/cards" className="px-1 text-sm font-bold text-hot">
-                +{OCCASIONS.length - HERO_OCCASIONS.length} more
-              </Link>
-            </div>
+            <ul className="mt-7 hidden flex-wrap justify-center gap-x-5 gap-y-2 text-sm font-bold text-ink/70 sm:flex lg:justify-start">
+              <li>✓ No coding</li>
+              <li>✓ No design skills</li>
+              <li>✓ Ready in 2 minutes</li>
+            </ul>
           </div>
 
-          {/* A laptop and a phone, both running real cards, so it's clear they work on any screen.
-              Built at one design size (600×520) and scaled to fit each breakpoint. */}
-          <div className="relative mx-auto mt-6 h-[312px] w-full sm:mt-10 sm:h-[468px] lg:mt-0 lg:h-[375px] xl:h-[416px]">
-            <div aria-hidden className="absolute inset-x-6 top-10 h-3/4 rounded-full bg-gradient-to-br from-hot/40 via-tangerine/30 to-grape/30 blur-3xl" />
-            <div className="absolute left-1/2 top-0 h-[520px] w-[600px] origin-top -translate-x-1/2 scale-[0.6] sm:scale-90 lg:scale-[0.72] xl:scale-[0.8]">
-              <span className="absolute left-3 top-0 z-20 whitespace-nowrap rounded-full bg-ink px-5 py-2.5 font-display text-xl font-semibold text-white shadow-xl">
-                💻 On a laptop · try pressing No
-              </span>
-              <div className="absolute left-0 top-14">
-                {/* A slightly smaller virtual screen keeps the card legible at this size. */}
-                <LaptopFrame screenWidth={760} screenHeight={475} scale={504 / 760}>
-                  <CardPlayer card={buildDemo("valentine")} preview focusScreenId="question" />
-                </LaptopFrame>
-              </div>
-              <div className="absolute left-[438px] top-[150px] z-10 h-[307px] w-[150px] rotate-[5deg]">
-                <div className="origin-top-left scale-[0.48]">
-                  <PhoneFrame>
-                    <CardPlayer card={buildDemo("diwali")} preview focusScreenId="game" />
-                  </PhoneFrame>
-                </div>
-              </div>
-              <span className="absolute right-0 top-[470px] z-20 whitespace-nowrap rounded-full bg-white px-5 py-2.5 font-display text-xl font-semibold text-ink shadow-xl">
-                📱 On a phone · tap the diyas
-              </span>
-            </div>
-          </div>
+          <HeroShowcase />
         </div>
 
         {/* The whole process in one line. */}
@@ -155,7 +108,7 @@ export default function Home() {
           <ol className="grid gap-3 rounded-3xl bg-white/80 p-4 shadow-sm ring-1 ring-ink/5 backdrop-blur sm:grid-cols-3 sm:gap-0 sm:p-3">
             {[
               { emoji: "🎨", title: "Pick a design", body: `${TEMPLATES.length} designs, 9 occasions` },
-              { emoji: "📸", title: "Add names & photos", body: "Change any words you like" },
+              { emoji: "✏️", title: "Fill in the blanks", body: "Names, photos and your message" },
               { emoji: "💬", title: "Send the link", body: "WhatsApp, text or Instagram" },
             ].map((step, i) => (
               <li key={step.title} className={`flex items-center gap-3 px-3 py-1 ${i > 0 ? "sm:border-l sm:border-ink/10" : ""}`}>
