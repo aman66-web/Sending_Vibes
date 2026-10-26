@@ -10,7 +10,8 @@ import { Reveal } from "@/components/Reveal";
 import { SiteHeader } from "@/components/SiteHeader";
 import { TEMPLATES } from "@/lib/catalog";
 import { PRICES } from "@/lib/pricing";
-import { buildDemo } from "@/lib/templates";
+import { OCCASIONS, type Occasion } from "@/lib/card";
+import { buildDemo, occasions } from "@/lib/templates";
 
 const MARQUEE = [
   { emoji: "💘", label: "Valentine's" },
@@ -24,6 +25,15 @@ const MARQUEE = [
   { emoji: "🏆", label: "Congrats" },
   { emoji: "🧵", label: "Raksha Bandhan", soon: true },
   { emoji: "👶", label: "New baby", soon: true },
+];
+
+const HERO_OCCASIONS: Occasion[] = ["valentine", "birthday", "diwali", "christmas", "eid"];
+
+// Each hero phone opens straight onto the part you can play with.
+const HERO_PHONES: { occasion: Occasion; screen: string; position: "left" | "center" | "right"; label: string }[] = [
+  { occasion: "diwali", screen: "game", position: "left", label: "🪔 Tap to light them" },
+  { occasion: "valentine", screen: "question", position: "center", label: "👆 Try pressing No" },
+  { occasion: "birthday", screen: "game", position: "right", label: "🎂 Blow them out" },
 ];
 
 const TIERS = [
@@ -55,13 +65,11 @@ const FAQS = [
 ];
 
 export default function Home() {
-  const heroCard = buildDemo("valentine");
-
   return (
     <div className="overflow-x-clip bg-cream text-ink">
       <SiteHeader />
 
-      {/* Hero */}
+      {/* Hero: says what we do in one glance, then shows it. */}
       <section className="relative">
         <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute -left-40 -top-40 h-[30rem] w-[30rem] animate-blob rounded-full bg-hot/25 blur-3xl" />
@@ -70,87 +78,105 @@ export default function Home() {
           <div className="absolute inset-0 bg-[radial-gradient(#1d0b17_1px,transparent_1px)] [background-size:22px_22px] opacity-[0.05]" />
         </div>
 
-        <div className="relative mx-auto grid max-w-6xl items-center gap-14 px-4 pb-24 pt-12 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:pt-20">
+        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 pb-10 pt-10 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-6 lg:pt-14">
           <div className="text-center lg:text-left">
-            <Link href="/cards" className="inline-flex items-center gap-2 rounded-full border border-hot/20 bg-white/70 px-3.5 py-1.5 text-sm font-bold text-hot shadow-sm backdrop-blur transition hover:bg-white">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-hot opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-hot" />
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/80 px-3.5 py-1.5 text-sm font-bold text-ink/70 shadow-sm ring-1 ring-ink/5 backdrop-blur">
+              💌 Sent as a link · no app needed
+            </span>
+            <h1 className="mt-5 font-display text-[clamp(2.75rem,6.2vw,4.6rem)] font-bold leading-[0.92] tracking-tight">
+              <span className="animate-shimmer bg-gradient-to-r from-hot via-tangerine to-grape bg-[length:200%_auto] bg-clip-text text-transparent">
+                Interactive cards
               </span>
-              New: {TEMPLATES.length} card designs for 9 occasions →
-            </Link>
-            <h1 className="mt-6 font-display text-[clamp(2.9rem,6.2vw,4.6rem)] font-bold leading-[0.95] tracking-tight">
-              Don&apos;t send a card.
               <br />
-              Send a{" "}
-              <span className="relative inline-block whitespace-nowrap pr-2 font-serif font-normal italic">
-                <span className="animate-shimmer bg-gradient-to-r from-hot via-tangerine to-grape bg-[length:200%_auto] bg-clip-text text-transparent">
-                  moment
-                </span>
-                <svg viewBox="0 0 300 24" className="absolute -bottom-2 left-0 w-full" aria-hidden>
-                  <path d="M4 16 C 60 4, 120 22, 180 10 S 270 8, 296 14" fill="none" stroke="#ff2e7e" strokeWidth="5" strokeLinecap="round" />
+              they can{" "}
+              <span className="relative inline-block whitespace-nowrap pr-1 font-serif font-normal italic">
+                play
+                <svg viewBox="0 0 300 24" className="absolute -bottom-1 left-0 w-full" aria-hidden>
+                  <path d="M4 16 C 60 4, 120 22, 180 10 S 270 8, 296 14" fill="none" stroke="#ff2e7e" strokeWidth="6" strokeLinecap="round" />
                 </svg>
               </span>
               .
             </h1>
-            <p className="mx-auto mt-7 max-w-xl text-lg leading-relaxed text-ink/70 sm:text-xl lg:mx-0">
-              Interactive cards with a No button that runs away, mini games, your photos and a finale worth screenshotting. Made in two minutes. Sent as a link.
+            <p className="mx-auto mt-5 max-w-lg text-base leading-relaxed text-ink/70 sm:mt-6 sm:text-xl lg:mx-0">
+              Not a picture. A little experience they tap through: mini games, your photos, a No button that runs away and a big finale.
             </p>
-            <div className="mt-9 flex flex-wrap justify-center gap-3 lg:justify-start">
+            <div className="mt-8 flex flex-wrap justify-center gap-3 lg:justify-start">
               <Link
                 href="/create"
-                className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-hot to-tangerine px-8 py-4 font-display text-lg font-semibold text-white shadow-[0_14px_34px_-10px_rgba(255,46,126,0.8)] transition hover:-translate-y-0.5"
+                className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-hot to-tangerine px-6 py-3.5 font-display text-base font-semibold text-white shadow-[0_14px_34px_-10px_rgba(255,46,126,0.8)] transition hover:-translate-y-0.5 sm:px-8 sm:py-4 sm:text-lg"
               >
-                Make your card
+                Make a card · {PRICES.card.label}
                 <span className="transition group-hover:translate-x-1">→</span>
               </Link>
-              <Link href="/cards" className="inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 font-display text-lg font-semibold shadow-sm ring-1 ring-ink/10 transition hover:-translate-y-0.5">
-                Browse the cards
+              <Link href="/cards" className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 font-display text-base font-semibold shadow-sm ring-1 ring-ink/10 transition hover:-translate-y-0.5 sm:px-8 sm:py-4 sm:text-lg">
+                See all {TEMPLATES.length} designs
               </Link>
             </div>
-            <ul className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm font-semibold text-ink/60 lg:justify-start">
-              <li>✓ No app needed</li>
-              <li>✓ Ready in 2 minutes</li>
-              <li>✓ Works on any phone</li>
-            </ul>
+            <div className="mt-7 hidden flex-wrap items-center justify-center gap-2 sm:flex lg:justify-start">
+              {HERO_OCCASIONS.map((o) => (
+                <Link
+                  key={o}
+                  href={`/cards?occasion=${o}`}
+                  className="rounded-full bg-white/80 px-3 py-1.5 text-sm font-bold text-ink/70 ring-1 ring-ink/5 transition hover:bg-white hover:text-ink"
+                >
+                  {occasions[o].emoji} {occasions[o].label}
+                </Link>
+              ))}
+              <Link href="/cards" className="px-1 text-sm font-bold text-hot">
+                +{OCCASIONS.length - HERO_OCCASIONS.length} more
+              </Link>
+            </div>
           </div>
 
-          <div className="relative mx-auto">
-            <div aria-hidden className="absolute inset-x-0 top-16 -z-10 h-[80%] rounded-full bg-gradient-to-br from-hot/50 via-tangerine/40 to-grape/40 blur-3xl" />
-            <div className="rotate-[-2.5deg] transition duration-500 hover:rotate-0">
-              <PhoneFrame>
-                <CardPlayer card={heroCard} preview />
-              </PhoneFrame>
-            </div>
-            <span
-              style={{ "--r": "-8deg" } as React.CSSProperties}
-              className="absolute -left-14 top-24 hidden animate-bob rounded-2xl bg-white px-4 py-2.5 font-display font-semibold shadow-xl sm:block"
-            >
-              Nope 🙅‍♀️
-            </span>
-            <span
-              style={{ "--r": "6deg", animationDelay: "-2s" } as React.CSSProperties}
-              className="absolute -right-10 top-48 hidden animate-bob rounded-2xl bg-gradient-to-r from-hot to-tangerine px-4 py-2.5 font-display font-semibold text-white shadow-xl sm:block"
-            >
-              💘 +1
-            </span>
-            <span
-              style={{ "--r": "-4deg", animationDelay: "-3.5s" } as React.CSSProperties}
-              className="absolute -right-8 top-6 hidden h-16 w-16 animate-bob place-items-center rounded-full bg-ink text-3xl shadow-xl sm:grid"
-            >
-              🎆
-            </span>
-            <span
-              style={{ "--r": "8deg", animationDelay: "-1s" } as React.CSSProperties}
-              className="absolute -left-12 bottom-24 hidden animate-bob rounded-md bg-white p-1.5 pb-5 shadow-xl sm:block"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element -- decorative sticker */}
-              <img src="/demo/sunset.svg" alt="" className="h-20 w-16 rounded-sm object-cover" />
-            </span>
-            <p className="absolute -bottom-12 left-1/2 hidden -translate-x-1/2 whitespace-nowrap font-hand text-2xl text-ink/60 sm:block">
-              ↑ it&apos;s real, tap the envelope
-            </p>
+          {/* Three live cards, each already on its interactive moment. Phones are laid out at full size and scaled, so their content never gets cramped. */}
+          <div className="relative mx-auto mt-2 h-[540px] w-full max-w-[600px] [--side:118px] sm:mt-10 sm:h-[600px] sm:[--side:190px] lg:mt-0">
+            <div aria-hidden className="absolute inset-x-10 top-24 h-2/3 rounded-full bg-gradient-to-br from-hot/40 via-tangerine/30 to-grape/30 blur-3xl" />
+            {HERO_PHONES.map((phone) => (
+              <div
+                key={phone.occasion}
+                className={`absolute left-1/2 top-0 origin-top ${phone.position === "center" ? "z-20" : "z-10"}`}
+                style={{
+                  transform:
+                    phone.position === "center"
+                      ? "translateX(-50%) scale(var(--center-scale, 0.8))"
+                      : `translateX(calc(-50% ${phone.position === "left" ? "-" : "+"} var(--side))) translateY(56px) rotate(${phone.position === "left" ? -8 : 8}deg) scale(0.66)`,
+                }}
+              >
+                <PhoneFrame>
+                  <CardPlayer card={buildDemo(phone.occasion)} preview focusScreenId={phone.screen} />
+                </PhoneFrame>
+                {/* Side labels sit above their phones so the centre phone never covers them. */}
+                <span
+                  className={`absolute left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-5 py-2.5 font-display font-semibold shadow-xl ${
+                    phone.position === "center" ? "top-full mt-5 bg-ink text-xl text-white" : "bottom-full mb-6 hidden bg-white text-2xl text-ink sm:block"
+                  }`}
+                >
+                  {phone.label}
+                </span>
+              </div>
+            ))}
           </div>
+        </div>
+
+        {/* The whole process in one line. */}
+        <div className="relative mx-auto max-w-5xl px-4 pb-16 sm:px-6">
+          <ol className="grid gap-3 rounded-3xl bg-white/80 p-4 shadow-sm ring-1 ring-ink/5 backdrop-blur sm:grid-cols-3 sm:gap-0 sm:p-3">
+            {[
+              { emoji: "🎨", title: "Pick a design", body: `${TEMPLATES.length} designs, 9 occasions` },
+              { emoji: "📸", title: "Add names & photos", body: "Change any words you like" },
+              { emoji: "💬", title: "Send the link", body: "WhatsApp, text or Instagram" },
+            ].map((step, i) => (
+              <li key={step.title} className={`flex items-center gap-3 px-3 py-1 ${i > 0 ? "sm:border-l sm:border-ink/10" : ""}`}>
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-cream text-2xl">{step.emoji}</span>
+                <span>
+                  <span className="block font-display font-bold leading-tight">
+                    {i + 1}. {step.title}
+                  </span>
+                  <span className="block text-sm text-ink/55">{step.body}</span>
+                </span>
+              </li>
+            ))}
+          </ol>
         </div>
       </section>
 
