@@ -9,6 +9,8 @@ export type Theme = {
   accent: string;
   accentText: string;
   secondary: string;
+  // A simpler background for share images, where layered gradients don't render.
+  og?: string;
 };
 
 export const themes: Record<ThemeName, Theme> = {
@@ -115,6 +117,7 @@ export const themes: Record<ThemeName, Theme> = {
   holi: {
     label: "Holi",
     background: "radial-gradient(circle at 10% 10%, #fbcfe8 0%, transparent 40%), radial-gradient(circle at 90% 20%, #fef08a 0%, transparent 40%), radial-gradient(circle at 20% 90%, #bbf7d0 0%, transparent 45%), radial-gradient(circle at 85% 85%, #bfdbfe 0%, transparent 45%), #fffaf5",
+    og: "linear-gradient(135deg, #fbcfe8 0%, #fef08a 35%, #bbf7d0 65%, #bfdbfe 100%)",
     surface: "rgba(255,255,255,0.8)",
     text: "#3b0764",
     muted: "#86198f",

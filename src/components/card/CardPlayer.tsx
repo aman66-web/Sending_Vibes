@@ -56,6 +56,13 @@ export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 
 
   const current = screens[Math.min(index, screens.length - 1)];
   const muted = useMuted();
+  // Browsers only count some events as a "real" tap that may start audio (on
+  // phones that's the finger lifting, not landing), so try on each of them.
+  const unlock = () => {
+    if (!sound) return;
+    unlockAudio();
+    if (!tapped) setTapped(true);
+  };
   // Browsers only allow audio after a tap, so nothing plays until their first one.
   const [tapped, setTapped] = useState(false);
   const music = card.music ?? "none";
@@ -86,11 +93,10 @@ export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 
     <SoundEnabled.Provider value={sound}>
     <div
       style={style}
-      onPointerDownCapture={() => {
-        if (!sound) return;
-        unlockAudio();
-        if (!tapped) setTapped(true);
-      }}
+      onPointerDownCapture={unlock}
+      onPointerUpCapture={unlock}
+      onClickCapture={unlock}
+      onKeyDownCapture={unlock}
       className={`@container relative flex w-full flex-col overflow-hidden ${preview ? "h-full" : "min-h-dvh"}`}
     >
       <EmojiRain effect={card.ambient} />
@@ -185,7 +191,7 @@ function DeviceTip({ device }: { device: "phone" | "desktop" }) {
   const mismatch = touch !== null && (device === "phone" ? !touch : touch);
   if (!mismatch || dismissed) return null;
   return (
-    <div className="absolute inset-x-0 top-0 z-30 flex justify-center p-3">
+    <div className="absolute inset-x-0 bottom-0 z-30 flex justify-center p-3">
       <div className="flex items-center gap-3 rounded-full bg-black/75 py-2 pl-4 pr-2 text-sm font-semibold text-white shadow-lg backdrop-blur">
         {device === "phone" ? "📱 Best on a phone, but it works here too" : "💻 Best on a computer, but it works here too"}
         <button onClick={() => setDismissed(true)} aria-label="Dismiss" className="grid h-6 w-6 place-items-center rounded-full bg-white/20">

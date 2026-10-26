@@ -6,6 +6,7 @@ export type DatedOccasion = { occasion: Occasion; name: string; date: Date; appr
 
 // Festivals that follow the moon move every year, so they're listed by hand.
 // Eid and Raksha Bandhan depend on the moon and can shift by a day.
+// Add the next year's dates before the list runs out (it ends with 2028).
 const LUNAR: { occasion: Occasion; name: string; date: string; approx?: boolean }[] = [
   { occasion: "diwali", name: "Diwali", date: "2026-11-08" },
   { occasion: "eid", name: "Eid al-Fitr", date: "2027-03-09", approx: true },
@@ -13,6 +14,11 @@ const LUNAR: { occasion: Occasion; name: string; date: string; approx?: boolean 
   { occasion: "eid", name: "Eid al-Adha", date: "2027-05-16", approx: true },
   { occasion: "rakhi", name: "Raksha Bandhan", date: "2027-08-17", approx: true },
   { occasion: "diwali", name: "Diwali", date: "2027-10-29" },
+  { occasion: "eid", name: "Eid al-Fitr", date: "2028-02-27", approx: true },
+  { occasion: "holi", name: "Holi", date: "2028-03-10", approx: true },
+  { occasion: "eid", name: "Eid al-Adha", date: "2028-05-05", approx: true },
+  { occasion: "rakhi", name: "Raksha Bandhan", date: "2028-08-04", approx: true },
+  { occasion: "diwali", name: "Diwali", date: "2028-10-17" },
 ];
 
 const FIXED: { occasion: Occasion; name: string; month: number; day: number }[] = [
@@ -59,8 +65,11 @@ function datesFor(year: number): DatedOccasion[] {
   ];
 }
 
+// Today's date as it is in the UK, where most people sending cards are.
 function today(now: Date) {
-  return utc(now.getUTCFullYear(), now.getUTCMonth() + 1, now.getUTCDate());
+  const parts = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", year: "numeric", month: "numeric", day: "numeric" }).formatToParts(now);
+  const part = (type: string) => Number(parts.find((p) => p.type === type)?.value);
+  return utc(part("year"), part("month"), part("day"));
 }
 
 export function upcoming(now = new Date(), count = 4): (DatedOccasion & { days: number })[] {

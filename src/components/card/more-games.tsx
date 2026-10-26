@@ -7,6 +7,21 @@ import { useSfx } from "./sound";
 export type GameProps = { onWin: () => void; won: boolean };
 
 const PANEL = "relative w-full select-none overflow-hidden rounded-3xl ring-1 ring-black/5";
+const FOCUS = "outline-none focus-visible:ring-4 focus-visible:ring-[var(--c-accent)]";
+
+// Where a tap lands inside a panel, in the panel's own pixels (it may be shown scaled down).
+// Keyboard players get a random spot instead.
+function tapPoint(e: React.PointerEvent<HTMLElement> | React.KeyboardEvent<HTMLElement>) {
+  const el = e.currentTarget;
+  const box = el.getBoundingClientRect();
+  const scale = box.width / el.offsetWidth || 1;
+  const width = el.offsetWidth;
+  const height = el.offsetHeight;
+  if (!("clientX" in e)) return { x: width * (0.15 + Math.random() * 0.7), y: height * (0.15 + Math.random() * 0.5), height };
+  return { x: (e.clientX - box.left) / scale, y: (e.clientY - box.top) / scale, height };
+}
+
+const isPress = (e: React.KeyboardEvent) => e.key === "Enter" || e.key === " ";
 
 // ---------- Loves me, loves me not ----------
 
@@ -123,7 +138,17 @@ export function WhackGhosts({ onWin, won }: GameProps) {
       <div className="mb-2 text-center font-display text-lg font-semibold">
         {Math.min(score, GHOST_TARGET)} / {GHOST_TARGET} 👻
       </div>
-      <div className={`${PANEL} grid grid-cols-3 gap-2 bg-[#1a1033] p-3`}>
+      {/* Keyboard players press Enter or Space to whack whichever ghost is up. */}
+      <div
+        tabIndex={0}
+        aria-label="Ghost garden. Press Enter or Space to whack a ghost."
+        onKeyDown={(e) => {
+          if (!isPress(e)) return;
+          e.preventDefault();
+          if (ghosts[0]) whack(ghosts[0]);
+        }}
+        className={`${PANEL} ${FOCUS} grid grid-cols-3 gap-2 bg-[#1a1033] p-3`}
+      >
         {Array.from({ length: 9 }, (_, cell) => {
           const ghost = ghosts.find((g) => g.cell === cell);
           const boo = booed.find((b) => b.cell === cell);
@@ -162,14 +187,10 @@ export function LaunchFireworks({ onWin, won }: GameProps) {
   const launched = useRef(0);
   const nextId = useRef(0);
 
-  const launch = (e: React.PointerEvent<HTMLDivElement>) => {
+  const launch = (e: React.PointerEvent<HTMLDivElement> | React.KeyboardEvent<HTMLDivElement>) => {
     // Read everything from the event now: React clears currentTarget once the handler returns.
-    const el = e.currentTarget;
-    const box = el.getBoundingClientRect();
-    const scale = box.width / el.offsetWidth || 1;
-    const height = el.offsetHeight;
-    const x = (e.clientX - box.left) / scale;
-    const y = Math.min((e.clientY - box.top) / scale, height - 40);
+    const { x, y: tapY, height } = tapPoint(e);
+    const y = Math.min(tapY, height - 40);
     const id = nextId.current++;
     const firework = { id, x, y, from: height - y, hue: Math.floor(Math.random() * 360) };
     setFireworks((f) => [...f, firework]);
@@ -189,8 +210,16 @@ export function LaunchFireworks({ onWin, won }: GameProps) {
       </div>
       <div
         data-sky
+        role="button"
+        tabIndex={0}
+        aria-label="Launch a firework"
         onPointerDown={launch}
-        className={`${PANEL} h-72 cursor-crosshair touch-none bg-[radial-gradient(circle_at_50%_120%,#3b1d6e_0%,#120a2e_55%,#05030f_100%)] @2xl:h-96`}
+        onKeyDown={(e) => {
+          if (!isPress(e)) return;
+          e.preventDefault();
+          launch(e);
+        }}
+        className={`${PANEL} ${FOCUS} h-72 cursor-crosshair touch-none bg-[radial-gradient(circle_at_50%_120%,#3b1d6e_0%,#120a2e_55%,#05030f_100%)] @2xl:h-96`}
       >
         {Array.from({ length: 18 }, (_, i) => (
           <span key={i} className="absolute h-0.5 w-0.5 rounded-full bg-white/70" style={{ left: `${(i * 37) % 100}%`, top: `${(i * 23) % 70}%` }} />
@@ -513,15 +542,14 @@ export function ThrowColours({ onWin, won }: GameProps) {
   const count = useRef(0);
   const nextId = useRef(0);
 
-  const throwAt = (e: React.PointerEvent<HTMLDivElement>) => {
-    const box = e.currentTarget.getBoundingClientRect();
-    const scale = box.width / e.currentTarget.offsetWidth || 1;
+  const throwAt = (e: React.PointerEvent<HTMLDivElement> | React.KeyboardEvent<HTMLDivElement>) => {
+    const { x, y } = tapPoint(e);
     const id = nextId.current++;
     const r = () => 35 + Math.floor(Math.random() * 30);
     const splat = {
       id,
-      x: (e.clientX - box.left) / scale,
-      y: (e.clientY - box.top) / scale,
+      x,
+      y,
       color: SPLAT_COLORS[id % SPLAT_COLORS.length],
       size: 70 + Math.random() * 60,
       shape: `${r()}% ${r()}% ${r()}% ${r()}% / ${r()}% ${r()}% ${r()}% ${r()}%`,
@@ -539,7 +567,19 @@ export function ThrowColours({ onWin, won }: GameProps) {
       <div className="mb-2 text-center font-display text-lg font-semibold">
         {Math.min(splats.length, SPLAT_TARGET)} / {SPLAT_TARGET} 🎨
       </div>
-      <div data-splat onPointerDown={throwAt} className={`${PANEL} h-72 cursor-pointer touch-none bg-white/90 @2xl:h-96`}>
+      <div
+        data-splat
+        role="button"
+        tabIndex={0}
+        aria-label="Throw some colour"
+        onPointerDown={throwAt}
+        onKeyDown={(e) => {
+          if (!isPress(e)) return;
+          e.preventDefault();
+          throwAt(e);
+        }}
+        className={`${PANEL} ${FOCUS} h-72 cursor-pointer touch-none bg-white/90 @2xl:h-96`}
+      >
         {splats.map((s) => (
           <span
             key={s.id}
@@ -679,11 +719,11 @@ export function HoldHug({ onWin, won }: GameProps) {
   }, [holding, won]);
 
   useEffect(() => {
-    if (!holding) return;
+    if (!holding || won) return;
     sfx("chime");
     const t = setInterval(() => sfx("tick"), 260);
     return () => clearInterval(t);
-  }, [holding, sfx]);
+  }, [holding, won, sfx]);
 
   const r = 88;
   const circumference = 2 * Math.PI * r;

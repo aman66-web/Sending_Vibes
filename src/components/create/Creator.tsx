@@ -429,7 +429,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       {showPreview && card && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <CardPlayer card={card} preview sound focusScreenId={selected} />
-          <button onClick={() => setShowPreview(false)} className="absolute right-4 top-4 z-50 rounded-full bg-black/70 px-4 py-2 text-sm font-semibold text-white">
+          <button onClick={() => setShowPreview(false)} className="absolute left-4 top-4 z-50 rounded-full bg-black/70 px-4 py-2 text-sm font-semibold text-white">
             Close preview
           </button>
         </div>

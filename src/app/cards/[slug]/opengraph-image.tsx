@@ -14,7 +14,7 @@ export default async function ProductOgImage({ params }: { params: Promise<{ slu
   const theme = themes[t?.theme ?? "rose"];
   return new ImageResponse(
     (
-      <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", padding: "60px 80px", background: theme.background, color: theme.text }}>
+      <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", padding: "60px 80px", background: theme.og ?? theme.background, color: theme.text }}>
         <div style={{ display: "flex", flexDirection: "column", flex: 1, paddingRight: 40 }}>
           <div style={{ display: "flex", fontSize: 30, fontWeight: 700, color: theme.muted }}>
             {t ? `Interactive ${occasions[t.occasion].label} card` : "Interactive cards"}

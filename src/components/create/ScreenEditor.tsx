@@ -171,7 +171,7 @@ export function ScreenEditor({ screen, onChange }: Props) {
           <Select
             label="Where it lands"
             value={String(screen.landOn)}
-            options={Object.fromEntries([["-1", "Anywhere (a fair spin)"], ...screen.options.map((o, i) => [String(i), `Always on "${o || `slice ${i + 1}`}" (rigged 😏)`])])}
+            options={[["-1", "Anywhere (a fair spin)"], ...screen.options.map((o, i): [string, string] => [String(i), `Always on "${o || `slice ${i + 1}`}" (rigged 😏)`])]}
             onChange={(v) => onChange((prev) => (prev.type === "wheel" ? { ...prev, landOn: Number(v) } : prev))}
           />
           <Field label="When it stops" value={screen.winText} max={140} onChange={(v) => set("winText", v)} />
@@ -518,9 +518,11 @@ export function Select<T extends string>({
 }: {
   label: string;
   value: T;
-  options: Record<T, string>;
+  // An array keeps its order; object keys that look like numbers get sorted first.
+  options: Record<T, string> | [T, string][];
   onChange: (v: T) => void;
 }) {
+  const entries = Array.isArray(options) ? options : (Object.entries(options) as [T, string][]);
   return (
     <label className="block">
       <span className="text-sm font-semibold">{label}</span>
@@ -529,9 +531,9 @@ export function Select<T extends string>({
         onChange={(e) => onChange(e.target.value as T)}
         className="mt-1 w-full rounded-xl border border-line bg-panel px-3 py-2.5 outline-none focus:border-brand"
       >
-        {(Object.keys(options) as T[]).map((k) => (
+        {entries.map(([k, text]) => (
           <option key={k} value={k}>
-            {options[k]}
+            {text}
           </option>
         ))}
       </select>

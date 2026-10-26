@@ -63,8 +63,10 @@ export function unlockAudio() {
   if (ctx.state === "suspended") ctx.resume().catch(() => {});
 }
 
+// A context that's still resuming from the tap that unlocked it queues sounds
+// and plays them the moment it starts, so only a closed one is skipped.
 function ready() {
-  return !!ctx && !!sfxBus && ctx.state === "running" && !muted;
+  return !!ctx && !!sfxBus && ctx.state !== "closed" && !muted;
 }
 
 // ---------- Building blocks ----------
@@ -232,8 +234,8 @@ function parse(track: string): NoteEvent[] {
     });
 }
 
-function musicNote(t: number, freq: number, length: number, wave: Tune["wave"], gain: number) {
-  if (!ctx || !musicBus) return;
+function musicNote(out: AudioNode, t: number, freq: number, length: number, wave: Tune["wave"], gain: number) {
+  if (!ctx) return;
   const ring = Math.max(0.5, length * 1.4);
   const voices: [OscillatorType, number, number][] =
     wave === "bell"
@@ -251,7 +253,7 @@ function musicNote(t: number, freq: number, length: number, wave: Tune["wave"], 
     g.gain.setValueAtTime(0.0001, t);
     g.gain.exponentialRampToValueAtTime(level, t + (wave === "bell" ? 0.006 : 0.05));
     g.gain.exponentialRampToValueAtTime(0.0001, t + ring);
-    o.connect(g).connect(musicBus);
+    o.connect(g).connect(out);
     o.start(t);
     o.stop(t + ring + 0.05);
   }
@@ -267,19 +269,22 @@ export function playMusic(name: Music): () => void {
     ...(tune.bass ? [{ events: parse(tune.bass), gain: 0.45, i: 0, at: 0 }] : []),
   ];
   const audio = ctx;
-  const bus = musicBus;
+  // Each playback gets its own volume knob, so stopping one tune fades out
+  // exactly its notes, even ones already scheduled, without touching the next.
+  const out = audio.createGain();
+  out.connect(musicBus);
   const start = audio.currentTime + 0.15;
   tracks.forEach((tr) => (tr.at = start));
-  bus.gain.cancelScheduledValues(audio.currentTime);
-  bus.gain.setValueAtTime(0.16, audio.currentTime);
 
   const schedule = () => {
+    // If the tab was asleep, skip ahead instead of playing a burst of missed
+    // notes. Every track moves by the same amount so melody and bass stay together.
+    const behind = audio.currentTime + 0.05 - Math.min(...tracks.map((tr) => tr.at));
+    if (behind > 0) tracks.forEach((tr) => (tr.at += behind));
     for (const tr of tracks) {
-      // If the tab was asleep, skip ahead instead of playing a burst of missed notes.
-      if (tr.at < audio.currentTime) tr.at = audio.currentTime + 0.05;
       while (tr.at < audio.currentTime + 0.5) {
         const ev = tr.events[tr.i];
-        for (const f of ev.freqs) musicNote(tr.at, f, ev.beats * beat, tune.wave, tr.gain * (ev.freqs.length > 1 ? 0.6 : 1));
+        for (const f of ev.freqs) musicNote(out, tr.at, f, ev.beats * beat, tune.wave, tr.gain * (ev.freqs.length > 1 ? 0.6 : 1));
         tr.at += ev.beats * beat;
         tr.i = (tr.i + 1) % tr.events.length;
       }
@@ -289,7 +294,8 @@ export function playMusic(name: Music): () => void {
   const timer = setInterval(schedule, 120);
   return () => {
     clearInterval(timer);
-    bus.gain.setTargetAtTime(0.0001, audio.currentTime, 0.15);
+    out.gain.setTargetAtTime(0.0001, audio.currentTime, 0.15);
+    setTimeout(() => out.disconnect(), 4000);
   };
 }
 
