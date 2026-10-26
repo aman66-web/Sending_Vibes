@@ -21,6 +21,12 @@ const SCREEN_ICONS: Record<Screen["type"], string> = {
   quiz: "❓",
   scratch: "🪙",
   typeit: "⌨️",
+  wheel: "🎡",
+  coupons: "🎟️",
+  reasons: "🫙",
+  slider: "📈",
+  timeline: "🗓️",
+  boxes: "🎁",
   finale: "🎆",
 };
 
@@ -42,6 +48,18 @@ function describe(s: Screen): string {
       return "A silver panel they scratch to reveal your message";
     case "typeit":
       return "They have to type a secret password to unlock it";
+    case "wheel":
+      return `A prize wheel with ${s.options.length} slices${s.landOn >= 0 ? " (secretly rigged)" : ""}`;
+    case "coupons":
+      return `${s.coupons.length} coupon${s.coupons.length === 1 ? "" : "s"} they tap to redeem`;
+    case "reasons":
+      return `A jar of ${s.reasons.length} notes they pull out one by one`;
+    case "slider":
+      return `"${s.title}" on a slider that only goes up`;
+    case "timeline":
+      return `${s.events.length} moments from your story, one at a time`;
+    case "boxes":
+      return `${s.prizes.length} mystery boxes to choose from`;
     case "finale":
       return `${EFFECT_LABELS[s.effect]} and your final words`;
   }
@@ -85,11 +103,11 @@ export function ProductView({ slug }: { slug: string }) {
           </div>
           {frame === "phone" ? (
             <PhoneFrame>
-              <CardPlayer key="phone" card={card} preview />
+              <CardPlayer key="phone" card={card} preview sound />
             </PhoneFrame>
           ) : (
             <BrowserFrame className="h-[520px]">
-              <CardPlayer key="desktop" card={card} preview />
+              <CardPlayer key="desktop" card={card} preview sound />
             </BrowserFrame>
           )}
           <p className="font-hand text-2xl text-ink/60">it&apos;s live, tap through it ↑</p>

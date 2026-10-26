@@ -17,6 +17,17 @@ export const GAME_LABELS: Record<(typeof GAMES)[number], string> = {
   "unwrap-gift": "Unwrap the present",
   "shake-it": "Shake the phone (best on phone)",
   "cursor-chase": "Chase the heart with the mouse (best on desktop)",
+  "loves-me-not": "Loves me, loves me not",
+  "whack-ghosts": "Whack the ghosts",
+  "launch-fireworks": "Launch fireworks",
+  "release-lanterns": "Release the sky lanterns",
+  "bubble-wrap": "Pop the bubble wrap",
+  pinata: "Smash the piñata",
+  "grow-flower": "Grow a flower",
+  "throw-colours": "Throw colours (Holi)",
+  "slot-machine": "Slot machine jackpot",
+  "hold-hug": "Press and hold to send a hug",
+  "catch-candy": "Catch the sweets",
 };
 
 export const EFFECT_LABELS: Record<(typeof EFFECTS)[number], string> = {
@@ -39,6 +50,12 @@ export const SCREEN_LABELS: Record<Screen["type"], string> = {
   quiz: "Quiz",
   scratch: "Scratch card",
   typeit: "Secret password",
+  wheel: "Spin the wheel",
+  coupons: "Coupon book",
+  reasons: "Reasons jar",
+  slider: "Love-o-meter",
+  timeline: "Our story",
+  boxes: "Pick a box",
   finale: "Big finale",
 };
 
@@ -50,6 +67,8 @@ type Props = { screen: Screen; onChange: Update };
 export function ScreenEditor({ screen, onChange }: Props) {
   // Each field edit produces a new screen of the same type.
   const set = (key: string, value: string) => onChange((prev) => ({ ...prev, [key]: value }) as Screen);
+  const setList = (key: string) => (fn: (items: string[]) => string[]) =>
+    onChange((prev) => ({ ...prev, [key]: fn((prev as unknown as Record<string, string[]>)[key] ?? []) }) as Screen);
 
   switch (screen.type) {
     case "intro":
@@ -119,6 +138,84 @@ export function ScreenEditor({ screen, onChange }: Props) {
           <Field label="When they get it" value={screen.winText} max={140} onChange={(v) => set("winText", v)} />
         </>
       );
+    case "wheel":
+      return (
+        <>
+          <Field label="Title" value={screen.title} max={120} onChange={(v) => set("title", v)} />
+          <Field label="Instructions" value={screen.instructions} max={200} onChange={(v) => set("instructions", v)} />
+          <ListField
+            label="What's on the wheel"
+            items={screen.options}
+            min={2}
+            max={8}
+            maxLength={40}
+            placeholder="e.g. Breakfast in bed"
+            addLabel="+ Add a slice"
+            onChange={(fn) =>
+              onChange((prev) => {
+                if (prev.type !== "wheel") return prev;
+                const options = fn(prev.options);
+                // Keep "always lands on" pointing at the same slice when one is removed.
+                const removed = prev.options.findIndex((o, i) => options[i] !== o);
+                let landOn = prev.landOn;
+                if (options.length < prev.options.length && removed >= 0 && landOn >= 0) landOn = landOn === removed ? -1 : landOn > removed ? landOn - 1 : landOn;
+                return { ...prev, options, landOn };
+              })
+            }
+          />
+          <Select
+            label="Where it lands"
+            value={String(screen.landOn)}
+            options={Object.fromEntries([["-1", "Anywhere (a fair spin)"], ...screen.options.map((o, i) => [String(i), `Always on "${o || `slice ${i + 1}`}" (rigged 😏)`])])}
+            onChange={(v) => onChange((prev) => (prev.type === "wheel" ? { ...prev, landOn: Number(v) } : prev))}
+          />
+          <Field label="When it stops" value={screen.winText} max={140} onChange={(v) => set("winText", v)} />
+        </>
+      );
+    case "coupons":
+      return (
+        <>
+          <Field label="Title" value={screen.title} max={120} onChange={(v) => set("title", v)} />
+          <Field label="Instructions" value={screen.instructions} max={200} onChange={(v) => set("instructions", v)} />
+          <ListField label="Coupons" items={screen.coupons} min={1} max={6} maxLength={80} placeholder="e.g. One foot rub" addLabel="+ Add a coupon" onChange={setList("coupons")} />
+        </>
+      );
+    case "reasons":
+      return (
+        <>
+          <Field label="Title" value={screen.title} max={120} onChange={(v) => set("title", v)} />
+          <Field label="Instructions" value={screen.instructions} max={200} onChange={(v) => set("instructions", v)} />
+          <ListField label="Notes in the jar" items={screen.reasons} min={1} max={12} maxLength={160} placeholder="e.g. Your terrible jokes" addLabel="+ Add a note" onChange={setList("reasons")} />
+        </>
+      );
+    case "slider":
+      return (
+        <>
+          <Field label="The question" value={screen.title} max={120} onChange={(v) => set("title", v)} />
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Low end" value={screen.low} max={30} onChange={(v) => set("low", v)} />
+            <Field label="High end" value={screen.high} max={30} onChange={(v) => set("high", v)} />
+          </div>
+          <p className="text-xs opacity-60">However they drag it, it only goes up. 😌</p>
+          <Field label="When it hits 100%" value={screen.winText} max={140} onChange={(v) => set("winText", v)} />
+        </>
+      );
+    case "timeline":
+      return (
+        <>
+          <Field label="Title" value={screen.title} max={120} onChange={(v) => set("title", v)} />
+          <TimelineField screen={screen} onChange={onChange} />
+        </>
+      );
+    case "boxes":
+      return (
+        <>
+          <Field label="Title" value={screen.title} max={120} onChange={(v) => set("title", v)} />
+          <Field label="Instructions" value={screen.instructions} max={200} onChange={(v) => set("instructions", v)} />
+          <ListField label="What's in each box" items={screen.prizes} min={2} max={3} maxLength={80} placeholder="e.g. A hug" addLabel="+ Add a box" onChange={setList("prizes")} />
+          <p className="text-xs opacity-60">Tip: put the same thing in every box. They&apos;ll never know.</p>
+        </>
+      );
     case "finale":
       return (
         <>
@@ -128,6 +225,101 @@ export function ScreenEditor({ screen, onChange }: Props) {
         </>
       );
   }
+}
+
+// A list of short texts the person can edit, add to and remove from.
+function ListField({
+  label,
+  items,
+  min,
+  max,
+  maxLength,
+  placeholder,
+  addLabel,
+  onChange,
+}: {
+  label: string;
+  items: string[];
+  min: number;
+  max: number;
+  maxLength: number;
+  placeholder?: string;
+  addLabel: string;
+  onChange: (fn: (items: string[]) => string[]) => void;
+}) {
+  return (
+    <div className="space-y-2">
+      <span className="text-sm font-semibold">
+        {label} ({items.length}/{max})
+      </span>
+      {items.map((item, i) => (
+        <div key={i} className="flex items-center gap-2">
+          <span className="w-5 shrink-0 text-right text-xs font-bold opacity-50">{i + 1}</span>
+          <input
+            value={item}
+            maxLength={maxLength}
+            placeholder={placeholder}
+            aria-label={`${label} ${i + 1}`}
+            onChange={(e) => onChange((list) => list.map((x, j) => (j === i ? e.target.value : x)))}
+            className="min-w-0 flex-1 rounded-lg border border-line bg-panel px-3 py-2 text-sm outline-none focus:border-brand"
+          />
+          {items.length > min && (
+            <button aria-label="Remove" onClick={() => onChange((list) => list.filter((_, j) => j !== i))} className="px-1 text-sm opacity-60 hover:opacity-100">
+              ✕
+            </button>
+          )}
+        </div>
+      ))}
+      {items.length < max && (
+        <button onClick={() => onChange((list) => [...list, ""])} className="text-xs font-semibold text-brand">
+          {addLabel}
+        </button>
+      )}
+    </div>
+  );
+}
+
+type TimelineScreen = Extract<Screen, { type: "timeline" }>;
+
+function TimelineField({ screen, onChange }: { screen: TimelineScreen; onChange: Update }) {
+  const update = (fn: (events: TimelineScreen["events"]) => TimelineScreen["events"]) =>
+    onChange((prev) => (prev.type === "timeline" ? { ...prev, events: fn(prev.events) } : prev));
+  const cls = "rounded-lg border border-line bg-panel px-3 py-2 text-sm outline-none focus:border-brand";
+  return (
+    <div className="space-y-2">
+      <span className="text-sm font-semibold">Moments ({screen.events.length}/8)</span>
+      {screen.events.map((ev, i) => (
+        <div key={i} className="flex items-start gap-2">
+          <input
+            value={ev.when}
+            maxLength={40}
+            placeholder="When"
+            aria-label={`Moment ${i + 1} date`}
+            onChange={(e) => update((list) => list.map((x, j) => (j === i ? { ...x, when: e.target.value } : x)))}
+            className={`w-28 shrink-0 ${cls}`}
+          />
+          <input
+            value={ev.what}
+            maxLength={160}
+            placeholder="What happened"
+            aria-label={`Moment ${i + 1}`}
+            onChange={(e) => update((list) => list.map((x, j) => (j === i ? { ...x, what: e.target.value } : x)))}
+            className={`min-w-0 flex-1 ${cls}`}
+          />
+          {screen.events.length > 1 && (
+            <button aria-label="Remove moment" onClick={() => update((list) => list.filter((_, j) => j !== i))} className="px-1 pt-2 text-sm opacity-60 hover:opacity-100">
+              ✕
+            </button>
+          )}
+        </div>
+      ))}
+      {screen.events.length < 8 && (
+        <button onClick={() => update((list) => [...list, { when: "", what: "" }])} className="text-xs font-semibold text-brand">
+          + Add a moment
+        </button>
+      )}
+    </div>
+  );
 }
 
 type QuizScreen = Extract<Screen, { type: "quiz" }>;

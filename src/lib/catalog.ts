@@ -1,4 +1,4 @@
-import type { CardData, Device, Effect, Game, Layout, Occasion, QuizQuestion, Screen, ThemeName } from "./card";
+import type { CardData, Device, Effect, Game, Layout, Music, Occasion, QuizQuestion, Screen, ThemeName, TimelineEvent } from "./card";
 
 // The card designs people can browse and start from. Each one is a preset list
 // of building-block screens plus a look; everything stays editable afterwards.
@@ -36,6 +36,8 @@ export type Template = {
   headline: string;
   blurb: string;
   featured?: boolean;
+  // Defaults to the occasion's usual tune.
+  music?: Music;
   screens: (to: string, from: string) => Screen[];
   demo: { to: string; from: string; photos?: DemoPhoto[] };
 };
@@ -51,6 +53,25 @@ const scratch = (title: string, instructions: string, hidden: string, id = "scra
 const typeit = (title: string, instructions: string, phrase: string, winText: string, id = "typeit"): Screen => ({ id, type: "typeit", title, instructions, phrase, winText });
 const finale = (title: string, body: string, effect: Effect): Screen => ({ id: "finale", type: "finale", title, body, effect });
 const q = (text: string, options: string[], answer: number): QuizQuestion => ({ question: text, options, answer });
+const wheel = (title: string, instructions: string, options: string[], winText: string, landOn = -1, id = "wheel"): Screen => ({ id, type: "wheel", title, instructions, options, landOn, winText });
+const coupons = (title: string, instructions: string, list: string[], id = "coupons"): Screen => ({ id, type: "coupons", title, instructions, coupons: list });
+const reasons = (title: string, instructions: string, list: string[], id = "reasons"): Screen => ({ id, type: "reasons", title, instructions, reasons: list });
+const slider = (title: string, low: string, high: string, winText: string, id = "slider"): Screen => ({ id, type: "slider", title, low, high, winText });
+const timeline = (title: string, events: TimelineEvent[], id = "timeline"): Screen => ({ id, type: "timeline", title, events });
+const boxes = (title: string, instructions: string, prizes: string[], id = "boxes"): Screen => ({ id, type: "boxes", title, instructions, prizes });
+const at = (when: string, what: string): TimelineEvent => ({ when, what });
+
+const OCCASION_MUSIC: Record<Occasion, Music> = {
+  valentine: "love",
+  birthday: "birthday",
+  diwali: "festive",
+  christmas: "jingle",
+  eid: "festive",
+  anniversary: "love",
+  sorry: "love",
+  thanks: "festive",
+  congrats: "joy",
+};
 
 const P = {
   sunset: { src: "/demo/sunset.svg", caption: "Golden hour with you" },
@@ -187,6 +208,76 @@ export const TEMPLATES: Template[] = [
     demo: { to: "Priya", from: "Sam" },
   },
 
+  {
+    slug: "date-night-roulette",
+    name: "Date Night Roulette",
+    occasion: "valentine",
+    tone: "funny",
+    device: "everywhere",
+    theme: "midnight",
+    ambient: "hearts",
+    emoji: "🎡",
+    headline: "Spin for our next date",
+    blurb: "They spin a wheel to pick your next date night, then redeem date coupons. The No button still runs away.",
+    screens: (to, from) => [
+      intro(`${to}, let's leave it to fate 🎡`, `${from} couldn't decide what we're doing for Valentine's. So you're spinning for it.`, "Let's spin"),
+      question("First things first. Will you be my Valentine?", "Obviously 💖", "No", "Correct answer. Now spin."),
+      wheel("Spin for our date", "Whatever it lands on, we're doing it", ["Pizza & a film", "Fancy dinner", "Takeaway in PJs", "Mini golf", "A picnic", "Cook together"], "It's a date! 🗓️"),
+      coupons("Your date coupons", "Tap to redeem. Valid forever.", ["You pick the restaurant", "I pay. All of it.", "Dessert is on me", "No phones all night"]),
+      finale("Happy Valentine's Day 💘", `It's a date. Love, ${from}`, "hearts"),
+    ],
+    demo: { to: "Priya", from: "Sam" },
+  },
+  {
+    slug: "loves-me-loves-me-not",
+    name: "Loves Me, Loves Me Not",
+    occasion: "valentine",
+    tone: "cute",
+    device: "everywhere",
+    theme: "rose",
+    ambient: "petals",
+    emoji: "🌼",
+    headline: "Loves me, loves me not…",
+    blurb: "They pluck the petals off a daisy (it always ends on 'loves me'), then try to slide the love-o-meter down. It only goes up.",
+    screens: (to, from) => [
+      intro(`${to}, a little flower for you 🌼`, `${from} wants to know something. The flower will decide.`, "Pick it"),
+      game("loves-me-not", "Loves me, loves me not", "Pluck every petal to find out", "LOVES ME! The flower never lies 💘"),
+      slider(`How much do you love ${from}?`, "A little", "Too much", "Off the charts. As expected 😌"),
+      message("Just so you know", `It was always going to be 'loves me'. I made sure of it.\n\nHappy Valentine's, ${to}.\n${from} x`),
+      finale("Happy Valentine's Day 🌸", "You're stuck with me now.", "petals"),
+    ],
+    demo: { to: "Priya", from: "Sam" },
+  },
+  {
+    slug: "reasons-i-love-you",
+    name: "Reasons I Love You",
+    occasion: "valentine",
+    tone: "romantic",
+    device: "everywhere",
+    theme: "lavender",
+    ambient: "hearts",
+    emoji: "🫙",
+    headline: "A jar full of reasons",
+    blurb: "A jar of handwritten notes. They tap it to pull out every reason you love them, then see your photos.",
+    featured: true,
+    screens: (to, from) => [
+      intro(`For ${to}, with love`, `${from} filled a jar with reasons. It wasn't hard.`, "Open the jar"),
+      reasons("Reasons I love you", "Tap the jar to pull out a note", [
+        "The way you laugh at your own jokes before you finish them",
+        "You always save me the last bite",
+        "How safe I feel when you hug me",
+        "Your terrible singing in the car",
+        "You make boring days fun",
+        "The way you look at me when you think I'm not looking",
+        "You're you. That's the main one.",
+      ]),
+      photos("Some of my favourite reasons"),
+      message("And one more thing", `I could fill a hundred jars and still not be done.\n\nHappy Valentine's Day.\nLove, ${from}`),
+      finale(`I love you, ${to} 💜`, "Every single reason.", "hearts"),
+    ],
+    demo: { to: "Priya", from: "Sam", photos: [P.sunset, P.coffee, P.lights] },
+  },
+
   // ---------- Birthday ----------
   {
     slug: "birthday-bash",
@@ -308,6 +399,75 @@ export const TEMPLATES: Template[] = [
     demo: { to: "Priya", from: "Sam" },
   },
 
+  {
+    slug: "pinata-party",
+    name: "Piñata Party",
+    occasion: "birthday",
+    tone: "festive",
+    device: "everywhere",
+    theme: "party",
+    ambient: "confetti",
+    emoji: "🪅",
+    headline: "Smash it for your surprise",
+    blurb: "They whack a swinging piñata until it bursts with sweets, then spin a wheel for their birthday present.",
+    featured: true,
+    screens: (to, from) => [
+      intro(`It's party time, ${to}! 🪅`, `${from} hung up a piñata just for you. Grab a stick.`, "Let's smash it"),
+      game("pinata", "Smash the piñata!", "Tap it 8 times to break it open", "Sweets everywhere! 🍬"),
+      wheel("Spin for your present", "What will it be?", ["Cake", "A big hug", "Breakfast in bed", "A day off chores", "A surprise trip", "Karaoke night"], "Happy birthday to you! 🎁"),
+      photos("Party memories"),
+      finale(`Happy Birthday, ${to}! 🎉`, `Love, ${from}. Now go and eat all those sweets.`, "confetti"),
+    ],
+    demo: { to: "Priya", from: "Sam", photos: [P.balloons, P.cake, P.summer] },
+  },
+  {
+    slug: "birthday-coupon-book",
+    name: "Birthday Coupon Book",
+    occasion: "birthday",
+    tone: "cute",
+    device: "everywhere",
+    theme: "mint",
+    ambient: "sparkles",
+    emoji: "🎟️",
+    headline: "A book of birthday treats",
+    blurb: "They blow out the candles, then get a book of birthday coupons to redeem all year: breakfast in bed, film picks and more.",
+    screens: (to, from) => [
+      intro(`Happy birthday, ${to}! 🎂`, `${from} got you something you can actually use.`, "Ooh, what is it?"),
+      game("blow-candles", "Make a wish first", "Tap each flame to blow out your candles", "Wish made 🌟 Now for your present…"),
+      coupons("Your birthday coupons", "Tap one to redeem it. Screenshot it as proof!", [
+        "Breakfast in bed",
+        "You pick the film (no complaints)",
+        "One day off chores",
+        "Dinner of your choice",
+        "Unlimited hugs",
+        "I'll sing to you (sorry)",
+      ]),
+      message("Happy birthday", `I hope this year brings you everything you've been wishing for. And if it doesn't, you've got coupons.\n\n${from}`),
+      finale(`Happy Birthday, ${to}! 🎈`, "Coupons valid for one whole year.", "confetti"),
+    ],
+    demo: { to: "Priya", from: "Sam" },
+  },
+  {
+    slug: "pick-your-present",
+    name: "Pick Your Present",
+    occasion: "birthday",
+    tone: "funny",
+    device: "everywhere",
+    theme: "sunset",
+    ambient: "confetti",
+    emoji: "🎁",
+    headline: "Three boxes. One present. No pressure.",
+    blurb: "They choose a mystery box (they're all the same, shh), then pull a slot machine until they hit the jackpot.",
+    screens: (to, from) => [
+      intro(`Happy birthday, ${to}! 🎁`, `${from} has three presents for you. You can only pick one.`, "Show me"),
+      boxes("Pick a present", "Choose wisely. No swapsies.", ["A hug 🤗", "A hug 🤗", "A hug 🤗"]),
+      game("slot-machine", "Bonus round!", "Pull the lever for the jackpot", "JACKPOT! Happy birthday 🎰"),
+      message("In all seriousness", `Happy birthday. You deserve the best day ever (and more than a hug, which is coming, I promise).\n\n${from}`),
+      finale(`Happy Birthday, ${to}! 🥳`, "The real present was me all along.", "confetti"),
+    ],
+    demo: { to: "Priya", from: "Sam" },
+  },
+
   // ---------- Diwali ----------
   {
     slug: "festival-of-lights",
@@ -369,6 +529,55 @@ export const TEMPLATES: Template[] = [
       game("shake-it", "Shake to launch!", "Shake your phone to light the fuse", "Kaboom! Happy Diwali 🎇"),
       message("Happy Diwali!", `No burnt fingers, no scared dogs, all the sparkle.\n\nWishing you a bright one, ${from}`),
       finale("Happy Diwali! 🎆", "Same time next year?", "fireworks"),
+    ],
+    demo: { to: "Priya", from: "Sam" },
+  },
+
+  {
+    slug: "lanterns-of-light",
+    name: "Lanterns of Light",
+    occasion: "diwali",
+    tone: "heartfelt",
+    device: "everywhere",
+    theme: "marigold",
+    ambient: "stars",
+    emoji: "🏮",
+    headline: "Send a wish up into the sky",
+    blurb: "They release glowing sky lanterns one by one, read your Diwali wishes, then light up the sky with fireworks.",
+    screens: (to, from) => [
+      intro(`Happy Diwali, ${to} 🏮`, `${from} saved you some lanterns. Make a wish with each one.`, "Let's go outside"),
+      game("release-lanterns", "Release the lanterns", "Tap each lantern and make a wish", "May every wish come true ✨"),
+      message("My wishes for you", `Light to guide you, love to hold you, and sweets to keep you going.\n\nHappy Diwali, from ${from}`),
+      game("launch-fireworks", "Now the fireworks!", "Tap the sky to launch 6 fireworks", "What a show! 🎆", "game2"),
+      finale("Shubh Deepavali 🪔", "May your year shine as bright as tonight.", "fireworks"),
+    ],
+    demo: { to: "Priya", from: "Sam" },
+  },
+  {
+    slug: "mithai-mayhem",
+    name: "Mithai Mayhem",
+    occasion: "diwali",
+    tone: "funny",
+    device: "everywhere",
+    theme: "sunset",
+    ambient: "sparkles",
+    emoji: "🍬",
+    headline: "How many laddoos is too many?",
+    blurb: "A Diwali quiz about sweets with only one right answer, a spin of the mithai wheel and a fireworks finale.",
+    screens: (to, from) => [
+      intro(`Happy Diwali, ${to}! 🍬`, `${from} has some very important questions about sweets.`, "I'm ready"),
+      quiz(
+        "The Diwali sweets quiz",
+        [
+          q("How many laddoos is too many?", ["3", "10", "There's no such thing"], 2),
+          q("The best part of Diwali is…", ["The lights", "The family", "The mithai, obviously"], 2),
+          q("Who gets the last kaju katli?", [from, to, "We fight for it"], 2),
+        ],
+        "Correct. Sweets are life.",
+      ),
+      wheel("Spin for your mithai", "Whatever it lands on, I owe you a box", ["Kaju katli", "Gulab jamun", "Jalebi", "Laddoo", "Barfi", "Rasmalai"], "Your box of mithai is on its way 📦"),
+      game("launch-fireworks", "Light up the sky", "Tap the sky to launch 6 fireworks", "Dhamaka! 🎆"),
+      finale("Happy Diwali! 🎆", "Save me a laddoo.", "fireworks"),
     ],
     demo: { to: "Priya", from: "Sam" },
   },
@@ -441,6 +650,59 @@ export const TEMPLATES: Template[] = [
       finale("Merry Christmas ❄️", "Warmest wishes for the season.", "snow"),
     ],
     demo: { to: "Mum", from: "Ravi", photos: [P.tree, P.lights, P.coffee] },
+  },
+
+  {
+    slug: "secret-santa",
+    name: "Secret Santa",
+    occasion: "christmas",
+    tone: "funny",
+    device: "everywhere",
+    theme: "noel",
+    ambient: "snow",
+    emoji: "🎅",
+    headline: "It's socks. It's always socks.",
+    blurb: "They pick a present from under the tree (all three are socks), then pull a festive slot machine for the jackpot.",
+    screens: (to, from) => [
+      intro(`Ho ho ho, ${to}! 🎅`, `Your Secret Santa (it's ${from}) has three presents for you.`, "Gimme"),
+      boxes("Pick a present", "Choose carefully…", ["Socks 🧦", "More socks 🧦", "A lovely jumper (it's socks) 🧦"]),
+      game("slot-machine", "Christmas jackpot", "Pull the lever for some festive luck", "Jackpot! Merry Christmas 🎄"),
+      message("Merry Christmas!", `Wishing you warm feet and a warm heart this Christmas.\n\n${from}`),
+      finale("Merry Christmas! 🎄", "Wear them with pride.", "snow"),
+    ],
+    demo: { to: "Priya", from: "Sam" },
+  },
+  {
+    slug: "twelve-reasons-of-christmas",
+    name: "12 Reasons of Christmas",
+    occasion: "christmas",
+    tone: "heartfelt",
+    device: "everywhere",
+    theme: "gold",
+    ambient: "snow",
+    emoji: "✨",
+    headline: "On the 12th day of Christmas…",
+    blurb: "A jar of twelve reasons you're thankful for them, your festive photos and a gentle snowfall.",
+    screens: (to, from) => [
+      intro(`Merry Christmas, ${to} ✨`, `${from} has 12 things to tell you.`, "Open"),
+      reasons("12 reasons of Christmas", "Tap the jar for each one", [
+        "You make every Christmas feel like home",
+        "Your famous roast potatoes",
+        "You always find the perfect present",
+        "Your laugh at the cracker jokes",
+        "How you look after everyone",
+        "Christmas films with you",
+        "You let me have the last mince pie",
+        "The way you light up a room",
+        "Your patience with my wrapping",
+        "Every memory we've made",
+        "All the ones still to come",
+        "You. Just you.",
+      ]),
+      photos("Christmas memories"),
+      finale(`Merry Christmas, ${to} 🎄`, `With love, ${from}`, "snow"),
+    ],
+    demo: { to: "Priya", from: "Sam", photos: [P.tree, P.lights, P.fireworks] },
   },
 
   // ---------- Eid ----------
@@ -604,6 +866,59 @@ export const TEMPLATES: Template[] = [
     demo: { to: "Priya", from: "Sam", photos: [P.coffee, P.sunset, P.toast] },
   },
 
+  {
+    slug: "our-timeline",
+    name: "Our Timeline",
+    occasion: "anniversary",
+    tone: "romantic",
+    device: "everywhere",
+    theme: "gold",
+    ambient: "sparkles",
+    emoji: "🗓️",
+    headline: "Every chapter of us",
+    blurb: "Your story told moment by moment, from the day you met to today, then your photos and a jar of reasons.",
+    screens: (to, from) => [
+      intro(`Happy anniversary, ${to} 💍`, `${from} wrote down our story. Every chapter of it.`, "Read our story"),
+      timeline("Our story so far", [
+        at("The beginning", "We met, and I couldn't stop smiling"),
+        at("First date", "I was so nervous I forgot my wallet"),
+        at("Our first trip", "Lost, sunburnt and completely happy"),
+        at("Moving in", "Too many cushions. Your idea."),
+        at("Today", "Still my favourite person in the world"),
+      ]),
+      photos("Our favourite chapters"),
+      reasons("Why I'd do it all again", "Tap the jar", ["You make me laugh every day", "You're my safe place", "We're a really good team", "You still give me butterflies"]),
+      finale("Happy anniversary ❤️", "Here's to every chapter still to come.", "petals"),
+    ],
+    demo: { to: "Priya", from: "Sam", photos: [P.toast, P.sunset, P.coffee] },
+  },
+  {
+    slug: "love-coupons",
+    name: "Love Coupons",
+    occasion: "anniversary",
+    tone: "cute",
+    device: "everywhere",
+    theme: "rose",
+    ambient: "hearts",
+    emoji: "🎟️",
+    headline: "Coupons, redeemable forever",
+    blurb: "A book of love coupons they can cash in whenever they like, plus a prize wheel that's secretly rigged to land on a kiss.",
+    screens: (to, from) => [
+      intro(`Happy anniversary, ${to} 💕`, `${from} made you something you can cash in whenever you like.`, "Ooh"),
+      coupons("Your love coupons", "Tap to redeem. No expiry date.", [
+        "One back massage",
+        "Breakfast in bed",
+        "A night off cooking",
+        "You win the next argument",
+        "Movie night, your pick",
+        "One big hug, on demand",
+      ]),
+      wheel("Bonus prize!", "Spin to see what else you've won", ["A kiss", "A hug", "A cuddle", "A dance", "A kiss", "A surprise"], "You won a kiss 😘", 0),
+      finale("Happy anniversary! 💖", `Love you always, ${from}`, "hearts"),
+    ],
+    demo: { to: "Priya", from: "Sam" },
+  },
+
   // ---------- Sorry ----------
   {
     slug: "please-forgive-me",
@@ -664,6 +979,32 @@ export const TEMPLATES: Template[] = [
     demo: { to: "Priya", from: "Sam" },
   },
 
+  {
+    slug: "hug-it-out",
+    name: "Can We Hug It Out?",
+    occasion: "sorry",
+    tone: "cute",
+    device: "everywhere",
+    theme: "lavender",
+    ambient: "hearts",
+    emoji: "🤗",
+    headline: "Sorry. Hug?",
+    blurb: "An apology with a runaway No button, a press-and-hold hug and a book of make-it-up-to-you coupons.",
+    screens: (to, from) => [
+      intro(`${to}, I'm sorry 🥺`, `${from} knows they messed up. Please hear me out.`, "Okay…"),
+      question("Can you forgive me?", "Yes, fine 🙄", "No", "Thank you. Really. 💜"),
+      game("hold-hug", "Then let's hug it out", "Press and hold to send a hug", "Hug received. All better? 🫶"),
+      coupons("Making it up to you", "Redeem these whenever you like", [
+        "I'll do the washing up for a week",
+        "Your choice of takeaway",
+        "I'll admit you were right",
+        "One grovelling apology, on demand",
+      ]),
+      finale("Friends again? 💜", `Sorry again. Love, ${from}`, "hearts"),
+    ],
+    demo: { to: "Priya", from: "Sam" },
+  },
+
   // ---------- Thank you ----------
   {
     slug: "thank-you-so-much",
@@ -705,6 +1046,26 @@ export const TEMPLATES: Template[] = [
       finale("THANK YOU! 🎉", "You're appreciated more than you know.", "confetti"),
     ],
     demo: { to: "Ms Patel", from: "Class 4B", photos: [P.bouquet, P.balloons, P.coffee, P.cake, P.sunset, P.grad] },
+  },
+
+  {
+    slug: "thanks-a-bunch",
+    name: "Thanks a Bunch",
+    occasion: "thanks",
+    tone: "heartfelt",
+    device: "everywhere",
+    theme: "mint",
+    ambient: "petals",
+    emoji: "🌷",
+    headline: "I grew you a thank you",
+    blurb: "They water a little plant until it blooms, then read your thank-you message. Lovely for teachers, nurses and neighbours.",
+    screens: (to, from) => [
+      intro(`Thank you, ${to} 🌷`, `${from} planted something for you.`, "Let's see"),
+      game("grow-flower", "Help it grow", "Water the plant until it blooms", "A thank you, in full bloom 🌸"),
+      message("Thank you", `What you did meant more than you know. Thank you for your kindness, your time and your patience.\n\nWith thanks, ${from}`),
+      finale("Thanks a bunch! 💐", "You're one in a million.", "petals"),
+    ],
+    demo: { to: "Ms Patel", from: "Class 4B" },
   },
 
   // ---------- Congrats ----------
@@ -756,6 +1117,26 @@ export const TEMPLATES: Template[] = [
     ],
     demo: { to: "Priya", from: "Sam" },
   },
+  {
+    slug: "you-hit-the-jackpot",
+    name: "You Hit the Jackpot",
+    occasion: "congrats",
+    tone: "funny",
+    device: "everywhere",
+    theme: "gold",
+    ambient: "stars",
+    emoji: "🎰",
+    headline: "Winner winner!",
+    blurb: "For promotions, new jobs and big wins. They pull a slot machine for the jackpot, then try (and fail) to rate how proud you are.",
+    screens: (to, from) => [
+      intro(`Big news, ${to}! 🎰`, `${from} heard you've been winning at life.`, "Spin to win"),
+      game("slot-machine", "Pull for the jackpot", "Pull the lever. Third time lucky?", "JACKPOT! Just like you 🏆"),
+      slider(`How proud is ${from} of you?`, "A bit", "Ridiculously", "Ridiculously proud. Officially."),
+      message("Congratulations!", `You worked so hard for this and you absolutely deserve it. Drinks are on you, though.\n\n${from}`),
+      finale(`Congrats, ${to}! 🥂`, "Onwards and upwards.", "fireworks"),
+    ],
+    demo: { to: "Priya", from: "Sam" },
+  },
 ];
 
 export const templatesBySlug = Object.fromEntries(TEMPLATES.map((t) => [t.slug, t])) as Record<string, Template>;
@@ -774,6 +1155,7 @@ export function buildCard(t: Template, to: string, from: string): CardData {
     template: t.slug,
     device: t.device,
     layout: t.layout ?? "standard",
+    music: t.music ?? OCCASION_MUSIC[t.occasion],
     screens: t.screens(to, from),
   };
 }
