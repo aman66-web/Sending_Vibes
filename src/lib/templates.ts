@@ -1,4 +1,5 @@
-import type { CardData, Occasion, Screen } from "./card";
+import type { CardData, Occasion } from "./card";
+import { TEMPLATES, buildCard, buildTemplateDemo, type Template } from "./catalog";
 
 export type OccasionInfo = {
   label: string;
@@ -7,183 +8,26 @@ export type OccasionInfo = {
 };
 
 export const occasions: Record<Occasion, OccasionInfo> = {
-  valentine: {
-    label: "Valentine's",
-    emoji: "💘",
-    tagline: "The No button runs away. They have to say yes.",
-  },
-  diwali: {
-    label: "Diwali",
-    emoji: "🪔",
-    tagline: "Light the diyas together and finish with fireworks.",
-  },
-  birthday: {
-    label: "Birthday",
-    emoji: "🎂",
-    tagline: "Blow out the candles, see the memories, and make a wish.",
-  },
+  valentine: { label: "Valentine's", emoji: "💘", tagline: "The No button runs away. They have to say yes." },
+  birthday: { label: "Birthday", emoji: "🎂", tagline: "Blow out the candles, see the memories, and make a wish." },
+  diwali: { label: "Diwali", emoji: "🪔", tagline: "Light the diyas together and finish with fireworks." },
+  christmas: { label: "Christmas", emoji: "🎄", tagline: "Unwrap a present and catch the snow." },
+  eid: { label: "Eid", emoji: "🌙", tagline: "Catch the stars and send your Eid wishes." },
+  anniversary: { label: "Anniversary", emoji: "💍", tagline: "Your story so far, with a quiz about your firsts." },
+  sorry: { label: "Sorry", emoji: "🥺", tagline: "Apologise in a way they can't say no to." },
+  thanks: { label: "Thank you", emoji: "🙏", tagline: "Say thanks with photos, games and a big finish." },
+  congrats: { label: "Congrats", emoji: "🏆", tagline: "Pop the balloons for their big win." },
 };
 
-export function buildTemplate(occasion: Occasion, to: string, from: string): CardData {
-  const screens = templateScreens[occasion](to, from);
-  return {
-    occasion,
-    to,
-    from,
-    theme: occasion === "valentine" ? "rose" : occasion === "diwali" ? "marigold" : "party",
-    ambient: occasion === "valentine" ? "hearts" : occasion === "diwali" ? "sparkles" : "none",
-    screens,
-  };
+// The first design listed for an occasion is its default.
+export function defaultTemplate(occasion: Occasion): Template {
+  return TEMPLATES.find((t) => t.occasion === occasion)!;
 }
 
-const templateScreens: Record<Occasion, (to: string, from: string) => Screen[]> = {
-  valentine: (to, from) => [
-    {
-      id: "intro",
-      type: "intro",
-      title: `Hey ${to} 💌`,
-      subtitle: `${from} made you something. Tap when you're ready.`,
-      button: "Open it",
-    },
-    {
-      id: "question",
-      type: "question",
-      question: `${to}, will you be my Valentine?`,
-      yes: "Yes! 💖",
-      no: "No",
-      afterYes: "I knew you'd say yes 🥰",
-    },
-    {
-      id: "photos",
-      type: "photos",
-      title: "Some of my favourite moments with you",
-      captions: [],
-      photos: [],
-    },
-    {
-      id: "game",
-      type: "game",
-      game: "catch-hearts",
-      title: "Catch my love",
-      instructions: "Tap 10 falling hearts to unlock your surprise",
-      winText: "You caught all my love! 💘",
-    },
-    {
-      id: "message",
-      type: "message",
-      title: "Just so you know…",
-      body: `Every day with you is my favourite day. Thank you for being you.\n\nLove, ${from}`,
-    },
-    {
-      id: "finale",
-      type: "finale",
-      title: "Happy Valentine's Day ❤️",
-      body: "Now screenshot this and send it back to me 😌",
-      effect: "hearts",
-    },
-  ],
-  diwali: (to, from) => [
-    {
-      id: "intro",
-      type: "intro",
-      title: `Happy Diwali, ${to} ✨`,
-      subtitle: `${from} sent you a little festival of lights.`,
-      button: "Let's begin",
-    },
-    {
-      id: "game",
-      type: "game",
-      game: "light-diyas",
-      title: "Light the diyas",
-      instructions: "Tap each diya to light it",
-      winText: "May your home always be this bright 🪔",
-    },
-    {
-      id: "photos",
-      type: "photos",
-      title: "Memories that light me up",
-      captions: [],
-      photos: [],
-    },
-    {
-      id: "message",
-      type: "message",
-      title: "My Diwali wish for you",
-      body: `Wishing you and your family love, light, laughter and lots of mithai this Diwali.\n\nWarmly, ${from}`,
-    },
-    {
-      id: "finale",
-      type: "finale",
-      title: "Shubh Deepavali 🎆",
-      body: "May this year bring you light in every way.",
-      effect: "fireworks",
-    },
-  ],
-  birthday: (to, from) => [
-    {
-      id: "intro",
-      type: "intro",
-      title: `It's your day, ${to}! 🎉`,
-      subtitle: `${from} has a surprise for you.`,
-      button: "Let's party",
-    },
-    {
-      id: "game",
-      type: "game",
-      game: "blow-candles",
-      title: "Make a wish…",
-      instructions: "Tap every flame to blow out your candles",
-      winText: "Wish made! I hope it comes true 🌟",
-    },
-    {
-      id: "photos",
-      type: "photos",
-      title: "Another year of great memories",
-      captions: [],
-      photos: [],
-    },
-    {
-      id: "message",
-      type: "message",
-      title: "Happy birthday!",
-      body: `Here's to another year of being amazing. Can't wait to celebrate with you.\n\nLove, ${from}`,
-    },
-    {
-      id: "finale",
-      type: "finale",
-      title: `Happy Birthday ${to}! 🎂`,
-      body: "Go eat some cake. You've earned it.",
-      effect: "confetti",
-    },
-  ],
-};
-
-// Illustrated sample photos so the demos show off the polaroid screen.
-const DEMO_PHOTOS: Record<Occasion, { src: string; caption: string }[]> = {
-  valentine: [
-    { src: "/demo/sunset.svg", caption: "Golden hour with you" },
-    { src: "/demo/coffee.svg", caption: "Where it all started ☕" },
-    { src: "/demo/lights.svg", caption: "Fairy-light nights ✨" },
-  ],
-  diwali: [
-    { src: "/demo/rangoli.svg", caption: "Our rangoli this year" },
-    { src: "/demo/lights.svg", caption: "Diwali at home 🪔" },
-    { src: "/demo/fireworks.svg", caption: "Fireworks from the roof" },
-  ],
-  birthday: [
-    { src: "/demo/cake.svg", caption: "Cake o'clock 🎂" },
-    { src: "/demo/balloons.svg", caption: "Up, up and away" },
-    { src: "/demo/sunset.svg", caption: "Last summer ☀️" },
-  ],
-};
+export function buildTemplate(occasion: Occasion, to: string, from: string): CardData {
+  return buildCard(defaultTemplate(occasion), to, from);
+}
 
 export function buildDemo(occasion: Occasion): CardData {
-  const card = buildTemplate(occasion, "Priya", "Sam");
-  const photos = DEMO_PHOTOS[occasion];
-  return {
-    ...card,
-    screens: card.screens.map((s) =>
-      s.type === "photos" ? { ...s, photos: photos.map((p) => p.src), captions: photos.map((p) => p.caption) } : s,
-    ),
-  };
+  return buildTemplateDemo(defaultTemplate(occasion));
 }

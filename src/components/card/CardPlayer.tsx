@@ -1,12 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import type { CardData } from "@/lib/card";
 import { occasions } from "@/lib/templates";
 import { themes } from "@/lib/themes";
 import { EmojiRain } from "./effects";
-import { FinaleScreen, GameScreen, IntroScreen, MessageScreen, PhotosScreen, QuestionScreen } from "./screens";
+import {
+  FinaleScreen,
+  GameScreen,
+  IntroScreen,
+  MessageScreen,
+  PhotosScreen,
+  QuestionScreen,
+  QuizScreen,
+  ScratchScreen,
+  TypeItScreen,
+} from "./screens";
 
 type Props = {
   card: CardData;
@@ -34,6 +44,7 @@ export function CardPlayer({ card, preview = false, focusScreenId }: Props) {
   }
 
   const current = screens[Math.min(index, screens.length - 1)];
+  const wide = card.layout === "wide";
   const next = () => setIndex((i) => Math.min(i + 1, screens.length - 1));
   const replay = () => {
     setIndex(0);
@@ -52,8 +63,9 @@ export function CardPlayer({ card, preview = false, focusScreenId }: Props) {
   } as React.CSSProperties;
 
   return (
-    <div style={style} className={`relative flex w-full flex-col overflow-hidden ${preview ? "h-full" : "min-h-dvh"}`}>
+    <div style={style} className={`@container relative flex w-full flex-col overflow-hidden ${preview ? "h-full" : "min-h-dvh"}`}>
       <EmojiRain effect={card.ambient} />
+      {!preview && card.device && card.device !== "everywhere" && <DeviceTip device={card.device} />}
 
       <div className={`relative z-10 flex justify-center gap-1.5 ${preview ? "pt-12" : "pt-5"}`}>
         {screens.map((s, i) => (
@@ -68,12 +80,15 @@ export function CardPlayer({ card, preview = false, focusScreenId }: Props) {
       </div>
 
       <main className="flex flex-1 items-center justify-center px-5 py-8">
-        <div key={`${run}-${current.id}`} className="w-full max-w-md animate-screen-in">
+        <div key={`${run}-${current.id}`} className={`w-full animate-screen-in ${wide ? "max-w-4xl" : "max-w-md"}`}>
           {current.type === "intro" && <IntroScreen screen={current} onNext={next} emoji={occasions[card.occasion].emoji} />}
           {current.type === "question" && <QuestionScreen screen={current} onNext={next} />}
-          {current.type === "photos" && <PhotosScreen screen={current} onNext={next} />}
+          {current.type === "photos" && <PhotosScreen screen={current} onNext={next} wide={wide} />}
           {current.type === "message" && <MessageScreen screen={current} onNext={next} />}
-          {current.type === "game" && <GameScreen screen={current} onNext={next} />}
+          {current.type === "game" && <GameScreen screen={current} onNext={next} occasion={card.occasion} />}
+          {current.type === "quiz" && <QuizScreen screen={current} onNext={next} />}
+          {current.type === "scratch" && <ScratchScreen screen={current} onNext={next} />}
+          {current.type === "typeit" && <TypeItScreen screen={current} onNext={next} />}
           {current.type === "finale" && (
             <FinaleScreen
               screen={current}
@@ -81,7 +96,7 @@ export function CardPlayer({ card, preview = false, focusScreenId }: Props) {
               footer={
                 !preview && (
                   <Link
-                    href="/create"
+                    href={card.template ? `/create?template=${card.template}` : "/create"}
                     className="mt-4 rounded-full bg-[var(--c-surface)] px-5 py-2.5 text-sm font-semibold shadow-sm ring-1 ring-black/10 backdrop-blur"
                   >
                     ✨ Make your own on Sending Vibes
@@ -98,6 +113,38 @@ export function CardPlayer({ card, preview = false, focusScreenId }: Props) {
           From {card.from} to {card.to} · made with Sending Vibes
         </p>
       )}
+    </div>
+  );
+}
+
+const COARSE = "(pointer: coarse)";
+
+function useIsTouch() {
+  return useSyncExternalStore(
+    (onChange) => {
+      const mq = window.matchMedia(COARSE);
+      mq.addEventListener("change", onChange);
+      return () => mq.removeEventListener("change", onChange);
+    },
+    () => window.matchMedia(COARSE).matches,
+    () => null,
+  );
+}
+
+// A gentle nudge when a phone-first card is opened on a computer, or the other way round.
+function DeviceTip({ device }: { device: "phone" | "desktop" }) {
+  const touch = useIsTouch();
+  const [dismissed, setDismissed] = useState(false);
+  const mismatch = touch !== null && (device === "phone" ? !touch : touch);
+  if (!mismatch || dismissed) return null;
+  return (
+    <div className="absolute inset-x-0 top-0 z-30 flex justify-center p-3">
+      <div className="flex items-center gap-3 rounded-full bg-black/75 py-2 pl-4 pr-2 text-sm font-semibold text-white shadow-lg backdrop-blur">
+        {device === "phone" ? "📱 Best on a phone, but it works here too" : "💻 Best on a computer, but it works here too"}
+        <button onClick={() => setDismissed(true)} aria-label="Dismiss" className="grid h-6 w-6 place-items-center rounded-full bg-white/20">
+          ✕
+        </button>
+      </div>
     </div>
   );
 }

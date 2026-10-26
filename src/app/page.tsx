@@ -3,41 +3,42 @@ import { CardPlayer } from "@/components/card/CardPlayer";
 import { Particles } from "@/components/card/effects";
 import { OccasionShowcase } from "@/components/landing/OccasionShowcase";
 import { AiPromptDemo, RunawayDemo, TypewriterLoop } from "@/components/landing/widgets";
+import { CatalogGrid } from "@/components/catalog/CatalogGrid";
 import { Logo } from "@/components/Logo";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { Reveal } from "@/components/Reveal";
+import { SiteHeader } from "@/components/SiteHeader";
+import { TEMPLATES } from "@/lib/catalog";
+import { PRICES } from "@/lib/pricing";
 import { buildDemo } from "@/lib/templates";
 
 const MARQUEE = [
   { emoji: "💘", label: "Valentine's" },
   { emoji: "🪔", label: "Diwali" },
   { emoji: "🎂", label: "Birthdays" },
-  { emoji: "💍", label: "Anniversaries", soon: true },
-  { emoji: "🌙", label: "Eid", soon: true },
-  { emoji: "🎄", label: "Christmas", soon: true },
-  { emoji: "🙏", label: "Sorry cards", soon: true },
+  { emoji: "🎄", label: "Christmas" },
+  { emoji: "🌙", label: "Eid" },
+  { emoji: "💍", label: "Anniversaries" },
+  { emoji: "🥺", label: "Sorry" },
+  { emoji: "🙏", label: "Thank you" },
+  { emoji: "🏆", label: "Congrats" },
   { emoji: "🧵", label: "Raksha Bandhan", soon: true },
+  { emoji: "👶", label: "New baby", soon: true },
 ];
 
 const TIERS = [
   {
-    name: "Free",
-    price: "£0",
-    note: "while we launch",
-    points: ["Every template and game", "Edit every word", "Up to 6 photos", "Small Sending Vibes credit"],
+    name: "Card",
+    price: PRICES.card.label,
+    note: "per card",
+    points: [`Any of the ${TEMPLATES.length} designs`, "Edit every word on every screen", "Up to 6 of your photos", "Every game, quiz and effect"],
     live: true,
   },
   {
-    name: "Personal",
-    price: "£3.99",
-    note: "per card",
-    points: ["Everything in Free", "No branding", "Background music", "Extra games"],
-  },
-  {
     name: "AI Custom",
-    price: "£9.99",
+    price: PRICES.aiCustom.label,
     note: "per card",
-    points: ["Everything in Personal", "Describe changes in plain English", "Custom quizzes about you two", "Up to 30 AI edits"],
+    points: [`Everything in the ${PRICES.card.label} card`, "Describe changes in plain English", "Custom quizzes about you two", "Up to 30 AI edits"],
     featured: true,
   },
 ];
@@ -47,7 +48,10 @@ const FAQS = [
   { q: "Is it private?", a: "Only people with the link can open a card. Links are long random codes, and cards aren't listed or searchable anywhere." },
   { q: "Can I use my own photos?", a: "Yes, up to 6. They're resized on your phone before upload, which also strips out location data." },
   { q: "How long does it take to make one?", a: "About two minutes. Pick an occasion, add names and photos, tweak any words you like, and you'll get your link." },
-  { q: "What does it cost?", a: "Making and sending cards is free while we launch. Paid extras like no branding and the AI editor are coming soon." },
+  {
+    q: "What does it cost?",
+    a: `Each card is ${PRICES.card.label}, paid once. No subscription. AI Custom cards, where you describe changes in plain English, will be ${PRICES.aiCustom.label}.`,
+  },
 ];
 
 export default function Home() {
@@ -55,20 +59,7 @@ export default function Home() {
 
   return (
     <div className="overflow-x-clip bg-cream text-ink">
-      <header className="sticky top-0 z-50 border-b border-ink/5 bg-cream/75 backdrop-blur-xl">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
-          <Logo />
-          <div className="hidden items-center gap-8 text-sm font-semibold text-ink/70 md:flex">
-            <a href="#features" className="hover:text-ink">Features</a>
-            <a href="#occasions" className="hover:text-ink">Occasions</a>
-            <a href="#how" className="hover:text-ink">How it works</a>
-            <a href="#pricing" className="hover:text-ink">Pricing</a>
-          </div>
-          <Link href="/create" className="rounded-full bg-ink px-5 py-2.5 text-sm font-bold text-white transition hover:bg-hot">
-            Make a card
-          </Link>
-        </nav>
-      </header>
+      <SiteHeader />
 
       {/* Hero */}
       <section className="relative">
@@ -81,13 +72,13 @@ export default function Home() {
 
         <div className="relative mx-auto grid max-w-6xl items-center gap-14 px-4 pb-24 pt-12 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:pt-20">
           <div className="text-center lg:text-left">
-            <span className="inline-flex items-center gap-2 rounded-full border border-hot/20 bg-white/70 px-3.5 py-1.5 text-sm font-bold text-hot shadow-sm backdrop-blur">
+            <Link href="/cards" className="inline-flex items-center gap-2 rounded-full border border-hot/20 bg-white/70 px-3.5 py-1.5 text-sm font-bold text-hot shadow-sm backdrop-blur transition hover:bg-white">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-hot opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-hot" />
               </span>
-              Diwali cards are live 🪔
-            </span>
+              New: {TEMPLATES.length} card designs for 9 occasions →
+            </Link>
             <h1 className="mt-6 font-display text-[clamp(2.9rem,6.2vw,4.6rem)] font-bold leading-[0.95] tracking-tight">
               Don&apos;t send a card.
               <br />
@@ -110,12 +101,12 @@ export default function Home() {
                 href="/create"
                 className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-hot to-tangerine px-8 py-4 font-display text-lg font-semibold text-white shadow-[0_14px_34px_-10px_rgba(255,46,126,0.8)] transition hover:-translate-y-0.5"
               >
-                Make yours free
+                Make your card
                 <span className="transition group-hover:translate-x-1">→</span>
               </Link>
-              <a href="#occasions" className="inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 font-display text-lg font-semibold shadow-sm ring-1 ring-ink/10 transition hover:-translate-y-0.5">
-                See all occasions
-              </a>
+              <Link href="/cards" className="inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 font-display text-lg font-semibold shadow-sm ring-1 ring-ink/10 transition hover:-translate-y-0.5">
+                Browse the cards
+              </Link>
             </div>
             <ul className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm font-semibold text-ink/60 lg:justify-start">
               <li>✓ No app needed</li>
@@ -276,6 +267,25 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Products */}
+      <section id="cards" className="mx-auto max-w-6xl px-4 py-28 sm:px-6">
+        <Reveal className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
+          <div className="max-w-2xl">
+            <p className="font-bold uppercase tracking-[0.2em] text-hot">Shop the cards</p>
+            <h2 className="mt-3 font-display text-5xl font-bold leading-tight sm:text-6xl">
+              {TEMPLATES.length} ways to make their <span className="font-serif font-normal italic text-hot">day</span>
+            </h2>
+            <p className="mt-4 text-lg text-ink/65">Funny, heartfelt, cute or festive. Hover over a card and hit play to see it in action.</p>
+          </div>
+          <Link href="/cards" className="shrink-0 rounded-full bg-white px-6 py-3.5 font-display font-semibold shadow-sm ring-1 ring-ink/10 transition hover:-translate-y-0.5">
+            Browse all {TEMPLATES.length} →
+          </Link>
+        </Reveal>
+        <Reveal className="mt-10">
+          <CatalogGrid limit={8} />
+        </Reveal>
+      </section>
+
       {/* How it works */}
       <section id="how" className="mx-auto max-w-6xl px-4 py-28 sm:px-6">
         <Reveal className="mx-auto max-w-2xl text-center">
@@ -288,8 +298,8 @@ export default function Home() {
           <div aria-hidden className="absolute left-[16%] right-[16%] top-8 hidden border-t-2 border-dashed border-hot/30 md:block" />
           {[
             {
-              title: "Pick an occasion",
-              body: "Valentine's, Diwali or a birthday, with more on the way.",
+              title: "Pick a design",
+              body: `Nine occasions and ${TEMPLATES.length} designs, from funny to heartfelt.`,
               mock: (
                 <div className="flex flex-wrap justify-center gap-2">
                   <span className="rounded-full bg-ink px-3 py-1.5 text-sm font-bold text-white">💘 Valentine&apos;s</span>
@@ -351,9 +361,9 @@ export default function Home() {
             <h2 className="mt-3 font-display text-5xl font-bold sm:text-6xl">
               Cheaper than <span className="font-serif font-normal italic text-sun">flowers</span>.
             </h2>
-            <p className="mt-4 text-lg text-white/60">One price per card. No subscriptions. Free while we launch.</p>
+            <p className="mt-4 text-lg text-white/60">One price per card. No subscriptions.</p>
           </Reveal>
-          <div className="mt-14 grid gap-5 md:grid-cols-3">
+          <div className="mx-auto mt-14 grid max-w-4xl gap-5 md:grid-cols-2">
             {TIERS.map((t, i) => (
               <Reveal key={t.name} delay={i * 100}>
                 <div
@@ -375,7 +385,7 @@ export default function Home() {
                   </ul>
                   {t.live ? (
                     <Link href="/create" className="mt-8 rounded-full bg-white py-3.5 text-center font-display font-semibold text-ink transition hover:bg-sun">
-                      Start free
+                      Make a card
                     </Link>
                   ) : (
                     <span className="mt-8 rounded-full bg-white/10 py-3.5 text-center font-display font-semibold text-white/70">Coming soon</span>
@@ -418,7 +428,7 @@ export default function Home() {
           >
             Make your card →
           </Link>
-          <p className="mt-5 text-white/60">Free while we launch. No sign-up needed.</p>
+          <p className="mt-5 text-white/60">{PRICES.card.label} per card. No sign-up needed.</p>
         </div>
       </section>
 
@@ -427,7 +437,7 @@ export default function Home() {
           <Logo textClass="text-white" />
           <div className="flex gap-6 text-sm font-semibold">
             <Link href="/create" className="hover:text-white">Make a card</Link>
-            <Link href="/demo/valentine" className="hover:text-white">Demos</Link>
+            <Link href="/cards" className="hover:text-white">All cards</Link>
             <a href="#faq" className="hover:text-white">FAQ</a>
           </div>
           <p className="text-sm">© {new Date().getFullYear()} Sending Vibes</p>

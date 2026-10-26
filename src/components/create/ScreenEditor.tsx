@@ -6,17 +6,27 @@ import { uploadPhoto } from "./image";
 
 const MAX_PHOTOS = 6;
 
-const GAME_LABELS: Record<(typeof GAMES)[number], string> = {
+export const GAME_LABELS: Record<(typeof GAMES)[number], string> = {
   "catch-hearts": "Catch the falling hearts",
   "light-diyas": "Light the diyas",
   "blow-candles": "Blow out the candles",
+  "pop-balloons": "Pop the balloons",
+  "catch-snowflakes": "Catch the snowflakes",
+  "catch-stars": "Catch the stars",
+  "memory-match": "Memory match",
+  "unwrap-gift": "Unwrap the present",
+  "shake-it": "Shake the phone (best on phone)",
+  "cursor-chase": "Chase the heart with the mouse (best on desktop)",
 };
 
-const EFFECT_LABELS: Record<(typeof EFFECTS)[number], string> = {
+export const EFFECT_LABELS: Record<(typeof EFFECTS)[number], string> = {
   hearts: "Floating hearts",
   fireworks: "Fireworks",
   confetti: "Confetti",
   sparkles: "Sparkles",
+  snow: "Snow",
+  stars: "Stars",
+  petals: "Falling petals",
   none: "Nothing",
 };
 
@@ -26,6 +36,9 @@ export const SCREEN_LABELS: Record<Screen["type"], string> = {
   photos: "Photos",
   message: "Message",
   game: "Mini game",
+  quiz: "Quiz",
+  scratch: "Scratch card",
+  typeit: "Secret password",
   finale: "Big finale",
 };
 
@@ -81,6 +94,31 @@ export function ScreenEditor({ screen, onChange }: Props) {
           <Field label="When they win" value={screen.winText} max={140} onChange={(v) => set("winText", v)} />
         </>
       );
+    case "quiz":
+      return (
+        <>
+          <Field label="Quiz name" value={screen.title} max={120} onChange={(v) => set("title", v)} />
+          <QuizField screen={screen} onChange={onChange} />
+          <Field label="When they finish" value={screen.winText} max={140} onChange={(v) => set("winText", v)} />
+        </>
+      );
+    case "scratch":
+      return (
+        <>
+          <Field label="Title" value={screen.title} max={120} onChange={(v) => set("title", v)} />
+          <Field label="Instructions" value={screen.instructions} max={200} onChange={(v) => set("instructions", v)} />
+          <Field label="Hidden message (revealed when scratched)" value={screen.hidden} max={200} onChange={(v) => set("hidden", v)} />
+        </>
+      );
+    case "typeit":
+      return (
+        <>
+          <Field label="Title" value={screen.title} max={120} onChange={(v) => set("title", v)} />
+          <Field label="Clue" value={screen.instructions} max={200} onChange={(v) => set("instructions", v)} />
+          <Field label="Secret password they have to type" value={screen.phrase} max={40} onChange={(v) => set("phrase", v)} />
+          <Field label="When they get it" value={screen.winText} max={140} onChange={(v) => set("winText", v)} />
+        </>
+      );
     case "finale":
       return (
         <>
@@ -90,6 +128,82 @@ export function ScreenEditor({ screen, onChange }: Props) {
         </>
       );
   }
+}
+
+type QuizScreen = Extract<Screen, { type: "quiz" }>;
+const MAX_QUESTIONS = 6;
+
+function QuizField({ screen, onChange }: { screen: QuizScreen; onChange: Update }) {
+  const update = (fn: (questions: QuizScreen["questions"]) => QuizScreen["questions"]) =>
+    onChange((prev) => (prev.type === "quiz" ? { ...prev, questions: fn(prev.questions) } : prev));
+  const setQuestion = (qi: number, patch: Partial<QuizScreen["questions"][number]>) =>
+    update((qs) => qs.map((q, i) => (i === qi ? { ...q, ...patch } : q)));
+
+  return (
+    <div className="space-y-4">
+      {screen.questions.map((q, qi) => (
+        <div key={qi} className="space-y-3 rounded-xl border border-line p-3">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-bold">Question {qi + 1}</span>
+            {screen.questions.length > 1 && (
+              <button onClick={() => update((qs) => qs.filter((_, i) => i !== qi))} className="text-xs font-semibold text-red-600">
+                Remove
+              </button>
+            )}
+          </div>
+          <Field label="Question" value={q.question} max={140} onChange={(v) => setQuestion(qi, { question: v })} />
+          <div className="space-y-2">
+            <span className="text-sm font-semibold">Answers (tick the right one)</span>
+            {q.options.map((opt, oi) => (
+              <div key={oi} className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name={`quiz-${screen.id}-${qi}`}
+                  checked={q.answer === oi}
+                  onChange={() => setQuestion(qi, { answer: oi })}
+                  aria-label={`Answer ${oi + 1} is correct`}
+                  className="h-4 w-4 accent-[var(--brand)]"
+                />
+                <input
+                  value={opt}
+                  maxLength={60}
+                  onChange={(e) => setQuestion(qi, { options: q.options.map((o, j) => (j === oi ? e.target.value : o)) })}
+                  className="flex-1 rounded-lg border border-line bg-panel px-2 py-1.5 text-sm outline-none focus:border-brand"
+                />
+                {q.options.length > 2 && (
+                  <button
+                    aria-label="Remove answer"
+                    onClick={() =>
+                      setQuestion(qi, {
+                        options: q.options.filter((_, j) => j !== oi),
+                        answer: q.answer === oi ? 0 : q.answer > oi ? q.answer - 1 : q.answer,
+                      })
+                    }
+                    className="text-sm opacity-60"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            ))}
+            {q.options.length < 4 && (
+              <button onClick={() => setQuestion(qi, { options: [...q.options, ""] })} className="text-xs font-semibold text-brand">
+                + Add an answer
+              </button>
+            )}
+          </div>
+        </div>
+      ))}
+      {screen.questions.length < MAX_QUESTIONS && (
+        <button
+          onClick={() => update((qs) => [...qs, { question: "", options: ["", ""], answer: 0 }])}
+          className="rounded-full border border-line px-3 py-1.5 text-sm font-semibold hover:border-brand hover:text-brand"
+        >
+          + Add a question
+        </button>
+      )}
+    </div>
+  );
 }
 
 type PhotosScreen = Extract<Screen, { type: "photos" }>;

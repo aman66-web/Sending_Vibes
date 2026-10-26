@@ -7,7 +7,13 @@ const EMOJI: Partial<Record<Effect, string[]>> = {
   hearts: ["💖", "💕", "❤️", "💗", "💘"],
   sparkles: ["✨", "🌟", "✨", "💫"],
   confetti: ["🎉", "🎊", "🥳", "🎈"],
+  snow: ["❄️", "❅", "❆", "❄️"],
+  stars: ["⭐", "🌟", "✨", "🌙"],
+  petals: ["🌸", "🌷", "💮", "🌺"],
 };
+
+// Snow and petals drift down; everything else floats up.
+const FALLS: Effect[] = ["snow", "petals"];
 
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
 
@@ -39,7 +45,7 @@ function seededRandom(seed: number) {
 
 type Drop = { id: number; left: number; size: number; duration: number; delay: number; emoji: string };
 
-// Emoji drifting up the background.
+// Emoji drifting across the background.
 export function EmojiRain({ effect, count = 14, intense = false }: { effect: Effect; count?: number; intense?: boolean }) {
   const reduced = useReducedMotion();
   const drops = useMemo<Drop[]>(() => {
@@ -57,12 +63,13 @@ export function EmojiRain({ effect, count = 14, intense = false }: { effect: Eff
   }, [effect, count, intense]);
 
   if (!drops.length || reduced) return null;
+  const falls = FALLS.includes(effect);
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
       {drops.map((d) => (
         <span
           key={d.id}
-          className="absolute bottom-[-10%] animate-float-up"
+          className={`absolute ${falls ? "top-[-10%] animate-float-down" : "bottom-[-10%] animate-float-up"}`}
           style={{
             left: `${d.left}%`,
             fontSize: d.size,

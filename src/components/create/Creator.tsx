@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { CardPlayer } from "@/components/card/CardPlayer";
 import { Logo } from "@/components/Logo";
 import { PhoneFrame } from "@/components/PhoneFrame";
-import { OCCASIONS, THEMES, type CardData, type Effect, type Occasion, type Screen } from "@/lib/card";
-import { buildTemplate, occasions } from "@/lib/templates";
+import { OCCASIONS, THEMES, type CardData, type Effect, type Occasion, type Screen, type ThemeName } from "@/lib/card";
+import { ProductThumb } from "@/components/catalog/ProductThumb";
+import { TEMPLATES, buildCard, deviceInfo, getTemplate, toneInfo } from "@/lib/catalog";
+import { defaultTemplate, occasions } from "@/lib/templates";
 import { themes } from "@/lib/themes";
 import { Field, SCREEN_LABELS, ScreenEditor, Select } from "./ScreenEditor";
 
@@ -17,21 +19,33 @@ const AMBIENT_OPTIONS: Record<Exclude<Effect, "fireworks">, string> = {
   hearts: "Floating hearts",
   sparkles: "Sparkles",
   confetti: "Party emoji",
+  snow: "Snow",
+  stars: "Stars",
+  petals: "Falling petals",
   none: "Nothing",
 };
 
-const NEW_SCREENS: Record<"message" | "photos" | "game" | "question", () => Screen> = {
+const NEW_SCREENS: Record<"message" | "photos" | "game" | "question" | "quiz" | "scratch" | "typeit", () => Screen> = {
   message: () => ({ id: uid(), type: "message", title: "A little note", body: "" }),
   photos: () => ({ id: uid(), type: "photos", title: "Us ❤️", photos: [], captions: [] }),
   game: () => ({ id: uid(), type: "game", game: "catch-hearts", title: "Quick game!", instructions: "Tap 10 falling hearts", winText: "You did it!" }),
   question: () => ({ id: uid(), type: "question", question: "Do you love me?", yes: "Yes", no: "No", afterYes: "Good answer 😌" }),
+  quiz: () => ({
+    id: uid(),
+    type: "quiz",
+    title: "Quick quiz",
+    questions: [{ question: "Where did we first meet?", options: ["", ""], answer: 0 }],
+    winText: "You know me so well!",
+  }),
+  scratch: () => ({ id: uid(), type: "scratch", title: "Scratch for a surprise", instructions: "Scratch the silver panel", hidden: "Surprise! 🎉" }),
+  typeit: () => ({ id: uid(), type: "typeit", title: "Enter the password", instructions: "You know it…", phrase: "I love you", winText: "Unlocked!" }),
 };
 
 function uid() {
   return Math.random().toString(36).slice(2, 10);
 }
 
-type Step = "occasion" | "names" | "edit" | "done";
+type Step = "occasion" | "design" | "names" | "edit" | "done";
 
 // An unfinished card is kept in localStorage so a refresh doesn't lose someone's work.
 function loadDraft(): CardData | null {
@@ -50,12 +64,16 @@ function clearDraft() {
 }
 
 // Rendered client-only (see app/create/page.tsx), so reading localStorage on first render is safe.
-export function Creator({ initialOccasion }: { initialOccasion?: Occasion }) {
-  const [draft] = useState(() => (initialOccasion ? null : loadDraft()));
-  const [step, setStep] = useState<Step>(draft ? "edit" : initialOccasion ? "names" : "occasion");
-  const [occasion, setOccasion] = useState<Occasion>(draft?.occasion ?? initialOccasion ?? "valentine");
-  const [to, setTo] = useState(draft?.to ?? "");
-  const [from, setFrom] = useState(draft?.from ?? "");
+type CreatorProps = { initialOccasion?: Occasion; initialTemplate?: string; initialTo?: string; initialFrom?: string; initialTheme?: ThemeName };
+
+export function Creator({ initialOccasion, initialTemplate, initialTo, initialFrom, initialTheme }: CreatorProps) {
+  const chosen = getTemplate(initialTemplate);
+  const [draft] = useState(() => (initialOccasion || chosen ? null : loadDraft()));
+  const [step, setStep] = useState<Step>(draft ? "edit" : chosen ? "names" : initialOccasion ? "design" : "occasion");
+  const [occasion, setOccasion] = useState<Occasion>(draft?.occasion ?? chosen?.occasion ?? initialOccasion ?? "valentine");
+  const [templateSlug, setTemplateSlug] = useState<string | undefined>(chosen?.slug);
+  const [to, setTo] = useState(draft?.to ?? initialTo ?? "");
+  const [from, setFrom] = useState(draft?.from ?? initialFrom ?? "");
   const [card, setCard] = useState<CardData | null>(draft);
   const [selected, setSelected] = useState<string | undefined>(draft?.screens[0]?.id);
   const [showPreview, setShowPreview] = useState(false);
@@ -70,7 +88,10 @@ export function Creator({ initialOccasion }: { initialOccasion?: Occasion }) {
   }, [card, step]);
 
   const start = () => {
-    const c = buildTemplate(occasion, to.trim(), from.trim());
+    const template = getTemplate(templateSlug) ?? defaultTemplate(occasion);
+    const built = buildCard(template, to.trim(), from.trim());
+    // A colour picked on the product page carries over, but only for that design.
+    const c = initialTheme && template.slug === initialTemplate ? { ...built, theme: initialTheme } : built;
     setCard(c);
     setSelected(c.screens[0].id);
     setStep("edit");
@@ -143,13 +164,13 @@ export function Creator({ initialOccasion }: { initialOccasion?: Occasion }) {
       {step === "occasion" && (
         <section className="mx-auto max-w-3xl px-4 py-12">
           <h1 className="text-center font-display text-4xl font-bold">What are we celebrating?</h1>
-          <div className="mt-8 grid gap-4 sm:grid-cols-3">
+          <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3">
             {OCCASIONS.map((o) => (
               <button
                 key={o}
                 onClick={() => {
                   setOccasion(o);
-                  setStep("names");
+                  setStep("design");
                 }}
                 className="rounded-3xl border border-line bg-panel p-6 text-left shadow-sm transition hover:-translate-y-1 hover:border-brand hover:shadow-md"
               >
@@ -162,10 +183,46 @@ export function Creator({ initialOccasion }: { initialOccasion?: Occasion }) {
         </section>
       )}
 
+      {step === "design" && (
+        <section className="mx-auto max-w-5xl px-4 py-12">
+          <button onClick={() => setStep("occasion")} className="text-sm font-semibold opacity-70">
+            ← All occasions
+          </button>
+          <h1 className="mt-4 font-display text-4xl font-bold">
+            Pick a {occasions[occasion].label} design {occasions[occasion].emoji}
+          </h1>
+          <p className="mt-1 opacity-70">Everything is editable afterwards: words, photos, colours and screens.</p>
+          <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {TEMPLATES.filter((t) => t.occasion === occasion).map((t) => (
+              <div key={t.slug} className="group overflow-hidden rounded-3xl border border-line bg-panel shadow-sm transition hover:-translate-y-1 hover:border-brand hover:shadow-md">
+                <button
+                  onClick={() => {
+                    setTemplateSlug(t.slug);
+                    setStep("names");
+                  }}
+                  className="block w-full text-left"
+                >
+                  <ProductThumb template={t} />
+                  <div className="p-3">
+                    <p className="font-display font-bold leading-tight">{t.name}</p>
+                    <p className="mt-1 text-xs opacity-70">
+                      {toneInfo[t.tone].emoji} {toneInfo[t.tone].label} · {deviceInfo[t.device].emoji} {deviceInfo[t.device].label}
+                    </p>
+                  </div>
+                </button>
+                <a href={`/cards/${t.slug}`} target="_blank" rel="noreferrer" className="block border-t border-line px-3 py-2 text-xs font-semibold text-brand">
+                  ▶ Preview it
+                </a>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       {step === "names" && (
         <section className="mx-auto max-w-md px-4 py-12">
-          <button onClick={() => setStep("occasion")} className="text-sm font-semibold opacity-70">
-            ← {occasions[occasion].emoji} {occasions[occasion].label}
+          <button onClick={() => setStep("design")} className="text-sm font-semibold opacity-70">
+            ← {getTemplate(templateSlug)?.name ?? occasions[occasion].label}
           </button>
           <h1 className="mt-4 font-display text-4xl font-bold">Who&apos;s it for?</h1>
           <form
@@ -341,6 +398,9 @@ function summary(s: Screen) {
     case "photos":
     case "game":
     case "finale":
+    case "quiz":
+    case "scratch":
+    case "typeit":
       return s.title;
     case "question":
       return s.question;

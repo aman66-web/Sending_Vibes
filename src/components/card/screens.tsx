@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import type { Screen } from "@/lib/card";
+import { useEffect, useRef, useState } from "react";
+import type { Occasion, Screen } from "@/lib/card";
 import { FinaleEffect, Particles, useReducedMotion } from "./effects";
 import { GameView } from "./games";
 import { useRunaway } from "./runaway";
@@ -12,6 +12,7 @@ type ScreenProps<T extends Screen["type"]> = { screen: Of<T>; onNext: () => void
 export function PrimaryButton({ children, onClick, className = "" }: { children: React.ReactNode; onClick?: () => void; className?: string }) {
   return (
     <button
+      data-primary
       onClick={onClick}
       className={`rounded-full bg-[var(--c-accent)] px-8 py-3.5 font-display text-lg font-semibold text-[var(--c-accent-text)] shadow-lg shadow-black/10 transition hover:brightness-110 active:scale-95 ${className}`}
     >
@@ -101,6 +102,7 @@ export function QuestionScreen({ screen, onNext }: ScreenProps<"question">) {
         <div className="absolute inset-x-0 top-6 flex items-center justify-center gap-4">
           <button
             ref={yes}
+            data-yes
             onClick={() => setSaidYes(true)}
             style={{ transform: `scale(${yesScale})` }}
             className="rounded-full bg-[var(--c-accent)] px-8 py-3.5 font-display text-lg font-semibold text-[var(--c-accent-text)] shadow-lg transition-transform duration-300"
@@ -115,10 +117,36 @@ export function QuestionScreen({ screen, onNext }: ScreenProps<"question">) {
   );
 }
 
-export function PhotosScreen({ screen, onNext }: ScreenProps<"photos">) {
+export function PhotosScreen({ screen, onNext, wide = false }: ScreenProps<"photos"> & { wide?: boolean }) {
   const [index, setIndex] = useState(0);
   const photos = screen.photos;
   const total = photos.length;
+
+  // Desktop designs pin every photo up at once, like a gallery wall.
+  if (wide && total > 0) {
+    return (
+      <div className="flex w-full flex-col items-center gap-8 text-center">
+        <h2 className="font-display text-3xl font-bold leading-tight @2xl:text-4xl">{screen.title}</h2>
+        <div className="mx-auto grid w-full max-w-3xl grid-cols-2 gap-4 @2xl:grid-cols-3 @2xl:gap-6">
+          {photos.map((src, i) => (
+            <figure
+              key={src + i}
+              className="relative animate-pop rounded-md bg-white p-2 pb-9 shadow-xl transition duration-300 hover:z-10 hover:scale-105 hover:rotate-0 @2xl:p-3 @2xl:pb-12"
+              style={{ transform: `rotate(${[-4, 3, -2, 5, -3, 2][i % 6]}deg)`, animationDelay: `${i * 120}ms` }}
+            >
+              <span className="absolute -top-2 left-1/2 h-4 w-4 -translate-x-1/2 rounded-full bg-[var(--c-accent)] shadow ring-2 ring-white" />
+              {/* eslint-disable-next-line @next/next/no-img-element -- user photos from our storage, already resized on upload */}
+              <img src={src} alt="" className="aspect-square w-full rounded-sm object-cover" draggable={false} />
+              <figcaption className="absolute inset-x-2 bottom-1.5 truncate font-hand text-lg text-neutral-700 @2xl:bottom-3 @2xl:text-xl">
+                {screen.captions[i] ?? ""}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+        <PrimaryButton onClick={onNext}>Next</PrimaryButton>
+      </div>
+    );
+  }
 
   return (
     <div className="flex w-full flex-col items-center gap-5 text-center">
@@ -192,14 +220,14 @@ export function MessageScreen({ screen, onNext }: ScreenProps<"message">) {
   );
 }
 
-export function GameScreen({ screen, onNext }: ScreenProps<"game">) {
+export function GameScreen({ screen, onNext, occasion }: ScreenProps<"game"> & { occasion: Occasion }) {
   const [won, setWon] = useState(false);
   return (
     <div className="flex w-full flex-col items-center gap-3 text-center">
-      {won && <Particles mode={screen.game === "light-diyas" ? "fireworks" : "confetti"} />}
+      {won && <Particles mode={screen.game === "light-diyas" || (screen.game === "shake-it" && occasion === "diwali") ? "fireworks" : "confetti"} />}
       <h2 className="font-display text-3xl font-bold leading-tight">{screen.title}</h2>
       <p className="text-[var(--c-muted)]">{won ? screen.winText : screen.instructions}</p>
-      <GameView game={screen.game} won={won} onWin={() => setWon(true)} />
+      <GameView game={screen.game} occasion={occasion} won={won} onWin={() => setWon(true)} />
       <PrimaryButton onClick={onNext} className={won ? "animate-pop" : "invisible"}>
         Next
       </PrimaryButton>
@@ -221,5 +249,217 @@ export function FinaleScreen({ screen, onReplay, footer }: { screen: Of<"finale"
         {footer}
       </div>
     </>
+  );
+}
+
+const WRONG_LINES = ["Wrong! 😤", "Excuse me?? 🙄", "Try again 👀", "Hmm, no. 🙅", "I'm offended 😭"];
+
+export function QuizScreen({ screen, onNext }: ScreenProps<"quiz">) {
+  const [index, setIndex] = useState(0);
+  const [wrong, setWrong] = useState<number | null>(null);
+  const [misses, setMisses] = useState(0);
+  const [right, setRight] = useState<number | null>(null);
+  const done = index >= screen.questions.length;
+  const q = screen.questions[Math.min(index, screen.questions.length - 1)];
+
+  const pick = (i: number) => {
+    if (right !== null) return;
+    if (i === q.answer) {
+      setRight(i);
+      setWrong(null);
+      setTimeout(() => {
+        setRight(null);
+        setIndex((n) => n + 1);
+      }, 650);
+    } else {
+      setWrong(i);
+      setMisses((m) => m + 1);
+    }
+  };
+
+  if (done) {
+    return (
+      <div className="flex flex-col items-center gap-5 text-center">
+        <Particles mode="confetti" />
+        <div className="animate-pop text-7xl">{misses === 0 ? "🏆" : "😅"}</div>
+        <h2 className="font-display text-3xl font-bold">{screen.winText}</h2>
+        <p className="text-[var(--c-muted)]">{misses === 0 ? "Full marks. Obviously." : `Only ${misses} wrong answer${misses === 1 ? "" : "s"}. We'll talk about that later.`}</p>
+        <PrimaryButton onClick={onNext}>Next</PrimaryButton>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex w-full flex-col items-center gap-5 text-center">
+      <p className="text-sm font-bold uppercase tracking-widest text-[var(--c-muted)]">
+        {screen.title} · {index + 1} of {screen.questions.length}
+      </p>
+      <h2 key={index} className="animate-screen-in font-display text-3xl font-bold leading-tight">
+        {q.question}
+      </h2>
+      <div className="grid w-full gap-3 @xl:grid-cols-2">
+        {q.options.map((option, i) => (
+          <button
+            key={`${index}-${i}`}
+            data-quiz-option={i}
+            onClick={() => pick(i)}
+            className={`rounded-2xl px-5 py-4 text-left font-display text-lg font-semibold shadow-sm ring-1 ring-black/10 transition ${
+              right === i
+                ? "scale-[1.02] bg-emerald-500 text-white"
+                : wrong === i
+                  ? "animate-shake bg-red-500 text-white"
+                  : "bg-[var(--c-secondary)] text-[var(--c-text)] hover:-translate-y-0.5"
+            }`}
+          >
+            {option}
+          </button>
+        ))}
+      </div>
+      <p className="h-6 font-display font-semibold text-[var(--c-accent)]">{wrong !== null ? WRONG_LINES[misses % WRONG_LINES.length] : ""}</p>
+    </div>
+  );
+}
+
+// A silver panel they rub away with a finger (or mouse) to reveal a hidden message.
+export function ScratchScreen({ screen, onNext }: ScreenProps<"scratch">) {
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const drawing = useRef(false);
+  const strokes = useRef(0);
+  const [revealed, setRevealed] = useState(false);
+
+  useEffect(() => {
+    const el = canvas.current;
+    const ctx = el?.getContext("2d");
+    if (!el || !ctx) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    el.width = el.clientWidth * dpr;
+    el.height = el.clientHeight * dpr;
+    ctx.scale(dpr, dpr);
+    const w = el.clientWidth;
+    const h = el.clientHeight;
+    const g = ctx.createLinearGradient(0, 0, w, h);
+    g.addColorStop(0, "#d4d4d8");
+    g.addColorStop(0.5, "#f4f4f5");
+    g.addColorStop(1, "#a1a1aa");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = "rgba(0,0,0,0.08)";
+    for (let i = 0; i < 300; i++) ctx.fillRect(Math.random() * w, Math.random() * h, 2, 2);
+    ctx.fillStyle = "#52525b";
+    ctx.font = "600 20px system-ui, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("✨ Scratch here ✨", w / 2, h / 2 + 7);
+  }, []);
+
+  const scratch = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    // Scratch whenever a finger or a held mouse button moves across, even if the press began outside the panel.
+    const pressed = drawing.current || e.pointerType !== "mouse" || (e.buttons & 1) === 1;
+    if (!pressed || revealed) return;
+    const el = e.currentTarget;
+    const ctx = el.getContext("2d");
+    if (!ctx) return;
+    const box = el.getBoundingClientRect();
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.beginPath();
+    ctx.arc(e.clientX - box.left, e.clientY - box.top, 24, 0, Math.PI * 2);
+    ctx.fill();
+    strokes.current += 1;
+    if (strokes.current % 12 !== 0) return;
+    // Sample the panel to see how much has been scratched away.
+    const { data } = ctx.getImageData(0, 0, el.width, el.height);
+    let clear = 0;
+    let total = 0;
+    for (let i = 3; i < data.length; i += 4 * 40) {
+      total++;
+      if (data[i] === 0) clear++;
+    }
+    if (clear / total > 0.5) setRevealed(true);
+  };
+
+  return (
+    <div className="flex w-full flex-col items-center gap-5 text-center">
+      {revealed && <Particles mode="confetti" />}
+      <h2 className="font-display text-3xl font-bold leading-tight">{screen.title}</h2>
+      <p className="text-[var(--c-muted)]">{revealed ? "There it is!" : screen.instructions}</p>
+      <div className="relative h-56 w-full max-w-sm overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-black/10">
+        <div className="absolute inset-0 grid place-items-center p-6">
+          <p className="font-display text-3xl font-bold leading-tight text-[#3b0a1f]">{screen.hidden}</p>
+        </div>
+        <canvas
+          ref={canvas}
+          aria-label="Scratch card"
+          onPointerDown={(e) => {
+            drawing.current = true;
+            e.currentTarget.setPointerCapture(e.pointerId);
+            scratch(e);
+          }}
+          onPointerMove={scratch}
+          onPointerUp={() => (drawing.current = false)}
+          className={`absolute inset-0 h-full w-full touch-none transition-opacity duration-700 ${revealed ? "pointer-events-none opacity-0" : ""}`}
+        />
+      </div>
+      <PrimaryButton onClick={onNext} className={revealed ? "animate-pop" : "invisible"}>
+        Next
+      </PrimaryButton>
+    </div>
+  );
+}
+
+const normalise = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]/g, "").replace(/\s+/g, " ").trim();
+
+// They have to type the secret phrase. Made for a keyboard, works with a phone keyboard too.
+export function TypeItScreen({ screen, onNext }: ScreenProps<"typeit">) {
+  const target = normalise(screen.phrase);
+  const [value, setValue] = useState("");
+  const [hints, setHints] = useState(0);
+  const typed = normalise(value);
+  const solved = typed === target;
+  // How many leading characters are right so far.
+  let correct = 0;
+  while (correct < typed.length && typed[correct] === target[correct]) correct++;
+  const wrongNow = typed.length > correct;
+
+  return (
+    <div className="flex w-full flex-col items-center gap-5 text-center">
+      {solved && <Particles mode="confetti" />}
+      <h2 className="font-display text-3xl font-bold leading-tight">{screen.title}</h2>
+      <p className="text-[var(--c-muted)]">{solved ? screen.winText : screen.instructions}</p>
+      <div className={`flex flex-wrap justify-center gap-1.5 ${wrongNow ? "animate-shake" : ""}`} aria-hidden>
+        {target.split("").map((ch, i) =>
+          ch === " " ? (
+            <span key={i} className="w-4" />
+          ) : (
+            <span
+              key={i}
+              className={`grid h-11 w-9 place-items-center rounded-lg font-display text-xl font-bold uppercase shadow-sm ring-1 ring-black/10 @2xl:h-14 @2xl:w-11 @2xl:text-2xl ${
+                i < correct || i < hints ? "bg-[var(--c-accent)] text-[var(--c-accent-text)]" : "bg-[var(--c-secondary)]"
+              }`}
+            >
+              {i < correct || i < hints ? ch : ""}
+            </span>
+          ),
+        )}
+      </div>
+      {!solved && (
+        <>
+          <input
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            aria-label="Type the secret phrase"
+            placeholder="Start typing…"
+            autoComplete="off"
+            autoCapitalize="off"
+            spellCheck={false}
+            className="w-full max-w-sm rounded-2xl bg-[var(--c-secondary)] px-5 py-4 text-center font-display text-xl font-semibold text-[var(--c-text)] shadow-sm outline-none ring-1 ring-black/10 placeholder:opacity-50 focus:ring-2 focus:ring-[var(--c-accent)]"
+          />
+          <button onClick={() => setHints((h) => Math.min(h + 1, target.length))} className="text-sm font-semibold underline underline-offset-4 opacity-75">
+            Need a hint?
+          </button>
+        </>
+      )}
+      <PrimaryButton onClick={onNext} className={solved ? "animate-pop" : "invisible"}>
+        Next
+      </PrimaryButton>
+    </div>
   );
 }
