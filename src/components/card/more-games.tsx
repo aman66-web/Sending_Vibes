@@ -200,18 +200,25 @@ export function LaunchFireworks({ onWin, won }: GameProps) {
               className="absolute h-4 w-1 animate-rocket rounded-full"
               style={{ background: `hsl(${f.hue} 100% 75%)`, boxShadow: `0 0 8px hsl(${f.hue} 100% 60%)`, "--from": `${f.from}px` } as React.CSSProperties}
             />
-            {Array.from({ length: 16 }, (_, i) => {
-              const a = (i / 16) * Math.PI * 2;
+            <span
+              className="absolute h-16 w-16 animate-burst rounded-full opacity-0 blur-md [animation-delay:450ms]"
+              style={{ background: `hsl(${f.hue} 100% 70% / 0.7)`, "--dx": "0px", "--dy": "0px" } as React.CSSProperties}
+            />
+            {Array.from({ length: 28 }, (_, i) => {
+              // Two rings of sparks, the inner one smaller and a different shade.
+              const outer = i < 18;
+              const a = (i / (outer ? 18 : 10)) * Math.PI * 2 + (outer ? 0 : 0.3);
+              const r = outer ? 78 : 42;
               return (
                 <span
                   key={i}
-                  className="absolute h-2 w-2 animate-burst rounded-full opacity-0 [animation-delay:450ms]"
+                  className={`absolute animate-burst rounded-full opacity-0 [animation-delay:450ms] ${outer ? "h-2 w-2" : "h-1.5 w-1.5"}`}
                   style={
                     {
-                      background: `hsl(${f.hue + (i % 3) * 25} 100% 65%)`,
-                      boxShadow: `0 0 10px hsl(${f.hue} 100% 60%)`,
-                      "--dx": `${Math.cos(a) * 70}px`,
-                      "--dy": `${Math.sin(a) * 70}px`,
+                      background: `hsl(${f.hue + (outer ? 0 : 40)} 100% ${outer ? 65 : 80}%)`,
+                      boxShadow: `0 0 10px 1px hsl(${f.hue} 100% 60%)`,
+                      "--dx": `${Math.cos(a) * r}px`,
+                      "--dy": `${Math.sin(a) * r + 12}px`,
                     } as React.CSSProperties
                   }
                 />

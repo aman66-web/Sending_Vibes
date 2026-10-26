@@ -38,6 +38,11 @@ export const EFFECT_LABELS: Record<(typeof EFFECTS)[number], string> = {
   snow: "Snow",
   stars: "Stars",
   petals: "Falling petals",
+  spooky: "Bats and ghosts",
+  colours: "Holi colours",
+  lanterns: "Lanterns",
+  bubbles: "Bubbles",
+  balloons: "Balloons",
   none: "Nothing",
 };
 

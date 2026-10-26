@@ -258,6 +258,18 @@ export const MEMORY_SYMBOLS: Record<Occasion, string[]> = {
   sorry: ["🥺", "🌷", "🍫", "🧸", "💐", "🙏"],
   thanks: ["🙏", "💐", "☕", "🍪", "⭐", "💛"],
   congrats: ["🎓", "🏆", "🎉", "⭐", "🥂", "🚀"],
+  halloween: ["🎃", "👻", "🦇", "🍬", "🕷️", "🧙"],
+  newyear: ["🥂", "🎆", "🕛", "🎉", "🍾", "✨"],
+  mothersday: ["💐", "☕", "🌷", "💖", "🧁", "👑"],
+  fathersday: ["👔", "🍺", "⚽", "🔧", "🏆", "🍖"],
+  rakhi: ["🎀", "🍬", "🎁", "🪔", "💪", "🌸"],
+  holi: ["🎨", "🌈", "💦", "🌸", "🍬", "🥳"],
+  newbaby: ["👶", "🍼", "🧸", "🌙", "⭐", "🎀"],
+  wedding: ["💍", "💒", "🥂", "💐", "🎂", "🕊️"],
+  getwell: ["🌻", "🍵", "🧸", "💊", "🛌", "🌈"],
+  missyou: ["🫶", "✈️", "📱", "💌", "🏡", "🌙"],
+  friendship: ["👯", "🍕", "🎮", "🍹", "📸", "💅"],
+  leaving: ["👋", "📦", "✈️", "🍰", "🎉", "⭐"],
 };
 
 // A fixed shuffle keeps server and browser renders identical.
@@ -360,7 +372,7 @@ function UnwrapGift({ onWin, won }: GameProps) {
   );
 }
 
-const SHAKE_EMOJI: Partial<Record<Occasion, string>> = { diwali: "🎆", birthday: "🎁", christmas: "🎁", congrats: "🍾" };
+const SHAKE_EMOJI: Partial<Record<Occasion, string>> = { diwali: "🎆", birthday: "🎁", christmas: "🎁", congrats: "🍾", newyear: "🍾", holi: "🎨", newbaby: "🍼" };
 type MotionPermission = { requestPermission?: () => Promise<string> };
 
 // Built for phones: shaking fills the meter. Tapping works too, so it never gets stuck.

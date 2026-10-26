@@ -4,9 +4,31 @@ import { z } from "zod";
 // Keeping it as structured data (not free-form HTML) means templates, the
 // creator form, and later the AI editor all produce something that always renders.
 
-export const OCCASIONS = ["valentine", "birthday", "diwali", "christmas", "eid", "anniversary", "sorry", "thanks", "congrats"] as const;
-export const THEMES = ["rose", "marigold", "party", "midnight", "noel", "crescent", "gold", "lavender", "mint", "sunset"] as const;
-export const EFFECTS = ["hearts", "fireworks", "confetti", "sparkles", "snow", "stars", "petals", "none"] as const;
+export const OCCASIONS = [
+  "valentine",
+  "birthday",
+  "diwali",
+  "christmas",
+  "eid",
+  "anniversary",
+  "sorry",
+  "thanks",
+  "congrats",
+  "halloween",
+  "newyear",
+  "mothersday",
+  "fathersday",
+  "rakhi",
+  "holi",
+  "newbaby",
+  "wedding",
+  "getwell",
+  "missyou",
+  "friendship",
+  "leaving",
+] as const;
+export const THEMES = ["rose", "marigold", "party", "midnight", "noel", "crescent", "gold", "lavender", "mint", "sunset", "spooky", "holi", "baby", "ivory", "sky"] as const;
+export const EFFECTS = ["hearts", "fireworks", "confetti", "sparkles", "snow", "stars", "petals", "spooky", "colours", "lanterns", "bubbles", "balloons", "none"] as const;
 export const GAMES = [
   "catch-hearts",
   "light-diyas",

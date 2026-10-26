@@ -23,6 +23,11 @@ const AMBIENT_OPTIONS: Record<Exclude<Effect, "fireworks">, string> = {
   snow: "Snow",
   stars: "Stars",
   petals: "Falling petals",
+  spooky: "Bats and ghosts",
+  colours: "Holi colours",
+  lanterns: "Lanterns",
+  bubbles: "Bubbles",
+  balloons: "Balloons",
   none: "Nothing",
 };
 
@@ -224,9 +229,12 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       </header>
 
       {step === "occasion" && (
-        <section className="mx-auto max-w-3xl px-4 py-12">
+        <section className="mx-auto max-w-5xl px-4 py-12">
           <h1 className="text-center font-display text-4xl font-bold">What are we celebrating?</h1>
-          <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3">
+          <p className="mt-2 text-center opacity-70">
+            {OCCASIONS.length} occasions, {TEMPLATES.length} designs. Pick one to see its designs.
+          </p>
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {OCCASIONS.map((o) => (
               <button
                 key={o}
@@ -234,11 +242,14 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                   setOccasion(o);
                   setStep("design");
                 }}
-                className="rounded-3xl border border-line bg-panel p-6 text-left shadow-sm transition hover:-translate-y-1 hover:border-brand hover:shadow-md"
+                className="rounded-3xl border border-line bg-panel p-4 text-left shadow-sm transition hover:-translate-y-1 hover:border-brand hover:shadow-md sm:p-5"
               >
-                <div className="text-5xl">{occasions[o].emoji}</div>
-                <div className="mt-3 font-display text-xl font-bold">{occasions[o].label}</div>
-                <p className="mt-1 text-sm opacity-70">{occasions[o].tagline}</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-4xl">{occasions[o].emoji}</span>
+                  <span className="rounded-full bg-brand-soft px-2 py-0.5 text-xs font-bold text-brand">{TEMPLATES.filter((t) => t.occasion === o).length} designs</span>
+                </div>
+                <div className="mt-3 font-display text-lg font-bold leading-tight">{occasions[o].label}</div>
+                <p className="mt-1 text-sm leading-snug opacity-70">{occasions[o].tagline}</p>
               </button>
             ))}
           </div>

@@ -7,22 +7,12 @@ import { CatalogGrid } from "@/components/catalog/CatalogGrid";
 import { Logo } from "@/components/Logo";
 import { Reveal } from "@/components/Reveal";
 import { SiteHeader } from "@/components/SiteHeader";
+import { OCCASIONS } from "@/lib/card";
 import { TEMPLATES } from "@/lib/catalog";
+import { occasions } from "@/lib/templates";
 import { PRICES } from "@/lib/pricing";
 
-const MARQUEE = [
-  { emoji: "💘", label: "Valentine's" },
-  { emoji: "🪔", label: "Diwali" },
-  { emoji: "🎂", label: "Birthdays" },
-  { emoji: "🎄", label: "Christmas" },
-  { emoji: "🌙", label: "Eid" },
-  { emoji: "💍", label: "Anniversaries" },
-  { emoji: "🥺", label: "Sorry" },
-  { emoji: "🙏", label: "Thank you" },
-  { emoji: "🏆", label: "Congrats" },
-  { emoji: "🧵", label: "Raksha Bandhan", soon: true },
-  { emoji: "👶", label: "New baby", soon: true },
-];
+const MARQUEE = OCCASIONS.map((o) => occasions[o]);
 
 const TIERS = [
   {
@@ -107,7 +97,7 @@ export default function Home() {
         <div className="relative mx-auto max-w-5xl px-4 pb-16 sm:px-6">
           <ol className="grid gap-3 rounded-3xl bg-white/80 p-4 shadow-sm ring-1 ring-ink/5 backdrop-blur sm:grid-cols-3 sm:gap-0 sm:p-3">
             {[
-              { emoji: "🎨", title: "Pick a design", body: `${TEMPLATES.length} designs, 9 occasions` },
+              { emoji: "🎨", title: "Pick a design", body: `${TEMPLATES.length} designs, ${OCCASIONS.length} occasions` },
               { emoji: "✏️", title: "Fill in the blanks", body: "Names, photos and your message" },
               { emoji: "💬", title: "Send the link", body: "WhatsApp, text or Instagram" },
             ].map((step, i) => (
@@ -127,12 +117,11 @@ export default function Home() {
 
       {/* Marquee */}
       <div className="relative -rotate-1 overflow-hidden bg-ink py-5 text-white shadow-2xl">
-        <div className="flex w-max animate-marquee gap-10 whitespace-nowrap font-display text-2xl font-semibold motion-reduce:animate-none">
+        <div className="flex w-max animate-marquee gap-10 whitespace-nowrap font-display text-2xl font-semibold [animation-duration:110s] motion-reduce:animate-none">
           {[...MARQUEE, ...MARQUEE].map((m, i) => (
             <span key={i} className="flex items-center gap-3">
               <span>{m.emoji}</span>
               {m.label}
-              {m.soon && <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs uppercase tracking-widest text-white/60">soon</span>}
               <span className="ml-7 text-hot">✦</span>
             </span>
           ))}
@@ -270,7 +259,7 @@ export default function Home() {
           {[
             {
               title: "Pick a design",
-              body: `Nine occasions and ${TEMPLATES.length} designs, from funny to heartfelt.`,
+              body: `${OCCASIONS.length} occasions and ${TEMPLATES.length} designs, from funny to heartfelt.`,
               mock: (
                 <div className="flex flex-wrap justify-center gap-2">
                   <span className="rounded-full bg-ink px-3 py-1.5 text-sm font-bold text-white">💘 Valentine&apos;s</span>

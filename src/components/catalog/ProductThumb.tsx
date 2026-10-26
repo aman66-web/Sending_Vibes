@@ -10,6 +10,11 @@ const SCATTER: Record<Effect, string> = {
   snow: "❄️",
   stars: "⭐",
   petals: "🌸",
+  spooky: "🦇",
+  colours: "🎨",
+  lanterns: "🏮",
+  bubbles: "🫧",
+  balloons: "🎈",
   none: "✨",
 };
 

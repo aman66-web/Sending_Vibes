@@ -54,7 +54,8 @@ export function WheelScreen({ screen, onNext }: ScreenProps<"wheel">) {
     );
   };
 
-  const fills = options.map((_, i) => (n % 2 === 1 && i === n - 1 ? "color-mix(in srgb, var(--c-accent) 55%, white)" : i % 2 === 0 ? "var(--c-accent)" : "var(--c-secondary)"));
+  // Accent and white slices read well on every theme, light or dark.
+  const fills = options.map((_, i) => (n % 2 === 1 && i === n - 1 ? "color-mix(in srgb, var(--c-accent) 45%, white)" : i % 2 === 0 ? "var(--c-accent)" : "#ffffff"));
   return (
     <div className="flex w-full flex-col items-center gap-4 text-center">
       {result !== null && <Particles mode="confetti" />}
@@ -84,7 +85,7 @@ export function WheelScreen({ screen, onNext }: ScreenProps<"wheel">) {
                     dominantBaseline="middle"
                     fontSize={n > 6 ? 10 : n > 4 ? 12 : 14}
                     fontWeight="700"
-                    style={{ fill: dark ? "var(--c-accent-text)" : "var(--c-text)" }}
+                    style={{ fill: dark ? "var(--c-accent-text)" : "#2a0f1c" }}
                   >
                     {short}
                   </text>
@@ -145,18 +146,16 @@ export function CouponsScreen({ screen, onNext }: ScreenProps<"coupons">) {
             key={i}
             data-redeem={redeemed[i] ? undefined : i}
             onClick={() => redeem(i)}
-            className={`relative flex min-h-28 flex-col items-center justify-center gap-1 overflow-hidden bg-white px-4 py-3 text-[#3b0a1f] shadow-md transition hover:-translate-y-0.5 ${redeemed[i] ? "opacity-80" : ""}`}
+            className="relative flex min-h-28 flex-col items-center justify-center gap-1 overflow-hidden bg-white px-4 py-3 text-[#3b0a1f] shadow-md transition hover:-translate-y-0.5"
             style={{ mask: TICKET_MASK, WebkitMask: TICKET_MASK, borderRadius: 14 }}
           >
             <span className="absolute inset-1.5 rounded-[10px] border-2 border-dashed border-[var(--c-accent)] opacity-40" />
             <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[var(--c-accent)]">Coupon</span>
             <span className="font-display text-base font-bold leading-tight">{c}</span>
-            <span className="text-[11px] font-semibold opacity-50">{redeemed[i] ? "" : "Tap to redeem"}</span>
+            <span className={`text-[11px] font-semibold opacity-50 ${redeemed[i] ? "invisible" : ""}`}>Tap to redeem</span>
             {redeemed[i] && (
-              <span className="absolute inset-0 grid place-items-center">
-                <span className="animate-stamp rounded-lg border-[3px] border-red-600 px-2 py-0.5 font-display text-lg font-black uppercase tracking-wider text-red-600">
-                  Redeemed
-                </span>
+              <span className="absolute bottom-1.5 right-2 animate-stamp rounded-md border-2 border-red-600 bg-white/80 px-1.5 font-display text-xs font-black uppercase tracking-wider text-red-600">
+                Redeemed ✓
               </span>
             )}
           </button>
@@ -408,7 +407,7 @@ export function BoxesScreen({ screen, onNext }: ScreenProps<"boxes">) {
             >
               {open && (
                 <span
-                  className={`absolute bottom-full mb-3 w-32 animate-pop rounded-xl px-2 py-2 font-display font-bold leading-tight shadow-lg @2xl:w-40 ${
+                  className={`absolute bottom-full left-1/2 mb-3 w-[6.5rem] -translate-x-1/2 animate-pop rounded-xl px-2 py-2 font-display font-bold leading-tight shadow-lg @2xl:w-36 ${
                     mine ? "z-10 bg-white text-base text-[#3b0a1f] ring-2 ring-[var(--c-accent)]" : "bg-[var(--c-surface)] text-xs"
                   }`}
                 >
