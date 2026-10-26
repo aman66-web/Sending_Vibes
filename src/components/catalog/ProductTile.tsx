@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { toneInfo, type Template } from "@/lib/catalog";
+import { PRICES } from "@/lib/pricing";
 import { occasions } from "@/lib/templates";
 import { ProductThumb } from "./ProductThumb";
 
@@ -29,7 +30,7 @@ export function ProductTile({ template }: { template: Template }) {
       <div className="mt-3 px-1">
         <div className="flex items-start justify-between gap-2">
           <h3 className="font-display text-lg font-bold leading-tight text-ink">{template.name}</h3>
-          <span className="shrink-0 pt-0.5 text-sm font-bold text-hot">Free</span>
+          <span className="shrink-0 pt-0.5 text-sm font-bold text-hot">{PRICES.card.label}</span>
         </div>
         <p className="mt-1 text-sm text-ink/60">
           {occasions[template.occasion].emoji} {occasions[template.occasion].label} · {toneInfo[template.tone].emoji} {toneInfo[template.tone].label}

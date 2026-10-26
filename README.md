@@ -61,7 +61,7 @@ No secret key is needed. The `cards` table can't be read or listed directly; a c
 
 ## Roadmap
 
-- [ ] Stripe checkout: Personal (£3.99) and AI Custom (£9.99) tiers
+- [ ] Stripe checkout: every card is paid (£3.99, or £9.99 for AI Custom)
 - [ ] AI editor: "describe what you want" edits to the card's blocks
 - [x] More occasions: Christmas, Eid, anniversary, sorry, thank you, congrats
 - [x] Quiz, scratch-to-reveal, memory match and more games

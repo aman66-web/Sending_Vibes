@@ -9,6 +9,7 @@ import { PhoneFrame } from "@/components/PhoneFrame";
 import { Reveal } from "@/components/Reveal";
 import { SiteHeader } from "@/components/SiteHeader";
 import { TEMPLATES } from "@/lib/catalog";
+import { PRICES } from "@/lib/pricing";
 import { buildDemo } from "@/lib/templates";
 
 const MARQUEE = [
@@ -27,23 +28,17 @@ const MARQUEE = [
 
 const TIERS = [
   {
-    name: "Free",
-    price: "£0",
-    note: "while we launch",
-    points: ["Every template and game", "Edit every word", "Up to 6 photos", "Small Sending Vibes credit"],
+    name: "Card",
+    price: PRICES.card.label,
+    note: "per card",
+    points: [`Any of the ${TEMPLATES.length} designs`, "Edit every word on every screen", "Up to 6 of your photos", "Every game, quiz and effect"],
     live: true,
   },
   {
-    name: "Personal",
-    price: "£3.99",
-    note: "per card",
-    points: ["Everything in Free", "No branding", "Background music", "Extra games"],
-  },
-  {
     name: "AI Custom",
-    price: "£9.99",
+    price: PRICES.aiCustom.label,
     note: "per card",
-    points: ["Everything in Personal", "Describe changes in plain English", "Custom quizzes about you two", "Up to 30 AI edits"],
+    points: [`Everything in the ${PRICES.card.label} card`, "Describe changes in plain English", "Custom quizzes about you two", "Up to 30 AI edits"],
     featured: true,
   },
 ];
@@ -53,7 +48,10 @@ const FAQS = [
   { q: "Is it private?", a: "Only people with the link can open a card. Links are long random codes, and cards aren't listed or searchable anywhere." },
   { q: "Can I use my own photos?", a: "Yes, up to 6. They're resized on your phone before upload, which also strips out location data." },
   { q: "How long does it take to make one?", a: "About two minutes. Pick an occasion, add names and photos, tweak any words you like, and you'll get your link." },
-  { q: "What does it cost?", a: "Making and sending cards is free while we launch. Paid extras like no branding and the AI editor are coming soon." },
+  {
+    q: "What does it cost?",
+    a: `Each card is ${PRICES.card.label}, paid once. No subscription. AI Custom cards, where you describe changes in plain English, will be ${PRICES.aiCustom.label}.`,
+  },
 ];
 
 export default function Home() {
@@ -103,7 +101,7 @@ export default function Home() {
                 href="/create"
                 className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-hot to-tangerine px-8 py-4 font-display text-lg font-semibold text-white shadow-[0_14px_34px_-10px_rgba(255,46,126,0.8)] transition hover:-translate-y-0.5"
               >
-                Make yours free
+                Make your card
                 <span className="transition group-hover:translate-x-1">→</span>
               </Link>
               <Link href="/cards" className="inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 font-display text-lg font-semibold shadow-sm ring-1 ring-ink/10 transition hover:-translate-y-0.5">
@@ -363,9 +361,9 @@ export default function Home() {
             <h2 className="mt-3 font-display text-5xl font-bold sm:text-6xl">
               Cheaper than <span className="font-serif font-normal italic text-sun">flowers</span>.
             </h2>
-            <p className="mt-4 text-lg text-white/60">One price per card. No subscriptions. Free while we launch.</p>
+            <p className="mt-4 text-lg text-white/60">One price per card. No subscriptions.</p>
           </Reveal>
-          <div className="mt-14 grid gap-5 md:grid-cols-3">
+          <div className="mx-auto mt-14 grid max-w-4xl gap-5 md:grid-cols-2">
             {TIERS.map((t, i) => (
               <Reveal key={t.name} delay={i * 100}>
                 <div
@@ -387,7 +385,7 @@ export default function Home() {
                   </ul>
                   {t.live ? (
                     <Link href="/create" className="mt-8 rounded-full bg-white py-3.5 text-center font-display font-semibold text-ink transition hover:bg-sun">
-                      Start free
+                      Make a card
                     </Link>
                   ) : (
                     <span className="mt-8 rounded-full bg-white/10 py-3.5 text-center font-display font-semibold text-white/70">Coming soon</span>
@@ -430,7 +428,7 @@ export default function Home() {
           >
             Make your card →
           </Link>
-          <p className="mt-5 text-white/60">Free while we launch. No sign-up needed.</p>
+          <p className="mt-5 text-white/60">{PRICES.card.label} per card. No sign-up needed.</p>
         </div>
       </section>
 

@@ -8,6 +8,7 @@ import { EFFECT_LABELS, GAME_LABELS, SCREEN_LABELS } from "@/components/create/S
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { THEMES, type Screen, type ThemeName } from "@/lib/card";
 import { buildTemplateDemo, deviceInfo, templatesBySlug, toneInfo } from "@/lib/catalog";
+import { PRICES } from "@/lib/pricing";
 import { occasions } from "@/lib/templates";
 import { themes } from "@/lib/themes";
 
@@ -114,7 +115,7 @@ export function ProductView({ slug }: { slug: string }) {
         <h1 className="mt-4 font-display text-4xl font-bold leading-tight sm:text-5xl">{template.name}</h1>
         <p className="mt-3 text-lg text-ink/70">{template.blurb}</p>
         <p className="mt-4 font-display text-2xl font-bold">
-          Free <span className="text-base font-semibold text-ink/50">while we launch</span>
+          {PRICES.card.label} <span className="text-base font-semibold text-ink/50">per card</span>
         </p>
 
         <div className="mt-6 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-ink/5">
