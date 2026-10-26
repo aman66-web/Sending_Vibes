@@ -9,9 +9,9 @@ const serif = Instrument_Serif({ subsets: ["latin"], variable: "--font-serif-fac
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://sending-vibes.vercel.app"),
-  title: "Sending Vibes: interactive cards they'll actually remember",
+  title: "Sending Vibes: personalised interactive cards they'll actually remember",
   description:
-    "Send an interactive card for Valentine's, Diwali, birthdays and more. Runaway No buttons, mini games, your photos, and a big finale.",
+    "Personalised interactive cards for birthdays, Valentine's, Diwali, Eid, Christmas, Halloween and more. Runaway No buttons, mini games, your photos, music and a big finale. Just fill in the blanks.",
 };
 
 export const viewport: Viewport = {

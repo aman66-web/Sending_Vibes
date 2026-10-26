@@ -6,10 +6,9 @@ import { CardPlayer } from "@/components/card/CardPlayer";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import type { Occasion } from "@/lib/card";
 import { buildDemo, occasions } from "@/lib/templates";
+import { SHOWCASE, type ShowcaseOccasion } from "./showcase";
 
-// The homepage showcases the three flagship occasions; the full range lives in /cards.
-const SHOWCASE = ["valentine", "diwali", "birthday"] as const;
-type ShowcaseOccasion = (typeof SHOWCASE)[number];
+// The homepage showcases a few flagship occasions; the full range lives in /cards.
 
 const STYLES: Record<ShowcaseOccasion, { panel: string; text: string; muted: string; check: string; blurb: string; includes: string[] }> = {
   valentine: {
@@ -36,23 +35,40 @@ const STYLES: Record<ShowcaseOccasion, { panel: string; text: string; muted: str
     blurb: "Better than a card on the mantelpiece. They blow out the candles, make a wish, and get buried in confetti.",
     includes: ["A party envelope", "Blow-out-the-candles game", "Photo memories", "Your birthday message", "A confetti finale"],
   },
+  halloween: {
+    panel: "from-[#1e1145] via-[#3b1d6e] to-[#4c1d95]",
+    text: "text-[#fff7ed]",
+    muted: "text-[#fff7ed]/70",
+    check: "bg-[#f97316] text-[#1c0a00]",
+    blurb: "Trick or treat? The Trick button runs away, then they whack the ghosts and fill a bag with sweets. Spooky music included.",
+    includes: ["A runaway Trick button", "Whack-the-ghosts game", "Catch the falling sweets", "Spooky music", "Bats and ghosts finale"],
+  },
+  christmas: {
+    panel: "from-[#0f3d2e] via-[#14532d] to-[#7f1d1d]",
+    text: "text-[#fff7ed]",
+    muted: "text-[#fff7ed]/70",
+    check: "bg-[#dc2626] text-white",
+    blurb: "A present they unwrap with their finger, snowflakes to catch and Jingle Bells playing in the background.",
+    includes: ["Unwrap-the-present game", "Catch the snowflakes", "Christmas photos", "Jingle Bells", "A snowy finale"],
+  },
 };
 
-export function OccasionShowcase() {
-  const [occasion, setOccasion] = useState<ShowcaseOccasion>("valentine");
+// `order` puts whatever is coming up soonest first (worked out on the server).
+export function OccasionShowcase({ order = SHOWCASE }: { order?: readonly ShowcaseOccasion[] }) {
+  const [occasion, setOccasion] = useState<ShowcaseOccasion>(order[0]);
   const demos = useMemo(() => Object.fromEntries(SHOWCASE.map((o) => [o, buildDemo(o)])) as Record<Occasion, ReturnType<typeof buildDemo>>, []);
   const style = STYLES[occasion];
 
   return (
     <div>
-      <div role="tablist" className="mx-auto flex w-fit gap-1 rounded-full bg-white p-1.5 shadow-sm ring-1 ring-ink/5">
-        {SHOWCASE.map((o) => (
+      <div role="tablist" className="mx-auto flex w-fit max-w-full gap-1 overflow-x-auto rounded-full bg-white p-1.5 shadow-sm ring-1 ring-ink/5 [scrollbar-width:none]">
+        {order.map((o) => (
           <button
             key={o}
             role="tab"
             aria-selected={o === occasion}
             onClick={() => setOccasion(o)}
-            className={`rounded-full px-4 py-2.5 font-display font-semibold transition sm:px-6 ${o === occasion ? "bg-ink text-white shadow" : "text-ink/60 hover:text-ink"}`}
+            className={`shrink-0 whitespace-nowrap rounded-full px-4 py-2.5 font-display font-semibold transition sm:px-6 ${o === occasion ? "bg-ink text-white shadow" : "text-ink/60 hover:text-ink"}`}
           >
             <span className="mr-1.5">{occasions[o].emoji}</span>
             {occasions[o].label}

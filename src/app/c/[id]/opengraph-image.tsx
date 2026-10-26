@@ -23,7 +23,7 @@ export default async function CardOgImage({ params }: { params: Promise<{ id: st
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          background: theme.background,
+          background: theme.og ?? theme.background,
           color: theme.text,
         }}
       >

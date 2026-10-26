@@ -9,6 +9,7 @@ import { ProductThumb } from "@/components/catalog/ProductThumb";
 import { TEMPLATES, buildCard, deviceInfo, getTemplate, toneInfo } from "@/lib/catalog";
 import { defaultTemplate, occasions } from "@/lib/templates";
 import { themes } from "@/lib/themes";
+import { MUSIC_LABELS } from "@/components/card/sound";
 import { Field, SCREEN_LABELS, ScreenEditor, Select } from "./ScreenEditor";
 
 const DRAFT_KEY = "sv-draft-v1";
@@ -22,23 +23,89 @@ const AMBIENT_OPTIONS: Record<Exclude<Effect, "fireworks">, string> = {
   snow: "Snow",
   stars: "Stars",
   petals: "Falling petals",
+  spooky: "Bats and ghosts",
+  colours: "Holi colours",
+  lanterns: "Lanterns",
+  bubbles: "Bubbles",
+  balloons: "Balloons",
   none: "Nothing",
 };
 
-const NEW_SCREENS: Record<"message" | "photos" | "game" | "question" | "quiz" | "scratch" | "typeit", () => Screen> = {
-  message: () => ({ id: uid(), type: "message", title: "A little note", body: "" }),
-  photos: () => ({ id: uid(), type: "photos", title: "Us ❤️", photos: [], captions: [] }),
-  game: () => ({ id: uid(), type: "game", game: "catch-hearts", title: "Quick game!", instructions: "Tap 10 falling hearts", winText: "You did it!" }),
-  question: () => ({ id: uid(), type: "question", question: "Do you love me?", yes: "Yes", no: "No", afterYes: "Good answer 😌" }),
-  quiz: () => ({
-    id: uid(),
-    type: "quiz",
-    title: "Quick quiz",
-    questions: [{ question: "Where did we first meet?", options: ["", ""], answer: 0 }],
-    winText: "You know me so well!",
-  }),
-  scratch: () => ({ id: uid(), type: "scratch", title: "Scratch for a surprise", instructions: "Scratch the silver panel", hidden: "Surprise! 🎉" }),
-  typeit: () => ({ id: uid(), type: "typeit", title: "Enter the password", instructions: "You know it…", phrase: "I love you", winText: "Unlocked!" }),
+type Addable = Exclude<Screen["type"], "intro" | "finale">;
+
+// What "Add a screen" offers, with a starting point for each.
+const NEW_SCREENS: Record<Addable, { emoji: string; hint: string; make: () => Screen }> = {
+  message: { emoji: "💌", hint: "A note that types itself out", make: () => ({ id: uid(), type: "message", title: "A little note", body: "" }) },
+  photos: { emoji: "📸", hint: "Up to 6 photos", make: () => ({ id: uid(), type: "photos", title: "Us ❤️", photos: [], captions: [] }) },
+  question: {
+    emoji: "🙅",
+    hint: "The No button runs away",
+    make: () => ({ id: uid(), type: "question", question: "Do you love me?", yes: "Yes", no: "No", afterYes: "Good answer 😌" }),
+  },
+  game: {
+    emoji: "🎮",
+    hint: "21 mini games to choose from",
+    make: () => ({ id: uid(), type: "game", game: "catch-hearts", title: "Quick game!", instructions: "Tap 10 falling hearts", winText: "You did it!" }),
+  },
+  wheel: {
+    emoji: "🎡",
+    hint: "Spin to win (it can be rigged)",
+    make: () => ({
+      id: uid(),
+      type: "wheel",
+      title: "Spin for your prize",
+      instructions: "Whatever it lands on, you get",
+      options: ["A hug", "Dinner on me", "A movie night", "Breakfast in bed"],
+      landOn: -1,
+      winText: "The wheel has spoken!",
+    }),
+  },
+  coupons: {
+    emoji: "🎟️",
+    hint: "Treats they tap to redeem",
+    make: () => ({ id: uid(), type: "coupons", title: "Your coupon book", instructions: "Tap one to redeem it", coupons: ["One free hug", "Breakfast in bed", "You pick the film"] }),
+  },
+  reasons: {
+    emoji: "🫙",
+    hint: "Notes they pull out of a jar",
+    make: () => ({ id: uid(), type: "reasons", title: "Reasons I love you", instructions: "Tap the jar to pull out a note", reasons: ["Your laugh", "Your terrible jokes", "How kind you are"] }),
+  },
+  quiz: {
+    emoji: "❓",
+    hint: "Questions about you two",
+    make: () => ({
+      id: uid(),
+      type: "quiz",
+      title: "Quick quiz",
+      questions: [{ question: "Where did we first meet?", options: ["", ""], answer: 0 }],
+      winText: "You know me so well!",
+    }),
+  },
+  slider: {
+    emoji: "📈",
+    hint: "A slider that only goes up",
+    make: () => ({ id: uid(), type: "slider", title: "How much do you love me?", low: "A little", high: "SO much", winText: "Correct answer 😌" }),
+  },
+  timeline: {
+    emoji: "🗓️",
+    hint: "Your story, moment by moment",
+    make: () => ({ id: uid(), type: "timeline", title: "Our story so far", events: [{ when: "The day we met", what: "" }, { when: "Today", what: "Still my favourite person" }] }),
+  },
+  boxes: {
+    emoji: "🎁",
+    hint: "Pick one of three mystery boxes",
+    make: () => ({ id: uid(), type: "boxes", title: "Pick a box", instructions: "Choose wisely…", prizes: ["A hug", "A kiss", "Both"] }),
+  },
+  scratch: {
+    emoji: "🪙",
+    hint: "Scratch to reveal a message",
+    make: () => ({ id: uid(), type: "scratch", title: "Scratch for a surprise", instructions: "Scratch the silver panel", hidden: "Surprise! 🎉" }),
+  },
+  typeit: {
+    emoji: "⌨️",
+    hint: "Unlock it with a password",
+    make: () => ({ id: uid(), type: "typeit", title: "Enter the password", instructions: "You know it…", phrase: "I love you", winText: "Unlocked!" }),
+  },
 };
 
 function uid() {
@@ -119,8 +186,8 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       return { ...c, screens };
     });
   const removeScreen = (id: string) => setCard((c) => c && { ...c, screens: c.screens.filter((s) => s.id !== id) });
-  const addScreen = (type: keyof typeof NEW_SCREENS) => {
-    const s = NEW_SCREENS[type]();
+  const addScreen = (type: Addable) => {
+    const s = NEW_SCREENS[type].make();
     setCard((c) => {
       if (!c) return c;
       const finale = c.screens.findIndex((x) => x.type === "finale");
@@ -162,9 +229,12 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       </header>
 
       {step === "occasion" && (
-        <section className="mx-auto max-w-3xl px-4 py-12">
+        <section className="mx-auto max-w-5xl px-4 py-12">
           <h1 className="text-center font-display text-4xl font-bold">What are we celebrating?</h1>
-          <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3">
+          <p className="mt-2 text-center opacity-70">
+            {OCCASIONS.length} occasions, {TEMPLATES.length} designs. Pick one to see its designs.
+          </p>
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {OCCASIONS.map((o) => (
               <button
                 key={o}
@@ -172,11 +242,14 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                   setOccasion(o);
                   setStep("design");
                 }}
-                className="rounded-3xl border border-line bg-panel p-6 text-left shadow-sm transition hover:-translate-y-1 hover:border-brand hover:shadow-md"
+                className="rounded-3xl border border-line bg-panel p-4 text-left shadow-sm transition hover:-translate-y-1 hover:border-brand hover:shadow-md sm:p-5"
               >
-                <div className="text-5xl">{occasions[o].emoji}</div>
-                <div className="mt-3 font-display text-xl font-bold">{occasions[o].label}</div>
-                <p className="mt-1 text-sm opacity-70">{occasions[o].tagline}</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-4xl">{occasions[o].emoji}</span>
+                  <span className="rounded-full bg-brand-soft px-2 py-0.5 text-xs font-bold text-brand">{TEMPLATES.filter((t) => t.occasion === o).length} designs</span>
+                </div>
+                <div className="mt-3 font-display text-lg font-bold leading-tight">{occasions[o].label}</div>
+                <p className="mt-1 text-sm leading-snug opacity-70">{occasions[o].tagline}</p>
               </button>
             ))}
           </div>
@@ -272,12 +345,15 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                   ))}
                 </div>
               </div>
-              <Select
-                label="Background effect"
-                value={card.ambient === "fireworks" ? "none" : card.ambient}
-                options={AMBIENT_OPTIONS}
-                onChange={(v) => setCard({ ...card, ambient: v })}
-              />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Select
+                  label="Background effect"
+                  value={card.ambient === "fireworks" ? "none" : card.ambient}
+                  options={AMBIENT_OPTIONS}
+                  onChange={(v) => setCard({ ...card, ambient: v })}
+                />
+                <Select label="Music 🎵" value={card.music ?? "none"} options={MUSIC_LABELS} onChange={(v) => setCard({ ...card, music: v })} />
+              </div>
             </Panel>
 
             <div className="space-y-3">
@@ -304,15 +380,27 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                   </div>
                 );
               })}
-              {card.screens.length < MAX_SCREENS && (
-                <div className="flex flex-wrap items-center gap-2 pt-1">
-                  <span className="text-sm font-semibold opacity-70">Add:</span>
-                  {(Object.keys(NEW_SCREENS) as (keyof typeof NEW_SCREENS)[]).map((t) => (
-                    <button key={t} onClick={() => addScreen(t)} className="rounded-full border border-line px-3 py-1.5 text-sm font-semibold hover:border-brand hover:text-brand">
-                      + {SCREEN_LABELS[t]}
-                    </button>
-                  ))}
+              {card.screens.length < MAX_SCREENS ? (
+                <div className="rounded-2xl border border-dashed border-line p-4">
+                  <p className="text-sm font-bold">Add a screen</p>
+                  <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                    {(Object.keys(NEW_SCREENS) as Addable[]).map((t) => (
+                      <button
+                        key={t}
+                        onClick={() => addScreen(t)}
+                        className="flex items-start gap-2 rounded-xl border border-line bg-panel p-2.5 text-left transition hover:-translate-y-0.5 hover:border-brand"
+                      >
+                        <span className="text-xl leading-none">{NEW_SCREENS[t].emoji}</span>
+                        <span className="min-w-0">
+                          <span className="block text-sm font-semibold leading-tight">{SCREEN_LABELS[t]}</span>
+                          <span className="mt-0.5 block text-xs leading-tight opacity-60">{NEW_SCREENS[t].hint}</span>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
+              ) : (
+                <p className="text-sm opacity-60">That&apos;s the maximum of {MAX_SCREENS} screens. Remove one to add another.</p>
               )}
             </div>
 
@@ -330,7 +418,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
           <aside className="hidden lg:block">
             <div className="sticky top-6">
               <PhoneFrame className="mx-auto h-[680px] w-[340px]">
-                <CardPlayer card={card} preview focusScreenId={selected} />
+                <CardPlayer card={card} preview sound focusScreenId={selected} />
               </PhoneFrame>
               <p className="mt-3 text-center text-xs opacity-60">Live preview. Tap through it like they will.</p>
             </div>
@@ -340,8 +428,8 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
 
       {showPreview && card && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <CardPlayer card={card} preview focusScreenId={selected} />
-          <button onClick={() => setShowPreview(false)} className="absolute right-4 top-4 z-50 rounded-full bg-black/70 px-4 py-2 text-sm font-semibold text-white">
+          <CardPlayer card={card} preview sound focusScreenId={selected} />
+          <button onClick={() => setShowPreview(false)} className="absolute left-4 top-4 z-50 rounded-full bg-black/70 px-4 py-2 text-sm font-semibold text-white">
             Close preview
           </button>
         </div>
@@ -401,6 +489,12 @@ function summary(s: Screen) {
     case "quiz":
     case "scratch":
     case "typeit":
+    case "wheel":
+    case "coupons":
+    case "reasons":
+    case "slider":
+    case "timeline":
+    case "boxes":
       return s.title;
     case "question":
       return s.question;

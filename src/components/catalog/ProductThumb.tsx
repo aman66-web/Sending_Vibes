@@ -1,5 +1,5 @@
 import type { Effect } from "@/lib/card";
-import { deviceInfo, type Template } from "@/lib/catalog";
+import { NEW_DESIGNS, deviceInfo, type Template } from "@/lib/catalog";
 import { themes } from "@/lib/themes";
 
 const SCATTER: Record<Effect, string> = {
@@ -10,6 +10,11 @@ const SCATTER: Record<Effect, string> = {
   snow: "❄️",
   stars: "⭐",
   petals: "🌸",
+  spooky: "🦇",
+  colours: "🎨",
+  lanterns: "🏮",
+  bubbles: "🫧",
+  balloons: "🎈",
   none: "✨",
 };
 
@@ -36,6 +41,9 @@ export function ProductThumb({ template, className = "" }: { template: Template;
         <span className="text-6xl drop-shadow-sm transition duration-500 group-hover:-rotate-6 group-hover:scale-110">{template.emoji}</span>
         <p className="mt-4 font-display text-xl font-bold leading-tight">{template.headline}</p>
       </div>
+      {NEW_DESIGNS.has(template.slug) && (
+        <span className="absolute right-3 top-3 rotate-6 rounded-full bg-sun px-2.5 py-1 text-[11px] font-black uppercase tracking-wide text-ink shadow">New</span>
+      )}
       {template.device !== "everywhere" && (
         <span className="absolute left-3 top-3 rounded-full bg-black/70 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-white backdrop-blur">
           {deviceInfo[template.device].emoji} {deviceInfo[template.device].label}

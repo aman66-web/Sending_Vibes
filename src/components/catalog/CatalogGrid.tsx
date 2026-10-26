@@ -17,15 +17,36 @@ export function CatalogGrid({ limit, allFilters = false, initialOccasion }: Prop
   const [occasion, setOccasion] = useState<Occasion | "all">(initialOccasion ?? "all");
   const [tone, setTone] = useState<Tone | "all">("all");
   const [device, setDevice] = useState<Device | "all">("all");
+  const [query, setQuery] = useState("");
+  const words = query.toLowerCase().split(/\s+/).filter(Boolean);
 
   let results = TEMPLATES.filter(
-    (t) => (occasion === "all" || t.occasion === occasion) && (tone === "all" || t.tone === tone) && (device === "all" || t.device === device),
+    (t) =>
+      (occasion === "all" || t.occasion === occasion) &&
+      (tone === "all" || t.tone === tone) &&
+      (device === "all" || t.device === device) &&
+      words.every((w) => searchText(t).includes(w)),
   );
   if (limit) results = [...results].sort((a, b) => Number(!!b.featured) - Number(!!a.featured)).slice(0, limit);
 
   return (
     <div>
       <div className="space-y-3">
+        {allFilters && (
+          <label className="relative mb-5 block max-w-md">
+            <span className="sr-only">Search the cards</span>
+            <span aria-hidden className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-lg opacity-50">
+              🔍
+            </span>
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search: proposal, dad jokes, coupons…"
+              className="w-full rounded-full bg-white py-3.5 pl-12 pr-5 font-semibold shadow-sm outline-none ring-1 ring-ink/10 placeholder:text-ink/35 focus:ring-2 focus:ring-hot"
+            />
+          </label>
+        )}
         <ChipRow label="Occasion">
           <Chip active={occasion === "all"} onClick={() => setOccasion("all")}>All</Chip>
           {OCCASIONS.map((o) => (
@@ -77,6 +98,7 @@ export function CatalogGrid({ limit, allFilters = false, initialOccasion }: Prop
               setOccasion("all");
               setTone("all");
               setDevice("all");
+              setQuery("");
             }}
             className="mt-4 rounded-full bg-ink px-5 py-2.5 text-sm font-bold text-white"
           >
@@ -107,4 +129,16 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
       {children}
     </button>
   );
+}
+
+// Everything a search can match: names, descriptions, occasion and the kinds of screens inside.
+const searchCache = new Map<string, string>();
+function searchText(t: (typeof TEMPLATES)[number]) {
+  let text = searchCache.get(t.slug);
+  if (!text) {
+    const screens = t.screens("", "").map((s) => (s.type === "game" ? `${s.type} ${s.game}` : s.type));
+    text = [t.name, t.headline, t.blurb, occasions[t.occasion].label, t.occasion, toneInfo[t.tone].label, t.device, ...screens].join(" ").toLowerCase();
+    searchCache.set(t.slug, text);
+  }
+  return text;
 }

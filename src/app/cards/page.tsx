@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { CatalogGrid } from "@/components/catalog/CatalogGrid";
+import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { OCCASIONS, type Occasion } from "@/lib/card";
 import { TEMPLATES } from "@/lib/catalog";
 
 export const metadata: Metadata = {
   title: "All cards · Sending Vibes",
-  description: `${TEMPLATES.length} interactive card designs for Valentine's, birthdays, Diwali, Christmas, Eid, anniversaries and more.`,
+  description: `${TEMPLATES.length} personalised interactive card designs for Valentine's, birthdays, Diwali, Christmas, Eid, Halloween, weddings, new babies and more.`,
 };
 
 export default async function CardsPage({ searchParams }: { searchParams: Promise<{ occasion?: string }> }) {
@@ -33,6 +34,7 @@ export default async function CardsPage({ searchParams }: { searchParams: Promis
       <main className="mx-auto max-w-6xl px-4 pb-24 sm:px-6">
         <CatalogGrid allFilters initialOccasion={initial} />
       </main>
+      <SiteFooter />
     </div>
   );
 }

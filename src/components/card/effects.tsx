@@ -10,6 +10,11 @@ const EMOJI: Partial<Record<Effect, string[]>> = {
   snow: ["❄️", "❅", "❆", "❄️"],
   stars: ["⭐", "🌟", "✨", "🌙"],
   petals: ["🌸", "🌷", "💮", "🌺"],
+  spooky: ["🦇", "👻", "🎃", "🕸️"],
+  colours: ["🩷", "💛", "💚", "💙", "💜", "🧡"],
+  lanterns: ["🏮", "✨", "🏮", "🌟"],
+  bubbles: ["🫧", "🫧", "✨", "🫧"],
+  balloons: ["🎈", "🎈", "🎉", "🎈"],
 };
 
 // Snow and petals drift down; everything else floats up.

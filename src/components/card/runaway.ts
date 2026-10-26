@@ -6,7 +6,7 @@ export const NO_LINES = ["Are you sure?", "Really sure?", "Think again 🥺", "P
 
 // A No button that can never be pressed: any attempt moves it somewhere random
 // inside `area`, away from the Yes button. Used by the card and the homepage demo.
-export function useRunaway() {
+export function useRunaway(onDodge?: () => void) {
   const area = useRef<HTMLDivElement>(null);
   const yes = useRef<HTMLButtonElement>(null);
   const no = useRef<HTMLButtonElement>(null);
@@ -35,6 +35,7 @@ export function useRunaway() {
     const scale = box.width / (area.current?.offsetWidth || box.width) || 1;
     setPos({ x: x / scale, y: y / scale });
     setDodges((d) => d + 1);
+    onDodge?.();
   };
 
   const noProps = {

@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { Occasion, Screen } from "@/lib/card";
+import type { Game, Occasion, Screen } from "@/lib/card";
 import { FinaleEffect, Particles, useReducedMotion } from "./effects";
 import { GameView } from "./games";
 import { useRunaway } from "./runaway";
+import { useSfx } from "./sound";
 
 type Of<T extends Screen["type"]> = Extract<Screen, { type: T }>;
 type ScreenProps<T extends Screen["type"]> = { screen: Of<T>; onNext: () => void };
@@ -22,6 +23,7 @@ export function PrimaryButton({ children, onClick, className = "" }: { children:
 }
 
 export function IntroScreen({ screen, onNext, emoji }: ScreenProps<"intro"> & { emoji: string }) {
+  const sfx = useSfx();
   const [open, setOpen] = useState(false);
   return (
     <div className="flex flex-col items-center gap-6 text-center">
@@ -29,7 +31,11 @@ export function IntroScreen({ screen, onNext, emoji }: ScreenProps<"intro"> & { 
       {/* An envelope that unseals and slides its letter up when tapped. */}
       <button
         aria-label={open ? screen.title : "Open the envelope"}
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          setOpen(true);
+          sfx("whoosh");
+          setTimeout(() => sfx("sparkle"), 450);
+        }}
         disabled={open}
         className="group relative mt-24 h-44 w-64 [perspective:900px]"
       >
@@ -69,7 +75,8 @@ export function IntroScreen({ screen, onNext, emoji }: ScreenProps<"intro"> & { 
 }
 
 export function QuestionScreen({ screen, onNext }: ScreenProps<"question">) {
-  const { area, yes, noProps, dodges, moved, label } = useRunaway();
+  const sfx = useSfx();
+  const { area, yes, noProps, dodges, moved, label } = useRunaway(() => sfx("boing"));
   const [saidYes, setSaidYes] = useState(false);
 
   if (saidYes) {
@@ -104,7 +111,10 @@ export function QuestionScreen({ screen, onNext }: ScreenProps<"question">) {
           <button
             ref={yes}
             data-yes
-            onClick={() => setSaidYes(true)}
+            onClick={() => {
+              setSaidYes(true);
+              sfx("win");
+            }}
             style={{ transform: `scale(${yesScale})` }}
             className="rounded-full bg-[var(--c-accent)] px-8 py-3.5 font-display text-lg font-semibold text-[var(--c-accent-text)] shadow-lg transition-transform duration-300"
           >
@@ -119,6 +129,7 @@ export function QuestionScreen({ screen, onNext }: ScreenProps<"question">) {
 }
 
 export function PhotosScreen({ screen, onNext, wide = false }: ScreenProps<"photos"> & { wide?: boolean }) {
+  const sfx = useSfx();
   const [index, setIndex] = useState(0);
   const photos = screen.photos;
   const total = photos.length;
@@ -157,7 +168,14 @@ export function PhotosScreen({ screen, onNext, wide = false }: ScreenProps<"phot
           Your photos will appear here
         </div>
       ) : (
-        <button aria-label="Next photo" onClick={() => setIndex((i) => (i + 1) % total)} className="relative h-80 w-64">
+        <button
+          aria-label="Next photo"
+          onClick={() => {
+            setIndex((i) => (i + 1) % total);
+            sfx("tap");
+          }}
+          className="relative h-80 w-64"
+        >
           {photos.map((src, i) => {
             const offset = (i - index + total) % total;
             const rotation = [-4, 5, -2, 3, -6, 2][i % 6];
@@ -221,14 +239,21 @@ export function MessageScreen({ screen, onNext }: ScreenProps<"message">) {
   );
 }
 
+const FIREWORK_GAMES: Game[] = ["light-diyas", "release-lanterns", "launch-fireworks"];
+
 export function GameScreen({ screen, onNext, occasion }: ScreenProps<"game"> & { occasion: Occasion }) {
+  const sfx = useSfx();
   const [won, setWon] = useState(false);
+  const win = () => {
+    setWon(true);
+    sfx("win");
+  };
   return (
     <div className="flex w-full flex-col items-center gap-3 text-center">
-      {won && <Particles mode={screen.game === "light-diyas" || (screen.game === "shake-it" && occasion === "diwali") ? "fireworks" : "confetti"} />}
+      {won && <Particles mode={FIREWORK_GAMES.includes(screen.game) || (screen.game === "shake-it" && occasion === "diwali") ? "fireworks" : "confetti"} />}
       <h2 className="font-display text-3xl font-bold leading-tight">{screen.title}</h2>
       <p className="text-[var(--c-muted)]">{won ? screen.winText : screen.instructions}</p>
-      <GameView game={screen.game} occasion={occasion} won={won} onWin={() => setWon(true)} />
+      <GameView game={screen.game} occasion={occasion} won={won} onWin={win} />
       <PrimaryButton onClick={onNext} className={won ? "animate-pop" : "invisible"}>
         Next
       </PrimaryButton>
@@ -237,6 +262,12 @@ export function GameScreen({ screen, onNext, occasion }: ScreenProps<"game"> & {
 }
 
 export function FinaleScreen({ screen, onReplay, footer }: { screen: Of<"finale">; onReplay: () => void; footer?: React.ReactNode }) {
+  const sfx = useSfx();
+  useEffect(() => {
+    const timers = [setTimeout(() => sfx("win"), 150), setTimeout(() => sfx("sparkle"), 700)];
+    if (screen.effect === "fireworks") for (let i = 0; i < 4; i++) timers.push(setTimeout(() => sfx("boom"), 900 + i * 800));
+    return () => timers.forEach(clearTimeout);
+  }, [sfx, screen.effect]);
   return (
     <>
       <FinaleEffect effect={screen.effect} />
@@ -256,6 +287,7 @@ export function FinaleScreen({ screen, onReplay, footer }: { screen: Of<"finale"
 const WRONG_LINES = ["Wrong! 😤", "Excuse me?? 🙄", "Try again 👀", "Hmm, no. 🙅", "I'm offended 😭"];
 
 export function QuizScreen({ screen, onNext }: ScreenProps<"quiz">) {
+  const sfx = useSfx();
   const [index, setIndex] = useState(0);
   const [wrong, setWrong] = useState<number | null>(null);
   const [misses, setMisses] = useState(0);
@@ -268,6 +300,7 @@ export function QuizScreen({ screen, onNext }: ScreenProps<"quiz">) {
     if (i === q.answer) {
       setRight(i);
       setWrong(null);
+      sfx(index === screen.questions.length - 1 ? "win" : "chime");
       setTimeout(() => {
         setRight(null);
         setIndex((n) => n + 1);
@@ -275,6 +308,7 @@ export function QuizScreen({ screen, onNext }: ScreenProps<"quiz">) {
     } else {
       setWrong(i);
       setMisses((m) => m + 1);
+      sfx("wrong");
     }
   };
 
@@ -323,6 +357,7 @@ export function QuizScreen({ screen, onNext }: ScreenProps<"quiz">) {
 
 // A silver panel they rub away with a finger (or mouse) to reveal a hidden message.
 export function ScratchScreen({ screen, onNext }: ScreenProps<"scratch">) {
+  const sfx = useSfx();
   const canvas = useRef<HTMLCanvasElement>(null);
   const drawing = useRef(false);
   const strokes = useRef(0);
@@ -365,6 +400,7 @@ export function ScratchScreen({ screen, onNext }: ScreenProps<"scratch">) {
     ctx.arc(e.clientX - box.left, e.clientY - box.top, 24, 0, Math.PI * 2);
     ctx.fill();
     strokes.current += 1;
+    if (strokes.current % 5 === 0) sfx("tick");
     if (strokes.current % 12 !== 0) return;
     // Sample the panel to see how much has been scratched away.
     const { data } = ctx.getImageData(0, 0, el.width, el.height);
@@ -374,7 +410,10 @@ export function ScratchScreen({ screen, onNext }: ScreenProps<"scratch">) {
       total++;
       if (data[i] === 0) clear++;
     }
-    if (clear / total > 0.5) setRevealed(true);
+    if (clear / total > 0.5) {
+      setRevealed(true);
+      sfx("win");
+    }
   };
 
   return (
@@ -410,6 +449,7 @@ const normalise = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]/g, "").repl
 
 // They have to type the secret phrase. Made for a keyboard, works with a phone keyboard too.
 export function TypeItScreen({ screen, onNext }: ScreenProps<"typeit">) {
+  const sfx = useSfx();
   const target = normalise(screen.phrase);
   const [value, setValue] = useState("");
   const [hints, setHints] = useState(0);
@@ -445,7 +485,14 @@ export function TypeItScreen({ screen, onNext }: ScreenProps<"typeit">) {
         <>
           <input
             value={value}
-            onChange={(e) => setValue(e.target.value)}
+            onChange={(e) => {
+              const next = normalise(e.target.value);
+              setValue(e.target.value);
+              if (next === target) {
+                sfx("unlock");
+                setTimeout(() => sfx("win"), 200);
+              } else if (next.length > typed.length) sfx(target.startsWith(next) ? "tap" : "wrong");
+            }}
             aria-label="Type the secret phrase"
             placeholder="Start typing…"
             autoComplete="off"

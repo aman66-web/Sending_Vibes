@@ -2,27 +2,24 @@ import Link from "next/link";
 import { Particles } from "@/components/card/effects";
 import { HeroShowcase } from "@/components/landing/HeroShowcase";
 import { OccasionShowcase } from "@/components/landing/OccasionShowcase";
-import { AiPromptDemo, RunawayDemo, TypewriterLoop } from "@/components/landing/widgets";
+import { SHOWCASE, type ShowcaseOccasion } from "@/components/landing/showcase";
+import { ComingUp } from "@/components/landing/ComingUp";
+import { MusicDemo } from "@/components/landing/MusicDemo";
+import { AiPromptDemo, RunawayDemo, TypewriterLoop, WheelDemo } from "@/components/landing/widgets";
 import { CatalogGrid } from "@/components/catalog/CatalogGrid";
-import { Logo } from "@/components/Logo";
 import { Reveal } from "@/components/Reveal";
+import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+import { OCCASIONS } from "@/lib/card";
 import { TEMPLATES } from "@/lib/catalog";
+import { occasions } from "@/lib/templates";
+import { nextDate } from "@/lib/calendar";
 import { PRICES } from "@/lib/pricing";
 
-const MARQUEE = [
-  { emoji: "💘", label: "Valentine's" },
-  { emoji: "🪔", label: "Diwali" },
-  { emoji: "🎂", label: "Birthdays" },
-  { emoji: "🎄", label: "Christmas" },
-  { emoji: "🌙", label: "Eid" },
-  { emoji: "💍", label: "Anniversaries" },
-  { emoji: "🥺", label: "Sorry" },
-  { emoji: "🙏", label: "Thank you" },
-  { emoji: "🏆", label: "Congrats" },
-  { emoji: "🧵", label: "Raksha Bandhan", soon: true },
-  { emoji: "👶", label: "New baby", soon: true },
-];
+// Re-rendered hourly so the "coming up" dates stay current.
+export const revalidate = 3600;
+
+const MARQUEE = OCCASIONS.map((o) => occasions[o]);
 
 const TIERS = [
   {
@@ -43,6 +40,7 @@ const TIERS = [
 
 const FAQS = [
   { q: "Do they need to download an app?", a: "No. It's a link. They tap it and it opens in their browser, on any phone or computer." },
+  { q: "Does it play music?", a: "Yes. Every card has sound effects and a tune you can pick, which starts when they open the envelope. There's a mute button if they're somewhere quiet." },
   { q: "Is it private?", a: "Only people with the link can open a card. Links are long random codes, and cards aren't listed or searchable anywhere." },
   { q: "Can I use my own photos?", a: "Yes, up to 6. They're resized on your phone before upload, which also strips out location data." },
   { q: "How long does it take to make one?", a: "About two minutes. Pick an occasion, add names and photos, tweak any words you like, and you'll get your link." },
@@ -51,6 +49,11 @@ const FAQS = [
     a: `Each card is ${PRICES.card.label}, paid once. No subscription. AI Custom cards, where you describe changes in plain English, will be ${PRICES.aiCustom.label}.`,
   },
 ];
+
+// Showcase tabs, soonest occasion first.
+function showcaseOrder(): ShowcaseOccasion[] {
+  return [...SHOWCASE].sort((a, b) => (nextDate(a)?.days ?? 999) - (nextDate(b)?.days ?? 999));
+}
 
 export default function Home() {
   return (
@@ -107,7 +110,7 @@ export default function Home() {
         <div className="relative mx-auto max-w-5xl px-4 pb-16 sm:px-6">
           <ol className="grid gap-3 rounded-3xl bg-white/80 p-4 shadow-sm ring-1 ring-ink/5 backdrop-blur sm:grid-cols-3 sm:gap-0 sm:p-3">
             {[
-              { emoji: "🎨", title: "Pick a design", body: `${TEMPLATES.length} designs, 9 occasions` },
+              { emoji: "🎨", title: "Pick a design", body: `${TEMPLATES.length} designs, ${OCCASIONS.length} occasions` },
               { emoji: "✏️", title: "Fill in the blanks", body: "Names, photos and your message" },
               { emoji: "💬", title: "Send the link", body: "WhatsApp, text or Instagram" },
             ].map((step, i) => (
@@ -127,17 +130,34 @@ export default function Home() {
 
       {/* Marquee */}
       <div className="relative -rotate-1 overflow-hidden bg-ink py-5 text-white shadow-2xl">
-        <div className="flex w-max animate-marquee gap-10 whitespace-nowrap font-display text-2xl font-semibold motion-reduce:animate-none">
+        <div className="flex w-max animate-marquee gap-10 whitespace-nowrap font-display text-2xl font-semibold [animation-duration:110s] motion-reduce:animate-none">
           {[...MARQUEE, ...MARQUEE].map((m, i) => (
             <span key={i} className="flex items-center gap-3">
               <span>{m.emoji}</span>
               {m.label}
-              {m.soon && <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs uppercase tracking-widest text-white/60">soon</span>}
               <span className="ml-7 text-hot">✦</span>
             </span>
           ))}
         </div>
       </div>
+
+      {/* Coming up */}
+      <section className="mx-auto max-w-6xl px-4 pt-24 sm:px-6">
+        <Reveal className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
+          <div>
+            <p className="font-bold uppercase tracking-[0.2em] text-hot">Coming up</p>
+            <h2 className="mt-3 font-display text-4xl font-bold leading-tight sm:text-5xl">
+              Don&apos;t leave it to the <span className="font-serif font-normal italic text-hot">last minute</span>
+            </h2>
+          </div>
+          <Link href="/occasions" className="shrink-0 font-display font-semibold text-hot">
+            All {OCCASIONS.length} occasions →
+          </Link>
+        </Reveal>
+        <Reveal className="mt-8">
+          <ComingUp />
+        </Reveal>
+      </section>
 
       {/* Features */}
       <section id="features" className="mx-auto max-w-6xl px-4 py-28 sm:px-6">
@@ -161,8 +181,8 @@ export default function Home() {
           </Reveal>
           <Reveal delay={100} className="md:col-span-2">
             <div className="flex h-full flex-col rounded-[2rem] bg-gradient-to-b from-[#3f1158] to-[#1a0626] p-7 text-[#fff4dc] sm:p-9">
-              <h3 className="font-display text-3xl font-bold">Mini games</h3>
-              <p className="mt-2 text-[#fff4dc]/70">Catch falling hearts, light the diyas, blow out the candles.</p>
+              <h3 className="font-display text-3xl font-bold">21 mini games</h3>
+              <p className="mt-2 text-[#fff4dc]/70">Light the diyas, smash a piñata, launch fireworks, whack the ghosts.</p>
               <div className="mt-auto flex justify-center gap-2 pt-10 text-5xl">
                 {[0, 1, 2, 3, 4].map((i) => (
                   <span key={i} className="animate-glow" style={{ animationDelay: `${i * 0.35}s` }}>
@@ -208,6 +228,42 @@ export default function Home() {
             </div>
           </Reveal>
 
+          <Reveal className="md:col-span-3">
+            <div className="flex h-full flex-col rounded-[2rem] bg-gradient-to-br from-[#fff7d6] to-[#ffd6a5] p-7 sm:p-9">
+              <h3 className="font-display text-3xl font-bold">Spin the wheel</h3>
+              <p className="mt-2 text-ink/65">For date nights, birthday presents or a kiss. You can secretly rig where it lands. 😏</p>
+              <div className="mt-6 flex flex-1 items-center justify-center">
+                <WheelDemo />
+              </div>
+            </div>
+          </Reveal>
+          <Reveal delay={100} className="md:col-span-3">
+            <div className="flex h-full flex-col rounded-[2rem] bg-gradient-to-br from-[#0b1238] to-[#3b1d6e] p-7 text-white sm:p-9">
+              <h3 className="font-display text-3xl font-bold">Music &amp; sound 🎵</h3>
+              <p className="mt-2 text-white/65">Every card has sound effects and its own tune, from Happy Birthday to something spooky. Have a listen:</p>
+              <div className="mt-6 flex flex-1 items-center justify-center">
+                <MusicDemo />
+              </div>
+            </div>
+          </Reveal>
+
+          <Reveal className="md:col-span-6">
+            <div className="grid gap-3 rounded-[2rem] bg-white p-7 shadow-sm ring-1 ring-ink/5 sm:grid-cols-2 sm:p-9 lg:grid-cols-4">
+              {[
+                { emoji: "🎟️", title: "Coupon books", body: "Breakfast in bed, a foot rub, you pick the film. Tap to redeem." },
+                { emoji: "🫙", title: "A jar of reasons", body: "They pull out every reason you love them, one note at a time." },
+                { emoji: "🗓️", title: "Your story", body: "From the day you met to today, moment by moment." },
+                { emoji: "🎁", title: "Mystery boxes", body: "Three boxes, one choice. (Psst: put the same thing in all three.)" },
+              ].map((b) => (
+                <div key={b.title} className="rounded-2xl bg-cream p-5">
+                  <span className="text-3xl">{b.emoji}</span>
+                  <p className="mt-2 font-display text-lg font-bold">{b.title}</p>
+                  <p className="mt-1 text-sm text-ink/65">{b.body}</p>
+                </div>
+              ))}
+            </div>
+          </Reveal>
+
           <Reveal className="md:col-span-6">
             <div className="relative grid items-center gap-8 overflow-hidden rounded-[2rem] bg-gradient-to-br from-grape via-[#b5179e] to-hot p-7 text-white sm:p-10 md:grid-cols-2">
               <div>
@@ -233,7 +289,7 @@ export default function Home() {
             </h2>
           </Reveal>
           <Reveal>
-            <OccasionShowcase />
+            <OccasionShowcase order={showcaseOrder()} />
           </Reveal>
         </div>
       </section>
@@ -270,7 +326,7 @@ export default function Home() {
           {[
             {
               title: "Pick a design",
-              body: `Nine occasions and ${TEMPLATES.length} designs, from funny to heartfelt.`,
+              body: `${OCCASIONS.length} occasions and ${TEMPLATES.length} designs, from funny to heartfelt.`,
               mock: (
                 <div className="flex flex-wrap justify-center gap-2">
                   <span className="rounded-full bg-ink px-3 py-1.5 text-sm font-bold text-white">💘 Valentine&apos;s</span>
@@ -403,17 +459,7 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="bg-ink py-10 text-white/60">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 px-4 sm:flex-row sm:px-6">
-          <Logo textClass="text-white" />
-          <div className="flex gap-6 text-sm font-semibold">
-            <Link href="/create" className="hover:text-white">Make a card</Link>
-            <Link href="/cards" className="hover:text-white">All cards</Link>
-            <a href="#faq" className="hover:text-white">FAQ</a>
-          </div>
-          <p className="text-sm">© {new Date().getFullYear()} Sending Vibes</p>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

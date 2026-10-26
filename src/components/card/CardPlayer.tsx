@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import type { CardData } from "@/lib/card";
 import { occasions } from "@/lib/templates";
 import { themes } from "@/lib/themes";
 import { EmojiRain } from "./effects";
+import { BoxesScreen, CouponsScreen, ReasonsScreen, SliderScreen, TimelineScreen, WheelScreen } from "./more-screens";
 import {
   FinaleScreen,
   GameScreen,
@@ -17,6 +18,7 @@ import {
   ScratchScreen,
   TypeItScreen,
 } from "./screens";
+import { playMusic, setMuted, SoundEnabled, unlockAudio, useMuted } from "./sound";
 
 type Props = {
   card: CardData;
@@ -25,9 +27,11 @@ type Props = {
   focusScreenId?: string;
   // Changing this jumps back to focusScreenId even if it hasn't changed.
   focusNonce?: number;
+  // Sound effects and music. Off in previews unless asked for.
+  sound?: boolean;
 };
 
-export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 0 }: Props) {
+export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 0, sound = !preview }: Props) {
   const theme = themes[card.theme];
   const screens = useMemo(
     () => card.screens.filter((s) => preview || s.type !== "photos" || s.photos.length > 0),
@@ -51,6 +55,22 @@ export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 
   }
 
   const current = screens[Math.min(index, screens.length - 1)];
+  const muted = useMuted();
+  // Browsers only count some events as a "real" tap that may start audio (on
+  // phones that's the finger lifting, not landing), so try on each of them.
+  const unlock = () => {
+    if (!sound) return;
+    unlockAudio();
+    if (!tapped) setTapped(true);
+  };
+  // Browsers only allow audio after a tap, so nothing plays until their first one.
+  const [tapped, setTapped] = useState(false);
+  const music = card.music ?? "none";
+  useEffect(() => {
+    if (!sound || !tapped || muted || music === "none") return;
+    return playMusic(music);
+  }, [sound, tapped, muted, music]);
+
   const wide = card.layout === "wide";
   const next = () => setIndex((i) => Math.min(i + 1, screens.length - 1));
   const replay = () => {
@@ -70,9 +90,27 @@ export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 
   } as React.CSSProperties;
 
   return (
-    <div style={style} className={`@container relative flex w-full flex-col overflow-hidden ${preview ? "h-full" : "min-h-dvh"}`}>
+    <SoundEnabled.Provider value={sound}>
+    <div
+      style={style}
+      onPointerDownCapture={unlock}
+      onPointerUpCapture={unlock}
+      onClickCapture={unlock}
+      onKeyDownCapture={unlock}
+      className={`@container relative flex w-full flex-col overflow-hidden ${preview ? "h-full" : "min-h-dvh"}`}
+    >
       <EmojiRain effect={card.ambient} />
       {!preview && card.device && card.device !== "everywhere" && <DeviceTip device={card.device} />}
+      {sound && (
+        <button
+          onClick={() => setMuted(!muted)}
+          aria-label={muted ? "Turn sound on" : "Turn sound off"}
+          aria-pressed={!muted}
+          className={`absolute right-3 z-30 grid h-10 w-10 place-items-center rounded-full bg-[var(--c-surface)] text-lg shadow-sm ring-1 ring-black/10 backdrop-blur ${preview ? "top-10" : "top-3"}`}
+        >
+          {muted ? "🔇" : "🔊"}
+        </button>
+      )}
 
       <div className={`relative z-10 flex justify-center gap-1.5 ${preview ? "pt-12" : "pt-5"}`}>
         {screens.map((s, i) => (
@@ -86,8 +124,9 @@ export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 
         ))}
       </div>
 
-      <main className="flex flex-1 items-center justify-center px-5 py-8">
-        <div key={`${run}-${current.id}`} className={`w-full animate-screen-in ${wide ? "max-w-4xl" : "max-w-md"}`}>
+      {/* Auto margins centre short screens; long ones (lots of coupons, say) scroll inside previews. */}
+      <main className={`flex flex-1 flex-col px-5 py-8 ${preview ? "min-h-0 overflow-y-auto" : ""}`}>
+        <div key={`${run}-${current.id}`} className={`m-auto w-full animate-screen-in ${wide ? "max-w-4xl" : "max-w-md"}`}>
           {current.type === "intro" && <IntroScreen screen={current} onNext={next} emoji={occasions[card.occasion].emoji} />}
           {current.type === "question" && <QuestionScreen screen={current} onNext={next} />}
           {current.type === "photos" && <PhotosScreen screen={current} onNext={next} wide={wide} />}
@@ -96,6 +135,12 @@ export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 
           {current.type === "quiz" && <QuizScreen screen={current} onNext={next} />}
           {current.type === "scratch" && <ScratchScreen screen={current} onNext={next} />}
           {current.type === "typeit" && <TypeItScreen screen={current} onNext={next} />}
+          {current.type === "wheel" && <WheelScreen screen={current} onNext={next} />}
+          {current.type === "coupons" && <CouponsScreen screen={current} onNext={next} />}
+          {current.type === "reasons" && <ReasonsScreen screen={current} onNext={next} />}
+          {current.type === "slider" && <SliderScreen screen={current} onNext={next} />}
+          {current.type === "timeline" && <TimelineScreen screen={current} onNext={next} />}
+          {current.type === "boxes" && <BoxesScreen screen={current} onNext={next} />}
           {current.type === "finale" && (
             <FinaleScreen
               screen={current}
@@ -121,6 +166,7 @@ export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 
         </p>
       )}
     </div>
+    </SoundEnabled.Provider>
   );
 }
 
@@ -145,7 +191,7 @@ function DeviceTip({ device }: { device: "phone" | "desktop" }) {
   const mismatch = touch !== null && (device === "phone" ? !touch : touch);
   if (!mismatch || dismissed) return null;
   return (
-    <div className="absolute inset-x-0 top-0 z-30 flex justify-center p-3">
+    <div className="absolute inset-x-0 bottom-0 z-30 flex justify-center p-3">
       <div className="flex items-center gap-3 rounded-full bg-black/75 py-2 pl-4 pr-2 text-sm font-semibold text-white shadow-lg backdrop-blur">
         {device === "phone" ? "📱 Best on a phone, but it works here too" : "💻 Best on a computer, but it works here too"}
         <button onClick={() => setDismissed(true)} aria-label="Dismiss" className="grid h-6 w-6 place-items-center rounded-full bg-white/20">

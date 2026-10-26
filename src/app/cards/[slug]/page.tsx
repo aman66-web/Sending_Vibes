@@ -3,8 +3,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ProductTile } from "@/components/catalog/ProductTile";
 import { ProductView } from "@/components/catalog/ProductView";
+import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { TEMPLATES, getTemplate } from "@/lib/catalog";
+import { PRICES } from "@/lib/pricing";
 import { occasions } from "@/lib/templates";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -25,14 +27,25 @@ export default async function ProductPage({ params }: Props) {
   const related = TEMPLATES.filter((x) => x.occasion === t.occasion && x.slug !== t.slug).slice(0, 4);
   const more = related.length ? related : TEMPLATES.filter((x) => x.featured && x.slug !== t.slug).slice(0, 4);
 
+  // Lets search engines show the price and description with the result.
+  const productJson = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: `${t.name}: interactive ${occasions[t.occasion].label} card`,
+    description: t.blurb,
+    brand: { "@type": "Brand", name: "Sending Vibes" },
+    offers: { "@type": "Offer", price: (PRICES.card.pence / 100).toFixed(2), priceCurrency: "GBP", availability: "https://schema.org/InStock" },
+  };
+
   return (
     <div className="min-h-dvh overflow-x-clip bg-cream text-ink">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJson).replace(/</g, "\\u003c") }} />
       <SiteHeader />
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
         <nav className="mb-6 text-sm font-semibold text-ink/50">
           <Link href="/cards" className="hover:text-ink">All cards</Link>
           <span className="mx-2">/</span>
-          <Link href={`/cards?occasion=${t.occasion}`} className="hover:text-ink">{occasions[t.occasion].label}</Link>
+          <Link href={`/occasions/${t.occasion}`} className="hover:text-ink">{occasions[t.occasion].label}</Link>
           <span className="mx-2">/</span>
           <span className="text-ink">{t.name}</span>
         </nav>
@@ -54,6 +67,7 @@ export default async function ProductPage({ params }: Props) {
           </div>
         </section>
       </main>
+      <SiteFooter />
     </div>
   );
 }

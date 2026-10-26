@@ -4,9 +4,31 @@ import { z } from "zod";
 // Keeping it as structured data (not free-form HTML) means templates, the
 // creator form, and later the AI editor all produce something that always renders.
 
-export const OCCASIONS = ["valentine", "birthday", "diwali", "christmas", "eid", "anniversary", "sorry", "thanks", "congrats"] as const;
-export const THEMES = ["rose", "marigold", "party", "midnight", "noel", "crescent", "gold", "lavender", "mint", "sunset"] as const;
-export const EFFECTS = ["hearts", "fireworks", "confetti", "sparkles", "snow", "stars", "petals", "none"] as const;
+export const OCCASIONS = [
+  "valentine",
+  "birthday",
+  "diwali",
+  "christmas",
+  "eid",
+  "anniversary",
+  "sorry",
+  "thanks",
+  "congrats",
+  "halloween",
+  "newyear",
+  "mothersday",
+  "fathersday",
+  "rakhi",
+  "holi",
+  "newbaby",
+  "wedding",
+  "getwell",
+  "missyou",
+  "friendship",
+  "leaving",
+] as const;
+export const THEMES = ["rose", "marigold", "party", "midnight", "noel", "crescent", "gold", "lavender", "mint", "sunset", "spooky", "holi", "baby", "ivory", "sky"] as const;
+export const EFFECTS = ["hearts", "fireworks", "confetti", "sparkles", "snow", "stars", "petals", "spooky", "colours", "lanterns", "bubbles", "balloons", "none"] as const;
 export const GAMES = [
   "catch-hearts",
   "light-diyas",
@@ -18,7 +40,20 @@ export const GAMES = [
   "unwrap-gift",
   "shake-it",
   "cursor-chase",
+  "loves-me-not",
+  "whack-ghosts",
+  "launch-fireworks",
+  "release-lanterns",
+  "bubble-wrap",
+  "pinata",
+  "grow-flower",
+  "throw-colours",
+  "slot-machine",
+  "hold-hug",
+  "catch-candy",
 ] as const;
+// Background tunes, synthesised in the browser (see components/card/sound.ts).
+export const MUSIC = ["none", "love", "birthday", "jingle", "festive", "lullaby", "spooky", "joy", "auld"] as const;
 // Which screen size a design is built for. Most work everywhere.
 export const DEVICES = ["everywhere", "phone", "desktop"] as const;
 export const LAYOUTS = ["standard", "wide"] as const;
@@ -29,6 +64,7 @@ export type Effect = (typeof EFFECTS)[number];
 export type Game = (typeof GAMES)[number];
 export type Device = (typeof DEVICES)[number];
 export type Layout = (typeof LAYOUTS)[number];
+export type Music = (typeof MUSIC)[number];
 
 const text = (max: number) => z.string().trim().max(max);
 
@@ -52,6 +88,8 @@ const quizQuestion = z
     answer: z.number().int().min(0).max(3),
   })
   .refine((q) => q.answer < q.options.length, "Answer must be one of the options");
+
+const timelineEvent = z.object({ when: text(40), what: text(160) });
 
 export const screenSchema = z.discriminatedUnion("type", [
   z.object({
@@ -114,6 +152,51 @@ export const screenSchema = z.discriminatedUnion("type", [
   }),
   z.object({
     ...screenBase,
+    type: z.literal("wheel"),
+    title: text(120),
+    instructions: text(200),
+    options: z.array(text(40)).min(2).max(8),
+    // Which slice it always lands on, or -1 for a fair spin.
+    landOn: z.number().int().min(-1).max(7),
+    winText: text(140),
+  }),
+  z.object({
+    ...screenBase,
+    type: z.literal("coupons"),
+    title: text(120),
+    instructions: text(200),
+    coupons: z.array(text(80)).min(1).max(6),
+  }),
+  z.object({
+    ...screenBase,
+    type: z.literal("reasons"),
+    title: text(120),
+    instructions: text(200),
+    reasons: z.array(text(160)).min(1).max(12),
+  }),
+  z.object({
+    ...screenBase,
+    type: z.literal("slider"),
+    title: text(120),
+    low: text(30),
+    high: text(30),
+    winText: text(140),
+  }),
+  z.object({
+    ...screenBase,
+    type: z.literal("timeline"),
+    title: text(120),
+    events: z.array(timelineEvent).min(1).max(8),
+  }),
+  z.object({
+    ...screenBase,
+    type: z.literal("boxes"),
+    title: text(120),
+    instructions: text(200),
+    prizes: z.array(text(80)).min(2).max(3),
+  }),
+  z.object({
+    ...screenBase,
     type: z.literal("finale"),
     title: text(140),
     body: text(600),
@@ -132,10 +215,12 @@ export const cardSchema = z.object({
   template: z.string().max(60).regex(/^[a-z0-9-]*$/).optional(),
   device: z.enum(DEVICES).optional(),
   layout: z.enum(LAYOUTS).optional(),
+  music: z.enum(MUSIC).optional(),
 });
 
 export type Screen = z.infer<typeof screenSchema>;
 export type ScreenType = Screen["type"];
 export type QuizQuestion = z.infer<typeof quizQuestion>;
+export type TimelineEvent = z.infer<typeof timelineEvent>;
 export type CardData = z.infer<typeof cardSchema>;
 export type StoredCard = CardData & { id: string; createdAt: string };

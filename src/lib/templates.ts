@@ -17,6 +17,18 @@ export const occasions: Record<Occasion, OccasionInfo> = {
   sorry: { label: "Sorry", emoji: "🥺", tagline: "Apologise in a way they can't say no to." },
   thanks: { label: "Thank you", emoji: "🙏", tagline: "Say thanks with photos, games and a big finish." },
   congrats: { label: "Congrats", emoji: "🏆", tagline: "Pop the balloons for their big win." },
+  halloween: { label: "Halloween", emoji: "🎃", tagline: "Whack the ghosts, grab the sweets, get spooked." },
+  newyear: { label: "New Year", emoji: "🥂", tagline: "Launch the fireworks and toast to the year ahead." },
+  mothersday: { label: "Mother's Day", emoji: "💐", tagline: "Grow her a flower and tell her what she means to you." },
+  fathersday: { label: "Father's Day", emoji: "👔", tagline: "Dad jokes, a quiz he can't fail and a big thank you." },
+  rakhi: { label: "Raksha Bandhan", emoji: "🎀", tagline: "For your brother or sister: memories, teasing and a promise." },
+  holi: { label: "Holi", emoji: "🌈", tagline: "Throw colours all over the screen. No stains, all the fun." },
+  newbaby: { label: "New baby", emoji: "👶", tagline: "Welcome the little one, or scratch to reveal big news." },
+  wedding: { label: "Wedding", emoji: "💒", tagline: "Pop the question or toast the happy couple." },
+  getwell: { label: "Get well", emoji: "🌻", tagline: "A hug they can hold and some bubble wrap for the sofa." },
+  missyou: { label: "Miss you", emoji: "🫶", tagline: "For long distance: a hug they can actually feel." },
+  friendship: { label: "Best friends", emoji: "👯", tagline: "Inside jokes, a bestie quiz and your best photos." },
+  leaving: { label: "Leaving", emoji: "👋", tagline: "Send off a colleague with games and good wishes." },
 };
 
 // The first design listed for an occasion is its default.

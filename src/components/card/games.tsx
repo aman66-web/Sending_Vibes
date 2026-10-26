@@ -2,8 +2,21 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Game, Occasion } from "@/lib/card";
-
-type GameProps = { onWin: () => void; won: boolean };
+import { useReducedMotion } from "./effects";
+import {
+  BubbleWrap,
+  type GameProps,
+  GrowFlower,
+  HoldHug,
+  LaunchFireworks,
+  LovesMeNot,
+  Pinata,
+  ReleaseLanterns,
+  SlotMachine,
+  ThrowColours,
+  WhackGhosts,
+} from "./more-games";
+import { useSfx } from "./sound";
 
 export function GameView({ game, occasion, ...props }: GameProps & { game: Game; occasion: Occasion }) {
   switch (game) {
@@ -19,6 +32,26 @@ export function GameView({ game, occasion, ...props }: GameProps & { game: Game;
       return <ShakeIt {...props} occasion={occasion} />;
     case "cursor-chase":
       return <CursorChase {...props} />;
+    case "loves-me-not":
+      return <LovesMeNot {...props} />;
+    case "whack-ghosts":
+      return <WhackGhosts {...props} />;
+    case "launch-fireworks":
+      return <LaunchFireworks {...props} />;
+    case "release-lanterns":
+      return <ReleaseLanterns {...props} />;
+    case "bubble-wrap":
+      return <BubbleWrap {...props} />;
+    case "pinata":
+      return <Pinata {...props} />;
+    case "grow-flower":
+      return <GrowFlower {...props} />;
+    case "throw-colours":
+      return <ThrowColours {...props} />;
+    case "slot-machine":
+      return <SlotMachine {...props} symbols={MEMORY_SYMBOLS[occasion]} />;
+    case "hold-hug":
+      return <HoldHug {...props} />;
     default:
       return <Catcher {...props} kind={game} />;
   }
@@ -32,12 +65,16 @@ const CATCHERS: Record<string, { emojis: string[]; rise?: boolean; icon: string;
   "pop-balloons": { emojis: ["🎈"], rise: true, icon: "🎈", hue: true },
   "catch-snowflakes": { emojis: ["❄️", "❅", "❆", "☃️"], icon: "❄️" },
   "catch-stars": { emojis: ["⭐", "🌟", "🌙", "✨"], icon: "🌟" },
+  "catch-candy": { emojis: ["🍬", "🍭", "🍫", "🎃"], icon: "🍬" },
 };
 
 type Drop = { id: number; left: number; duration: number; emoji: string };
 
 function Catcher({ onWin, won, kind }: GameProps & { kind: string }) {
   const config = CATCHERS[kind] ?? CATCHERS["catch-hearts"];
+  const sfx = useSfx();
+  // With animations switched off, things sit still for a moment instead of falling.
+  const still = useReducedMotion();
   const [drops, setDrops] = useState<Drop[]>([]);
   const [score, setScore] = useState(0);
   // Counted in a ref so rapid taps between renders are never lost.
@@ -59,12 +96,19 @@ function Catcher({ onWin, won, kind }: GameProps & { kind: string }) {
     return () => clearInterval(t);
   }, [won, config]);
 
+  useEffect(() => {
+    if (!still) return;
+    const t = setInterval(() => setDrops((d) => d.slice(-5)), 650);
+    return () => clearInterval(t);
+  }, [still]);
+
   const grab = (drop: Drop, e: React.PointerEvent) => {
     if (won) return;
     const box = e.currentTarget.parentElement!.getBoundingClientRect();
     setPops((p) => [...p, { id: drop.id, x: e.clientX - box.left, y: e.clientY - box.top }]);
     setTimeout(() => setPops((p) => p.filter((x) => x.id !== drop.id)), 600);
     setDrops((d) => d.filter((x) => x.id !== drop.id));
+    sfx("pop");
     caught.current += 1;
     setScore(caught.current);
     if (caught.current === TARGET) onWin();
@@ -82,9 +126,14 @@ function Catcher({ onWin, won, kind }: GameProps & { kind: string }) {
             data-catchable
             aria-label="Catch it"
             onPointerDown={(e) => grab(d, e)}
-            onAnimationEnd={() => setDrops((all) => all.filter((x) => x.id !== d.id))}
-            className={`absolute p-2 text-4xl leading-none ${config.rise ? "bottom-[-15%] animate-rise" : "top-[-15%] animate-fall"}`}
-            style={{ left: `${d.left}%`, animationDuration: `${d.duration}s`, filter: config.hue ? `hue-rotate(${(d.id * 67) % 360}deg)` : undefined }}
+            onAnimationEnd={() => !still && setDrops((all) => all.filter((x) => x.id !== d.id))}
+            className={`absolute p-2 text-4xl leading-none ${still ? "" : config.rise ? "bottom-[-15%] animate-rise" : "top-[-15%] animate-fall"}`}
+            style={{
+              left: `${d.left}%`,
+              top: still ? `${10 + ((d.id * 37) % 70)}%` : undefined,
+              animationDuration: `${d.duration}s`,
+              filter: config.hue ? `hue-rotate(${(d.id * 67) % 360}deg)` : undefined,
+            }}
           >
             {d.emoji}
           </button>
@@ -106,12 +155,14 @@ function Catcher({ onWin, won, kind }: GameProps & { kind: string }) {
 const DIYAS = 5;
 
 function LightDiyas({ onWin, won }: GameProps) {
+  const sfx = useSfx();
   const [lit, setLit] = useState<boolean[]>(() => Array(DIYAS).fill(false));
 
   const light = (i: number) => {
     if (lit[i] || won) return;
     const next = lit.map((v, j) => (j === i ? true : v));
     setLit(next);
+    sfx("chime");
     if (next.every(Boolean)) onWin();
   };
 
@@ -151,12 +202,14 @@ const CANDLES = 5;
 const CANDLE_COLORS = ["#f472b6", "#60a5fa", "#facc15", "#34d399", "#a78bfa"];
 
 function BlowCandles({ onWin, won }: GameProps) {
+  const sfx = useSfx();
   const [out, setOut] = useState<boolean[]>(() => Array(CANDLES).fill(false));
 
   const blow = (i: number) => {
     if (out[i] || won) return;
     const next = out.map((v, j) => (j === i ? true : v));
     setOut(next);
+    sfx("whoosh");
     if (next.every(Boolean)) onWin();
   };
 
@@ -195,7 +248,7 @@ function BlowCandles({ onWin, won }: GameProps) {
   );
 }
 
-const MEMORY_SYMBOLS: Record<Occasion, string[]> = {
+export const MEMORY_SYMBOLS: Record<Occasion, string[]> = {
   valentine: ["💘", "🌹", "💌", "🍫", "💍", "🧸"],
   birthday: ["🎂", "🎈", "🎁", "🥳", "🍰", "🎉"],
   diwali: ["🪔", "🎆", "🍬", "🌸", "✨", "🎇"],
@@ -205,6 +258,18 @@ const MEMORY_SYMBOLS: Record<Occasion, string[]> = {
   sorry: ["🥺", "🌷", "🍫", "🧸", "💐", "🙏"],
   thanks: ["🙏", "💐", "☕", "🍪", "⭐", "💛"],
   congrats: ["🎓", "🏆", "🎉", "⭐", "🥂", "🚀"],
+  halloween: ["🎃", "👻", "🦇", "🍬", "🕷️", "🧙"],
+  newyear: ["🥂", "🎆", "🕛", "🎉", "🍾", "✨"],
+  mothersday: ["💐", "☕", "🌷", "💖", "🧁", "👑"],
+  fathersday: ["👔", "🍺", "⚽", "🔧", "🏆", "🍖"],
+  rakhi: ["🎀", "🍬", "🎁", "🪔", "💪", "🌸"],
+  holi: ["🎨", "🌈", "💦", "🌸", "🍬", "🥳"],
+  newbaby: ["👶", "🍼", "🧸", "🌙", "⭐", "🎀"],
+  wedding: ["💍", "💒", "🥂", "💐", "🎂", "🕊️"],
+  getwell: ["🌻", "🍵", "🧸", "💊", "🛌", "🌈"],
+  missyou: ["🫶", "✈️", "📱", "💌", "🏡", "🌙"],
+  friendship: ["👯", "🍕", "🎮", "🍹", "📸", "💅"],
+  leaving: ["👋", "📦", "✈️", "🍰", "🎉", "⭐"],
 };
 
 // A fixed shuffle keeps server and browser renders identical.
@@ -220,6 +285,7 @@ function shuffled<T>(items: T[]): T[] {
 }
 
 function MemoryMatch({ onWin, won, occasion }: GameProps & { occasion: Occasion }) {
+  const sfx = useSfx();
   const [deck] = useState(() => shuffled([...MEMORY_SYMBOLS[occasion], ...MEMORY_SYMBOLS[occasion]]));
   const [open, setOpen] = useState<number[]>([]);
   const [matched, setMatched] = useState<number[]>([]);
@@ -230,9 +296,10 @@ function MemoryMatch({ onWin, won, occasion }: GameProps & { occasion: Occasion 
     if (won || busy || open.includes(i) || matched.includes(i)) return;
     const next = [...open, i];
     setOpen(next);
-    if (next.length < 2) return;
+    if (next.length < 2) return sfx("tap");
     setMoves((m) => m + 1);
     if (deck[next[0]] === deck[next[1]]) {
+      sfx("chime");
       const nowMatched = [...matched, ...next];
       setMatched(nowMatched);
       setOpen([]);
@@ -272,11 +339,13 @@ function MemoryMatch({ onWin, won, occasion }: GameProps & { occasion: Occasion 
 const UNWRAP_TAPS = 6;
 
 function UnwrapGift({ onWin, won }: GameProps) {
+  const sfx = useSfx();
   const [taps, setTaps] = useState(0);
   const tap = () => {
     if (won) return;
     const next = taps + 1;
     setTaps(next);
+    sfx(next === UNWRAP_TAPS ? "pop" : "whoosh");
     if (next === UNWRAP_TAPS) onWin();
   };
   return (
@@ -303,11 +372,13 @@ function UnwrapGift({ onWin, won }: GameProps) {
   );
 }
 
-const SHAKE_EMOJI: Partial<Record<Occasion, string>> = { diwali: "🎆", birthday: "🎁", christmas: "🎁", congrats: "🍾" };
+const SHAKE_EMOJI: Partial<Record<Occasion, string>> = { diwali: "🎆", birthday: "🎁", christmas: "🎁", congrats: "🍾", newyear: "🍾", holi: "🎨", newbaby: "🍼" };
 type MotionPermission = { requestPermission?: () => Promise<string> };
 
 // Built for phones: shaking fills the meter. Tapping works too, so it never gets stuck.
 function ShakeIt({ onWin, won, occasion }: GameProps & { occasion: Occasion }) {
+  const sfx = useSfx();
+  const sfxRef = useRef(sfx);
   const [power, setPower] = useState(0);
   const [mode, setMode] = useState<"idle" | "shake">("idle");
   const total = useRef(0);
@@ -320,6 +391,7 @@ function ShakeIt({ onWin, won, occasion }: GameProps & { occasion: Occasion }) {
     if (total.current >= 100) return;
     total.current = Math.min(100, total.current + amount);
     setPower(total.current);
+    sfxRef.current("tick");
     if (total.current >= 100) winRef.current();
   });
 
@@ -380,6 +452,7 @@ const CHASE_TARGET = 5;
 
 // Built for a mouse: the heart runs from the cursor. Corner it to catch it.
 function CursorChase({ onWin, won }: GameProps) {
+  const sfx = useSfx();
   const area = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState({ x: 50, y: 50 });
   const [caught, setCaught] = useState(0);
@@ -404,6 +477,7 @@ function CursorChase({ onWin, won }: GameProps) {
     if (won) return;
     const next = caught + 1;
     setCaught(next);
+    sfx("pop");
     setPos({ x: 15 + Math.random() * 70, y: 15 + Math.random() * 70 });
     if (next === CHASE_TARGET) onWin();
   };

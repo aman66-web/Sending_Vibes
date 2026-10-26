@@ -9,6 +9,8 @@ export type Theme = {
   accent: string;
   accentText: string;
   secondary: string;
+  // A simpler background for share images, where layered gradients don't render.
+  og?: string;
 };
 
 export const themes: Record<ThemeName, Theme> = {
@@ -99,6 +101,57 @@ export const themes: Record<ThemeName, Theme> = {
     text: "#431407",
     muted: "#9a3412",
     accent: "#ea580c",
+    accentText: "#ffffff",
+    secondary: "#ffffff",
+  },
+  spooky: {
+    label: "Spooky",
+    background: "radial-gradient(circle at 50% 0%, #4c1d95 0%, #1e1145 50%, #0b0616 100%)",
+    surface: "rgba(255,255,255,0.08)",
+    text: "#fff7ed",
+    muted: "#fdba74",
+    accent: "#f97316",
+    accentText: "#1c0a00",
+    secondary: "rgba(255,255,255,0.12)",
+  },
+  holi: {
+    label: "Holi",
+    background: "radial-gradient(circle at 10% 10%, #fbcfe8 0%, transparent 40%), radial-gradient(circle at 90% 20%, #fef08a 0%, transparent 40%), radial-gradient(circle at 20% 90%, #bbf7d0 0%, transparent 45%), radial-gradient(circle at 85% 85%, #bfdbfe 0%, transparent 45%), #fffaf5",
+    og: "linear-gradient(135deg, #fbcfe8 0%, #fef08a 35%, #bbf7d0 65%, #bfdbfe 100%)",
+    surface: "rgba(255,255,255,0.8)",
+    text: "#3b0764",
+    muted: "#86198f",
+    accent: "#db2777",
+    accentText: "#ffffff",
+    secondary: "#ffffff",
+  },
+  baby: {
+    label: "Baby",
+    background: "linear-gradient(160deg, #e0f2fe 0%, #fce7f3 55%, #fef9c3 100%)",
+    surface: "rgba(255,255,255,0.75)",
+    text: "#1e3a5f",
+    muted: "#5b7896",
+    accent: "#60a5fa",
+    accentText: "#ffffff",
+    secondary: "#ffffff",
+  },
+  ivory: {
+    label: "Ivory",
+    background: "linear-gradient(160deg, #fffbf2 0%, #f7ecdc 55%, #ecd9be 100%)",
+    surface: "rgba(255,255,255,0.75)",
+    text: "#44301b",
+    muted: "#8a6a43",
+    accent: "#b08642",
+    accentText: "#ffffff",
+    secondary: "#ffffff",
+  },
+  sky: {
+    label: "Sky",
+    background: "linear-gradient(170deg, #e0f2fe 0%, #bae6fd 50%, #7dd3fc 100%)",
+    surface: "rgba(255,255,255,0.75)",
+    text: "#0c3555",
+    muted: "#256b94",
+    accent: "#0284c7",
     accentText: "#ffffff",
     secondary: "#ffffff",
   },

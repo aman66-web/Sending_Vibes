@@ -1,0 +1,775 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { useReducedMotion } from "./effects";
+import { useSfx } from "./sound";
+
+export type GameProps = { onWin: () => void; won: boolean };
+
+const PANEL = "relative w-full select-none overflow-hidden rounded-3xl ring-1 ring-black/5";
+const FOCUS = "outline-none focus-visible:ring-4 focus-visible:ring-[var(--c-accent)]";
+
+// Where a tap lands inside a panel, in the panel's own pixels (it may be shown scaled down).
+// Keyboard players get a random spot instead.
+function tapPoint(e: React.PointerEvent<HTMLElement> | React.KeyboardEvent<HTMLElement>) {
+  const el = e.currentTarget;
+  const box = el.getBoundingClientRect();
+  const scale = box.width / el.offsetWidth || 1;
+  const width = el.offsetWidth;
+  const height = el.offsetHeight;
+  if (!("clientX" in e)) return { x: width * (0.15 + Math.random() * 0.7), y: height * (0.15 + Math.random() * 0.5), height };
+  return { x: (e.clientX - box.left) / scale, y: (e.clientY - box.top) / scale, height };
+}
+
+const isPress = (e: React.KeyboardEvent) => e.key === "Enter" || e.key === " ";
+
+// ---------- Loves me, loves me not ----------
+
+// An odd number of petals, so the last one is always "loves me".
+const PETALS = 9;
+
+export function LovesMeNot({ onWin, won }: GameProps) {
+  const sfx = useSfx();
+  const [plucked, setPlucked] = useState<boolean[]>(() => Array(PETALS).fill(false));
+  const count = plucked.filter(Boolean).length;
+
+  const pluck = (i: number) => {
+    if (plucked[i] || won) return;
+    const next = plucked.map((p, j) => (j === i ? true : p));
+    setPlucked(next);
+    sfx(next.filter(Boolean).length % 2 ? "pop" : "boing");
+    if (next.every(Boolean)) onWin();
+  };
+
+  const verdict = count === 0 ? "Pluck a petal…" : count % 2 === 1 ? "Loves me 💘" : "Loves me not 💔";
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <p key={count} className="h-9 animate-pop font-display text-2xl font-bold">
+        {verdict}
+      </p>
+      <svg viewBox="-110 -110 220 260" className="h-72 w-60 overflow-visible">
+        <path d="M0 20 C 6 70, -8 100, 2 150" stroke="#3f8f4f" strokeWidth="7" fill="none" strokeLinecap="round" />
+        <path d="M2 95 C 30 80, 45 92, 52 100 C 30 108, 14 104, 2 95Z" fill="#4caf50" />
+        {plucked.map((gone, i) => (
+          <g key={i} transform={`rotate(${(360 / PETALS) * i})`}>
+            <ellipse
+              data-petal={gone ? undefined : i}
+              role="button"
+              tabIndex={gone ? -1 : 0}
+              aria-label={gone ? "Plucked petal" : "Pluck this petal"}
+              onClick={() => pluck(i)}
+              onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && pluck(i)}
+              cx="0"
+              cy="-56"
+              rx="17"
+              ry="40"
+              fill="#ffffff"
+              stroke="rgba(0,0,0,0.12)"
+              strokeWidth="1.5"
+              className="cursor-pointer outline-none transition-[transform,opacity] duration-700 ease-out hover:brightness-95 focus-visible:stroke-[var(--c-accent)]"
+              style={{ transform: gone ? "translateY(-140px) rotate(25deg)" : "none", opacity: gone ? 0 : 1, pointerEvents: gone ? "none" : "auto" }}
+            />
+          </g>
+        ))}
+        <circle r="26" fill="#ffc83d" stroke="#e8a317" strokeWidth="3" />
+        <circle r="26" fill="url(#seeds)" opacity="0.35" />
+        <defs>
+          <pattern id="seeds" width="8" height="8" patternUnits="userSpaceOnUse">
+            <circle cx="4" cy="4" r="1.6" fill="#a86b00" />
+          </pattern>
+        </defs>
+      </svg>
+      <p className="text-sm font-semibold opacity-70">{won ? "The flower has spoken." : `${PETALS - count} petals left`}</p>
+    </div>
+  );
+}
+
+// ---------- Whack the ghosts ----------
+
+const GHOST_TARGET = 8;
+type Ghost = { id: number; cell: number };
+
+export function WhackGhosts({ onWin, won }: GameProps) {
+  const sfx = useSfx();
+  const reduced = useReducedMotion();
+  const [ghosts, setGhosts] = useState<Ghost[]>([]);
+  const [booed, setBooed] = useState<{ id: number; cell: number }[]>([]);
+  const [score, setScore] = useState(0);
+  const hits = useRef(0);
+  const nextId = useRef(0);
+
+  useEffect(() => {
+    if (won) return;
+    const timers = new Set<ReturnType<typeof setTimeout>>();
+    let last = -1;
+    const spawn = () => {
+      let cell = Math.floor(Math.random() * 9);
+      if (cell === last) cell = (cell + 4) % 9;
+      last = cell;
+      const id = nextId.current++;
+      setGhosts((g) => [...g, { id, cell }]);
+      const t = setTimeout(() => {
+        setGhosts((g) => g.filter((x) => x.id !== id));
+        timers.delete(t);
+      }, 1150);
+      timers.add(t);
+    };
+    spawn();
+    const interval = setInterval(spawn, 700);
+    return () => {
+      clearInterval(interval);
+      timers.forEach(clearTimeout);
+    };
+  }, [won]);
+
+  const whack = (ghost: Ghost) => {
+    if (won) return;
+    setGhosts((g) => g.filter((x) => x.id !== ghost.id));
+    setBooed((b) => [...b, ghost]);
+    setTimeout(() => setBooed((b) => b.filter((x) => x.id !== ghost.id)), 600);
+    sfx("pop");
+    hits.current += 1;
+    setScore(hits.current);
+    if (hits.current === GHOST_TARGET) onWin();
+  };
+
+  return (
+    <div className="w-full">
+      <div className="mb-2 text-center font-display text-lg font-semibold">
+        {Math.min(score, GHOST_TARGET)} / {GHOST_TARGET} 👻
+      </div>
+      {/* Keyboard players press Enter or Space to whack whichever ghost is up. */}
+      <div
+        tabIndex={0}
+        aria-label="Ghost garden. Press Enter or Space to whack a ghost."
+        onKeyDown={(e) => {
+          if (!isPress(e)) return;
+          e.preventDefault();
+          if (ghosts[0]) whack(ghosts[0]);
+        }}
+        className={`${PANEL} ${FOCUS} grid grid-cols-3 gap-2 bg-[#1a1033] p-3`}
+      >
+        {Array.from({ length: 9 }, (_, cell) => {
+          const ghost = ghosts.find((g) => g.cell === cell);
+          const boo = booed.find((b) => b.cell === cell);
+          return (
+            <div key={cell} className="relative h-20 overflow-hidden rounded-2xl bg-white/5 @2xl:h-24">
+              {ghost && !won && (
+                <button
+                  data-whack
+                  aria-label="Whack the ghost"
+                  onPointerDown={() => whack(ghost)}
+                  className={`absolute inset-x-0 bottom-3 mx-auto w-fit text-5xl leading-none ${reduced ? "" : "animate-ghost"}`}
+                >
+                  👻
+                </button>
+              )}
+              {boo && <span className="pointer-events-none absolute inset-0 grid animate-pop place-items-center font-display text-lg font-bold text-amber-300">BOO!</span>}
+              <span className="pointer-events-none absolute inset-x-2 bottom-0 h-4 rounded-t-full bg-[#2c1f4a]" />
+              <span className="pointer-events-none absolute bottom-1 right-1.5 text-xl opacity-70">🪦</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ---------- Launch fireworks ----------
+
+const FIREWORK_TARGET = 6;
+type Firework = { id: number; x: number; y: number; from: number; hue: number };
+
+export function LaunchFireworks({ onWin, won }: GameProps) {
+  const sfx = useSfx();
+  const [fireworks, setFireworks] = useState<Firework[]>([]);
+  const [count, setCount] = useState(0);
+  const launched = useRef(0);
+  const nextId = useRef(0);
+
+  const launch = (e: React.PointerEvent<HTMLDivElement> | React.KeyboardEvent<HTMLDivElement>) => {
+    // Read everything from the event now: React clears currentTarget once the handler returns.
+    const { x, y: tapY, height } = tapPoint(e);
+    const y = Math.min(tapY, height - 40);
+    const id = nextId.current++;
+    const firework = { id, x, y, from: height - y, hue: Math.floor(Math.random() * 360) };
+    setFireworks((f) => [...f, firework]);
+    setTimeout(() => setFireworks((f) => f.filter((w) => w.id !== id)), 1700);
+    sfx("whoosh");
+    setTimeout(() => sfx("boom"), 450);
+    if (won) return;
+    launched.current += 1;
+    setCount(launched.current);
+    if (launched.current === FIREWORK_TARGET) setTimeout(onWin, 500);
+  };
+
+  return (
+    <div className="w-full">
+      <div className="mb-2 text-center font-display text-lg font-semibold">
+        {Math.min(count, FIREWORK_TARGET)} / {FIREWORK_TARGET} 🎆
+      </div>
+      <div
+        data-sky
+        role="button"
+        tabIndex={0}
+        aria-label="Launch a firework"
+        onPointerDown={launch}
+        onKeyDown={(e) => {
+          if (!isPress(e)) return;
+          e.preventDefault();
+          launch(e);
+        }}
+        className={`${PANEL} ${FOCUS} h-72 cursor-crosshair touch-none bg-[radial-gradient(circle_at_50%_120%,#3b1d6e_0%,#120a2e_55%,#05030f_100%)] @2xl:h-96`}
+      >
+        {Array.from({ length: 18 }, (_, i) => (
+          <span key={i} className="absolute h-0.5 w-0.5 rounded-full bg-white/70" style={{ left: `${(i * 37) % 100}%`, top: `${(i * 23) % 70}%` }} />
+        ))}
+        {fireworks.map((f) => (
+          <span key={f.id} className="pointer-events-none absolute" style={{ left: f.x, top: f.y }}>
+            <span
+              className="absolute h-4 w-1 animate-rocket rounded-full"
+              style={{ background: `hsl(${f.hue} 100% 75%)`, boxShadow: `0 0 8px hsl(${f.hue} 100% 60%)`, "--from": `${f.from}px` } as React.CSSProperties}
+            />
+            <span
+              className="absolute h-16 w-16 animate-burst rounded-full opacity-0 blur-md [animation-delay:450ms]"
+              style={{ background: `hsl(${f.hue} 100% 70% / 0.7)`, "--dx": "0px", "--dy": "0px" } as React.CSSProperties}
+            />
+            {Array.from({ length: 28 }, (_, i) => {
+              // Two rings of sparks, the inner one smaller and a different shade.
+              const outer = i < 18;
+              const a = (i / (outer ? 18 : 10)) * Math.PI * 2 + (outer ? 0 : 0.3);
+              const r = outer ? 78 : 42;
+              return (
+                <span
+                  key={i}
+                  className={`absolute animate-burst rounded-full opacity-0 [animation-delay:450ms] ${outer ? "h-2 w-2" : "h-1.5 w-1.5"}`}
+                  style={
+                    {
+                      background: `hsl(${f.hue + (outer ? 0 : 40)} 100% ${outer ? 65 : 80}%)`,
+                      boxShadow: `0 0 10px 1px hsl(${f.hue} 100% 60%)`,
+                      "--dx": `${Math.cos(a) * r}px`,
+                      "--dy": `${Math.sin(a) * r + 12}px`,
+                    } as React.CSSProperties
+                  }
+                />
+              );
+            })}
+          </span>
+        ))}
+        {count === 0 && (
+          <p className="pointer-events-none absolute inset-0 grid place-items-center font-display text-lg font-semibold text-white/80">Tap anywhere in the sky ✨</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---------- Release the lanterns ----------
+
+const LANTERNS = 5;
+
+function LanternShape({ lit }: { lit: boolean }) {
+  return (
+    <svg viewBox="0 0 40 56" className="h-full w-full">
+      <defs>
+        <radialGradient id="lantern-glow" cx="50%" cy="65%" r="60%">
+          <stop offset="0%" stopColor="#fff3b0" />
+          <stop offset="45%" stopColor="#ffb703" />
+          <stop offset="100%" stopColor="#e85d04" />
+        </radialGradient>
+      </defs>
+      <path d="M8 6 H32 L37 44 Q20 50 3 44 Z" fill={lit ? "url(#lantern-glow)" : "#c2410c"} />
+      <path d="M8 6 H32" stroke="#7c2d12" strokeWidth="3" strokeLinecap="round" />
+      <path d="M14 8 L12 44 M26 8 L28 44" stroke="rgba(124,45,18,0.35)" strokeWidth="1.2" />
+      <path d="M17 48 Q20 54 23 48" fill={lit ? "#ffd166" : "#78350f"} />
+    </svg>
+  );
+}
+
+export function ReleaseLanterns({ onWin, won }: GameProps) {
+  const sfx = useSfx();
+  const [released, setReleased] = useState<boolean[]>(() => Array(LANTERNS).fill(false));
+
+  const release = (i: number) => {
+    if (released[i] || won) return;
+    const next = released.map((r, j) => (j === i ? true : r));
+    setReleased(next);
+    sfx("chime");
+    if (next.every(Boolean)) setTimeout(onWin, 900);
+  };
+
+  return (
+    <div className={`${PANEL} h-80 bg-[linear-gradient(180deg,#0b1238_0%,#1e1b4b_55%,#4c1d95_100%)]`}>
+      {Array.from({ length: 22 }, (_, i) => (
+        <span key={i} className="absolute h-1 w-1 animate-pulse rounded-full bg-white/70" style={{ left: `${(i * 41) % 100}%`, top: `${(i * 17) % 60}%`, animationDelay: `${i * 0.3}s` }} />
+      ))}
+      <div className="absolute inset-x-0 bottom-4 flex items-end justify-center gap-3">
+        {released.map((up, i) => (
+          <button
+            key={i}
+            data-lantern={up ? undefined : i}
+            aria-label={up ? "Lantern released" : "Release this lantern"}
+            onClick={() => release(i)}
+            className={`relative h-16 w-12 ${up ? "animate-lantern" : "hover:-translate-y-1"} transition`}
+            style={{ animationDelay: up ? "0s" : undefined }}
+          >
+            {up && <span className="absolute inset-0 rounded-full bg-amber-300/50 blur-xl" />}
+            <LanternShape lit={up} />
+          </button>
+        ))}
+      </div>
+      {!released.some(Boolean) && (
+        <p className="pointer-events-none absolute inset-x-0 top-1/3 text-center font-display text-lg font-semibold text-white/85">Tap each lantern to let it go 🏮</p>
+      )}
+    </div>
+  );
+}
+
+// ---------- Bubble wrap ----------
+
+const BUBBLES = 20;
+
+export function BubbleWrap({ onWin, won }: GameProps) {
+  const sfx = useSfx();
+  const [popped, setPopped] = useState<boolean[]>(() => Array(BUBBLES).fill(false));
+  const state = useRef(popped);
+  const pressing = useRef(false);
+
+  const pop = (i: number) => {
+    if (state.current[i] || won) return;
+    state.current = state.current.map((p, j) => (j === i ? true : p));
+    setPopped(state.current);
+    sfx("pop");
+    if (state.current.every(Boolean)) onWin();
+  };
+
+  // Popping by dragging a finger across, which a plain click handler can't do on touch screens.
+  const popUnder = (e: React.PointerEvent) => {
+    if (!pressing.current) return;
+    const el = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null;
+    const i = el?.dataset.bubble;
+    if (i !== undefined) pop(Number(i));
+  };
+
+  return (
+    <div className="w-full">
+      <div className="mb-2 text-center font-display text-lg font-semibold">
+        {popped.filter(Boolean).length} / {BUBBLES} popped
+      </div>
+      <div
+        onPointerDown={(e) => {
+          pressing.current = true;
+          popUnder(e);
+        }}
+        onPointerMove={popUnder}
+        onPointerUp={() => (pressing.current = false)}
+        onPointerLeave={() => (pressing.current = false)}
+        className={`${PANEL} mx-auto grid max-w-sm touch-none grid-cols-5 gap-2 bg-sky-100/60 p-3`}
+      >
+        {popped.map((p, i) => (
+          <button
+            key={i}
+            data-bubble={i}
+            aria-label={p ? "Popped" : "Pop this bubble"}
+            onClick={() => pop(i)}
+            className={`aspect-square rounded-full transition duration-150 ${
+              p
+                ? "scale-75 bg-sky-200/50 shadow-inner"
+                : "bg-[radial-gradient(circle_at_32%_30%,#ffffff_0%,#ffffff_18%,rgba(186,230,253,0.9)_40%,rgba(125,211,252,0.7)_100%)] shadow-md ring-1 ring-sky-300/60 hover:scale-105"
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ---------- Piñata ----------
+
+const PINATA_HITS = 8;
+const CANDY = ["🍬", "🍭", "🍫", "🍩", "🎊", "🍬", "🧁", "🍭"];
+
+export function Pinata({ onWin, won }: GameProps) {
+  const sfx = useSfx();
+  const [hits, setHits] = useState(0);
+
+  const hit = () => {
+    if (won) return;
+    const next = hits + 1;
+    setHits(next);
+    sfx(next === PINATA_HITS ? "boom" : "stamp");
+    if (next === PINATA_HITS) onWin();
+  };
+
+  return (
+    <div className="flex w-full flex-col items-center gap-3">
+      <div className="relative flex h-72 w-full justify-center">
+        <span className="absolute top-0 h-12 w-0.5 bg-current opacity-40" />
+        {won ? (
+          <div className="relative mt-24">
+            {CANDY.map((c, i) => {
+              const a = (i / CANDY.length) * Math.PI * 2;
+              return (
+                <span
+                  key={i}
+                  className="absolute animate-burst text-4xl"
+                  style={{ "--dx": `${Math.cos(a) * 120}px`, "--dy": `${Math.sin(a) * 90 + 60}px` } as React.CSSProperties}
+                >
+                  {c}
+                </span>
+              );
+            })}
+            <span className="block animate-pop text-7xl">🎉</span>
+          </div>
+        ) : (
+          <button
+            data-pinata
+            aria-label="Hit the piñata"
+            onClick={hit}
+            className="absolute top-10 origin-top animate-swing text-[7rem] leading-none"
+          >
+            <span key={hits} className={`block ${hits ? "animate-shake" : ""}`} style={{ transform: `rotate(${hits * 4}deg)` }}>
+              🪅
+            </span>
+          </button>
+        )}
+      </div>
+      <div className="flex gap-1.5">
+        {Array.from({ length: PINATA_HITS }, (_, i) => (
+          <span key={i} className={`h-2.5 w-5 rounded-full transition ${i < hits ? "bg-[var(--c-accent)]" : "bg-current opacity-20"}`} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ---------- Grow a flower ----------
+
+const STAGES = 5;
+
+function Plant({ stage }: { stage: number }) {
+  const stem = [0, 22, 48, 72, 84, 90][stage];
+  return (
+    <svg viewBox="0 0 200 220" className="h-full w-full overflow-visible">
+      {/* Stem and leaves */}
+      {stage > 0 && (
+        <>
+          <path d={`M100 160 L100 ${160 - stem}`} stroke="#3f8f4f" strokeWidth="6" strokeLinecap="round" className="transition-all duration-700" />
+          <path d="M100 150 C 80 140, 70 128, 72 120 C 88 122, 98 134, 100 150Z" fill="#4caf50" className="origin-[100px_150px] animate-pop" />
+          {stage > 1 && <path d="M100 130 C 120 120, 132 108, 128 100 C 112 104, 102 116, 100 130Z" fill="#58b85c" className="origin-[100px_130px] animate-pop" />}
+        </>
+      )}
+      {/* Bud, then the bloom in the card's own colour */}
+      {stage === 3 && <ellipse cx="100" cy={160 - stem} rx="9" ry="14" fill="#3f8f4f" className="animate-pop" />}
+      {stage >= 4 && (
+        <g transform={`translate(100 ${160 - stem})`}>
+          {Array.from({ length: 8 }, (_, i) => (
+            <ellipse
+              key={i}
+              cx="0"
+              cy={stage === 5 ? -24 : -12}
+              rx={stage === 5 ? 13 : 7}
+              ry={stage === 5 ? 24 : 12}
+              transform={`rotate(${i * 45})`}
+              style={{ fill: "var(--c-accent)" }}
+              className="transition-all duration-700"
+              opacity={0.92}
+            />
+          ))}
+          <circle r={stage === 5 ? 14 : 8} fill="#ffc83d" className="transition-all duration-700" />
+        </g>
+      )}
+      {/* Pot */}
+      <path d="M58 160 H142 L132 214 H68 Z" fill="#c2410c" />
+      <rect x="52" y="152" width="96" height="16" rx="4" fill="#ea580c" />
+      <ellipse cx="100" cy="155" rx="42" ry="4" fill="#5b3a1e" />
+      {stage === 0 && <ellipse cx="100" cy="152" rx="6" ry="3.5" fill="#8b5a2b" />}
+    </svg>
+  );
+}
+
+export function GrowFlower({ onWin, won }: GameProps) {
+  const sfx = useSfx();
+  const [stage, setStage] = useState(0);
+  const [drops, setDrops] = useState(0);
+
+  const water = () => {
+    if (won) return;
+    const next = Math.min(stage + 1, STAGES);
+    setStage(next);
+    setDrops((d) => d + 1);
+    sfx(next === STAGES ? "sparkle" : "tap");
+    if (next === STAGES) onWin();
+  };
+
+  return (
+    <div className="flex w-full flex-col items-center gap-3">
+      <button aria-label="Water the plant" onClick={water} className="relative h-64 w-56">
+        {drops > 0 && !won && (
+          <span key={drops} className="pointer-events-none absolute left-1/2 top-4 -translate-x-1/2">
+            {[-18, 0, 18].map((x, i) => (
+              <span key={i} className="absolute animate-drip text-2xl" style={{ left: x, animationDelay: `${i * 90}ms` }}>
+                💧
+              </span>
+            ))}
+          </span>
+        )}
+        <Plant stage={stage} />
+        {won && <span className="absolute -right-2 top-6 animate-pop text-4xl">✨</span>}
+      </button>
+      {!won && (
+        <button
+          data-water
+          onClick={water}
+          className="rounded-full bg-[var(--c-accent)] px-6 py-3 font-display font-semibold text-[var(--c-accent-text)] shadow-lg active:scale-95"
+        >
+          💧 Water it ({stage}/{STAGES})
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ---------- Throw colours (Holi) ----------
+
+const SPLAT_TARGET = 12;
+const SPLAT_COLORS = ["#ff2e7e", "#ffc23d", "#22c55e", "#3b82f6", "#ff8a3d", "#a855f7", "#06b6d4"];
+type Splat = { id: number; x: number; y: number; color: string; size: number; shape: string; rot: number };
+
+export function ThrowColours({ onWin, won }: GameProps) {
+  const sfx = useSfx();
+  const [splats, setSplats] = useState<Splat[]>([]);
+  const count = useRef(0);
+  const nextId = useRef(0);
+
+  const throwAt = (e: React.PointerEvent<HTMLDivElement> | React.KeyboardEvent<HTMLDivElement>) => {
+    const { x, y } = tapPoint(e);
+    const id = nextId.current++;
+    const r = () => 35 + Math.floor(Math.random() * 30);
+    const splat = {
+      id,
+      x,
+      y,
+      color: SPLAT_COLORS[id % SPLAT_COLORS.length],
+      size: 70 + Math.random() * 60,
+      shape: `${r()}% ${r()}% ${r()}% ${r()}% / ${r()}% ${r()}% ${r()}% ${r()}%`,
+      rot: Math.random() * 360,
+    };
+    setSplats((s) => [...s.slice(-40), splat]);
+    sfx("pop");
+    if (won) return;
+    count.current += 1;
+    if (count.current === SPLAT_TARGET) onWin();
+  };
+
+  return (
+    <div className="w-full">
+      <div className="mb-2 text-center font-display text-lg font-semibold">
+        {Math.min(splats.length, SPLAT_TARGET)} / {SPLAT_TARGET} 🎨
+      </div>
+      <div
+        data-splat
+        role="button"
+        tabIndex={0}
+        aria-label="Throw some colour"
+        onPointerDown={throwAt}
+        onKeyDown={(e) => {
+          if (!isPress(e)) return;
+          e.preventDefault();
+          throwAt(e);
+        }}
+        className={`${PANEL} ${FOCUS} h-72 cursor-pointer touch-none bg-white/90 @2xl:h-96`}
+      >
+        {splats.map((s) => (
+          <span
+            key={s.id}
+            className="pointer-events-none absolute animate-pop"
+            style={{ left: s.x - s.size / 2, top: s.y - s.size / 2, width: s.size, height: s.size, transform: `rotate(${s.rot}deg)` }}
+          >
+            <span className="absolute inset-0 opacity-85 blur-[2px]" style={{ background: s.color, borderRadius: s.shape }} />
+            {[0, 1, 2, 3].map((k) => (
+              <span
+                key={k}
+                className="absolute h-3 w-3 rounded-full"
+                style={{ background: s.color, left: `${50 + Math.cos(k * 1.7 + s.rot) * 62}%`, top: `${50 + Math.sin(k * 1.7 + s.rot) * 62}%` }}
+              />
+            ))}
+          </span>
+        ))}
+        {splats.length === 0 && (
+          <p className="pointer-events-none absolute inset-0 grid place-items-center font-display text-lg font-semibold text-neutral-500">Tap to throw colour! 🌈</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---------- Slot machine ----------
+
+// Rigged, kindly: the third pull is always the jackpot.
+export function SlotMachine({ onWin, won, symbols }: GameProps & { symbols: string[] }) {
+  const sfx = useSfx();
+  const [reels, setReels] = useState([symbols[1], symbols[2], symbols[3]]);
+  const [spinning, setSpinning] = useState([false, false, false]);
+  const [pulls, setPulls] = useState(0);
+  const stopped = useRef([true, true, true]);
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const ticker = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
+  const busy = spinning.some(Boolean);
+
+  useEffect(
+    () => () => {
+      timers.current.forEach(clearTimeout);
+      clearInterval(ticker.current);
+    },
+    [],
+  );
+
+  const pull = () => {
+    if (busy || won) return;
+    const n = pulls + 1;
+    setPulls(n);
+    const at = (k: number) => symbols[k % symbols.length];
+    const final = n >= 3 ? [symbols[0], symbols[0], symbols[0]] : n === 2 ? [at(n + 1), at(n + 1), at(n + 3)] : [at(1), at(2), at(4)];
+    stopped.current = [false, false, false];
+    setSpinning([true, true, true]);
+    sfx("whoosh");
+    ticker.current = setInterval(() => {
+      const shuffle = stopped.current.map((done) => (done ? null : symbols[Math.floor(Math.random() * symbols.length)]));
+      setReels((r) => r.map((s, i) => shuffle[i] ?? s));
+      sfx("tick");
+    }, 80);
+    final.forEach((sym, i) => {
+      const t = setTimeout(
+        () => {
+          stopped.current[i] = true;
+          setSpinning(stopped.current.map((done) => !done));
+          setReels((r) => r.map((s, j) => (j === i ? sym : s)));
+          sfx("stamp");
+          if (i === 2) {
+            clearInterval(ticker.current);
+            if (n >= 3) onWin();
+          }
+        },
+        700 + i * 350,
+      );
+      timers.current.push(t);
+    });
+  };
+
+  const message = won ? "JACKPOT! 🎰" : busy ? "Spinning…" : pulls === 0 ? "Pull the lever!" : pulls === 1 ? "No luck. Try again!" : "So close! One more…";
+  return (
+    <div className="flex w-full flex-col items-center gap-4">
+      <p className="h-8 font-display text-2xl font-bold">{message}</p>
+      <div className="rounded-[2rem] bg-[var(--c-accent)] p-3 shadow-xl">
+        <div className="flex gap-2 rounded-3xl bg-white p-3 shadow-inner">
+          {reels.map((s, i) => (
+            <div key={i} className="grid h-24 w-20 place-items-center overflow-hidden rounded-2xl bg-neutral-100 ring-1 ring-black/10 @2xl:h-28 @2xl:w-24">
+              <span className={`text-5xl ${spinning[i] ? "translate-y-1 blur-[1.5px]" : won ? "animate-pop" : ""}`}>{s}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      {!won && (
+        <button
+          data-pull
+          onClick={pull}
+          disabled={busy}
+          className="rounded-full bg-[var(--c-accent)] px-8 py-3.5 font-display text-lg font-semibold text-[var(--c-accent-text)] shadow-lg transition active:scale-95 disabled:opacity-60"
+        >
+          🎰 Pull
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ---------- Hold to send a hug ----------
+
+const HUG_MS = 2600;
+
+export function HoldHug({ onWin, won }: GameProps) {
+  const sfx = useSfx();
+  const [holding, setHolding] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const value = useRef(0);
+  const winRef = useRef(onWin);
+  useEffect(() => {
+    winRef.current = onWin;
+  });
+
+  useEffect(() => {
+    if (won) return;
+    let raf = 0;
+    let last = performance.now();
+    const tick = (now: number) => {
+      const dt = now - last;
+      last = now;
+      const before = value.current;
+      value.current = holding ? Math.min(1, before + dt / HUG_MS) : Math.max(0, before - dt / 4000);
+      if (value.current !== before) setProgress(value.current);
+      if (value.current >= 1) {
+        winRef.current();
+        return;
+      }
+      if (holding || value.current > 0) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [holding, won]);
+
+  useEffect(() => {
+    if (!holding || won) return;
+    sfx("chime");
+    const t = setInterval(() => sfx("tick"), 260);
+    return () => clearInterval(t);
+  }, [holding, won, sfx]);
+
+  const r = 88;
+  const circumference = 2 * Math.PI * r;
+  const shown = won ? 1 : progress;
+  return (
+    <div className="flex flex-col items-center gap-4 py-2">
+      <div className="relative grid h-56 w-56 place-items-center">
+        <svg viewBox="0 0 200 200" className="absolute inset-0 -rotate-90">
+          <circle cx="100" cy="100" r={r} fill="none" stroke="currentColor" strokeOpacity="0.15" strokeWidth="12" />
+          <circle
+            cx="100"
+            cy="100"
+            r={r}
+            fill="none"
+            strokeWidth="12"
+            strokeLinecap="round"
+            style={{ stroke: "var(--c-accent)" }}
+            strokeDasharray={circumference}
+            strokeDashoffset={circumference * (1 - shown)}
+          />
+        </svg>
+        <button
+          data-hold
+          aria-label="Press and hold to send a hug"
+          onPointerDown={(e) => {
+            e.currentTarget.setPointerCapture(e.pointerId);
+            setHolding(true);
+          }}
+          onPointerUp={() => setHolding(false)}
+          onPointerCancel={() => setHolding(false)}
+          onKeyDown={(e) => {
+            if (e.key !== " " && e.key !== "Enter") return;
+            e.preventDefault();
+            setHolding(true);
+          }}
+          onKeyUp={() => setHolding(false)}
+          onContextMenu={(e) => e.preventDefault()}
+          disabled={won}
+          className="grid h-40 w-40 touch-none select-none place-items-center rounded-full bg-[var(--c-secondary)] shadow-xl ring-1 ring-black/10 [-webkit-touch-callout:none]"
+        >
+          <span className={`text-7xl transition-transform ${won ? "animate-pop" : ""}`} style={{ transform: won ? undefined : `scale(${1 + shown * 0.5})` }}>
+            {won ? "💞" : "🤗"}
+          </span>
+        </button>
+      </div>
+      <p className="font-display text-lg font-semibold">{won ? "Hug delivered!" : holding ? "Keep holding… 🫶" : progress > 0 ? "Don't let go!" : "Press and hold"}</p>
+    </div>
+  );
+}
