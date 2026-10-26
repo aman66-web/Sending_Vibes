@@ -1,5 +1,6 @@
--- Cards are stored as a single JSON document. Only the server (service role)
--- reads and writes this table, so RLS is on with no public policies.
+-- Cards are stored as a single JSON document. RLS is on with no policies, so the
+-- table can't be read or listed directly. Access goes through the functions in
+-- 0002_card_functions.sql.
 create table if not exists public.cards (
   id text primary key,
   data jsonb not null,
