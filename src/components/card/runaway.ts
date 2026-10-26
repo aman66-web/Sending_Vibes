@@ -30,7 +30,10 @@ export function useRunaway() {
         left < yesBox.right + 12 && left + noBox.width > yesBox.left - 12 && top < yesBox.bottom + 12 && top + noBox.height > yesBox.top - 12;
       if (!overlaps) break;
     }
-    setPos({ x, y });
+    // The maths above is in screen pixels; convert to the area's own pixels in
+    // case the card is shown scaled down (e.g. inside a phone or laptop mockup).
+    const scale = box.width / (area.current?.offsetWidth || box.width) || 1;
+    setPos({ x: x / scale, y: y / scale });
     setDodges((d) => d + 1);
   };
 

@@ -5,6 +5,7 @@ import { OccasionShowcase } from "@/components/landing/OccasionShowcase";
 import { AiPromptDemo, RunawayDemo, TypewriterLoop } from "@/components/landing/widgets";
 import { CatalogGrid } from "@/components/catalog/CatalogGrid";
 import { Logo } from "@/components/Logo";
+import { LaptopFrame } from "@/components/LaptopFrame";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { Reveal } from "@/components/Reveal";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -28,13 +29,6 @@ const MARQUEE = [
 ];
 
 const HERO_OCCASIONS: Occasion[] = ["valentine", "birthday", "diwali", "christmas", "eid"];
-
-// Each hero phone opens straight onto the part you can play with.
-const HERO_PHONES: { occasion: Occasion; screen: string; position: "left" | "center" | "right"; label: string }[] = [
-  { occasion: "diwali", screen: "game", position: "left", label: "🪔 Tap to light them" },
-  { occasion: "valentine", screen: "question", position: "center", label: "👆 Try pressing No" },
-  { occasion: "birthday", screen: "game", position: "right", label: "🎂 Blow them out" },
-];
 
 const TIERS = [
   {
@@ -128,33 +122,31 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Three live cards, each already on its interactive moment. Phones are laid out at full size and scaled, so their content never gets cramped. */}
-          <div className="relative mx-auto mt-2 h-[540px] w-full max-w-[600px] [--side:118px] sm:mt-10 sm:h-[600px] sm:[--side:190px] lg:mt-0">
-            <div aria-hidden className="absolute inset-x-10 top-24 h-2/3 rounded-full bg-gradient-to-br from-hot/40 via-tangerine/30 to-grape/30 blur-3xl" />
-            {HERO_PHONES.map((phone) => (
-              <div
-                key={phone.occasion}
-                className={`absolute left-1/2 top-0 origin-top ${phone.position === "center" ? "z-20" : "z-10"}`}
-                style={{
-                  transform:
-                    phone.position === "center"
-                      ? "translateX(-50%) scale(var(--center-scale, 0.8))"
-                      : `translateX(calc(-50% ${phone.position === "left" ? "-" : "+"} var(--side))) translateY(56px) rotate(${phone.position === "left" ? -8 : 8}deg) scale(0.66)`,
-                }}
-              >
-                <PhoneFrame>
-                  <CardPlayer card={buildDemo(phone.occasion)} preview focusScreenId={phone.screen} />
-                </PhoneFrame>
-                {/* Side labels sit above their phones so the centre phone never covers them. */}
-                <span
-                  className={`absolute left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-5 py-2.5 font-display font-semibold shadow-xl ${
-                    phone.position === "center" ? "top-full mt-5 bg-ink text-xl text-white" : "bottom-full mb-6 hidden bg-white text-2xl text-ink sm:block"
-                  }`}
-                >
-                  {phone.label}
-                </span>
+          {/* A laptop and a phone, both running real cards, so it's clear they work on any screen.
+              Built at one design size (600×520) and scaled to fit each breakpoint. */}
+          <div className="relative mx-auto mt-6 h-[312px] w-full sm:mt-10 sm:h-[468px] lg:mt-0 lg:h-[375px] xl:h-[416px]">
+            <div aria-hidden className="absolute inset-x-6 top-10 h-3/4 rounded-full bg-gradient-to-br from-hot/40 via-tangerine/30 to-grape/30 blur-3xl" />
+            <div className="absolute left-1/2 top-0 h-[520px] w-[600px] origin-top -translate-x-1/2 scale-[0.6] sm:scale-90 lg:scale-[0.72] xl:scale-[0.8]">
+              <span className="absolute left-3 top-0 z-20 whitespace-nowrap rounded-full bg-ink px-5 py-2.5 font-display text-xl font-semibold text-white shadow-xl">
+                💻 On a laptop · try pressing No
+              </span>
+              <div className="absolute left-0 top-14">
+                {/* A slightly smaller virtual screen keeps the card legible at this size. */}
+                <LaptopFrame screenWidth={760} screenHeight={475} scale={504 / 760}>
+                  <CardPlayer card={buildDemo("valentine")} preview focusScreenId="question" />
+                </LaptopFrame>
               </div>
-            ))}
+              <div className="absolute left-[438px] top-[150px] z-10 h-[307px] w-[150px] rotate-[5deg]">
+                <div className="origin-top-left scale-[0.48]">
+                  <PhoneFrame>
+                    <CardPlayer card={buildDemo("diwali")} preview focusScreenId="game" />
+                  </PhoneFrame>
+                </div>
+              </div>
+              <span className="absolute right-0 top-[470px] z-20 whitespace-nowrap rounded-full bg-white px-5 py-2.5 font-display text-xl font-semibold text-ink shadow-xl">
+                📱 On a phone · tap the diyas
+              </span>
+            </div>
           </div>
         </div>
 
