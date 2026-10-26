@@ -141,6 +141,7 @@ export function WhackGhosts({ onWin, won }: GameProps) {
               )}
               {boo && <span className="pointer-events-none absolute inset-0 grid animate-pop place-items-center font-display text-lg font-bold text-amber-300">BOO!</span>}
               <span className="pointer-events-none absolute inset-x-2 bottom-0 h-4 rounded-t-full bg-[#2c1f4a]" />
+              <span className="pointer-events-none absolute bottom-1 right-1.5 text-xl opacity-70">🪦</span>
             </div>
           );
         })}

@@ -131,3 +131,61 @@ export function AiPromptDemo() {
     </div>
   );
 }
+
+const WHEEL = [
+  { label: "Pizza", emoji: "🍕", color: "#ff2e7e" },
+  { label: "A film", emoji: "🎬", color: "#ffffff" },
+  { label: "Cake", emoji: "🍰", color: "#ff8a3d" },
+  { label: "Flowers", emoji: "💐", color: "#ffffff" },
+  { label: "A hug", emoji: "🤗", color: "#7c3aed" },
+  { label: "A kiss", emoji: "💋", color: "#ffffff" },
+];
+
+// A small prize wheel for the features section. Tap to spin.
+export function WheelDemo() {
+  const [rotation, setRotation] = useState(0);
+  const [result, setResult] = useState<number | null>(null);
+  const [spinning, setSpinning] = useState(false);
+  const slice = 360 / WHEEL.length;
+
+  const spin = () => {
+    if (spinning) return;
+    const target = Math.floor(Math.random() * WHEEL.length);
+    setRotation((r) => r - (r % 360) + 360 * 4 + (360 - (target * slice + slice / 2)));
+    setSpinning(true);
+    setResult(null);
+    setTimeout(() => {
+      setSpinning(false);
+      setResult(target);
+    }, 3100);
+  };
+
+  const point = (deg: number) => {
+    const a = ((deg - 90) * Math.PI) / 180;
+    return `${(Math.cos(a) * 96).toFixed(2)} ${(Math.sin(a) * 96).toFixed(2)}`;
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <button onClick={spin} aria-label="Spin the wheel" className="relative h-44 w-44 transition hover:scale-[1.03]">
+        <svg viewBox="-100 -104 200 208" className="h-full w-full drop-shadow-lg">
+          <g style={{ transform: `rotate(${rotation}deg)`, transition: spinning ? "transform 3s cubic-bezier(0.33, 1, 0.68, 1)" : "none" }}>
+            {WHEEL.map((s, i) => (
+              <g key={s.label}>
+                <path d={`M0 0 L${point(i * slice)} A96 96 0 0 1 ${point((i + 1) * slice)} Z`} fill={s.color} stroke="#1d0b17" strokeOpacity="0.08" strokeWidth="2" />
+                <text transform={`rotate(${i * slice + slice / 2}) translate(0 -64)`} textAnchor="middle" dominantBaseline="middle" fontSize="24">
+                  {s.emoji}
+                </text>
+              </g>
+            ))}
+          </g>
+          <circle r="14" fill="#1d0b17" stroke="white" strokeWidth="4" />
+          <path d="M-10 -104 L10 -104 L0 -84 Z" fill="#1d0b17" stroke="white" strokeWidth="2.5" strokeLinejoin="round" />
+        </svg>
+      </button>
+      <p className="h-7 font-display text-lg font-bold">
+        {result !== null ? `${WHEEL[result].emoji} ${WHEEL[result].label}!` : spinning ? "Spinning…" : "Tap the wheel"}
+      </p>
+    </div>
+  );
+}
