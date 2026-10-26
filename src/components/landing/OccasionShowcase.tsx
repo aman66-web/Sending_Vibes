@@ -4,10 +4,14 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { CardPlayer } from "@/components/card/CardPlayer";
 import { PhoneFrame } from "@/components/PhoneFrame";
-import { OCCASIONS, type Occasion } from "@/lib/card";
+import type { Occasion } from "@/lib/card";
 import { buildDemo, occasions } from "@/lib/templates";
 
-const STYLES: Record<Occasion, { panel: string; text: string; muted: string; check: string; blurb: string; includes: string[] }> = {
+// The homepage showcases the three flagship occasions; the full range lives in /cards.
+const SHOWCASE = ["valentine", "diwali", "birthday"] as const;
+type ShowcaseOccasion = (typeof SHOWCASE)[number];
+
+const STYLES: Record<ShowcaseOccasion, { panel: string; text: string; muted: string; check: string; blurb: string; includes: string[] }> = {
   valentine: {
     panel: "from-[#ffe4ec] via-[#ffc8d8] to-[#ff9ebb]",
     text: "text-[#4a0d24]",
@@ -35,14 +39,14 @@ const STYLES: Record<Occasion, { panel: string; text: string; muted: string; che
 };
 
 export function OccasionShowcase() {
-  const [occasion, setOccasion] = useState<Occasion>("valentine");
-  const demos = useMemo(() => Object.fromEntries(OCCASIONS.map((o) => [o, buildDemo(o)])) as Record<Occasion, ReturnType<typeof buildDemo>>, []);
+  const [occasion, setOccasion] = useState<ShowcaseOccasion>("valentine");
+  const demos = useMemo(() => Object.fromEntries(SHOWCASE.map((o) => [o, buildDemo(o)])) as Record<Occasion, ReturnType<typeof buildDemo>>, []);
   const style = STYLES[occasion];
 
   return (
     <div>
       <div role="tablist" className="mx-auto flex w-fit gap-1 rounded-full bg-white p-1.5 shadow-sm ring-1 ring-ink/5">
-        {OCCASIONS.map((o) => (
+        {SHOWCASE.map((o) => (
           <button
             key={o}
             role="tab"
