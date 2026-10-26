@@ -41,13 +41,15 @@ Open http://localhost:3000. With no configuration, cards and photos are stored i
 ## Production storage (Supabase)
 
 1. Create a Supabase project.
-2. Run `supabase/migrations/0001_cards.sql`. It creates the `cards` table and a public `photos` bucket.
+2. Run the SQL files in `supabase/migrations/` in order. They create the `cards` table, the `photos` bucket, and the `create_card` / `get_card` functions the site uses.
 3. Set these environment variables (in `.env.local` or on Vercel):
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=https://<project>.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=<service role key>   # server only, never expose
+SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
 ```
+
+No secret key is needed. The `cards` table can't be read or listed directly; a card can only be fetched by its exact ID through `get_card`. Photo uploads are insert-only, so existing photos can't be overwritten or listed.
 
 ## Roadmap
 

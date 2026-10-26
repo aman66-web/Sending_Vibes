@@ -3,7 +3,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import { customAlphabet } from "nanoid";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import type { CardData, StoredCard } from "./card";
+import { cardSchema, type CardData, type StoredCard } from "./card";
 
 // Card links must be unguessable, since they contain people's personal photos.
 const newId = customAlphabet("23456789abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ", 12);
@@ -17,9 +17,12 @@ export const PHOTO_TYPES: Record<string, string> = {
 
 // Uses Supabase when configured, otherwise a local .data folder so the app runs
 // with zero setup in development. Local storage does not work on Vercel.
+// Only the publishable key is needed: cards are read and written through the
+// create_card / get_card database functions (see supabase/migrations), and the
+// cards table itself is not accessible to the public.
 function supabase(): SupabaseClient | null {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const key = process.env.SUPABASE_PUBLISHABLE_KEY;
   if (!url || !key) return null;
   return createClient(url, key, { auth: { persistSession: false } });
 }
@@ -31,7 +34,7 @@ export async function saveCard(card: CardData): Promise<string> {
   const stored: StoredCard = { ...card, id, createdAt: new Date().toISOString() };
   const db = supabase();
   if (db) {
-    const { error } = await db.from("cards").insert({ id, data: stored });
+    const { error } = await db.rpc("create_card", { card_id: id, card: stored });
     if (error) throw new Error(`Could not save card: ${error.message}`);
     return id;
   }
@@ -43,17 +46,24 @@ export async function saveCard(card: CardData): Promise<string> {
 export async function getCard(id: string): Promise<StoredCard | null> {
   if (!/^[A-Za-z0-9]{12}$/.test(id)) return null;
   const db = supabase();
+  let raw: unknown = null;
   if (db) {
-    const { data, error } = await db.from("cards").select("data").eq("id", id).maybeSingle();
+    const { data, error } = await db.rpc("get_card", { card_id: id });
     if (error) throw new Error(`Could not load card: ${error.message}`);
-    return (data?.data as StoredCard) ?? null;
+    raw = data;
+  } else {
+    try {
+      raw = JSON.parse(await fs.readFile(path.join(DATA_DIR, "cards", `${id}.json`), "utf8"));
+    } catch {
+      return null;
+    }
   }
-  try {
-    const raw = await fs.readFile(path.join(DATA_DIR, "cards", `${id}.json`), "utf8");
-    return JSON.parse(raw) as StoredCard;
-  } catch {
-    return null;
-  }
+  // Re-validate on read: anyone holding the publishable key can call create_card
+  // directly, so stored data is never trusted to be well-formed.
+  const parsed = cardSchema.safeParse(raw);
+  if (!parsed.success) return null;
+  const createdAt = (raw as { createdAt?: unknown }).createdAt;
+  return { ...parsed.data, id, createdAt: typeof createdAt === "string" ? createdAt : "" };
 }
 
 export async function savePhoto(bytes: Buffer, contentType: string): Promise<string> {
