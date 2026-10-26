@@ -75,7 +75,9 @@ export function WheelScreen({ screen, onNext }: ScreenProps<"wheel">) {
               const a1 = (i + 1) * slice;
               const mid = a0 + slice / 2;
               const dark = fills[i] === "var(--c-accent)";
-              const short = label.length > 14 ? `${label.slice(0, 13)}…` : label;
+              const short = label.length > 16 ? `${label.slice(0, 15)}…` : label;
+              // Labels run from the rim towards the hub; shrink long ones so they don't slide under it.
+              const fontSize = Math.min(n > 6 ? 10 : n > 4 ? 12 : 14, 66 / (short.length * 0.6));
               return (
                 <g key={i}>
                   <path d={`M0 0 L${point(a0, 98)} A98 98 0 ${slice > 180 ? 1 : 0} 1 ${point(a1, 98)} Z`} style={{ fill: fills[i] }} stroke="white" strokeWidth="2" />
@@ -83,7 +85,7 @@ export function WheelScreen({ screen, onNext }: ScreenProps<"wheel">) {
                     transform={`rotate(${mid - 90}) translate(90 0)`}
                     textAnchor="end"
                     dominantBaseline="middle"
-                    fontSize={n > 6 ? 10 : n > 4 ? 12 : 14}
+                    fontSize={fontSize.toFixed(1)}
                     fontWeight="700"
                     style={{ fill: dark ? "var(--c-accent-text)" : "#2a0f1c" }}
                   >
