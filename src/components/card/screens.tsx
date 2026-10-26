@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { Screen } from "@/lib/card";
 import { FinaleEffect, Particles, useReducedMotion } from "./effects";
 import { GameView } from "./games";
+import { useRunaway } from "./runaway";
 
 type Of<T extends Screen["type"]> = Extract<Screen, { type: T }>;
 type ScreenProps<T extends Screen["type"]> = { screen: Of<T>; onNext: () => void };
@@ -20,46 +21,55 @@ export function PrimaryButton({ children, onClick, className = "" }: { children:
 }
 
 export function IntroScreen({ screen, onNext, emoji }: ScreenProps<"intro"> & { emoji: string }) {
+  const [open, setOpen] = useState(false);
   return (
     <div className="flex flex-col items-center gap-6 text-center">
-      <div className="animate-wiggle text-7xl">{emoji}</div>
-      <h1 className="font-display text-4xl font-bold leading-tight">{screen.title}</h1>
-      <p className="text-lg text-[var(--c-muted)]">{screen.subtitle}</p>
-      <PrimaryButton onClick={onNext}>{screen.button}</PrimaryButton>
+      <p className="font-display text-2xl font-bold">{open ? "\u00a0" : "You've got mail 💌"}</p>
+      {/* An envelope that unseals and slides its letter up when tapped. */}
+      <button
+        aria-label={open ? screen.title : "Open the envelope"}
+        onClick={() => setOpen(true)}
+        disabled={open}
+        className="group relative mt-24 h-44 w-64 [perspective:900px]"
+      >
+        <span className="absolute inset-0 rounded-xl bg-[var(--c-accent)] brightness-75" />
+        <span
+          className={`absolute inset-x-3 bottom-2 top-2 flex flex-col items-center rounded-lg bg-white px-4 pt-5 text-[#3b0a1f] shadow-md transition-transform duration-700 ease-out ${open ? "-translate-y-28 delay-300" : ""}`}
+          style={{ zIndex: 2 }}
+        >
+          <span className="font-display text-xl font-bold leading-tight">{screen.title}</span>
+          <span className="mt-2 h-1 w-10 rounded-full bg-[var(--c-accent)]" />
+        </span>
+        <span
+          className="absolute inset-0 rounded-xl bg-[var(--c-accent)] shadow-lg [clip-path:polygon(0_0,50%_54%,100%_0,100%_100%,0_100%)]"
+          style={{ zIndex: 3 }}
+        />
+        <span
+          className={`absolute inset-x-0 top-0 h-[60%] origin-top rounded-t-xl bg-[var(--c-accent)] brightness-90 [clip-path:polygon(0_0,100%_0,50%_100%)] ${open ? "[transform:rotateX(180deg)]" : ""}`}
+          style={{ zIndex: open ? 1 : 4, transition: "transform 0.5s ease-in-out, z-index 0s linear 0.25s" }}
+        />
+        <span
+          className={`absolute left-1/2 top-[60%] grid h-14 w-14 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-[#b3123f] text-2xl shadow-lg ring-4 ring-white/30 transition duration-300 ${open ? "scale-0 opacity-0" : "group-hover:scale-110"}`}
+          style={{ zIndex: 5 }}
+        >
+          {emoji}
+        </span>
+      </button>
+      {open ? (
+        <div className="flex animate-screen-in flex-col items-center gap-5 [animation-delay:800ms]">
+          <p className="text-lg text-[var(--c-muted)]">{screen.subtitle}</p>
+          <PrimaryButton onClick={onNext}>{screen.button}</PrimaryButton>
+        </div>
+      ) : (
+        <p className="animate-pulse text-sm font-semibold opacity-80">Tap the envelope to open it</p>
+      )}
     </div>
   );
 }
 
-const NO_LINES = ["Are you sure?", "Really sure?", "Think again 🥺", "Pleeease", "Nice try 😏", "You can't escape", "Just press yes!", "Wrong button 🙈"];
-
 export function QuestionScreen({ screen, onNext }: ScreenProps<"question">) {
-  const area = useRef<HTMLDivElement>(null);
-  const yesRef = useRef<HTMLButtonElement>(null);
-  const noRef = useRef<HTMLButtonElement>(null);
-  const [dodges, setDodges] = useState(0);
-  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
+  const { area, yes, noProps, dodges, moved, label } = useRunaway();
   const [saidYes, setSaidYes] = useState(false);
-
-  // The No button jumps somewhere random inside the play area, avoiding the Yes button.
-  const dodge = () => {
-    const box = area.current?.getBoundingClientRect();
-    const no = noRef.current?.getBoundingClientRect();
-    const yes = yesRef.current?.getBoundingClientRect();
-    if (!box || !no) return;
-    let x = 0;
-    let y = 0;
-    for (let tries = 0; tries < 20; tries++) {
-      x = Math.random() * Math.max(box.width - no.width, 0);
-      y = Math.random() * Math.max(box.height - no.height, 0);
-      if (!yes) break;
-      const left = box.left + x;
-      const top = box.top + y;
-      const overlaps = left < yes.right + 12 && left + no.width > yes.left - 12 && top < yes.bottom + 12 && top + no.height > yes.top - 12;
-      if (!overlaps) break;
-    }
-    setPos({ x, y });
-    setDodges((d) => d + 1);
-  };
 
   if (saidYes) {
     return (
@@ -73,29 +83,13 @@ export function QuestionScreen({ screen, onNext }: ScreenProps<"question">) {
   }
 
   const yesScale = Math.min(1 + dodges * 0.12, 1.8);
-  // Sits next to Yes until the first dodge, then roams the play area. It can never be pressed.
+  // Sits next to Yes until the first dodge, then roams the play area.
   const noButton = (
     <button
-      ref={noRef}
-      onPointerEnter={(e) => e.pointerType === "mouse" && dodge()}
-      onPointerDown={(e) => {
-        e.preventDefault();
-        dodge();
-      }}
-      onClick={(e) => {
-        e.preventDefault();
-        dodge();
-      }}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          dodge();
-        }
-      }}
-      style={pos ? { left: pos.x, top: pos.y } : undefined}
-      className={`${pos ? "absolute transition-[left,top] duration-200 ease-out" : ""} whitespace-nowrap rounded-full bg-[var(--c-secondary)] px-6 py-3 font-display text-base font-semibold text-[var(--c-text)] shadow ring-1 ring-black/10`}
+      {...noProps}
+      className={`${moved ? "absolute transition-[left,top] duration-200 ease-out" : ""} whitespace-nowrap rounded-full bg-[var(--c-secondary)] px-6 py-3 font-display text-base font-semibold text-[var(--c-text)] shadow ring-1 ring-black/10`}
     >
-      {dodges === 0 ? screen.no : NO_LINES[(dodges - 1) % NO_LINES.length]}
+      {label(screen.no)}
     </button>
   );
 
@@ -106,16 +100,16 @@ export function QuestionScreen({ screen, onNext }: ScreenProps<"question">) {
       <div ref={area} className="relative h-64 w-full">
         <div className="absolute inset-x-0 top-6 flex items-center justify-center gap-4">
           <button
-            ref={yesRef}
+            ref={yes}
             onClick={() => setSaidYes(true)}
             style={{ transform: `scale(${yesScale})` }}
             className="rounded-full bg-[var(--c-accent)] px-8 py-3.5 font-display text-lg font-semibold text-[var(--c-accent-text)] shadow-lg transition-transform duration-300"
           >
             {screen.yes}
           </button>
-          {!pos && noButton}
+          {!moved && noButton}
         </div>
-        {pos && noButton}
+        {moved && noButton}
       </div>
     </div>
   );

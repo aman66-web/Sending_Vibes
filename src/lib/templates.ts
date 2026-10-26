@@ -157,3 +157,33 @@ const templateScreens: Record<Occasion, (to: string, from: string) => Screen[]> 
     },
   ],
 };
+
+// Illustrated sample photos so the demos show off the polaroid screen.
+const DEMO_PHOTOS: Record<Occasion, { src: string; caption: string }[]> = {
+  valentine: [
+    { src: "/demo/sunset.svg", caption: "Golden hour with you" },
+    { src: "/demo/coffee.svg", caption: "Where it all started ☕" },
+    { src: "/demo/lights.svg", caption: "Fairy-light nights ✨" },
+  ],
+  diwali: [
+    { src: "/demo/rangoli.svg", caption: "Our rangoli this year" },
+    { src: "/demo/lights.svg", caption: "Diwali at home 🪔" },
+    { src: "/demo/fireworks.svg", caption: "Fireworks from the roof" },
+  ],
+  birthday: [
+    { src: "/demo/cake.svg", caption: "Cake o'clock 🎂" },
+    { src: "/demo/balloons.svg", caption: "Up, up and away" },
+    { src: "/demo/sunset.svg", caption: "Last summer ☀️" },
+  ],
+};
+
+export function buildDemo(occasion: Occasion): CardData {
+  const card = buildTemplate(occasion, "Priya", "Sam");
+  const photos = DEMO_PHOTOS[occasion];
+  return {
+    ...card,
+    screens: card.screens.map((s) =>
+      s.type === "photos" ? { ...s, photos: photos.map((p) => p.src), captions: photos.map((p) => p.caption) } : s,
+    ),
+  };
+}

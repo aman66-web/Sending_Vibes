@@ -157,7 +157,10 @@ export function Particles({ mode, loop = false }: { mode: "confetti" | "firework
         const r = rockets[i];
         r.y += r.vy * dt;
         ctx.fillStyle = r.color;
-        ctx.fillRect(r.x - 1.5, r.y, 3, 10);
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = r.color;
+        ctx.fillRect(r.x - 1.5, r.y, 3, 14);
+        ctx.shadowBlur = 0;
         if (r.y <= r.targetY) {
           explode(r.x, r.y, r.color);
           rockets.splice(i, 1);
@@ -185,9 +188,17 @@ export function Particles({ mode, loop = false }: { mode: "confetti" | "firework
           ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
           ctx.restore();
         } else {
+          // Glowing streaks read as sparks rather than dots.
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = p.color;
+          ctx.strokeStyle = p.color;
+          ctx.lineWidth = p.size;
+          ctx.lineCap = "round";
           ctx.beginPath();
-          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-          ctx.fill();
+          ctx.moveTo(p.x - p.vx * 4, p.y - p.vy * 4);
+          ctx.lineTo(p.x, p.y);
+          ctx.stroke();
+          ctx.shadowBlur = 0;
         }
         ctx.globalAlpha = 1;
       }

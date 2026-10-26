@@ -55,7 +55,7 @@ export function CardPlayer({ card, preview = false, focusScreenId }: Props) {
     <div style={style} className={`relative flex w-full flex-col overflow-hidden ${preview ? "h-full" : "min-h-dvh"}`}>
       <EmojiRain effect={card.ambient} />
 
-      <div className="relative z-10 flex justify-center gap-1.5 pt-5">
+      <div className={`relative z-10 flex justify-center gap-1.5 ${preview ? "pt-12" : "pt-5"}`}>
         {screens.map((s, i) => (
           <button
             key={s.id}
