@@ -88,6 +88,7 @@ export function QuestionScreen({ screen, onNext }: ScreenProps<"question">) {
   const noButton = (
     <button
       {...noProps}
+      data-no
       className={`${moved ? "absolute transition-[left,top] duration-200 ease-out" : ""} whitespace-nowrap rounded-full bg-[var(--c-secondary)] px-6 py-3 font-display text-base font-semibold text-[var(--c-text)] shadow ring-1 ring-black/10`}
     >
       {label(screen.no)}

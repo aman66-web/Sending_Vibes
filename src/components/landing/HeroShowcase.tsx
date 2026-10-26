@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { CardPlayer } from "@/components/card/CardPlayer";
 import { LaptopFrame } from "@/components/LaptopFrame";
+import { AutoPlay } from "./AutoPlay";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { buildTemplateDemo, templatesBySlug } from "@/lib/catalog";
 import { buildDemo } from "@/lib/templates";
@@ -15,6 +16,14 @@ const LAPTOP_TEMPLATE = "be-my-valentine";
 export function HeroShowcase() {
   const [to, setTo] = useState("");
   const [from, setFrom] = useState("");
+  // Clicking into a name box brings the laptop back to the question; every
+  // keystroke keeps the autoplay still so they can watch their name appear.
+  const [jump, setJump] = useState(0);
+  const [typing, setTyping] = useState(0);
+  const startTyping = () => {
+    setJump((n) => n + 1);
+    setTyping((n) => n + 1);
+  };
   const laptopCard = useMemo(() => buildTemplateDemo(templatesBySlug[LAPTOP_TEMPLATE], { to: to.trim(), from: from.trim() }), [to, from]);
   const phoneCard = useMemo(() => buildDemo("diwali"), []);
 
@@ -34,7 +43,9 @@ export function HeroShowcase() {
           <div className="absolute left-0 top-14">
             {/* A slightly smaller virtual screen keeps the card legible at this size. */}
             <LaptopFrame screenWidth={760} screenHeight={475} scale={504 / 760}>
-              <CardPlayer card={laptopCard} preview focusScreenId="question" />
+              <AutoPlay holdSignal={typing}>
+                <CardPlayer card={laptopCard} preview focusScreenId="question" focusNonce={jump} />
+              </AutoPlay>
             </LaptopFrame>
           </div>
           <div className="absolute left-[438px] top-[150px] z-10 h-[307px] w-[150px] rotate-[5deg]">
@@ -61,7 +72,11 @@ export function HeroShowcase() {
             <span className="text-xs font-bold text-ink/50">Their name</span>
             <input
               value={to}
-              onChange={(e) => setTo(e.target.value)}
+              onChange={(e) => {
+                setTo(e.target.value);
+                setTyping((n) => n + 1);
+              }}
+              onFocus={startTyping}
               maxLength={40}
               placeholder="Priya"
               className="mt-1 w-full rounded-xl bg-cream px-3 py-2 text-base font-semibold outline-none ring-1 ring-ink/10 placeholder:text-ink/30 focus:ring-2 focus:ring-hot"
@@ -71,7 +86,11 @@ export function HeroShowcase() {
             <span className="text-xs font-bold text-ink/50">Your name</span>
             <input
               value={from}
-              onChange={(e) => setFrom(e.target.value)}
+              onChange={(e) => {
+                setFrom(e.target.value);
+                setTyping((n) => n + 1);
+              }}
+              onFocus={startTyping}
               maxLength={40}
               placeholder="Sam"
               className="mt-1 w-full rounded-xl bg-cream px-3 py-2 text-base font-semibold outline-none ring-1 ring-ink/10 placeholder:text-ink/30 focus:ring-2 focus:ring-hot"

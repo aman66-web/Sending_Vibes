@@ -23,9 +23,11 @@ type Props = {
   // Creator preview: keeps empty photo screens visible and jumps to the screen being edited.
   preview?: boolean;
   focusScreenId?: string;
+  // Changing this jumps back to focusScreenId even if it hasn't changed.
+  focusNonce?: number;
 };
 
-export function CardPlayer({ card, preview = false, focusScreenId }: Props) {
+export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 0 }: Props) {
   const theme = themes[card.theme];
   const screens = useMemo(
     () => card.screens.filter((s) => preview || s.type !== "photos" || s.photos.length > 0),
@@ -37,10 +39,15 @@ export function CardPlayer({ card, preview = false, focusScreenId }: Props) {
   const [run, setRun] = useState(0);
 
   // Jump to whichever screen the creator is editing.
-  const [focused, setFocused] = useState(focusScreenId);
-  if (focused !== focusScreenId) {
-    setFocused(focusScreenId);
-    if (focusScreenId) setIndex(focusIndex());
+  const focusTarget = `${focusScreenId ?? ""}:${focusNonce}`;
+  const [focused, setFocused] = useState(focusTarget);
+  if (focused !== focusTarget) {
+    setFocused(focusTarget);
+    if (focusScreenId) {
+      setIndex(focusIndex());
+      // Start that screen fresh (e.g. the question again, not "after yes").
+      setRun((r) => r + 1);
+    }
   }
 
   const current = screens[Math.min(index, screens.length - 1)];
