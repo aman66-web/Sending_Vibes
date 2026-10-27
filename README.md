@@ -71,6 +71,16 @@ SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
 
 No secret key is needed. The `cards` table can't be read or listed directly; a card can only be fetched by its exact ID through `get_card`. Photo uploads are insert-only, so existing photos can't be overwritten or listed.
 
+## Live chat (Claude)
+
+The chat bubble in the bottom corner answers questions, suggests designs and helps write card messages. It only appears once this is set (on Vercel, for Production and Preview, then redeploy):
+
+```
+ANTHROPIC_API_KEY=sk-ant-...
+```
+
+What it knows comes from `src/lib/chat-prompt.ts`, built from the real catalogue. The server route is `src/app/api/chat/route.ts`: messages are capped at 800 characters and each visitor at 20 messages per 10 minutes. Set a monthly spend limit on the key in the Claude Console as the real backstop.
+
 ## Roadmap
 
 - [ ] Stripe checkout: every card is paid (£3.99, or £9.99 for AI Custom)
