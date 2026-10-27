@@ -5,12 +5,14 @@ import { fmt } from "@/i18n/config";
 import { useI18n } from "@/i18n/client";
 import type { Dict } from "@/i18n/en";
 import { OCCASIONS, type Occasion } from "@/lib/card";
-import { TONES, type Tone } from "@/lib/catalog";
+import { TONES, type Template, type Tone } from "@/lib/catalog";
 import { price } from "@/lib/pricing";
 import { occasions } from "@/lib/templates";
+import { ProductThumb } from "@/components/catalog/ProductThumb";
 import { PhotoField } from "./ScreenEditor";
 
-// The questions a custom card is written from. The eight core ones must all be
+// The questions a card is written from: a personalised one from scratch, or a
+// ready-made design with their words written into it. The eight core ones must all be
 // answered (the written ones at some length, since specific details are what make a
 // card feel personal); then up to two follow-ups written about their answers, which
 // can be skipped, and an optional step to add photos.
@@ -55,7 +57,8 @@ export const MIN_CHARS: Partial<Record<Question, number>> = { memory: 40, about:
 const FOLLOWUPS = 2;
 
 // The answers written out for the card writer. Labels are in the visitor's language.
-export function quizPrompt(a: Answers, t: Dict) {
+// Photos only shape a card made from scratch; a design keeps its own screens.
+export function quizPrompt(a: Answers, t: Dict, { askForPhotos = true } = {}) {
   const to = a.to.trim();
   const feel = [...a.vibes.map((v) => t.tones[v]), a.vibeOther.trim()].filter(Boolean);
   const lines = [
@@ -67,7 +70,7 @@ export function quizPrompt(a: Answers, t: Dict) {
     `What I most want them to know: ${a.message.trim()}`,
   ];
   for (const f of a.followups ?? []) if (f.a.trim()) lines.push(`${f.q}\n${f.a.trim()}`);
-  if (a.photos.length) lines.push(`I've added ${a.photos.length} photo${a.photos.length > 1 ? "s" : ""}, so include a photos screen.`);
+  if (askForPhotos && a.photos.length) lines.push(`I've added ${a.photos.length} photo${a.photos.length > 1 ? "s" : ""}, so include a photos screen.`);
   return lines.join("\n");
 }
 
@@ -96,24 +99,34 @@ type Props = {
   index: number;
   setIndex: (i: number) => void;
   onGenerate: () => void;
-  onDescribe: () => void;
-  onPremade: () => void;
+  // Back from the first question.
+  onBack: () => void;
+  // A personalised card can be described in their own words instead.
+  onDescribe?: () => void;
+  // The ready-made design their words go into, and a way to pick another.
+  design?: Template;
+  onChangeDesign?: () => void;
 };
 
-export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onDescribe, onPremade }: Props) {
+export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack, onDescribe, design, onChangeDesign }: Props) {
   const { t, currency } = useI18n();
   const q = t.quiz;
   const name = answers.to.trim() || q.them;
+  // Photos have somewhere to go unless the design has no photos screen.
+  const photoStep = !design || design.screens("", "").some((s) => s.type === "photos");
   // The core questions, then a follow-up step for each follow-up (or one "thinking"
   // step while they're being written), then photos.
   const followups = answers.followups;
   const steps: (Question | "thinking" | `f${number}` | "photos")[] = [
     ...QUESTIONS,
     ...(followups ? followups.map((_, i) => `f${i}` as const) : (["thinking"] as const)),
-    "photos",
+    ...(photoStep ? (["photos"] as const) : []),
   ];
-  const step = steps[Math.min(index, steps.length - 1)];
-  const total = QUESTIONS.length + (followups ? followups.length : FOLLOWUPS) + 1;
+  const at = Math.min(index, steps.length - 1);
+  const step = steps[at];
+  // The last step makes the card.
+  const last = at === steps.length - 1 && step !== "thinking";
+  const total = QUESTIONS.length + (followups ? followups.length : FOLLOWUPS) + (photoStep ? 1 : 0);
   const core = (QUESTIONS as readonly string[]).includes(step) ? (step as Question) : null;
   const followIndex = step.startsWith("f") && step !== "from" ? Number(step.slice(1)) : -1;
   const ready = core ? answered(core, answers, q.relations) : step !== "thinking";
@@ -146,9 +159,9 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onDescr
 
   const next = () => {
     if (!ready) return;
-    if (step === "photos") return onGenerate();
+    if (last) return onGenerate();
     if (step === "from" && !followups) askFollowups();
-    setIndex(index + 1);
+    setIndex(at + 1);
   };
   // Single choices move on by themselves, after a beat so the tap registers.
   const pickAndGo = (apply: () => void) => {
@@ -178,7 +191,20 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onDescr
         </div>
         <span className="shrink-0 text-sm font-semibold opacity-60">{fmt(q.progress, { n: index + 1, total })}</span>
       </div>
-      {index === 0 && <p className="mt-6 opacity-70">{q.intro}</p>}
+      {index === 0 && <p className="mt-6 opacity-70">{design ? q.readyIntro : q.intro}</p>}
+      {index === 0 && design && (
+        <div className="mt-4 flex items-center gap-3 rounded-2xl border border-line bg-panel p-2 pe-4">
+          <div className="w-12 shrink-0 overflow-hidden rounded-md">
+            <ProductThumb template={design} />
+          </div>
+          <p className="min-w-0 flex-1 truncate text-sm font-semibold">{fmt(q.yourDesign, { name: design.name })}</p>
+          {onChangeDesign && (
+            <button type="button" onClick={onChangeDesign} className="text-sm font-semibold text-brand underline-offset-4 hover:underline">
+              {q.changeDesign}
+            </button>
+          )}
+        </div>
+      )}
 
       <form
         key={step}
@@ -322,32 +348,31 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onDescr
         </div>
 
         <div className="mt-auto flex items-center gap-3 pt-10">
-          {index > 0 && step !== "thinking" && (
-            <button type="button" onClick={() => setIndex(index - 1)} className="rounded-full border-2 border-line px-5 py-3 font-semibold hover:border-foreground/40">
+          {step !== "thinking" && (
+            <button type="button" onClick={() => (at > 0 ? setIndex(at - 1) : onBack())} className="rounded-full border-2 border-line px-5 py-3 font-semibold hover:border-foreground/40">
               ← {q.back}
             </button>
           )}
           {followIndex >= 0 && (
-            <button type="button" onClick={() => setIndex(index + 1)} className="px-3 py-3 text-sm font-semibold opacity-60 hover:opacity-100">
+            <button type="button" onClick={() => (last ? onGenerate() : setIndex(at + 1))} className="px-3 py-3 text-sm font-semibold opacity-60 hover:opacity-100">
               {q.skip}
             </button>
           )}
           {step !== "thinking" && (
             <button disabled={!ready} className="ms-auto rounded-full bg-brand px-7 py-3.5 font-brand text-lg font-semibold text-white shadow-lg disabled:opacity-40">
-              {step === "photos" ? `${q.generate} ✨` : `${q.next} →`}
+              {last ? `${q.generate} ✨` : `${q.next} →`}
             </button>
           )}
         </div>
-        {step === "photos" && <p className="mt-3 text-end text-sm opacity-60">{fmt(q.price, { price: price("custom", currency) })}</p>}
+        {last && (
+          <p className="mt-3 text-end text-sm opacity-60">{design ? fmt(q.readyPrice, { price: price("card", currency) }) : fmt(q.price, { price: price("custom", currency) })}</p>
+        )}
       </form>
 
-      {index === 0 && (
-        <div className="mt-10 flex flex-wrap gap-x-6 gap-y-2 border-t border-line pt-5 text-sm font-semibold">
+      {index === 0 && onDescribe && (
+        <div className="mt-10 border-t border-line pt-5 text-sm font-semibold">
           <button onClick={onDescribe} className="text-brand underline-offset-4 hover:underline">
             {q.describeLink}
-          </button>
-          <button onClick={onPremade} className="opacity-70 underline-offset-4 hover:underline">
-            {fmt(q.premadeLink, { price: price("card", currency) })}
           </button>
         </div>
       )}

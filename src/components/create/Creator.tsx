@@ -10,12 +10,13 @@ import { PhoneFrame } from "@/components/PhoneFrame";
 import { addToBasket } from "@/lib/basket";
 import { EFFECTS, OCCASIONS, THEMES, type CardData, type Effect, type Occasion, type Screen, type ScreenType, type ThemeName } from "@/lib/card";
 import { ProductThumb } from "@/components/catalog/ProductThumb";
-import { TEMPLATES, buildCard, cardTier, deviceInfo, getTemplate, toneInfo } from "@/lib/catalog";
-import { defaultTemplate, occasions } from "@/lib/templates";
+import { TEMPLATES, cardTier, getTemplate, toneInfo } from "@/lib/catalog";
+import { occasions } from "@/lib/templates";
 import { formatMoney, price, tierPrice } from "@/lib/pricing";
 import { themes } from "@/lib/themes";
 import { fmt } from "@/i18n/config";
 import { useI18n } from "@/i18n/client";
+import { TwoWays } from "@/components/TwoWays";
 import { NO_ANSWERS, Quiz, quizPrompt, type Answers } from "./Quiz";
 import { Field, ScreenEditor, Select } from "./ScreenEditor";
 import { EditableCard, setAt, type Path } from "./WordEditing";
@@ -94,13 +95,15 @@ const NEW_SCREENS: Record<Addable, { emoji: string; make: () => Screen }> = {
 
 type Album = { photos: string[]; captions: string[] };
 
-// Puts photos added before the card was written into its photos screen, adding one
-// before the message (or finale) if the writer didn't include one.
-function withPhotos(card: CardData, album: Album | undefined, title: string): CardData {
+// Puts photos added before the card was written into its photos screen. A card made
+// from scratch gets one before the message (or finale) if the writer didn't include
+// one; a ready-made design keeps its screens as they are.
+function withPhotos(card: CardData, album: Album | undefined, title: string, addScreen: boolean): CardData {
   if (!album?.photos.length) return card;
   const { photos, captions } = album;
   const at = card.screens.findIndex((s) => s.type === "photos");
   if (at >= 0) return { ...card, screens: card.screens.map((s, i) => (i === at && s.type === "photos" ? { ...s, photos, captions } : s)) };
+  if (!addScreen) return card;
   const before = card.screens.findIndex((s) => s.type === "message" || s.type === "finale");
   const screens = [...card.screens];
   screens.splice(before > 0 ? before : screens.length, 0, { id: uid(), type: "photos", title, photos, captions });
@@ -111,8 +114,9 @@ function uid() {
   return Math.random().toString(36).slice(2, 10);
 }
 
-type Step = "quiz" | "describe" | "making" | "occasion" | "design" | "names" | "edit";
-// Premade keeps a design's screens as they are; custom can change anything, including by typing.
+// Choose a way, pick a design (ready-made only), answer the questions, then edit.
+type Step = "choose" | "pick" | "quiz" | "describe" | "making" | "edit";
+// Premade (a ready-made design) keeps its screens as they are; custom (personalised) can change anything, including by typing.
 type Mode = "premade" | "custom";
 export type Start = Mode;
 
@@ -155,11 +159,11 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   ) as Record<Exclude<Effect, "fireworks">, string>;
   const chosen = getTemplate(initialTemplate);
   const [draft] = useState(() => (initialOccasion || chosen || initialStart ? null : loadDraft()));
+  // A design picked elsewhere goes straight to the questions; an occasion opens the designs for it.
   const [step, setStep] = useState<Step>(
-    draft ? "edit" : chosen ? "names" : initialOccasion ? "design" : initialStart === "premade" ? "occasion" : "quiz",
+    draft ? "edit" : chosen ? "quiz" : initialOccasion || initialStart === "premade" ? "pick" : initialStart === "custom" ? "quiz" : "choose",
   );
-  const [mode, setMode] = useState<Mode>(() => (draft ? loadMode(draft) : initialStart === "custom" ? "custom" : "premade"));
-  const [occasion, setOccasion] = useState<Occasion>(draft?.occasion ?? chosen?.occasion ?? initialOccasion ?? "valentine");
+  const [mode, setMode] = useState<Mode>(() => (draft ? loadMode(draft) : chosen || initialOccasion || initialStart === "premade" ? "premade" : "custom"));
   const [templateSlug, setTemplateSlug] = useState<string | undefined>(chosen?.slug);
   const [to, setTo] = useState(draft?.to ?? initialTo ?? "");
   const [from, setFrom] = useState(draft?.from ?? initialFrom ?? "");
@@ -184,12 +188,13 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   const [viewing, setViewing] = useState<string | undefined>();
   const [nudge, setNudge] = useState(0);
   const [screenAsk, setScreenAsk] = useState("");
-  // The eight-question quiz.
-  const [answers, setAnswers] = useState<Answers>(NO_ANSWERS);
+  // The eight-question quiz. Names from a product page and a design's occasion are filled in already.
+  const [answers, setAnswers] = useState<Answers>({ ...NO_ANSWERS, to: initialTo ?? "", from: initialFrom ?? "", occasion: chosen?.occasion ?? "" });
   const [question, setQuestion] = useState(0);
   // Clicking words on the preview edits them; Play lets the card react as it will for them.
   const [wordMode, setWordMode] = useState<"edit" | "play">("edit");
-  const [pickOccasion, setPickOccasion] = useState<Occasion | "all">("all");
+  const [pickOccasion, setPickOccasion] = useState<Occasion | "all">(initialOccasion ?? "all");
+  const design = mode === "premade" ? getTemplate(templateSlug) : undefined;
   const ideaBox = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -201,14 +206,22 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     } catch {}
   }, [card, step, mode]);
 
-  const start = () => {
-    const template = getTemplate(templateSlug) ?? defaultTemplate(occasion);
-    const built = buildCard(template, to.trim(), from.trim());
-    // A colour picked on the product page carries over, but only for that design.
-    const c = initialTheme && template.slug === initialTemplate ? { ...built, theme: initialTheme } : built;
-    setCard(c);
-    setSelected(c.screens[0].id);
-    setStep("edit");
+  // The two ways: personalised goes to the questions, ready-made to the designs first.
+  const chooseWay = (way: Mode) => {
+    setMode(way);
+    setQuestion(0);
+    setStep(way === "premade" ? "pick" : "quiz");
+    window.scrollTo({ top: 0 });
+  };
+
+  // From the designs to the questions, with the design's occasion filled in.
+  const toQuestions = () => {
+    const tpl = getTemplate(templateSlug);
+    if (!tpl) return;
+    setAnswers((a) => (a.occasion || a.occasionOther ? a : { ...a, occasion: tpl.occasion }));
+    setQuestion(0);
+    setStep("quiz");
+    window.scrollTo({ top: 0 });
   };
 
   const startOver = () => {
@@ -220,13 +233,15 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     setAiDone(false);
     setAnswers(NO_ANSWERS);
     setQuestion(0);
-    setStep("quiz");
+    setTemplateSlug(undefined);
+    setMode("custom");
+    setStep("choose");
   };
 
   // Asks for a new card from a description, or for a change to the current one. The
   // reply streams in: a line for each screen as it's written, then the finished card.
   const callAi = async (
-    body: { prompt: string; card?: CardData },
+    body: { prompt: string; card?: CardData; focus?: string; template?: string; keepDesign?: boolean },
     names: { to: string; from: string },
     onProgress?: (screens: ScreenType[]) => void,
     signal?: AbortSignal,
@@ -269,15 +284,16 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   };
 
   const makeFromQuiz = () => {
-    const prompt = quizPrompt(answers, t);
+    const prompt = quizPrompt(answers, t, { askForPhotos: !design });
     setTo(answers.to.trim());
     setFrom(answers.from.trim());
     setIdea(prompt);
-    makeCard(prompt, { to: answers.to, from: answers.from }, "quiz", { photos: answers.photos, captions: answers.captions });
+    makeCard(prompt, { to: answers.to, from: answers.from }, "quiz", { photos: answers.photos, captions: answers.captions }, design?.slug);
   };
 
   // Writes a new card, showing the loading screen; going back returns to where it was asked for.
-  const makeCard = async (prompt: string, names: { to: string; from: string }, source: "quiz" | "describe", album?: Album) => {
+  // With a design, only its words are written and everything else stays as the design has it.
+  const makeCard = async (prompt: string, names: { to: string; from: string }, source: "quiz" | "describe", album?: Album, template?: string) => {
     const controller = new AbortController();
     making.current = controller;
     setBusy("make");
@@ -286,10 +302,13 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     setStep("making");
     window.scrollTo({ top: 0 });
     try {
-      const made = withPhotos(await callAi({ prompt }, names, setProgress, controller.signal), album, t.labels.screens.photos);
+      const written = await callAi(template ? { prompt, template, keepDesign: true } : { prompt }, names, setProgress, controller.signal);
+      // A colour picked on the product page carries over, but only for that design.
+      const coloured = template && initialTheme && template === initialTemplate ? { ...written, theme: initialTheme } : written;
+      const made = withPhotos(coloured, album, t.labels.screens.photos, !template);
       setCard(made);
       setSelected(made.screens[0]?.id);
-      setMode("custom");
+      setMode(template ? "premade" : "custom");
       setStep("edit");
       window.scrollTo({ top: 0 });
     } catch (e) {
@@ -316,7 +335,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     // Typing changes are a custom-card thing.
     setMode("custom");
     try {
-      const changed = await callAi({ prompt: prompt.trim(), card, ...(focus ? { focus } : {}) }, { to: card.to, from: card.from });
+      const changed = await callAi({ prompt: prompt.trim(), card, focus }, { to: card.to, from: card.from });
       setUndo(card);
       setCard(changed);
       if (focus) {
@@ -396,23 +415,22 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
             index={question}
             setIndex={setQuestion}
             onGenerate={makeFromQuiz}
-            onDescribe={() => setStep("describe")}
-            onPremade={() => {
-              setMode("premade");
-              setStep("occasion");
-            }}
+            onBack={() => setStep(design ? "pick" : "choose")}
+            onDescribe={design ? undefined : () => setStep("describe")}
+            design={design}
+            onChangeDesign={() => setStep("pick")}
           />
           {aiError && <p className="mx-auto -mt-6 max-w-2xl px-4 pb-8 text-sm font-semibold text-red-600">{aiError}</p>}
         </>
       )}
 
       {step === "describe" && (
-        <section className="mx-auto max-w-6xl px-4 py-10">
+        <section className="mx-auto max-w-3xl px-4 py-10">
           <button onClick={() => setStep("quiz")} className="text-sm font-semibold opacity-70">
             {x.back}
           </button>
-          <div className="mt-4 grid gap-10 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
-            <div className="min-w-0">
+          <div className="mt-4">
+            <div>
               <h1 className="font-brand text-4xl font-bold leading-tight sm:text-5xl">{x.describeTitle}</h1>
               <p className="mt-3 max-w-xl opacity-70">{x.describeIntro}</p>
               <form
@@ -476,44 +494,6 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                 })}
               </div>
             </div>
-
-            <aside className="min-w-0">
-              <div className="rounded-3xl border border-line bg-panel p-4 sm:p-5 lg:sticky lg:top-6">
-                <h2 className="font-brand text-2xl font-bold">{x.orTemplate}</h2>
-                <p className="mt-1 text-sm opacity-70">{x.orTemplateIntro}</p>
-                <select
-                  value={pickOccasion}
-                  onChange={(e) => setPickOccasion(e.target.value as Occasion | "all")}
-                  aria-label={x.orTemplate}
-                  className="mt-4 w-full rounded-xl border border-line bg-background px-3 py-2.5 text-sm font-semibold"
-                >
-                  <option value="all">{x.allOccasions}</option>
-                  {OCCASIONS.map((o) => (
-                    <option key={o} value={o}>
-                      {occasions[o].emoji} {t.occasions[o].label}
-                    </option>
-                  ))}
-                </select>
-                <div className="mt-4 grid max-h-[70vh] grid-cols-2 gap-3 overflow-y-auto pe-1 sm:grid-cols-3 lg:grid-cols-2">
-                  {TEMPLATES.filter((tpl) => pickOccasion === "all" || tpl.occasion === pickOccasion).map((tpl) => (
-                    <button
-                      key={tpl.slug}
-                      type="button"
-                      onClick={() => {
-                        setTemplateSlug(tpl.slug);
-                        setOccasion(tpl.occasion);
-                        setMode("custom");
-                        setStep("names");
-                      }}
-                      className="overflow-hidden rounded-2xl border border-line bg-background text-start transition hover:-translate-y-0.5 hover:border-brand"
-                    >
-                      <ProductThumb template={tpl} />
-                      <p className="p-2 text-xs font-bold leading-tight">{tpl.name}</p>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </aside>
           </div>
         </section>
       )}
@@ -549,95 +529,73 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
         </section>
       )}
 
-      {step === "occasion" && (
-        <section className="mx-auto max-w-5xl px-4 py-12">
-          <button onClick={() => setStep("quiz")} className="text-sm font-semibold opacity-70">
+      {step === "choose" && (
+        <section className="mx-auto max-w-5xl px-4 py-10 sm:py-14">
+          <h1 className="text-center font-brand text-4xl font-bold sm:text-5xl">{c.chooseTitle}</h1>
+          <p className="mx-auto mt-3 max-w-xl text-center opacity-70">{c.chooseIntro}</p>
+          <div className="mt-10">
+            <TwoWays onPick={chooseWay} />
+          </div>
+        </section>
+      )}
+
+      {step === "pick" && (
+        <section className="mx-auto max-w-6xl px-4 pb-32 pt-10">
+          <button onClick={() => setStep("choose")} className="text-sm font-semibold opacity-70">
             {x.back}
           </button>
-          <h1 className="text-center font-brand text-4xl font-bold">{c.occasionTitle}</h1>
-          <p className="mt-2 text-center opacity-70">
-            {fmt(c.occasionIntro, { o: OCCASIONS.length, n: TEMPLATES.length })}
-          </p>
-          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-            {OCCASIONS.map((o) => (
+          <h1 className="mt-4 font-brand text-4xl font-bold sm:text-5xl">{c.pickTitle}</h1>
+          <p className="mt-2 max-w-2xl opacity-70">{c.pickIntro}</p>
+          <div className="mt-6 flex flex-wrap gap-2">
+            {(["all", ...OCCASIONS] as const).map((o) => (
               <button
                 key={o}
-                onClick={() => {
-                  setOccasion(o);
-                  setStep("design");
-                }}
-                className="rounded-3xl border border-line bg-panel p-4 text-start shadow-sm transition hover:-translate-y-1 hover:border-brand hover:shadow-md sm:p-5"
+                onClick={() => setPickOccasion(o)}
+                aria-pressed={pickOccasion === o}
+                className={`rounded-full border-2 px-3.5 py-1.5 text-sm font-semibold transition ${pickOccasion === o ? "border-brand bg-brand text-white" : "border-line bg-panel hover:border-brand"}`}
               >
-                <div className="flex items-center justify-between">
-                  <span className="text-4xl">{occasions[o].emoji}</span>
-                  <span className="rounded-full bg-brand-soft px-2 py-0.5 text-xs font-bold text-brand">{fmt(t.common.designs, { n: TEMPLATES.filter((x) => x.occasion === o).length })}</span>
-                </div>
-                <div className="mt-3 font-brand text-lg font-bold leading-tight">{t.occasions[o].label}</div>
-                <p className="mt-1 text-sm leading-snug opacity-70">{t.occasions[o].tagline}</p>
+                {o === "all" ? x.allOccasions : `${occasions[o].emoji} ${t.occasions[o].label}`}
               </button>
             ))}
           </div>
-        </section>
-      )}
-
-      {step === "design" && (
-        <section className="mx-auto max-w-5xl px-4 py-12">
-          <button onClick={() => setStep("occasion")} className="text-sm font-semibold opacity-70">
-            {c.allOccasions}
-          </button>
-          <h1 className="mt-4 font-brand text-4xl font-bold">
-            {fmt(c.designTitle, { label: t.occasions[occasion].label, emoji: occasions[occasion].emoji })}
-          </h1>
-          <p className="mt-1 opacity-70">{c.designIntro}</p>
-          <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {TEMPLATES.filter((x) => x.occasion === occasion).map((tpl) => (
-              <div key={tpl.slug} className="group overflow-hidden rounded-3xl border border-line bg-panel shadow-sm transition hover:-translate-y-1 hover:border-brand hover:shadow-md">
-                <button
-                  onClick={() => {
-                    setTemplateSlug(tpl.slug);
-                    setStep("names");
-                  }}
-                  className="block w-full text-start"
+          <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {TEMPLATES.filter((tpl) => pickOccasion === "all" || tpl.occasion === pickOccasion).map((tpl) => {
+              const on = tpl.slug === templateSlug;
+              return (
+                <div
+                  key={tpl.slug}
+                  className={`relative overflow-hidden rounded-3xl border-2 bg-panel shadow-sm transition ${on ? "border-brand ring-4 ring-brand/20" : "border-line hover:-translate-y-1 hover:border-brand hover:shadow-md"}`}
                 >
-                  <ProductThumb template={tpl} />
-                  <div className="p-3">
-                    <p className="font-brand font-bold leading-tight">{tpl.name}</p>
-                    <p className="mt-1 text-xs opacity-70">
-                      {toneInfo[tpl.tone].emoji} {t.tones[tpl.tone]} · {deviceInfo[tpl.device].emoji} {t.devices[tpl.device].label}
-                    </p>
-                  </div>
-                </button>
-                <a href={`/cards/${tpl.slug}`} target="_blank" rel="noreferrer" className="block border-t border-line px-3 py-2 text-xs font-semibold text-brand">
-                  {c.previewIt}
-                </a>
-              </div>
-            ))}
+                  <button onClick={() => setTemplateSlug(tpl.slug)} aria-pressed={on} className="block w-full text-start">
+                    <ProductThumb template={tpl} />
+                    <div className="p-3">
+                      <p className="font-brand font-bold leading-tight">{tpl.name}</p>
+                      <p className="mt-1 text-xs opacity-70">
+                        {occasions[tpl.occasion].emoji} {t.occasions[tpl.occasion].label} · {toneInfo[tpl.tone].emoji} {t.tones[tpl.tone]}
+                      </p>
+                    </div>
+                  </button>
+                  {on && <span className="pointer-events-none absolute start-3 top-3 rounded-full bg-brand px-2.5 py-1 text-xs font-bold text-white">✓ {c.chosen}</span>}
+                  <a href={`/cards/${tpl.slug}`} target="_blank" rel="noreferrer" className="block border-t border-line px-3 py-2 text-xs font-semibold text-brand">
+                    {c.previewIt}
+                  </a>
+                </div>
+              );
+            })}
           </div>
-        </section>
-      )}
-
-      {step === "names" && (
-        <section className="mx-auto max-w-md px-4 py-12">
-          <button onClick={() => setStep(mode === "custom" && !chosen ? "describe" : "design")} className="text-sm font-semibold opacity-70">
-            ← {getTemplate(templateSlug)?.name ?? t.occasions[occasion].label}
-          </button>
-          <h1 className="mt-4 font-brand text-4xl font-bold">{c.namesTitle}</h1>
-          <form
-            className="mt-6 space-y-4"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (to.trim() && from.trim()) start();
-            }}
-          >
-            <Field label={c.theirName} value={to} max={40} onChange={setTo} placeholder={c.theirExample} />
-            <Field label={c.yourName} value={from} max={40} onChange={setFrom} placeholder={c.yourExample} />
-            <button
-              disabled={!to.trim() || !from.trim()}
-              className="w-full rounded-full bg-brand py-3.5 font-brand text-lg font-semibold text-white disabled:opacity-40"
-            >
-              {c.next}
-            </button>
-          </form>
+          {/* Always in reach while scrolling the designs. Kept to the left, clear of the chat button. */}
+          <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-background/95 px-4 py-3 backdrop-blur">
+            <div className="mx-auto flex max-w-6xl items-center gap-4">
+              <button
+                onClick={toQuestions}
+                disabled={!getTemplate(templateSlug)}
+                className="shrink-0 rounded-full bg-brand px-6 py-3 font-brand text-lg font-semibold text-white shadow-lg disabled:opacity-40"
+              >
+                {c.pickNext} →
+              </button>
+              <p className="min-w-0 truncate text-sm font-semibold opacity-70">{getTemplate(templateSlug)?.name ?? c.pickHint}</p>
+            </div>
+          </div>
         </section>
       )}
 

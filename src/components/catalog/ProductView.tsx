@@ -9,7 +9,7 @@ import { useI18n } from "@/i18n/client";
 import type { Dict } from "@/i18n/en";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { THEMES, type Screen, type ThemeName } from "@/lib/card";
-import { buildTemplateDemo, deviceInfo, templatesBySlug, toneInfo } from "@/lib/catalog";
+import { buildTemplateDemo, templatesBySlug, toneInfo } from "@/lib/catalog";
 import { price } from "@/lib/pricing";
 import { occasions } from "@/lib/templates";
 import { themes } from "@/lib/themes";
@@ -72,7 +72,7 @@ export function ProductView({ slug }: { slug: string }) {
   const template = templatesBySlug[slug];
   const { t, currency } = useI18n();
   const p = t.product;
-  const [frame, setFrame] = useState<"phone" | "desktop">(template.device === "desktop" ? "desktop" : "phone");
+  const [frame, setFrame] = useState<"phone" | "desktop">("phone");
   const [to, setTo] = useState("");
   const [from, setFrom] = useState("");
   const [theme, setTheme] = useState<ThemeName>(template.theme);
@@ -132,9 +132,7 @@ export function ProductView({ slug }: { slug: string }) {
           <span className="rounded-full border-2 border-ink/15 bg-paper px-3 py-1">
             {toneInfo[template.tone].emoji} {t.tones[template.tone]}
           </span>
-          <span className="rounded-full border-2 border-ink bg-ink px-3 py-1 text-paper">
-            {deviceInfo[template.device].emoji} {t.devices[template.device].label}
-          </span>
+          <span className="rounded-full border-2 border-ink bg-ink px-3 py-1 text-paper">✨ {t.devices.everywhere.label}</span>
         </div>
         <h1 dir="auto" className="mt-4 font-brand text-4xl font-bold leading-tight sm:text-5xl">{template.name}</h1>
         <p dir="auto" className="mt-3 text-lg text-ink/70">{template.blurb}</p>
@@ -200,10 +198,8 @@ export function ProductView({ slug }: { slug: string }) {
             <li>✓ {p.changes.screens}</li>
           </ul>
           <div className="mt-6 rounded-xl border-2 border-dashed border-ink/25 p-4 text-sm">
-            <p className="font-bold">
-              {deviceInfo[template.device].emoji} {t.devices[template.device].label}
-            </p>
-            <p className="mt-1 text-ink/60">{t.devices[template.device].detail}</p>
+            <p className="font-bold">✨ {t.devices.everywhere.label}</p>
+            <p className="mt-1 text-ink/60">{t.devices.everywhere.detail}</p>
           </div>
         </div>
       </div>

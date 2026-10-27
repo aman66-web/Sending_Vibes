@@ -16,6 +16,7 @@ const bodySchema = z.object({
   from: z.string().trim().min(1).max(40),
   card: cardSchema.optional(),
   template: z.string().max(60).regex(/^[a-z0-9-]*$/).optional(),
+  keepDesign: z.boolean().optional(),
   focus: z.string().max(40).optional(),
 });
 
