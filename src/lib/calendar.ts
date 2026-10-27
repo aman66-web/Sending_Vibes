@@ -1,31 +1,35 @@
+import { fmt } from "@/i18n/config";
+import type { Dict } from "@/i18n/en";
 import type { Occasion } from "./card";
 
 // When each occasion next comes round, for the "coming up" strip and occasion pages.
 
-export type DatedOccasion = { occasion: Occasion; name: string; date: Date; approx: boolean };
+// `key` names the date in the dictionary (t.calendar); `name` is the English fallback.
+export type DateKey = keyof Dict["calendar"];
+export type DatedOccasion = { occasion: Occasion; key: DateKey; name: string; date: Date; approx: boolean };
 
 // Festivals that follow the moon move every year, so they're listed by hand.
 // Eid and Raksha Bandhan depend on the moon and can shift by a day.
 // Add the next year's dates before the list runs out (it ends with 2028).
-const LUNAR: { occasion: Occasion; name: string; date: string; approx?: boolean }[] = [
-  { occasion: "diwali", name: "Diwali", date: "2026-11-08" },
-  { occasion: "eid", name: "Eid al-Fitr", date: "2027-03-09", approx: true },
-  { occasion: "holi", name: "Holi", date: "2027-03-22" },
-  { occasion: "eid", name: "Eid al-Adha", date: "2027-05-16", approx: true },
-  { occasion: "rakhi", name: "Raksha Bandhan", date: "2027-08-17", approx: true },
-  { occasion: "diwali", name: "Diwali", date: "2027-10-29" },
-  { occasion: "eid", name: "Eid al-Fitr", date: "2028-02-27", approx: true },
-  { occasion: "holi", name: "Holi", date: "2028-03-10", approx: true },
-  { occasion: "eid", name: "Eid al-Adha", date: "2028-05-05", approx: true },
-  { occasion: "rakhi", name: "Raksha Bandhan", date: "2028-08-04", approx: true },
-  { occasion: "diwali", name: "Diwali", date: "2028-10-17" },
+const LUNAR: { occasion: Occasion; key: DateKey; name: string; date: string; approx?: boolean }[] = [
+  { occasion: "diwali", key: "diwali", name: "Diwali", date: "2026-11-08" },
+  { occasion: "eid", key: "eidFitr", name: "Eid al-Fitr", date: "2027-03-09", approx: true },
+  { occasion: "holi", key: "holi", name: "Holi", date: "2027-03-22" },
+  { occasion: "eid", key: "eidAdha", name: "Eid al-Adha", date: "2027-05-16", approx: true },
+  { occasion: "rakhi", key: "rakhi", name: "Raksha Bandhan", date: "2027-08-17", approx: true },
+  { occasion: "diwali", key: "diwali", name: "Diwali", date: "2027-10-29" },
+  { occasion: "eid", key: "eidFitr", name: "Eid al-Fitr", date: "2028-02-27", approx: true },
+  { occasion: "holi", key: "holi", name: "Holi", date: "2028-03-10", approx: true },
+  { occasion: "eid", key: "eidAdha", name: "Eid al-Adha", date: "2028-05-05", approx: true },
+  { occasion: "rakhi", key: "rakhi", name: "Raksha Bandhan", date: "2028-08-04", approx: true },
+  { occasion: "diwali", key: "diwali", name: "Diwali", date: "2028-10-17" },
 ];
 
-const FIXED: { occasion: Occasion; name: string; month: number; day: number }[] = [
-  { occasion: "newyear", name: "New Year", month: 1, day: 1 },
-  { occasion: "valentine", name: "Valentine's Day", month: 2, day: 14 },
-  { occasion: "halloween", name: "Halloween", month: 10, day: 31 },
-  { occasion: "christmas", name: "Christmas", month: 12, day: 25 },
+const FIXED: { occasion: Occasion; key: DateKey; name: string; month: number; day: number }[] = [
+  { occasion: "newyear", key: "newYear", name: "New Year", month: 1, day: 1 },
+  { occasion: "valentine", key: "valentine", name: "Valentine's Day", month: 2, day: 14 },
+  { occasion: "halloween", key: "halloween", name: "Halloween", month: 10, day: 31 },
+  { occasion: "christmas", key: "christmas", name: "Christmas", month: 12, day: 25 },
 ];
 
 const utc = (y: number, m: number, d: number) => new Date(Date.UTC(y, m - 1, d));
@@ -58,10 +62,10 @@ function datesFor(year: number): DatedOccasion[] {
     return utc(year, 6, firstSunday + 14);
   })();
   return [
-    ...FIXED.map((f) => ({ occasion: f.occasion, name: f.name, date: utc(year, f.month, f.day), approx: false })),
+    ...FIXED.map((f) => ({ occasion: f.occasion, key: f.key, name: f.name, date: utc(year, f.month, f.day), approx: false })),
     // UK dates: Mothering Sunday is three weeks before Easter; Father's Day is the third Sunday in June.
-    { occasion: "mothersday", name: "Mother's Day (UK)", date: new Date(easter(year).getTime() - 21 * DAY), approx: false },
-    { occasion: "fathersday", name: "Father's Day", date: thirdSundayOfJune, approx: false },
+    { occasion: "mothersday", key: "mothersDay", name: "Mother's Day (UK)", date: new Date(easter(year).getTime() - 21 * DAY), approx: false },
+    { occasion: "fathersday", key: "fathersDay", name: "Father's Day", date: thirdSundayOfJune, approx: false },
   ];
 }
 
@@ -78,7 +82,7 @@ export function upcoming(now = new Date(), count = 4): (DatedOccasion & { days: 
   const all: DatedOccasion[] = [
     ...datesFor(year),
     ...datesFor(year + 1),
-    ...LUNAR.map((l) => ({ occasion: l.occasion, name: l.name, date: new Date(`${l.date}T00:00:00Z`), approx: !!l.approx })),
+    ...LUNAR.map((l) => ({ occasion: l.occasion, key: l.key, name: l.name, date: new Date(`${l.date}T00:00:00Z`), approx: !!l.approx })),
   ];
   return all
     .filter((d) => d.date >= start)
@@ -91,15 +95,17 @@ export function nextDate(occasion: Occasion, now = new Date()) {
   return upcoming(now, 50).find((d) => d.occasion === occasion);
 }
 
-export function whenLabel(days: number) {
-  if (days === 0) return "Today!";
-  if (days === 1) return "Tomorrow";
-  if (days < 7) return `In ${days} days`;
-  if (days < 60) return `In ${Math.round(days / 7)} week${Math.round(days / 7) === 1 ? "" : "s"}`;
-  return `In ${Math.round(days / 30)} months`;
+export function whenLabel(days: number, t: Dict) {
+  if (days === 0) return t.when.today;
+  if (days === 1) return t.when.tomorrow;
+  if (days < 7) return fmt(t.when.days, { n: days });
+  const weeks = Math.round(days / 7);
+  if (days < 60) return weeks === 1 ? t.when.week : fmt(t.when.weeks, { n: weeks });
+  return fmt(t.when.months, { n: Math.round(days / 30) });
 }
 
-export function formatDay(date: Date, approx = false) {
-  const s = date.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
-  return approx ? `around ${s}` : s;
+// `tag` is a language tag such as "en-GB" or "hi-IN".
+export function formatDay(date: Date, tag: string, t: Dict, approx = false) {
+  const s = date.toLocaleDateString(tag, { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
+  return approx ? fmt(t.when.around, { date: s }) : s;
 }

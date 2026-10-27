@@ -4,8 +4,9 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { BrowserFrame } from "@/components/BrowserFrame";
 import { CardPlayer } from "@/components/card/CardPlayer";
-import { MUSIC_LABELS } from "@/components/card/sound";
-import { EFFECT_LABELS, GAME_LABELS, SCREEN_LABELS } from "@/components/create/ScreenEditor";
+import { fmt } from "@/i18n/config";
+import { useI18n } from "@/i18n/client";
+import type { Dict } from "@/i18n/en";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { THEMES, type Screen, type ThemeName } from "@/lib/card";
 import { buildTemplateDemo, deviceInfo, templatesBySlug, toneInfo } from "@/lib/catalog";
@@ -31,43 +32,46 @@ const SCREEN_ICONS: Record<Screen["type"], string> = {
   finale: "🎆",
 };
 
-function describe(s: Screen): string {
+function describe(s: Screen, t: Dict): string {
+  const d = t.product.describe;
   switch (s.type) {
     case "intro":
-      return "An envelope they tap to unseal";
+      return d.intro;
     case "question":
-      return `"${s.question}" with a No button that runs away`;
+      return fmt(d.question, { q: s.question });
     case "photos":
-      return "Up to 6 of your photos with captions";
+      return d.photos;
     case "message":
-      return `"${s.title}", typed out like a handwritten note`;
+      return fmt(d.message, { title: s.title });
     case "game":
-      return GAME_LABELS[s.game];
+      return t.labels.games[s.game];
     case "quiz":
-      return `${s.questions.length} question${s.questions.length === 1 ? "" : "s"} about you two`;
+      return s.questions.length === 1 ? d.quizOne : fmt(d.quiz, { n: s.questions.length });
     case "scratch":
-      return "A silver panel they scratch to reveal your message";
+      return d.scratch;
     case "typeit":
-      return "They have to type a secret password to unlock it";
+      return d.typeit;
     case "wheel":
-      return `A prize wheel with ${s.options.length} slices${s.landOn >= 0 ? " (secretly rigged)" : ""}`;
+      return fmt(s.landOn >= 0 ? d.wheelRigged : d.wheel, { n: s.options.length });
     case "coupons":
-      return `${s.coupons.length} coupon${s.coupons.length === 1 ? "" : "s"} they tap to redeem`;
+      return s.coupons.length === 1 ? d.couponsOne : fmt(d.coupons, { n: s.coupons.length });
     case "reasons":
-      return `A jar of ${s.reasons.length} notes they pull out one by one`;
+      return fmt(d.reasons, { n: s.reasons.length });
     case "slider":
-      return `"${s.title}" on a slider that only goes up`;
+      return fmt(d.slider, { title: s.title });
     case "timeline":
-      return `${s.events.length} moments from your story, one at a time`;
+      return fmt(d.timeline, { n: s.events.length });
     case "boxes":
-      return `${s.prizes.length} mystery boxes to choose from`;
+      return fmt(d.boxes, { n: s.prizes.length });
     case "finale":
-      return `${EFFECT_LABELS[s.effect]} and your final words`;
+      return fmt(d.finale, { effect: t.labels.effects[s.effect] });
   }
 }
 
 export function ProductView({ slug }: { slug: string }) {
   const template = templatesBySlug[slug];
+  const { t } = useI18n();
+  const p = t.product;
   const [frame, setFrame] = useState<"phone" | "desktop">(template.device === "desktop" ? "desktop" : "phone");
   const [to, setTo] = useState("");
   const [from, setFrom] = useState("");
@@ -96,7 +100,7 @@ export function ProductView({ slug }: { slug: string }) {
                 onClick={() => setFrame(f)}
                 className={`rounded-full px-5 py-2 text-sm font-bold transition ${frame === f ? "bg-ink text-paper" : "text-ink/65 hover:text-ink"}`}
               >
-                {f === "phone" ? "📱 On a phone" : "💻 On a computer"}
+                {f === "phone" ? p.onPhone : p.onComputer}
               </button>
             ))}
           </div>
@@ -109,12 +113,12 @@ export function ProductView({ slug }: { slug: string }) {
               <CardPlayer key="desktop" card={card} preview sound />
             </BrowserFrame>
           )}
-          <p className="font-hand text-2xl text-ink/60">it&apos;s live, tap through it ↑</p>
+          <p className="font-hand text-2xl text-ink/60">{p.live}</p>
           {card.music && card.music !== "none" && (
-            <p className="-mt-4 text-sm font-semibold text-ink/50">🔊 Sound on: it plays {MUSIC_LABELS[card.music]} when you open it</p>
+            <p className="-mt-4 text-sm font-semibold text-ink/50">{fmt(p.soundOn, { tune: t.labels.music[card.music] })}</p>
           )}
           <a href={`/cards/${slug}/play`} target="_blank" rel="noreferrer" className="text-sm font-bold underline decoration-hot decoration-2 underline-offset-4">
-            Open full screen ↗
+            {p.fullScreen}
           </a>
         </div>
       </div>
@@ -123,38 +127,38 @@ export function ProductView({ slug }: { slug: string }) {
       <div className="lg:sticky lg:top-24 lg:self-start">
         <div className="flex flex-wrap gap-2 text-xs font-bold">
           <span className="rounded-full border-2 border-ink/15 bg-paper px-3 py-1">
-            {occasions[template.occasion].emoji} {occasions[template.occasion].label}
+            {occasions[template.occasion].emoji} {t.occasions[template.occasion].label}
           </span>
           <span className="rounded-full border-2 border-ink/15 bg-paper px-3 py-1">
-            {toneInfo[template.tone].emoji} {toneInfo[template.tone].label}
+            {toneInfo[template.tone].emoji} {t.tones[template.tone]}
           </span>
           <span className="rounded-full border-2 border-ink bg-ink px-3 py-1 text-paper">
-            {deviceInfo[template.device].emoji} {deviceInfo[template.device].label}
+            {deviceInfo[template.device].emoji} {t.devices[template.device].label}
           </span>
         </div>
-        <h1 className="mt-4 font-brand text-4xl font-bold leading-tight sm:text-5xl">{template.name}</h1>
-        <p className="mt-3 text-lg text-ink/70">{template.blurb}</p>
+        <h1 dir="auto" className="mt-4 font-brand text-4xl font-bold leading-tight sm:text-5xl">{template.name}</h1>
+        <p dir="auto" className="mt-3 text-lg text-ink/70">{template.blurb}</p>
         <p className="mt-4 font-brand text-3xl font-black text-hot">
-          {PRICES.card.label} <span className="text-base font-semibold text-ink/50">per card</span>
+          {PRICES.card.label} <span className="text-base font-semibold text-ink/50">{p.perCard}</span>
         </p>
 
         <div className="sheet mt-6 p-5">
-          <p className="font-brand text-lg font-bold">Try it with your names</p>
-          <p className="text-sm text-ink/60">Watch the preview update as you type.</p>
+          <p className="font-brand text-lg font-bold">{p.tryNames}</p>
+          <p className="text-sm text-ink/60">{p.tryNamesHint}</p>
           <div className="mt-4 grid grid-cols-2 gap-3">
-            <NameInput label="Their name" value={to} onChange={setTo} placeholder={template.demo.to} />
-            <NameInput label="Your name" value={from} onChange={setFrom} placeholder={template.demo.from} />
+            <NameInput label={p.theirName} value={to} onChange={setTo} placeholder={template.demo.to} />
+            <NameInput label={p.yourName} value={from} onChange={setFrom} placeholder={template.demo.from} />
           </div>
-          <p className="mt-4 text-sm font-semibold">Colours</p>
+          <p className="mt-4 text-sm font-semibold">{p.colours}</p>
           <div className="mt-2 flex flex-wrap gap-2">
-            {THEMES.map((t) => (
+            {THEMES.map((x) => (
               <button
-                key={t}
-                onClick={() => setTheme(t)}
-                aria-label={themes[t].label}
-                title={themes[t].label}
-                className={`h-8 w-8 rounded-full ring-2 ring-offset-2 transition ${theme === t ? "ring-ink" : "ring-transparent hover:ring-ink/20"}`}
-                style={{ background: themes[t].background }}
+                key={x}
+                onClick={() => setTheme(x)}
+                aria-label={t.themes[x]}
+                title={t.themes[x]}
+                className={`h-8 w-8 rounded-full ring-2 ring-offset-2 transition ${theme === x ? "ring-ink" : "ring-transparent hover:ring-ink/20"}`}
+                style={{ background: themes[x].background }}
               />
             ))}
           </div>
@@ -162,22 +166,22 @@ export function ProductView({ slug }: { slug: string }) {
             href={`/create?${params.toString()}`}
             className="btn btn-red mt-5 w-full py-3.5 text-lg"
           >
-            Customise this card →
+            {p.customise}
           </Link>
-          <p className="mt-2 text-center text-xs text-ink/50">No sign-up. Takes about two minutes.</p>
+          <p className="mt-2 text-center text-xs text-ink/50">{p.noSignup}</p>
         </div>
 
         <div className="mt-8">
-          <h2 className="font-brand text-xl font-bold">What&apos;s inside</h2>
+          <h2 className="font-brand text-xl font-bold">{p.inside}</h2>
           <ol className="mt-3 space-y-2.5">
             {screens.map((s, i) => (
               <li key={s.id} className="flex gap-3">
                 <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border-2 border-ink/15 bg-paper text-lg">{SCREEN_ICONS[s.type]}</span>
                 <div className="min-w-0">
                   <p className="text-sm font-bold">
-                    {i + 1}. {SCREEN_LABELS[s.type]}
+                    {i + 1}. {t.labels.screens[s.type]}
                   </p>
-                  <p className="text-sm text-ink/60">{describe(s)}</p>
+                  <p className="text-sm text-ink/60">{describe(s, t)}</p>
                 </div>
               </li>
             ))}
@@ -185,20 +189,20 @@ export function ProductView({ slug }: { slug: string }) {
         </div>
 
         <div className="mt-8">
-          <h2 className="font-brand text-xl font-bold">What you can change</h2>
+          <h2 className="font-brand text-xl font-bold">{p.canChange}</h2>
           <ul className="mt-3 space-y-2 text-ink/75">
-            <li>✓ Their name and yours</li>
-            <li>✓ Every word on every screen</li>
-            <li>✓ {hasPhotos ? "Up to 6 of your own photos, with captions" : "Add a photo screen with up to 6 of your photos"}</li>
-            {hasQuiz && <li>✓ Your own quiz questions and answers</li>}
-            <li>✓ Colours ({THEMES.length} themes) and the background effect</li>
-            <li>✓ Add, remove or reorder screens: games, quizzes, scratch cards and more</li>
+            <li>✓ {p.changes.names}</li>
+            <li>✓ {p.changes.words}</li>
+            <li>✓ {hasPhotos ? p.changes.photos : p.changes.addPhotos}</li>
+            {hasQuiz && <li>✓ {p.changes.quiz}</li>}
+            <li>✓ {fmt(p.changes.colours, { n: THEMES.length })}</li>
+            <li>✓ {p.changes.screens}</li>
           </ul>
           <div className="mt-6 rounded-xl border-2 border-dashed border-ink/25 p-4 text-sm">
             <p className="font-bold">
-              {deviceInfo[template.device].emoji} {deviceInfo[template.device].label}
+              {deviceInfo[template.device].emoji} {t.devices[template.device].label}
             </p>
-            <p className="mt-1 text-ink/60">{deviceInfo[template.device].detail}</p>
+            <p className="mt-1 text-ink/60">{t.devices[template.device].detail}</p>
           </div>
         </div>
       </div>

@@ -99,6 +99,9 @@ export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 
       onPointerUpCapture={unlock}
       onClickCapture={unlock}
       onKeyDownCapture={unlock}
+      // The cards are written in English, so they read left to right even on Arabic and Urdu pages.
+      dir="ltr"
+      lang="en"
       className={`@container relative flex w-full flex-col overflow-hidden font-card ${preview ? "h-full" : "min-h-dvh"}`}
     >
       <EmojiRain effect={card.ambient} />

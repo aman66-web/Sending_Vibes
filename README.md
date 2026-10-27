@@ -71,6 +71,15 @@ SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
 
 No secret key is needed. The `cards` table can't be read or listed directly; a card can only be fetched by its exact ID through `get_card`. Photo uploads are insert-only, so existing photos can't be overwritten or listed.
 
+## Languages
+
+The site (not the cards) can be shown in English, Hindi, Punjabi, Gujarati, Bengali, Urdu, Arabic, Polish, Spanish and French, picked with the globe button in the header.
+
+- Every page lives under `src/app/[lang]/`. `src/proxy.ts` serves `/cards` from `/hi/cards` (etc.) based on the `lang` cookie, or the browser's language on a first visit, so addresses stay the same.
+- All site text is in `src/i18n/en.ts`. The other languages in `src/i18n/` are copies with the same keys; TypeScript complains if one is missing a key. Server components use `getI18n()`, client components `useI18n()`.
+- English pages are built ahead of time; other languages are built on first visit and then cached.
+- Urdu and Arabic pages read right to left. The cards themselves stay in English and left to right.
+
 ## Live chat (Claude)
 
 The chat bubble in the bottom corner answers questions, suggests designs and helps write card messages. It only appears once this is set (on Vercel, for Production and Preview, then redeploy):

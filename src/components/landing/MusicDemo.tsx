@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MUSIC_LABELS, playMusic, unlockAudio } from "@/components/card/sound";
+import { playMusic, unlockAudio } from "@/components/card/sound";
+import { useI18n } from "@/i18n/client";
 import type { Music } from "@/lib/card";
 
 const TUNES: Music[] = ["birthday", "love", "jingle", "joy", "spooky"];
 
 // Lets people hear the card music on the homepage. Nothing plays until they tap.
 export function MusicDemo() {
+  const { t } = useI18n();
   const [playing, setPlaying] = useState<Music | null>(null);
 
   useEffect(() => {
@@ -32,17 +34,17 @@ export function MusicDemo() {
         ))}
       </div>
       <div className="flex flex-wrap justify-center gap-2">
-        {TUNES.map((t) => (
+        {TUNES.map((tune) => (
           <button
-            key={t}
+            key={tune}
             onClick={() => {
               unlockAudio();
-              setPlaying((p) => (p === t ? null : t));
+              setPlaying((p) => (p === tune ? null : tune));
             }}
-            aria-pressed={playing === t}
-            className={`rounded-full border-2 px-3.5 py-1.5 text-sm font-bold transition ${playing === t ? "border-ink bg-paper text-ink" : "border-white/45 text-white hover:bg-white/15"}`}
+            aria-pressed={playing === tune}
+            className={`rounded-full border-2 px-3.5 py-1.5 text-sm font-bold transition ${playing === tune ? "border-ink bg-paper text-ink" : "border-white/45 text-white hover:bg-white/15"}`}
           >
-            {playing === t ? "■" : "▶"} {MUSIC_LABELS[t]}
+            {playing === tune ? "■" : "▶"} {t.labels.music[tune]}
           </button>
         ))}
       </div>
