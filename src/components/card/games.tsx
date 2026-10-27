@@ -16,7 +16,10 @@ import {
   ThrowColours,
   WhackGhosts,
 } from "./more-games";
+import { Motif } from "./motifs";
+import { HeartMark, Laurel } from "./ornaments";
 import { useSfx } from "./sound";
+import { BalloonSprite, GameIcon, GiftSprite, HeartSprite, OCCASION_ICONS, SnowflakeSprite, StarSprite, SweetSprite } from "./sprites";
 
 export function GameView({ game, occasion, ...props }: GameProps & { game: Game; occasion: Occasion }) {
   switch (game) {
@@ -49,7 +52,7 @@ export function GameView({ game, occasion, ...props }: GameProps & { game: Game;
     case "throw-colours":
       return <ThrowColours {...props} />;
     case "slot-machine":
-      return <SlotMachine {...props} symbols={MEMORY_SYMBOLS[occasion]} />;
+      return <SlotMachine {...props} symbols={OCCASION_ICONS[occasion]} />;
     case "hold-hug":
       return <HoldHug {...props} />;
     default:
@@ -59,16 +62,22 @@ export function GameView({ game, occasion, ...props }: GameProps & { game: Game;
 
 const TARGET = 10;
 
-// "Catch the falling things" games share one engine with different emoji.
-const CATCHERS: Record<string, { emojis: string[]; rise?: boolean; icon: string; hue?: boolean }> = {
-  "catch-hearts": { emojis: ["💖", "💗", "❤️", "💘"], icon: "💘" },
-  "pop-balloons": { emojis: ["🎈"], rise: true, icon: "🎈", hue: true },
-  "catch-snowflakes": { emojis: ["❄️", "❅", "❆", "☃️"], icon: "❄️" },
-  "catch-stars": { emojis: ["⭐", "🌟", "🌙", "✨"], icon: "🌟" },
-  "catch-candy": { emojis: ["🍬", "🍭", "🍫", "🎃"], icon: "🍬" },
+// Balloons and sweets take turns between the card's colours.
+const TINTS = ["var(--c-accent)", "var(--c-muted)", "color-mix(in srgb, var(--c-accent) 55%, white)"];
+
+// "Catch the falling things" games share one engine with different pieces.
+const CATCHERS: Record<string, { piece: (id: number) => React.ReactNode; icon: React.ReactNode; rise?: boolean }> = {
+  "catch-hearts": { piece: (id) => <HeartSprite className={id % 3 ? "h-11 w-11" : "h-8 w-8"} />, icon: <HeartSprite className="h-5 w-5" /> },
+  "pop-balloons": { piece: (id) => <BalloonSprite className="h-16 w-10" tint={TINTS[id % TINTS.length]} />, icon: <BalloonSprite className="h-6 w-4" />, rise: true },
+  "catch-snowflakes": {
+    piece: (id) => <SnowflakeSprite className={`opacity-85 ${id % 2 ? "h-10 w-10" : "h-8 w-8"}`} />,
+    icon: <SnowflakeSprite className="h-5 w-5 text-[var(--c-muted)]" />,
+  },
+  "catch-stars": { piece: (id) => <StarSprite className={id % 2 ? "h-11 w-11" : "h-8 w-8"} />, icon: <StarSprite className="h-5 w-5" /> },
+  "catch-candy": { piece: (id) => <SweetSprite className="h-8 w-12" tint={TINTS[id % TINTS.length]} />, icon: <SweetSprite className="h-4 w-6" /> },
 };
 
-type Drop = { id: number; left: number; duration: number; emoji: string };
+type Drop = { id: number; left: number; duration: number };
 
 function Catcher({ onWin, won, kind }: GameProps & { kind: string }) {
   const config = CATCHERS[kind] ?? CATCHERS["catch-hearts"];
@@ -86,15 +95,12 @@ function Catcher({ onWin, won, kind }: GameProps & { kind: string }) {
     if (won) return;
     const spawn = () => {
       const id = nextId.current++;
-      setDrops((d) => [
-        ...d,
-        { id, left: 6 + Math.random() * 80, duration: 3.2 + Math.random() * 1.8, emoji: config.emojis[id % config.emojis.length] },
-      ]);
+      setDrops((d) => [...d, { id, left: 6 + Math.random() * 80, duration: 3.2 + Math.random() * 1.8 }]);
     };
     spawn();
     const t = setInterval(spawn, 650);
     return () => clearInterval(t);
-  }, [won, config]);
+  }, [won]);
 
   useEffect(() => {
     if (!still) return;
@@ -116,7 +122,7 @@ function Catcher({ onWin, won, kind }: GameProps & { kind: string }) {
 
   return (
     <div className="w-full">
-      <div className="mb-2 text-center font-display text-lg font-semibold">
+      <div className="mb-2 flex items-center justify-center gap-2 font-display text-lg font-semibold">
         {Math.min(score, TARGET)} / {TARGET} {config.icon}
       </div>
       <div className="relative h-72 w-full touch-none select-none overflow-hidden rounded-3xl bg-[var(--c-secondary)]/40 ring-1 ring-black/5">
@@ -127,15 +133,14 @@ function Catcher({ onWin, won, kind }: GameProps & { kind: string }) {
             aria-label="Catch it"
             onPointerDown={(e) => grab(d, e)}
             onAnimationEnd={() => !still && setDrops((all) => all.filter((x) => x.id !== d.id))}
-            className={`absolute p-2 text-4xl leading-none ${still ? "" : config.rise ? "bottom-[-15%] animate-rise" : "top-[-15%] animate-fall"}`}
+            className={`absolute p-2 leading-none drop-shadow-sm ${still ? "" : config.rise ? "bottom-[-15%] animate-rise" : "top-[-15%] animate-fall"}`}
             style={{
               left: `${d.left}%`,
               top: still ? `${10 + ((d.id * 37) % 70)}%` : undefined,
               animationDuration: `${d.duration}s`,
-              filter: config.hue ? `hue-rotate(${(d.id * 67) % 360}deg)` : undefined,
             }}
           >
-            {d.emoji}
+            {config.piece(d.id)}
           </button>
         ))}
         {pops.map((p) => (
@@ -191,7 +196,7 @@ function LightDiyas({ onWin, won }: GameProps) {
             <circle cx="32" cy="74" r="2.5" fill="#ffd166" opacity={on ? 1 : 0.4} />
             <circle cx="44" cy="70" r="2.5" fill="#ffd166" opacity={on ? 1 : 0.4} />
           </svg>
-          {!on && !won && <span className="absolute -top-1 animate-bounce text-xs opacity-70">tap</span>}
+          {!on && !won && <span className="absolute -top-1 text-[10px] font-semibold uppercase tracking-[0.2em] opacity-50">tap</span>}
         </button>
       ))}
     </div>
@@ -199,7 +204,9 @@ function LightDiyas({ onWin, won }: GameProps) {
 }
 
 const CANDLES = 5;
-const CANDLE_COLORS = ["#f472b6", "#60a5fa", "#facc15", "#34d399", "#a78bfa"];
+// Ivory wax with a fine gold twist.
+const WAX =
+  "repeating-linear-gradient(-35deg, transparent 0 5px, color-mix(in srgb, var(--c-muted) 55%, transparent) 5px 6.5px), linear-gradient(90deg, #e9dfcb 0%, #fbf7ef 45%, #e2d5bc 100%)";
 
 function BlowCandles({ onWin, won }: GameProps) {
   const sfx = useSfx();
@@ -215,7 +222,7 @@ function BlowCandles({ onWin, won }: GameProps) {
 
   return (
     <div className="flex flex-col items-center py-4">
-      <div className="flex gap-4">
+      <div className="flex gap-5">
         {out.map((isOut, i) => (
           <button
             key={i}
@@ -224,53 +231,34 @@ function BlowCandles({ onWin, won }: GameProps) {
             className="relative flex h-24 w-8 flex-col items-center justify-end"
           >
             {isOut ? (
-              <span className="absolute top-0 animate-smoke text-lg opacity-60">💨</span>
+              <svg viewBox="0 0 20 40" className="absolute top-0 h-10 w-5 animate-smoke" aria-hidden fill="none" stroke="currentColor" strokeOpacity="0.5" strokeWidth="1.4" strokeLinecap="round">
+                <path d="M10 38c-4-5 4-9 0-14s4-9 0-14-2-6 1-8" />
+              </svg>
             ) : (
-              <span className="absolute top-1 h-7 w-4 origin-bottom animate-flicker rounded-[50%_50%_50%_50%/60%_60%_40%_40%] bg-gradient-to-t from-orange-500 via-amber-300 to-yellow-100 shadow-[0_0_18px_6px_rgba(255,200,80,0.5)]" />
+              <span className="absolute top-1 h-7 w-4 origin-bottom animate-flicker rounded-[50%_50%_50%_50%/60%_60%_40%_40%] bg-gradient-to-t from-amber-500 via-amber-200 to-white shadow-[0_0_18px_6px_rgba(255,214,140,0.45)]" />
             )}
-            <span className="h-14 w-3 rounded-sm" style={{ background: CANDLE_COLORS[i] }} />
+            <span className="absolute top-8 h-2 w-px bg-neutral-800/70" />
+            <span className="h-14 w-3 rounded-[2px] shadow-sm" style={{ background: WAX }} />
           </button>
         ))}
       </div>
-      <div className="relative -mt-1 h-16 w-64 rounded-t-2xl bg-pink-200 shadow-inner">
-        <div className="absolute inset-x-0 top-0 h-4 rounded-t-2xl bg-white/90" />
-        <div className="absolute inset-x-0 top-3 flex justify-around">
-          {Array.from({ length: 7 }, (_, i) => (
-            <span key={i} className="h-4 w-4 rounded-b-full bg-white/90" />
+      {/* Two tiers of cream icing, trimmed in the card's own colours */}
+      <div className="relative h-14 w-56 rounded-t-md bg-[#f6efe3] shadow-[inset_0_-6px_10px_rgba(0,0,0,0.06)] ring-1 ring-black/5">
+        <div className="absolute inset-x-0 bottom-2 h-2 bg-[var(--c-accent)]" />
+        <div className="absolute inset-x-3 bottom-[18px] flex justify-between">
+          {Array.from({ length: 11 }, (_, i) => (
+            <span key={i} className="h-1.5 w-1.5 rounded-full bg-[var(--c-muted)] opacity-70" />
           ))}
         </div>
       </div>
-      <div className="h-16 w-72 rounded-b-2xl bg-amber-700/90 shadow-lg">
-        <div className="h-3 w-full bg-pink-300" />
+      <div className="relative h-16 w-72 rounded-b-md bg-[#efe5d4] shadow-[inset_0_-8px_12px_rgba(0,0,0,0.07)] ring-1 ring-black/5">
+        <div className="absolute inset-x-0 bottom-3 h-2.5 bg-[var(--c-accent)]" />
+        <div className="absolute inset-x-0 bottom-[22px] h-px bg-[var(--c-muted)] opacity-60" />
       </div>
-      <div className="h-3 w-80 rounded-full bg-black/10" />
+      <div className="h-2.5 w-80 rounded-full bg-[var(--c-muted)] opacity-40" />
     </div>
   );
 }
-
-export const MEMORY_SYMBOLS: Record<Occasion, string[]> = {
-  valentine: ["💘", "🌹", "💌", "🍫", "💍", "🧸"],
-  birthday: ["🎂", "🎈", "🎁", "🥳", "🍰", "🎉"],
-  diwali: ["🪔", "🎆", "🍬", "🌸", "✨", "🎇"],
-  christmas: ["🎄", "🎅", "⛄", "🎁", "🦌", "🍪"],
-  eid: ["🌙", "⭐", "🕌", "🍬", "🎁", "🤲"],
-  anniversary: ["💍", "🥂", "🌹", "💑", "🏡", "📸"],
-  sorry: ["🥺", "🌷", "🍫", "🧸", "💐", "🙏"],
-  thanks: ["🙏", "💐", "☕", "🍪", "⭐", "💛"],
-  congrats: ["🎓", "🏆", "🎉", "⭐", "🥂", "🚀"],
-  halloween: ["🎃", "👻", "🦇", "🍬", "🕷️", "🧙"],
-  newyear: ["🥂", "🎆", "🕛", "🎉", "🍾", "✨"],
-  mothersday: ["💐", "☕", "🌷", "💖", "🧁", "👑"],
-  fathersday: ["👔", "🍺", "⚽", "🔧", "🏆", "🍖"],
-  rakhi: ["🎀", "🍬", "🎁", "🪔", "💪", "🌸"],
-  holi: ["🎨", "🌈", "💦", "🌸", "🍬", "🥳"],
-  newbaby: ["👶", "🍼", "🧸", "🌙", "⭐", "🎀"],
-  wedding: ["💍", "💒", "🥂", "💐", "🎂", "🕊️"],
-  getwell: ["🌻", "🍵", "🧸", "💊", "🛌", "🌈"],
-  missyou: ["🫶", "✈️", "📱", "💌", "🏡", "🌙"],
-  friendship: ["👯", "🍕", "🎮", "🍹", "📸", "💅"],
-  leaving: ["👋", "📦", "✈️", "🍰", "🎉", "⭐"],
-};
 
 // A fixed shuffle keeps server and browser renders identical.
 function shuffled<T>(items: T[]): T[] {
@@ -286,7 +274,7 @@ function shuffled<T>(items: T[]): T[] {
 
 function MemoryMatch({ onWin, won, occasion }: GameProps & { occasion: Occasion }) {
   const sfx = useSfx();
-  const [deck] = useState(() => shuffled([...MEMORY_SYMBOLS[occasion], ...MEMORY_SYMBOLS[occasion]]));
+  const [deck] = useState(() => shuffled([...OCCASION_ICONS[occasion], ...OCCASION_ICONS[occasion]]));
   const [open, setOpen] = useState<number[]>([]);
   const [matched, setMatched] = useState<number[]>([]);
   const [moves, setMoves] = useState(0);
@@ -323,11 +311,20 @@ function MemoryMatch({ onWin, won, occasion }: GameProps & { occasion: Occasion 
               data-symbol={symbol}
               aria-label={shown ? symbol : "Hidden card"}
               onClick={() => flip(i)}
-              className={`grid aspect-square place-items-center rounded-2xl text-3xl shadow-sm ring-1 ring-black/5 transition duration-300 @2xl:text-4xl ${
-                shown ? "bg-white [transform:rotateY(0)]" : "bg-[var(--c-accent)] text-[var(--c-accent-text)] [transform:rotateY(180deg)]"
-              } ${matched.includes(i) ? "opacity-70" : ""}`}
+              className={`relative grid aspect-square place-items-center rounded-xl shadow-sm ring-1 ring-black/10 transition duration-300 ${
+                shown ? "bg-[#fbf8f2] text-[var(--c-accent)] [transform:rotateY(0)]" : "bg-[var(--c-accent)] text-[var(--c-accent-text)] [transform:rotateY(180deg)]"
+              } ${matched.includes(i) ? "ring-2 ring-[var(--c-muted)]" : ""}`}
             >
-              {shown ? symbol : <span className="text-xl font-bold opacity-80">?</span>}
+              {shown ? (
+                <GameIcon name={symbol} className="h-3/5 w-3/5" />
+              ) : (
+                <>
+                  <span aria-hidden className="absolute inset-1.5 rounded-lg border border-current opacity-35" />
+                  <svg viewBox="0 0 16 16" className="h-4 w-4 opacity-70" aria-hidden>
+                    <path d="M8 1l4 7-4 7-4-7z" fill="currentColor" />
+                  </svg>
+                </>
+              )}
             </button>
           );
         })}
@@ -356,10 +353,10 @@ function UnwrapGift({ onWin, won }: GameProps) {
         className="relative grid h-48 w-48 place-items-center"
       >
         {won ? (
-          <span className="animate-pop text-9xl">💝</span>
+          <HeartMark className="h-32 w-32 animate-pop text-[var(--c-accent)]" />
         ) : (
-          <span key={taps} className={`text-9xl ${taps > 0 ? "animate-shake" : ""}`} style={{ transform: `scale(${1 + taps * 0.05})` }}>
-            🎁
+          <span key={taps} className={`block ${taps > 0 ? "animate-shake" : ""}`} style={{ transform: `scale(${1 + taps * 0.05})` }}>
+            <GiftSprite className="h-40 w-40 drop-shadow-md" />
           </span>
         )}
       </button>
@@ -372,7 +369,6 @@ function UnwrapGift({ onWin, won }: GameProps) {
   );
 }
 
-const SHAKE_EMOJI: Partial<Record<Occasion, string>> = { diwali: "🎆", birthday: "🎁", christmas: "🎁", congrats: "🍾", newyear: "🍾", holi: "🎨", newbaby: "🍼" };
 type MotionPermission = { requestPermission?: () => Promise<string> };
 
 // Built for phones: shaking fills the meter. Tapping works too, so it never gets stuck.
@@ -421,11 +417,13 @@ function ShakeIt({ onWin, won, occasion }: GameProps & { occasion: Occasion }) {
     } else if (motion) setMode("shake");
   };
 
-  const emoji = SHAKE_EMOJI[occasion] ?? "🎉";
   return (
     <div className="flex flex-col items-center gap-5 py-2">
-      <span key={power} className={`text-8xl ${power > 0 && !won ? "animate-shake" : ""} ${won ? "animate-pop" : ""}`}>
-        {won ? "🥳" : emoji}
+      <span
+        key={power}
+        className={`grid h-36 w-36 place-items-center rounded-full bg-[#fbf8f2] text-[var(--c-accent)] shadow-md ring-1 ring-black/5 ${power > 0 && !won ? "animate-shake" : ""} ${won ? "animate-pop" : ""}`}
+      >
+        {won ? <Laurel className="h-20 w-28 text-[var(--c-muted)]" /> : <Motif occasion={occasion} className="h-20 w-20" />}
       </span>
       <div className="h-4 w-full max-w-xs overflow-hidden rounded-full bg-black/10">
         <div className="h-full rounded-full bg-[var(--c-accent)] transition-all duration-200" style={{ width: `${power}%` }} />
@@ -434,10 +432,10 @@ function ShakeIt({ onWin, won, occasion }: GameProps & { occasion: Occasion }) {
         <div className="flex flex-col items-center gap-3">
           {mode === "idle" ? (
             <button onClick={start} className="rounded-full bg-[var(--c-accent)] px-6 py-3 font-display font-semibold text-[var(--c-accent-text)] shadow-lg">
-              📳 Start shaking
+              Start shaking
             </button>
           ) : (
-            <p className="font-display text-lg font-semibold">Shake shake shake! 📳</p>
+            <p className="font-display text-lg font-semibold">Keep shaking…</p>
           )}
           <button onClick={() => add.current(10)} className="text-sm font-semibold underline underline-offset-4 opacity-75">
             Can&apos;t shake? Tap here really fast
@@ -484,8 +482,8 @@ function CursorChase({ onWin, won }: GameProps) {
 
   return (
     <div className="w-full">
-      <div className="mb-2 text-center font-display text-lg font-semibold">
-        Caught {caught} / {CHASE_TARGET} 💓
+      <div className="mb-2 flex items-center justify-center gap-2 font-display text-lg font-semibold">
+        Caught {caught} / {CHASE_TARGET} <HeartSprite className="h-5 w-5" />
       </div>
       <div
         ref={area}
@@ -496,10 +494,10 @@ function CursorChase({ onWin, won }: GameProps) {
           <button
             aria-label="Catch the heart"
             onClick={grab}
-            className="absolute -translate-x-1/2 -translate-y-1/2 p-2 text-5xl transition-[left,top] duration-150 ease-out"
+            className="absolute -translate-x-1/2 -translate-y-1/2 p-2 transition-[left,top] duration-150 ease-out"
             style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
           >
-            💓
+            <HeartSprite className="h-12 w-12 drop-shadow-md" />
           </button>
         )}
         <p className="pointer-events-none absolute inset-x-0 bottom-3 text-center text-xs font-semibold uppercase tracking-widest opacity-50">
