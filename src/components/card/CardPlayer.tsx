@@ -29,9 +29,11 @@ type Props = {
   focusNonce?: number;
   // Sound effects and music. Off in previews unless asked for.
   sound?: boolean;
+  // Thumbnail mode: no room left for a phone notch.
+  bare?: boolean;
 };
 
-export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 0, sound = !preview }: Props) {
+export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 0, sound = !preview, bare = false }: Props) {
   const theme = themes[card.theme];
   const screens = useMemo(
     () => card.screens.filter((s) => preview || s.type !== "photos" || s.photos.length > 0),
@@ -112,7 +114,7 @@ export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 
         </button>
       )}
 
-      <div className={`relative z-10 flex justify-center gap-1.5 ${preview ? "pt-12" : "pt-5"}`}>
+      <div className={`relative z-10 flex justify-center gap-1.5 ${preview && !bare ? "pt-12" : "pt-5"}`}>
         {screens.map((s, i) => (
           <button
             key={s.id}
@@ -125,7 +127,7 @@ export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 
       </div>
 
       {/* Auto margins centre short screens; long ones (lots of coupons, say) scroll inside previews. */}
-      <main className={`flex flex-1 flex-col px-5 py-8 ${preview ? "min-h-0 overflow-y-auto" : ""}`}>
+      <main className={`flex flex-1 flex-col px-5 py-8 ${preview ? "min-h-0 overflow-y-auto [scrollbar-width:none]" : ""}`}>
         <div key={`${run}-${current.id}`} className={`m-auto w-full animate-screen-in ${wide ? "max-w-4xl" : "max-w-md"}`}>
           {current.type === "intro" && <IntroScreen screen={current} onNext={next} emoji={occasions[card.occasion].emoji} />}
           {current.type === "question" && <QuestionScreen screen={current} onNext={next} />}

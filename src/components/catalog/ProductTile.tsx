@@ -2,7 +2,7 @@ import Link from "next/link";
 import { toneInfo, type Template } from "@/lib/catalog";
 import { PRICES } from "@/lib/pricing";
 import { occasions } from "@/lib/templates";
-import { ProductThumb } from "./ProductThumb";
+import { TilePreview } from "./TilePreview";
 
 export function PlayIcon({ className = "h-6 w-6" }: { className?: string }) {
   return (
@@ -17,7 +17,7 @@ export function ProductTile({ template }: { template: Template }) {
   return (
     <Link href={`/cards/${template.slug}`} className="group block" aria-label={`Preview ${template.name}`}>
       <div className="relative overflow-hidden rounded-[1.75rem] shadow-sm ring-1 ring-ink/5 transition duration-300 group-hover:-translate-y-1 group-hover:shadow-xl">
-        <ProductThumb template={template} />
+        <TilePreview slug={template.slug} />
         <div className="absolute inset-0 grid place-items-center bg-ink/0 transition duration-300 group-hover:bg-ink/35 [@media(hover:none)]:hidden">
           <span className="grid h-16 w-16 scale-75 place-items-center rounded-full bg-white pl-1 text-ink opacity-0 shadow-2xl transition duration-300 group-hover:scale-100 group-hover:opacity-100">
             <PlayIcon className="h-7 w-7" />
