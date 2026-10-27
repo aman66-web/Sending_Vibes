@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { CardPlayer } from "@/components/card/CardPlayer";
 import { Motif } from "@/components/card/motifs";
 import { Logo } from "@/components/Logo";
+import { BrowserFrame } from "@/components/BrowserFrame";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { addToBasket } from "@/lib/basket";
 import { EFFECTS, OCCASIONS, THEMES, type CardData, type Effect, type Occasion, type Screen, type ScreenType, type ThemeName } from "@/lib/card";
@@ -160,6 +161,12 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   // The screens written so far while a card is being made, and a way to stop it.
   const [progress, setProgress] = useState<ScreenType[]>([]);
   const making = useRef<AbortController | null>(null);
+  // The live preview: on a phone or a computer, which screen it's showing, and a nudge
+  // that makes it jump back to a screen after that screen changes.
+  const [view, setView] = useState<"phone" | "computer">(() => (draft?.device === "desktop" ? "computer" : "phone"));
+  const [viewing, setViewing] = useState<string | undefined>();
+  const [nudge, setNudge] = useState(0);
+  const [screenAsk, setScreenAsk] = useState("");
   const [pickOccasion, setPickOccasion] = useState<Occasion | "all">("all");
   const ideaBox = useRef<HTMLTextAreaElement>(null);
 
@@ -256,16 +263,24 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     setBusy(null);
   };
 
-  const changeByTyping = async (prompt = ask) => {
+  // A change to the whole card, or (with focus) to the screen showing in the preview.
+  const changeByTyping = async (prompt = ask, focus?: string) => {
     if (!card || prompt.trim().length < 3) return setAiError(x.errors.describe);
     setBusy("change");
     setAiError(null);
     setAiDone(false);
+    // Typing changes are a custom-card thing.
+    setMode("custom");
     try {
-      const changed = await callAi({ prompt: prompt.trim(), card }, { to: card.to, from: card.from });
+      const changed = await callAi({ prompt: prompt.trim(), card, ...(focus ? { focus } : {}) }, { to: card.to, from: card.from });
       setUndo(card);
       setCard(changed);
-      setAsk("");
+      if (focus) {
+        setScreenAsk("");
+        // Show that screen again from the start, with the change.
+        setSelected(focus);
+        setNudge((n) => n + 1);
+      } else setAsk("");
       setAiDone(true);
     } catch (e) {
       setAiError(e instanceof Error ? e.message : x.errors.failed);
@@ -603,7 +618,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       )}
 
       {step === "edit" && card && (
-        <div className="mx-auto grid max-w-6xl gap-8 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+        <div className={`mx-auto grid gap-8 px-4 py-6 sm:px-6 ${view === "computer" ? "max-w-7xl lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]" : "max-w-6xl lg:grid-cols-[minmax(0,1fr)_380px]"}`}>
           <div className="min-w-0 space-y-6 pb-28 lg:pb-10">
             <div>
               <h1 className="font-brand text-3xl font-bold">{c.editTitle}</h1>
@@ -776,11 +791,39 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
           </div>
 
           <aside className="hidden lg:block">
-            <div className="sticky top-6">
+            <div className="sticky top-4 space-y-3">
+              <div role="tablist" aria-label={c.preview} className="mx-auto flex w-fit gap-1 rounded-full border border-line bg-panel p-1">
+                {(["phone", "computer"] as const).map((v) => (
+                  <button
+                    key={v}
+                    role="tab"
+                    aria-selected={view === v}
+                    onClick={() => setView(v)}
+                    className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${view === v ? "bg-foreground text-background" : "opacity-70 hover:opacity-100"}`}
+                  >
+                    {v === "phone" ? t.product.onPhone : t.product.onComputer}
+                  </button>
+                ))}
+              </div>
+              <ScreenAsk
+                card={card}
+                viewing={viewing}
+                value={screenAsk}
+                onChange={setScreenAsk}
+                busy={busy !== null}
+                premade={mode === "premade"}
+                onSubmit={(id) => changeByTyping(screenAsk, id)}
+              />
               <div className="relative">
-                <PhoneFrame className="mx-auto h-[680px] w-[340px]">
-                  <CardPlayer card={card} preview sound focusScreenId={selected} />
-                </PhoneFrame>
+                {view === "phone" ? (
+                  <PhoneFrame className="mx-auto h-[560px] w-[280px]">
+                    <CardPlayer key="phone" card={card} preview sound focusScreenId={selected} focusNonce={nudge} onScreenChange={setViewing} />
+                  </PhoneFrame>
+                ) : (
+                  <BrowserFrame className="h-[520px]">
+                    <CardPlayer key="computer" card={card} preview sound focusScreenId={selected} focusNonce={nudge} onScreenChange={setViewing} />
+                  </BrowserFrame>
+                )}
                 {busy === "change" && (
                   <div className="absolute inset-0 grid place-items-center">
                     <span className="rounded-full bg-black/75 px-5 py-3 text-sm font-semibold text-white shadow-lg">
@@ -789,18 +832,38 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                   </div>
                 )}
               </div>
-              <p className="mt-3 text-center text-xs opacity-60">{c.livePreview}</p>
+              <p className="text-center text-xs opacity-60">{c.livePreview}</p>
             </div>
           </aside>
         </div>
       )}
 
       {showPreview && card && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <CardPlayer card={card} preview sound focusScreenId={selected} />
-          <button onClick={() => setShowPreview(false)} className="absolute start-4 top-4 z-50 rounded-full bg-black/70 px-4 py-2 text-sm font-semibold text-white">
-            {c.closePreview}
-          </button>
+        <div className="fixed inset-0 z-50 flex flex-col bg-background lg:hidden">
+          <div className="relative min-h-0 flex-1">
+            <CardPlayer card={card} preview sound focusScreenId={selected} focusNonce={nudge} onScreenChange={setViewing} />
+            <button onClick={() => setShowPreview(false)} className="absolute start-4 top-4 z-50 rounded-full bg-black/70 px-4 py-2 text-sm font-semibold text-white">
+              {c.closePreview}
+            </button>
+            {busy === "change" && (
+              <div className="absolute inset-0 z-40 grid place-items-center">
+                <span className="rounded-full bg-black/75 px-5 py-3 text-sm font-semibold text-white shadow-lg">
+                  <Making lines={[x.changing]} />
+                </span>
+              </div>
+            )}
+          </div>
+          <div className="border-t border-line p-3">
+            <ScreenAsk
+              card={card}
+              viewing={viewing}
+              value={screenAsk}
+              onChange={setScreenAsk}
+              busy={busy !== null}
+              premade={mode === "premade"}
+              onSubmit={(id) => changeByTyping(screenAsk, id)}
+            />
+          </div>
         </div>
       )}
 
@@ -828,6 +891,53 @@ function summary(s: Screen) {
     case "question":
       return s.question;
   }
+}
+
+type ScreenAskProps = {
+  card: CardData;
+  viewing?: string;
+  value: string;
+  onChange: (value: string) => void;
+  busy: boolean;
+  premade: boolean;
+  onSubmit: (screenId: string) => void;
+};
+
+// Type a change to whichever screen the preview is showing.
+function ScreenAsk({ card, viewing, value, onChange, busy, premade, onSubmit }: ScreenAskProps) {
+  const { t, currency } = useI18n();
+  const x = t.custom;
+  const i = Math.max(card.screens.findIndex((s) => s.id === viewing), 0);
+  const screen = card.screens[i];
+  if (!screen) return null;
+  return (
+    <form
+      className="rounded-2xl border-2 border-brand/40 bg-panel p-3"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (value.trim().length >= 3) onSubmit(screen.id);
+      }}
+    >
+      <label htmlFor="screen-ask" className="block text-sm font-bold">
+        ✨ {fmt(x.thisScreen, { name: `${i + 1}. ${t.labels.screens[screen.type]}` })}
+      </label>
+      <div className="mt-2 flex gap-2">
+        <input
+          id="screen-ask"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          maxLength={1000}
+          dir="auto"
+          placeholder={x.thisScreenPlaceholder}
+          className="min-w-0 flex-1 rounded-full border border-line bg-background px-4 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+        />
+        <button disabled={busy || value.trim().length < 3} className="shrink-0 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+          {x.go}
+        </button>
+      </div>
+      {premade && <p className="mt-2 text-xs opacity-60">{fmt(x.typingMakesCustom, { price: price("custom", currency) })}</p>}
+    </form>
+  );
 }
 
 type ChoiceProps = {

@@ -34,9 +34,11 @@ type Props = {
   sound?: boolean;
   // Thumbnail mode: no room left for a phone notch.
   bare?: boolean;
+  // Tells the creator which screen is showing, so a typed change can be about that one.
+  onScreenChange?: (id: string) => void;
 };
 
-export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 0, sound = !preview, bare = false }: Props) {
+export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 0, sound = !preview, bare = false, onScreenChange }: Props) {
   const theme = themes[card.theme];
   const screens = useMemo(
     () => card.screens.filter((s) => preview || s.type !== "photos" || s.photos.length > 0),
@@ -60,6 +62,10 @@ export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 
   }
 
   const current = screens[Math.min(index, screens.length - 1)];
+  const currentId = current?.id;
+  useEffect(() => {
+    if (currentId) onScreenChange?.(currentId);
+  }, [currentId, onScreenChange]);
   const muted = useMuted();
   // Browsers only count some events as a "real" tap that may start audio (on
   // phones that's the finger lifting, not landing), so try on each of them.

@@ -88,6 +88,8 @@ export type GenerateInput = {
   card?: CardData;
   // A design to start a new card from.
   template?: string;
+  // The screen they're looking at, when the change is about that screen.
+  focus?: string;
 };
 
 export class GenerateError extends Error {
@@ -172,7 +174,11 @@ function request(input: GenerateInput): { message: string; urls: string[] } {
   const prompt = `<request>\n${input.prompt}\n</request>`;
   if (input.card) {
     const { card, urls } = hidePhotos(withoutTemplate(input.card));
-    return { message: `Here is the card:\n${JSON.stringify(card)}\n\nThe change they want:\n${prompt}`, urls };
+    const screen = input.card.screens.find((s) => s.id === input.focus);
+    const about = screen
+      ? `\n\nThey're looking at the screen with id "${screen.id}" (a ${screen.type} screen), so "this", "here" and "this screen" mean that one. Make the change to that screen, unless what they ask is clearly about the whole card (like the colours, the music, or adding or removing screens). Leave the other screens as they are.`
+      : "";
+    return { message: `Here is the card:\n${JSON.stringify(card)}${about}\n\nThe change they want:\n${prompt}`, urls };
   }
   const base = getTemplate(input.template);
   const start = base ? `\nStart from this design and rework it to fit what they want:\n${JSON.stringify(withoutTemplate(buildCard(base, input.to, input.from)))}\n` : "";
