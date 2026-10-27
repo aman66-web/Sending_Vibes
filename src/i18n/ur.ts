@@ -682,7 +682,7 @@ export const ur: Dict = {
     namesTitle: "یہ کس کے لیے ہے؟",
     theirName: "ان کا نام",
     yourName: "آپ کا نام",
-    theirExample: "مثلاً پریا",
+    theirExample: "مثلاً اولیویا",
     yourExample: "مثلاً سیم",
     next: "آگے: اسے اپنا بنائیں →",
     editTitle: "اسے اپنا بنائیں",

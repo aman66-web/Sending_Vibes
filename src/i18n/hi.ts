@@ -676,7 +676,7 @@ export const hi: Dict = {
     namesTitle: "यह किसके लिए है?",
     theirName: "उनका नाम",
     yourName: "आपका नाम",
-    theirExample: "जैसे प्रिया",
+    theirExample: "जैसे ओलिविया",
     yourExample: "जैसे सैम",
     next: "आगे: इसे अपना बनाइए →",
     editTitle: "इसे अपना बनाइए",

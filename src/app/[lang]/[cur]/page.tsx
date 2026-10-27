@@ -294,7 +294,7 @@ export default async function Home() {
                 <div className="space-y-2 text-left text-sm">
                   <div className="border-b-2 border-dashed border-ink/25 px-1 pb-1">
                     <span className="font-brand text-ink/50">{h.to} </span>
-                    <span className="font-hand text-2xl leading-none">Priya</span>
+                    <span className="font-hand text-2xl leading-none">Olivia</span>
                   </div>
                   <div className="flex gap-2 pt-1">
                     {["/demo/sunset.svg", "/demo/coffee.svg", "/demo/lights.svg"].map((src) => (

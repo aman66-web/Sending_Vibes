@@ -682,7 +682,7 @@ export const bn: Dict = {
     namesTitle: "কার্ডটা কার জন্য?",
     theirName: "তার নাম",
     yourName: "আপনার নাম",
-    theirExample: "যেমন: Priya",
+    theirExample: "যেমন: Olivia",
     yourExample: "যেমন: Sam",
     next: "এরপর: নিজের মতো করে নিন →",
     editTitle: "নিজের মতো করে নিন",

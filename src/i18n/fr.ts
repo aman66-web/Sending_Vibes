@@ -682,7 +682,7 @@ export const fr: Dict = {
     namesTitle: "C'est pour qui ?",
     theirName: "Son prénom",
     yourName: "Ton prénom",
-    theirExample: "ex. Priya",
+    theirExample: "ex. Olivia",
     yourExample: "ex. Sam",
     next: "Suivant : personnalise-la →",
     editTitle: "Personnalise-la",

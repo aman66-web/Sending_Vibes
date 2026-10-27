@@ -682,7 +682,7 @@ export const gu: Dict = {
     namesTitle: "આ કોના માટે છે?",
     theirName: "એમનું નામ",
     yourName: "તમારું નામ",
-    theirExample: "દા.ત. પ્રિયા",
+    theirExample: "દા.ત. ઓલિવિયા",
     yourExample: "દા.ત. સેમ",
     next: "આગળ: તમારી રીતે બનાવો →",
     editTitle: "તમારી રીતે બનાવો",

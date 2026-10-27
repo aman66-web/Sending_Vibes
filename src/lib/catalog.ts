@@ -136,7 +136,7 @@ export const TEMPLATES: Template[] = [
       message("Just so you know…", `Every day with you is my favourite day. Thank you for being you.\n\nLove, ${from}`),
       finale("Happy Valentine's Day", "Now screenshot this and send it back to me", "hearts"),
     ],
-    demo: { to: "Priya", from: "Sam", photos: [P.sunset, P.coffee, P.lights] },
+    demo: { to: "Olivia", from: "Sam", photos: [P.sunset, P.coffee, P.lights] },
   },
   {
     slug: "no-is-not-an-option",
@@ -165,7 +165,7 @@ export const TEMPLATES: Template[] = [
       message("The fine print", `By opening this card you have agreed to:\n• Share your food with me\n• Laugh at my jokes (even the bad ones)\n• Be my Valentine, forever and ever\n\nNo refunds. Love, ${from}`),
       finale("Happy Valentine's!", "There was never a No button. There was only destiny.", "confetti"),
     ],
-    demo: { to: "Priya", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam" },
   },
   {
     slug: "love-letter",
@@ -188,7 +188,7 @@ export const TEMPLATES: Template[] = [
       message("Three things I love about you", "Your laugh, especially when you're trying not to.\nThe way you look after everyone.\nThat you're still here, putting up with me.", "message2"),
       finale(`Happy Valentine's Day, ${to}`, "Always yours.", "petals"),
     ],
-    demo: { to: "Priya", from: "Sam", photos: [P.sunset, P.lights, P.coffee] },
+    demo: { to: "Olivia", from: "Sam", photos: [P.sunset, P.lights, P.coffee] },
   },
   {
     slug: "catch-me-if-you-can",
@@ -209,7 +209,7 @@ export const TEMPLATES: Template[] = [
       photos("Exhibit A: we're cute"),
       finale("Happy Valentine's Day", `Love, ${from} (and my heart, which you caught fair and square)`, "hearts"),
     ],
-    demo: { to: "Priya", from: "Sam", photos: [P.sunset, P.coffee, P.lights, P.balloons, P.fireworks, P.cake] },
+    demo: { to: "Olivia", from: "Sam", photos: [P.sunset, P.coffee, P.lights, P.balloons, P.fireworks, P.cake] },
   },
   {
     slug: "scratch-the-question",
@@ -229,7 +229,7 @@ export const TEMPLATES: Template[] = [
       message("You won!", `Your prize: me, forever. No cash alternative.\n\nLove, ${from}`),
       finale("Happy Valentine's Day", "Jackpot.", "hearts"),
     ],
-    demo: { to: "Priya", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam" },
   },
 
   {
@@ -250,7 +250,7 @@ export const TEMPLATES: Template[] = [
       coupons("Your date coupons", "Tap to redeem. Valid forever.", ["You pick the restaurant", "I pay. All of it.", "Dessert is on me", "No phones all night"]),
       finale("Happy Valentine's Day", `It's a date. Love, ${from}`, "hearts"),
     ],
-    demo: { to: "Priya", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam" },
   },
   {
     slug: "loves-me-loves-me-not",
@@ -270,7 +270,7 @@ export const TEMPLATES: Template[] = [
       message("Just so you know", `It was always going to be 'loves me'. I made sure of it.\n\nHappy Valentine's, ${to}.\n${from} x`),
       finale("Happy Valentine's Day", "You're stuck with me now.", "petals"),
     ],
-    demo: { to: "Priya", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam" },
   },
   {
     slug: "reasons-i-love-you",
@@ -299,7 +299,7 @@ export const TEMPLATES: Template[] = [
       message("And one more thing", `I could fill a hundred jars and still not be done.\n\nHappy Valentine's Day.\nLove, ${from}`),
       finale(`I love you, ${to}`, "Every single reason.", "hearts"),
     ],
-    demo: { to: "Priya", from: "Sam", photos: [P.sunset, P.coffee, P.lights] },
+    demo: { to: "Olivia", from: "Sam", photos: [P.sunset, P.coffee, P.lights] },
   },
 
   // ---------- Birthday ----------
@@ -322,7 +322,7 @@ export const TEMPLATES: Template[] = [
       message("Happy birthday!", `Here's to another year of being amazing. Can't wait to celebrate with you.\n\nLove, ${from}`),
       finale(`Happy Birthday ${to}!`, "Go eat some cake. You've earned it.", "confetti"),
     ],
-    demo: { to: "Priya", from: "Sam", photos: [P.cake, P.balloons, P.summer] },
+    demo: { to: "Olivia", from: "Sam", photos: [P.cake, P.balloons, P.summer] },
   },
   {
     slug: "another-year-older",
@@ -351,7 +351,7 @@ export const TEMPLATES: Template[] = [
       message("Jokes aside…", `You're getting better with age. Like cheese. Or wine. Mostly cheese.\n\nHave the best day.\n${from}`),
       finale(`Happy Birthday, ${to}!`, "Don't forget to take your vitamins.", "confetti"),
     ],
-    demo: { to: "Priya", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam" },
   },
   {
     slug: "shake-the-present",
@@ -371,7 +371,7 @@ export const TEMPLATES: Template[] = [
       photos("Look how far we've come"),
       finale(`Happy Birthday ${to}!`, "You can stop shaking now.", "confetti"),
     ],
-    demo: { to: "Priya", from: "Sam", photos: [P.cake, P.balloons, P.summer] },
+    demo: { to: "Olivia", from: "Sam", photos: [P.cake, P.balloons, P.summer] },
   },
   {
     slug: "birthday-from-the-heart",
@@ -420,7 +420,7 @@ export const TEMPLATES: Template[] = [
       game("memory-match", "Birthday memory", "Find all the matching pairs", "Sharp as ever!"),
       finale(`Happy Birthday ${to}!`, "You passed. Now go celebrate.", "confetti"),
     ],
-    demo: { to: "Priya", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam" },
   },
 
   {
@@ -442,7 +442,7 @@ export const TEMPLATES: Template[] = [
       photos("Party memories"),
       finale(`Happy Birthday, ${to}!`, `Love, ${from}. Now go and eat all those sweets.`, "confetti"),
     ],
-    demo: { to: "Priya", from: "Sam", photos: [P.balloons, P.cake, P.summer] },
+    demo: { to: "Olivia", from: "Sam", photos: [P.balloons, P.cake, P.summer] },
   },
   {
     slug: "birthday-coupon-book",
@@ -469,7 +469,7 @@ export const TEMPLATES: Template[] = [
       message("Happy birthday", `I hope this year brings you everything you've been wishing for. And if it doesn't, you've got coupons.\n\n${from}`),
       finale(`Happy Birthday, ${to}!`, "Coupons valid for one whole year.", "confetti"),
     ],
-    demo: { to: "Priya", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam" },
   },
   {
     slug: "pick-your-present",
@@ -489,7 +489,7 @@ export const TEMPLATES: Template[] = [
       message("In all seriousness", `Happy birthday. You deserve the best day ever (and more than a hug, which is coming, I promise).\n\n${from}`),
       finale(`Happy Birthday, ${to}!`, "The real present was me all along.", "confetti"),
     ],
-    demo: { to: "Priya", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam" },
   },
 
   // ---------- Diwali ----------
@@ -512,7 +512,7 @@ export const TEMPLATES: Template[] = [
       message("My Diwali wish for you", `Wishing you and your family love, light, laughter and lots of mithai this Diwali.\n\nWarmly, ${from}`),
       finale("Shubh Deepavali", "May this year bring you light in every way.", "fireworks"),
     ],
-    demo: { to: "Priya", from: "Sam", photos: [P.rangoli, P.diyas, P.fireworks] },
+    demo: { to: "Olivia", from: "Sam", photos: [P.rangoli, P.diyas, P.fireworks] },
   },
   {
     slug: "diwali-blessings",
@@ -554,7 +554,7 @@ export const TEMPLATES: Template[] = [
       message("Happy Diwali!", `No burnt fingers, no scared dogs, all the sparkle.\n\nWishing you a bright one, ${from}`),
       finale("Happy Diwali!", "Same time next year?", "fireworks"),
     ],
-    demo: { to: "Priya", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam" },
   },
 
   {
@@ -575,7 +575,7 @@ export const TEMPLATES: Template[] = [
       game("launch-fireworks", "Now the fireworks!", "Tap the sky to launch 6 fireworks", "What a show!", "game2"),
       finale("Shubh Deepavali", "May your year shine as bright as tonight.", "fireworks"),
     ],
-    demo: { to: "Priya", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam" },
   },
   {
     slug: "mithai-mayhem",
@@ -603,7 +603,7 @@ export const TEMPLATES: Template[] = [
       game("launch-fireworks", "Light up the sky", "Tap the sky to launch 6 fireworks", "Dhamaka!"),
       finale("Happy Diwali!", "Save me a laddoo.", "fireworks"),
     ],
-    demo: { to: "Priya", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam" },
   },
 
   // ---------- Christmas ----------
@@ -627,7 +627,7 @@ export const TEMPLATES: Template[] = [
       message("Merry Christmas", `Wishing you a cosy Christmas full of good food, bad jokes and people you love.\n\n${from}`),
       finale("Merry Christmas!", "And a very happy New Year.", "snow"),
     ],
-    demo: { to: "Priya", from: "Sam", photos: [P.tree, P.lights, P.fireworks] },
+    demo: { to: "Olivia", from: "Sam", photos: [P.tree, P.lights, P.fireworks] },
   },
   {
     slug: "naughty-or-nice",
@@ -654,7 +654,7 @@ export const TEMPLATES: Template[] = [
       game("unwrap-gift", "Here's your present", "Tap to unwrap it", "Merry Christmas!"),
       finale("Merry Christmas!", `Signed, Santa (definitely not ${from})`, "snow"),
     ],
-    demo: { to: "Priya", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam" },
   },
   {
     slug: "christmas-memories",
@@ -694,7 +694,7 @@ export const TEMPLATES: Template[] = [
       message("Merry Christmas!", `Wishing you warm feet and a warm heart this Christmas.\n\n${from}`),
       finale("Merry Christmas!", "Wear them with pride.", "snow"),
     ],
-    demo: { to: "Priya", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam" },
   },
   {
     slug: "twelve-reasons-of-christmas",
@@ -726,7 +726,7 @@ export const TEMPLATES: Template[] = [
       photos("Christmas memories"),
       finale(`Merry Christmas, ${to}`, `With love, ${from}`, "snow"),
     ],
-    demo: { to: "Priya", from: "Sam", photos: [P.tree, P.lights, P.fireworks] },
+    demo: { to: "Olivia", from: "Sam", photos: [P.tree, P.lights, P.fireworks] },
   },
 
   // ---------- Eid ----------
@@ -868,7 +868,7 @@ export const TEMPLATES: Template[] = [
       message("Happy anniversary", `Another year of laughing at the same jokes and stealing the covers. I'd choose you again in every version of my life.\n\n${from}`),
       finale("Happy Anniversary", "Here's to the next chapter.", "petals"),
     ],
-    demo: { to: "Priya", from: "Sam", photos: [P.toast, P.sunset, P.coffee] },
+    demo: { to: "Olivia", from: "Sam", photos: [P.toast, P.sunset, P.coffee] },
   },
   {
     slug: "still-choose-you",
@@ -887,7 +887,7 @@ export const TEMPLATES: Template[] = [
       photos("Us"),
       finale("Happy Anniversary", "To us.", "sparkles"),
     ],
-    demo: { to: "Priya", from: "Sam", photos: [P.toast, P.sunset, P.lights] },
+    demo: { to: "Olivia", from: "Sam", photos: [P.toast, P.sunset, P.lights] },
   },
   {
     slug: "secret-password",
@@ -908,7 +908,7 @@ export const TEMPLATES: Template[] = [
       message("Happy anniversary", `Every one of these pictures is a day I'm glad I spent with you.\n\n${from}`),
       finale("Happy Anniversary", "Password changes next year. Hint: it won't.", "sparkles"),
     ],
-    demo: { to: "Priya", from: "Sam", photos: [P.toast, P.sunset, P.coffee, P.lights, P.balloons, P.fireworks] },
+    demo: { to: "Olivia", from: "Sam", photos: [P.toast, P.sunset, P.coffee, P.lights, P.balloons, P.fireworks] },
   },
   {
     slug: "memory-lane",
@@ -928,7 +928,7 @@ export const TEMPLATES: Template[] = [
       message("P.S.", `I'd play this game with you forever (and still let you win).\n\n${from}`),
       finale("Happy Anniversary", "Many more matches to come.", "hearts"),
     ],
-    demo: { to: "Priya", from: "Sam", photos: [P.coffee, P.sunset, P.toast] },
+    demo: { to: "Olivia", from: "Sam", photos: [P.coffee, P.sunset, P.toast] },
   },
 
   {
@@ -955,7 +955,7 @@ export const TEMPLATES: Template[] = [
       reasons("Why I'd do it all again", "Tap the jar", ["You make me laugh every day", "You're my safe place", "We're a really good team", "You still give me butterflies"]),
       finale("Happy anniversary", "Here's to every chapter still to come.", "petals"),
     ],
-    demo: { to: "Priya", from: "Sam", photos: [P.toast, P.sunset, P.coffee] },
+    demo: { to: "Olivia", from: "Sam", photos: [P.toast, P.sunset, P.coffee] },
   },
   {
     slug: "love-coupons",
@@ -981,7 +981,7 @@ export const TEMPLATES: Template[] = [
       wheel("Bonus prize!", "Spin to see what else you've won", ["A kiss", "A hug", "A cuddle", "A dance", "A kiss", "A surprise"], "You won a kiss", 0),
       finale("Happy anniversary!", `Love you always, ${from}`, "hearts"),
     ],
-    demo: { to: "Priya", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam" },
   },
 
   // ---------- Sorry ----------
@@ -1003,7 +1003,7 @@ export const TEMPLATES: Template[] = [
       message("My official apology", `I'm sorry. You were right, I was wrong, and I'll never do it again (I will try very hard not to do it again).\n\nForgive me? ${from}`),
       finale("Friends again?", "I'll buy the snacks.", "hearts"),
     ],
-    demo: { to: "Priya", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam" },
   },
   {
     slug: "im-really-sorry",
@@ -1022,7 +1022,7 @@ export const TEMPLATES: Template[] = [
       photos("Remember these?"),
       finale("I'm sorry", "Whenever you're ready to talk, I'm here.", "petals"),
     ],
-    demo: { to: "Priya", from: "Sam", photos: [P.bouquet, P.coffee, P.sunset] },
+    demo: { to: "Olivia", from: "Sam", photos: [P.bouquet, P.coffee, P.sunset] },
   },
   {
     slug: "scratch-my-apology",
@@ -1041,7 +1041,7 @@ export const TEMPLATES: Template[] = [
       question("Deal?", "Deal", "No", "Yay! Booking the table now."),
       finale("Thank you for forgiving me", "You're the best.", "hearts"),
     ],
-    demo: { to: "Priya", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam" },
   },
 
   {
@@ -1067,7 +1067,7 @@ export const TEMPLATES: Template[] = [
       ]),
       finale("Friends again?", `Sorry again. Love, ${from}`, "hearts"),
     ],
-    demo: { to: "Priya", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam" },
   },
 
   // ---------- Thank you ----------
@@ -1153,7 +1153,7 @@ export const TEMPLATES: Template[] = [
       message("So proud of you", `All that hard work paid off. You deserve every bit of this.\n\nCongratulations!\n${from}`),
       finale(`Congrats, ${to}!`, "Onwards and upwards.", "fireworks"),
     ],
-    demo: { to: "Priya", from: "Sam", photos: [P.grad, P.balloons, P.cake] },
+    demo: { to: "Olivia", from: "Sam", photos: [P.grad, P.balloons, P.cake] },
   },
   {
     slug: "big-brain-energy",
@@ -1180,7 +1180,7 @@ export const TEMPLATES: Template[] = [
       game("catch-stars", "Gold stars for you", "Catch 10 gold stars", "Gold stars all round"),
       finale(`Congratulations, ${to}!`, "Don't let it go to your head (too late).", "confetti"),
     ],
-    demo: { to: "Priya", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam" },
   },
   {
     slug: "you-hit-the-jackpot",
@@ -1200,7 +1200,7 @@ export const TEMPLATES: Template[] = [
       message("Congratulations!", `You worked so hard for this and you absolutely deserve it. Drinks are on you, though.\n\n${from}`),
       finale(`Congrats, ${to}!`, "Onwards and upwards.", "fireworks"),
     ],
-    demo: { to: "Priya", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam" },
   },
   // ---------- Halloween ----------
   {
@@ -1222,7 +1222,7 @@ export const TEMPLATES: Template[] = [
       game("catch-candy", "Fill your sweet bag", "Catch 10 falling sweets", "That's a lot of sugar", "game2"),
       finale("Happy Halloween!", `Boo! Love, ${from}`, "spooky"),
     ],
-    demo: { to: "Priya", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam" },
   },
   {
     slug: "boo-i-love-you",
@@ -1242,7 +1242,7 @@ export const TEMPLATES: Template[] = [
       game("whack-ghosts", "Protect our house", "Whack 8 ghosts", "Our house is safe. My hero"),
       finale("Happy Halloween, boo", `Love, ${from} (your favourite ghoul)`, "spooky"),
     ],
-    demo: { to: "Priya", from: "Sam", photos: [P.pumpkin, P.lights, P.coffee] },
+    demo: { to: "Olivia", from: "Sam", photos: [P.pumpkin, P.lights, P.coffee] },
   },
   {
     slug: "haunted-house",
@@ -1263,7 +1263,7 @@ export const TEMPLATES: Template[] = [
       game("whack-ghosts", "Ghosts everywhere!", "Whack 8 ghosts to escape", "You escaped! Barely."),
       finale("Happy Halloween!", `You survived. ${from} is impressed.`, "spooky"),
     ],
-    demo: { to: "Priya", from: "Sam", photos: [P.pumpkin, P.lights, P.fireworks, P.coffee, P.sunset, P.balloons] },
+    demo: { to: "Olivia", from: "Sam", photos: [P.pumpkin, P.lights, P.fireworks, P.coffee, P.sunset, P.balloons] },
   },
 
   // ---------- New Year ----------
@@ -1286,7 +1286,7 @@ export const TEMPLATES: Template[] = [
       message("Here's to the new year", `Thank you for being part of my year. Here's to more laughs, more adventures and fewer early mornings.\n\nCheers, ${from}`),
       finale("Happy New Year!", "Same again next year?", "fireworks"),
     ],
-    demo: { to: "Priya", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam" },
   },
   {
     slug: "year-in-review",
@@ -1306,7 +1306,7 @@ export const TEMPLATES: Template[] = [
       reasons("Best bits of the year", "Tap the jar", ["Every time you made me laugh", "Our late-night chats", "You being there when it mattered", "All the food we ate"]),
       finale("Happy New Year", "Here's to the next one.", "fireworks"),
     ],
-    demo: { to: "Priya", from: "Sam", photos: [P.clock, P.newyear, P.toast] },
+    demo: { to: "Olivia", from: "Sam", photos: [P.clock, P.newyear, P.toast] },
   },
   {
     slug: "pop-the-champagne",
@@ -1325,7 +1325,7 @@ export const TEMPLATES: Template[] = [
       message("Cheers to you", `Here's to a year of good news, good food and good people.\n\n${from}`),
       finale("Happy New Year!", "Mind the cork.", "fireworks"),
     ],
-    demo: { to: "Priya", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam" },
   },
 
   // ---------- Mother's Day ----------
@@ -1474,7 +1474,7 @@ export const TEMPLATES: Template[] = [
       photos("Us, growing up"),
       finale("Happy Raksha Bandhan", `Love you (don't let it go to your head). ${from}`, "sparkles"),
     ],
-    demo: { to: "Arjun", from: "Priya", photos: [P.rakhi, P.summer, P.cake] },
+    demo: { to: "Arjun", from: "Olivia", photos: [P.rakhi, P.summer, P.cake] },
   },
   {
     slug: "sibling-rivalry",
@@ -1494,7 +1494,7 @@ export const TEMPLATES: Template[] = [
       message("But seriously", `You're annoying and you steal my food, but I wouldn't swap you for anything.\n\nHappy Raksha Bandhan.\n${from}`),
       finale("Happy Raksha Bandhan!", "Now where's my present?", "confetti"),
     ],
-    demo: { to: "Arjun", from: "Priya" },
+    demo: { to: "Arjun", from: "Olivia" },
   },
 
   // ---------- Holi ----------
@@ -1517,7 +1517,7 @@ export const TEMPLATES: Template[] = [
       message("Holi wishes", `May your life be as bright and colourful as today. Happy Holi!\n\n${from}`),
       finale("Happy Holi!", "Bura na mano, Holi hai!", "colours"),
     ],
-    demo: { to: "Priya", from: "Sam", photos: [P.holi, P.summer, P.balloons] },
+    demo: { to: "Olivia", from: "Sam", photos: [P.holi, P.summer, P.balloons] },
   },
   {
     slug: "holi-hai",
@@ -1537,7 +1537,7 @@ export const TEMPLATES: Template[] = [
       wheel("Spin for your colour", "This is the colour you're wearing all day", ["Pink", "Yellow", "Green", "Blue", "Orange", "Purple"], "Looks great on you!"),
       finale("Happy Holi!", "Bura na mano, Holi hai!", "colours"),
     ],
-    demo: { to: "Priya", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam" },
   },
 
   // ---------- New baby ----------
@@ -1560,7 +1560,7 @@ export const TEMPLATES: Template[] = [
       message("Welcome to the world", `What wonderful news. Your little one is so lucky to have you. Enjoy every moment (and get some sleep when you can).\n\nWith love, ${from}`),
       finale("Welcome, little one", "The world just got a little sweeter.", "bubbles"),
     ],
-    demo: { to: "Priya & Sam", from: "Auntie Meera", photos: [P.baby, P.bouquet, P.balloons] },
+    demo: { to: "Olivia & Sam", from: "Auntie Meera", photos: [P.baby, P.bouquet, P.balloons] },
   },
   {
     slug: "scratch-to-reveal-baby",
@@ -1580,7 +1580,7 @@ export const TEMPLATES: Template[] = [
       message("We can't wait", `We can't wait for you to meet our little one.\n\nLove, ${from}`),
       finale("It's a girl!", "Get ready for lots of pink.", "balloons"),
     ],
-    demo: { to: "Mum & Dad", from: "Priya & Sam" },
+    demo: { to: "Mum & Dad", from: "Olivia & Sam" },
   },
   {
     slug: "big-news",
@@ -1600,7 +1600,7 @@ export const TEMPLATES: Template[] = [
       message("Surprise!", `Baby is due next summer and we couldn't wait to tell you.\n\nLove, ${from}`),
       finale("Baby on board!", "Start practising the lullabies.", "hearts"),
     ],
-    demo: { to: "Mum & Dad", from: "Priya & Sam" },
+    demo: { to: "Mum & Dad", from: "Olivia & Sam" },
   },
 
   // ---------- Wedding ----------
@@ -1623,7 +1623,7 @@ export const TEMPLATES: Template[] = [
       question(`${to}, will you marry me?`, "YES!", "No", "You said yes!!!"),
       finale("We're getting married!", `I love you. ${from}`, "fireworks"),
     ],
-    demo: { to: "Priya", from: "Sam", photos: [P.rings, P.sunset, P.coffee] },
+    demo: { to: "Olivia", from: "Sam", photos: [P.rings, P.sunset, P.coffee] },
   },
   {
     slug: "to-the-happy-couple",
@@ -1643,7 +1643,7 @@ export const TEMPLATES: Template[] = [
       message("Wishing you both", `Wishing you a lifetime of love, laughter and someone to share the last slice of cake with. Congratulations!\n\n${from}`),
       finale("Congratulations!", "To love and laughter.", "confetti"),
     ],
-    demo: { to: "Priya & Sam", from: "Meera", photos: [P.rings, P.toast, P.bouquet] },
+    demo: { to: "Olivia & Sam", from: "Meera", photos: [P.rings, P.toast, P.bouquet] },
   },
   {
     slug: "be-my-bridesmaid",
@@ -1663,7 +1663,7 @@ export const TEMPLATES: Template[] = [
       photos("Us, before the big day"),
       finale("It's official!", `Love you! ${from}`, "petals"),
     ],
-    demo: { to: "Meera", from: "Priya", photos: [P.friends, P.bouquet, P.sunset] },
+    demo: { to: "Meera", from: "Olivia", photos: [P.friends, P.bouquet, P.sunset] },
   },
 
   // ---------- Get well ----------
@@ -1686,7 +1686,7 @@ export const TEMPLATES: Template[] = [
       message("Get well soon", `Rest up, drink lots of tea and let everyone look after you for once. We miss you!\n\n${from}`),
       finale("Get well soon!", "Back on your feet in no time.", "bubbles"),
     ],
-    demo: { to: "Priya", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam" },
   },
   {
     slug: "pop-the-boredom",
@@ -1706,7 +1706,7 @@ export const TEMPLATES: Template[] = [
       message("Get well soon", `Hurry up and get better. It's boring without you.\n\n${from}`),
       finale("Get well soon!", "Doctor's orders: more naps.", "bubbles"),
     ],
-    demo: { to: "Priya", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam" },
   },
 
   // ---------- Miss you ----------
@@ -1729,7 +1729,7 @@ export const TEMPLATES: Template[] = [
       photos("Until next time"),
       finale("Not long now", `See you soon. Love, ${from}`, "hearts"),
     ],
-    demo: { to: "Priya", from: "Sam", photos: [P.sunset, P.coffee, P.lights] },
+    demo: { to: "Olivia", from: "Sam", photos: [P.sunset, P.coffee, P.lights] },
   },
   {
     slug: "counting-the-days",
@@ -1748,7 +1748,7 @@ export const TEMPLATES: Template[] = [
       coupons("When I see you next", "Tap to redeem when we're together", ["The biggest hug at arrivals", "Your favourite dinner", "A whole day of doing nothing together", "No phones, just us"]),
       finale("See you soon", `Counting down, ${from}`, "stars"),
     ],
-    demo: { to: "Priya", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam" },
   },
 
   // ---------- Best friends ----------
@@ -1771,7 +1771,7 @@ export const TEMPLATES: Template[] = [
       photos("Exhibit A: we're iconic"),
       finale("Besties forever", `Love you, ${from}`, "confetti"),
     ],
-    demo: { to: "Meera", from: "Priya", photos: [P.friends, P.summer, P.coffee] },
+    demo: { to: "Meera", from: "Olivia", photos: [P.friends, P.summer, P.coffee] },
   },
   {
     slug: "friendship-coupons",
@@ -1790,7 +1790,7 @@ export const TEMPLATES: Template[] = [
       boxes("Pick a box", "One of these is your real present", ["A hug", "Another hug", "Me, forever"]),
       finale("Best friends forever", `Love, ${from}`, "sparkles"),
     ],
-    demo: { to: "Meera", from: "Priya" },
+    demo: { to: "Meera", from: "Olivia" },
   },
   {
     slug: "friendship-gallery",
@@ -1811,7 +1811,7 @@ export const TEMPLATES: Template[] = [
       game("memory-match", "A little game", "Find all the matching pairs", "We make a good team"),
       finale("Friends forever", `Thank you for being you. ${from}`, "confetti"),
     ],
-    demo: { to: "Meera", from: "Priya", photos: [P.friends, P.summer, P.coffee, P.balloons, P.lights, P.cake] },
+    demo: { to: "Meera", from: "Olivia", photos: [P.friends, P.summer, P.coffee, P.balloons, P.lights, P.cake] },
   },
 
   // ---------- Leaving ----------
@@ -1834,7 +1834,7 @@ export const TEMPLATES: Template[] = [
       message("Good luck!", `It won't be the same without you. Thank you for everything, and good luck with what comes next. Keep in touch!\n\n${from}`),
       finale(`Good luck, ${to}!`, "Don't forget us.", "balloons"),
     ],
-    demo: { to: "Priya", from: "The team", photos: [P.desk, P.cake, P.coffee] },
+    demo: { to: "Olivia", from: "The team", photos: [P.desk, P.cake, P.coffee] },
   },
   {
     slug: "you-cant-leave",
@@ -1854,7 +1854,7 @@ export const TEMPLATES: Template[] = [
       message("In all seriousness", `We'll miss you loads. Good luck, and remember us when you're famous.\n\n${from}`),
       finale("Good luck!", "Traitor. (We love you.)", "confetti"),
     ],
-    demo: { to: "Priya", from: "The team" },
+    demo: { to: "Olivia", from: "The team" },
   },
 ];
 
