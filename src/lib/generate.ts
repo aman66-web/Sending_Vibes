@@ -2,6 +2,7 @@ import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { customAlphabet } from "nanoid";
 import { EFFECTS, GAMES, MUSIC, OCCASIONS, THEMES, cardSchema, type CardData, type Game, type ScreenType } from "./card";
+import { LANGUAGES, type Locale } from "@/i18n/config";
 import { TEMPLATES, buildCard, getTemplate } from "./catalog";
 
 // Writes a whole card from a description, or changes an existing one, with Claude.
@@ -71,7 +72,7 @@ ${gameNotes()}
 - Never invent shared memories or facts about the two of them. If they didn't give you details, write questions and lines that are playful rather than factual ("Who's the better cook?" with the answer being the sender).
 - Include what they ask for. Otherwise pick a good mix: at least two playful screens (a question, game, quiz, wheel, scratch card and so on), a photos screen (they can add their own photos or remove it), and a heartfelt message near the end.
 - Sound like a person, not a greeting card factory: warm, a bit funny where it fits, no clichés. Use emoji sparingly or not at all.
-- Write in the language of their description. For English, use British spelling.
+- Write in the language their description is written in. If it's only names and choices, use the language you're told the site is in. For English, use British spelling.
 - Pick the occasion, colours, effects and music that suit it.
 
 # Changing a card
@@ -90,6 +91,8 @@ export type GenerateInput = {
   template?: string;
   // The screen they're looking at, when the change is about that screen.
   focus?: string;
+  // The language the site is shown in, for new cards.
+  locale?: Locale;
 };
 
 export class GenerateError extends Error {
@@ -182,7 +185,8 @@ function request(input: GenerateInput): { message: string; urls: string[] } {
   }
   const base = getTemplate(input.template);
   const start = base ? `\nStart from this design and rework it to fit what they want:\n${JSON.stringify(withoutTemplate(buildCard(base, input.to, input.from)))}\n` : "";
-  return { message: `Their name: ${input.to}\nYour name (the sender): ${input.from}\n${start}\nWhat they want:\n${prompt}`, urls: [] };
+  const language = input.locale && input.locale !== "en" ? `The site is in ${LANGUAGES[input.locale].english}.\n` : "";
+  return { message: `Their name: ${input.to}\nYour name (the sender): ${input.from}\n${language}${start}\nWhat they want:\n${prompt}`, urls: [] };
 }
 
 const SCREEN_TYPES = new Set<string>(cardSchema.shape.screens.element.options.map((o) => o.shape.type.value));

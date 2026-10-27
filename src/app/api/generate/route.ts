@@ -11,7 +11,7 @@ import { GenerateError, generateCard, generateReady } from "@/lib/generate";
 export const maxDuration = 120;
 
 const bodySchema = z.object({
-  prompt: z.string().trim().min(3).max(1000),
+  prompt: z.string().trim().min(3).max(2000),
   to: z.string().trim().min(1).max(40),
   from: z.string().trim().min(1).max(40),
   card: cardSchema.optional(),
@@ -39,7 +39,8 @@ function allowed(ip: string) {
 
 export async function POST(req: NextRequest) {
   const lang = req.cookies.get(LOCALE_COOKIE)?.value;
-  const errors = DICTS[isLocale(lang) ? lang : DEFAULT_LOCALE].custom.errors;
+  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
+  const errors = DICTS[locale].custom.errors;
   const fail = (error: string, status: number) => NextResponse.json({ error }, { status });
 
   const origin = req.headers.get("origin");
@@ -63,7 +64,7 @@ export async function POST(req: NextRequest) {
         } catch {}
       };
       try {
-        const card = await generateCard(parsed.data, { signal: req.signal, onProgress: (screens) => send({ type: "progress", screens }) });
+        const card = await generateCard({ ...parsed.data, locale }, { signal: req.signal, onProgress: (screens) => send({ type: "progress", screens }) });
         send({ type: "card", card });
       } catch (e) {
         if (!req.signal.aborted) console.error("generate failed", e);
