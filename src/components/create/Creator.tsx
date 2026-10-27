@@ -16,6 +16,7 @@ import { formatMoney, price, tierPrice } from "@/lib/pricing";
 import { themes } from "@/lib/themes";
 import { fmt } from "@/i18n/config";
 import { useI18n } from "@/i18n/client";
+import { SignIn, type SignedIn } from "@/components/SignIn";
 import { TwoWays } from "@/components/TwoWays";
 import { NO_ANSWERS, Quiz, quizPrompt, type Answers } from "./Quiz";
 import { Field, ScreenEditor, Select } from "./ScreenEditor";
@@ -23,6 +24,8 @@ import { EditableCard, setAt, type Path } from "./WordEditing";
 
 const DRAFT_KEY = "sv-draft-v1";
 const MODE_KEY = "sv-draft-mode";
+// The questions in progress, kept while they sign in with Google (which leaves the site).
+const QUIZ_KEY = "sv-quiz-v1";
 const MAX_SCREENS = 12;
 // The designs shown next to each example description, in the same order as t.custom.examples.
 const EXAMPLE_SLUGS = ["be-my-valentine", "birthday-bash", "festival-of-lights", "naughty-or-nice", "please-forgive-me", "for-the-best-mum"];
@@ -137,6 +140,23 @@ function clearDraft() {
   } catch {}
 }
 
+type SavedQuiz = { step: "quiz" | "describe"; answers: Answers; question: number; mode: Mode; templateSlug?: string; idea: string; to: string; from: string; at: number };
+
+function loadQuiz(): SavedQuiz | null {
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(QUIZ_KEY) ?? "null") as SavedQuiz | null;
+    return saved && Date.now() - saved.at < 2 * 60 * 60_000 ? saved : null;
+  } catch {
+    return null;
+  }
+}
+
+function clearQuiz() {
+  try {
+    sessionStorage.removeItem(QUIZ_KEY);
+  } catch {}
+}
+
 function loadMode(draft: CardData): Mode {
   try {
     const saved = localStorage.getItem(MODE_KEY);
@@ -146,9 +166,19 @@ function loadMode(draft: CardData): Mode {
 }
 
 // Rendered client-only (see app/create/page.tsx), so reading localStorage on first render is safe.
-type CreatorProps = { initialOccasion?: Occasion; initialTemplate?: string; initialTo?: string; initialFrom?: string; initialTheme?: ThemeName; initialStart?: Start };
+type CreatorProps = {
+  initialOccasion?: Occasion;
+  initialTemplate?: string;
+  initialTo?: string;
+  initialFrom?: string;
+  initialTheme?: ThemeName;
+  initialStart?: Start;
+  // Back from signing in with Google, to carry on with the questions.
+  resume?: boolean;
+  signInFailed?: boolean;
+};
 
-export function Creator({ initialOccasion, initialTemplate, initialTo, initialFrom, initialTheme, initialStart }: CreatorProps) {
+export function Creator({ initialOccasion, initialTemplate, initialTo, initialFrom, initialTheme, initialStart, resume, signInFailed }: CreatorProps) {
   const { t, currency } = useI18n();
   const c = t.create;
   const x = t.custom;
@@ -158,25 +188,28 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     EFFECTS.filter((x) => x !== "fireworks").map((x) => [x, x === "confetti" ? t.labels.partyEmoji : t.labels.effects[x]]),
   ) as Record<Exclude<Effect, "fireworks">, string>;
   const chosen = getTemplate(initialTemplate);
-  const [draft] = useState(() => (initialOccasion || chosen || initialStart ? null : loadDraft()));
+  const [saved] = useState(() => (resume ? loadQuiz() : null));
+  const [draft] = useState(() => (initialOccasion || chosen || initialStart || saved ? null : loadDraft()));
   // A design picked elsewhere goes straight to the questions; an occasion opens the designs for it.
   const [step, setStep] = useState<Step>(
-    draft ? "edit" : chosen ? "quiz" : initialOccasion || initialStart === "premade" ? "pick" : initialStart === "custom" ? "quiz" : "choose",
+    saved ? saved.step : draft ? "edit" : chosen ? "quiz" : initialOccasion || initialStart === "premade" ? "pick" : initialStart === "custom" ? "quiz" : "choose",
   );
-  const [mode, setMode] = useState<Mode>(() => (draft ? loadMode(draft) : chosen || initialOccasion || initialStart === "premade" ? "premade" : "custom"));
-  const [templateSlug, setTemplateSlug] = useState<string | undefined>(chosen?.slug);
-  const [to, setTo] = useState(draft?.to ?? initialTo ?? "");
-  const [from, setFrom] = useState(draft?.from ?? initialFrom ?? "");
+  const [mode, setMode] = useState<Mode>(() =>
+    saved ? saved.mode : draft ? loadMode(draft) : chosen || initialOccasion || initialStart === "premade" ? "premade" : "custom",
+  );
+  const [templateSlug, setTemplateSlug] = useState<string | undefined>(saved ? saved.templateSlug : chosen?.slug);
+  const [to, setTo] = useState(saved?.to ?? draft?.to ?? initialTo ?? "");
+  const [from, setFrom] = useState(saved?.from ?? draft?.from ?? initialFrom ?? "");
   const [card, setCard] = useState<CardData | null>(draft);
   const [selected, setSelected] = useState<string | undefined>(draft?.screens[0]?.id);
   const [showPreview, setShowPreview] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Making a card by typing, and changing one by typing.
-  const [idea, setIdea] = useState("");
+  const [idea, setIdea] = useState(saved?.idea ?? "");
   const [ask, setAsk] = useState("");
   const [busy, setBusy] = useState<"make" | "change" | null>(null);
-  const [aiError, setAiError] = useState<string | null>(null);
+  const [aiError, setAiError] = useState<string | null>(signInFailed ? t.account.signInFailed : null);
   const [aiDone, setAiDone] = useState(false);
   const [undo, setUndo] = useState<CardData | null>(null);
   // The screens written so far while a card is being made, and a way to stop it.
@@ -189,13 +222,45 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   const [nudge, setNudge] = useState(0);
   const [screenAsk, setScreenAsk] = useState("");
   // The eight-question quiz. Names from a product page and a design's occasion are filled in already.
-  const [answers, setAnswers] = useState<Answers>({ ...NO_ANSWERS, to: initialTo ?? "", from: initialFrom ?? "", occasion: chosen?.occasion ?? "" });
-  const [question, setQuestion] = useState(0);
+  const [answers, setAnswers] = useState<Answers>(saved?.answers ?? { ...NO_ANSWERS, to: initialTo ?? "", from: initialFrom ?? "", occasion: chosen?.occasion ?? "" });
+  const [question, setQuestion] = useState(saved?.question ?? 0);
+  // Signing up comes before a new card is made, for anyone not signed in when they start.
+  const [auth, setAuth] = useState<{ google: boolean; email: boolean; account: SignedIn | null; needed: boolean } | null>(null);
   // Clicking words on the preview edits them; Play lets the card react as it will for them.
   const [wordMode, setWordMode] = useState<"edit" | "play">("edit");
   const [pickOccasion, setPickOccasion] = useState<Occasion | "all">(initialOccasion ?? "all");
   const design = mode === "premade" ? getTemplate(templateSlug) : undefined;
   const ideaBox = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    fetch("/api/account", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((s: { enabled: boolean; google: boolean; email: boolean; account: SignedIn | null }) =>
+        setAuth({ google: s.google, email: s.email, account: s.account, needed: s.enabled && !s.account }),
+      )
+      .catch(() => {});
+  }, []);
+
+  // Keeps the questions (or the description) while Google signs them in.
+  const saveQuiz = () => {
+    try {
+      const keep: SavedQuiz = { step: step === "describe" ? "describe" : "quiz", answers, question, mode, templateSlug, idea, to, from, at: Date.now() };
+      sessionStorage.setItem(QUIZ_KEY, JSON.stringify(keep));
+    } catch {}
+  };
+  const signUp = auth?.needed
+    ? {
+        google: auth.google,
+        email: auth.email,
+        account: auth.account,
+        onSignedIn: (account: SignedIn) => {
+          setAuth((a) => a && { ...a, account });
+          setAiError(null);
+        },
+        onGoogle: saveQuiz,
+      }
+    : undefined;
+  const mustSignUp = Boolean(signUp && !signUp.account);
 
   useEffect(() => {
     try {
@@ -278,6 +343,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   };
 
   const makeFromIdea = () => {
+    if (mustSignUp) return setAiError(x.errors.signIn);
     if (idea.trim().length < 3) return setAiError(x.errors.describe);
     if (!to.trim() || !from.trim()) return setAiError(c.needNames);
     makeCard(idea.trim(), { to, from }, "describe");
@@ -296,6 +362,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   const makeCard = async (prompt: string, names: { to: string; from: string }, source: "quiz" | "describe", album?: Album, template?: string) => {
     const controller = new AbortController();
     making.current = controller;
+    clearQuiz();
     setBusy("make");
     setAiError(null);
     setProgress([]);
@@ -419,6 +486,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
             onDescribe={design ? undefined : () => setStep("describe")}
             design={design}
             onChangeDesign={() => setStep("pick")}
+            signUp={signUp}
           />
           {aiError && <p className="mx-auto -mt-6 max-w-2xl px-4 pb-8 text-sm font-semibold text-red-600">{aiError}</p>}
         </>
@@ -457,7 +525,13 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                   <Field label={c.theirName} value={to} max={40} onChange={setTo} placeholder={c.theirExample} />
                   <Field label={c.yourName} value={from} max={40} onChange={setFrom} placeholder={c.yourExample} />
                 </div>
-                <button disabled={busy !== null} className="w-full rounded-full bg-brand py-3.5 font-brand text-lg font-semibold text-white shadow-lg disabled:opacity-70">
+                {signUp && mustSignUp && (
+                  <div className="rounded-2xl border border-line bg-background p-4">
+                    <p className="mb-3 font-brand text-lg font-bold">{t.quiz.signupTitle}</p>
+                    <SignIn google={signUp.google} email={signUp.email} next="/create?resume=1" onSignedIn={signUp.onSignedIn} onGoogle={signUp.onGoogle} />
+                  </div>
+                )}
+                <button disabled={busy !== null || mustSignUp} className="w-full rounded-full bg-brand py-3.5 font-brand text-lg font-semibold text-white shadow-lg disabled:opacity-70">
                   {x.make} ✨
                 </button>
                 <p className="text-center text-sm opacity-60">{x.takesAMoment}</p>

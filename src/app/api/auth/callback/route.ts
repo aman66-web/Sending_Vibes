@@ -11,5 +11,7 @@ export async function GET(req: NextRequest) {
     if (!error) return NextResponse.redirect(new URL(next, req.nextUrl.origin));
     console.error("Google sign-in failed", error);
   }
-  return NextResponse.redirect(new URL("/account?error=signin", req.nextUrl.origin));
+  const back = new URL(next, req.nextUrl.origin);
+  back.searchParams.set("error", "signin");
+  return NextResponse.redirect(back);
 }
