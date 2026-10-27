@@ -1,13 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { CardPlayer } from "@/components/card/CardPlayer";
 import { Logo } from "@/components/Logo";
 import { PhoneFrame } from "@/components/PhoneFrame";
+import { addToBasket } from "@/lib/basket";
 import { EFFECTS, OCCASIONS, THEMES, type CardData, type Effect, type Occasion, type Screen, type ThemeName } from "@/lib/card";
 import { ProductThumb } from "@/components/catalog/ProductThumb";
 import { TEMPLATES, buildCard, deviceInfo, getTemplate, toneInfo } from "@/lib/catalog";
 import { defaultTemplate, occasions } from "@/lib/templates";
+import { price } from "@/lib/pricing";
 import { themes } from "@/lib/themes";
 import { fmt } from "@/i18n/config";
 import { useI18n } from "@/i18n/client";
@@ -86,7 +89,7 @@ function uid() {
   return Math.random().toString(36).slice(2, 10);
 }
 
-type Step = "occasion" | "design" | "names" | "edit" | "done";
+type Step = "occasion" | "design" | "names" | "edit";
 
 // An unfinished card is kept in localStorage so a refresh doesn't lose someone's work.
 function loadDraft(): CardData | null {
@@ -108,8 +111,9 @@ function clearDraft() {
 type CreatorProps = { initialOccasion?: Occasion; initialTemplate?: string; initialTo?: string; initialFrom?: string; initialTheme?: ThemeName };
 
 export function Creator({ initialOccasion, initialTemplate, initialTo, initialFrom, initialTheme }: CreatorProps) {
-  const { t } = useI18n();
+  const { t, currency } = useI18n();
   const c = t.create;
+  const router = useRouter();
   // Fireworks only work as a finale effect, so they're not offered as a background.
   const ambientOptions = Object.fromEntries(
     EFFECTS.filter((x) => x !== "fireworks").map((x) => [x, x === "confetti" ? t.labels.partyEmoji : t.labels.effects[x]]),
@@ -126,7 +130,6 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   const [showPreview, setShowPreview] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [cardId, setCardId] = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -147,7 +150,6 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   const startOver = () => {
     clearDraft();
     setCard(null);
-    setCardId(null);
     setTo("");
     setFrom("");
     setStep("occasion");
@@ -187,12 +189,12 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       const res = await fetch("/api/cards", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(card) });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(json.error ?? c.failed);
-      setCardId(json.id);
-      setStep("done");
+      // Saved but locked until it's paid for; the basket takes it from here.
+      addToBasket({ id: json.id, to: card.to, from: card.from, occasion: card.occasion, theme: card.theme, template: card.template, delivery: "self" });
       clearDraft();
+      router.push("/basket");
     } catch (e) {
       setError(e instanceof Error ? e.message : c.failed);
-    } finally {
       setSaving(false);
     }
   };
@@ -390,7 +392,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                 {c.preview}
               </button>
               <button onClick={publish} disabled={saving} className="flex-[2] rounded-full bg-brand py-3.5 font-brand text-lg font-semibold text-white shadow-lg disabled:opacity-50 lg:w-full">
-                {saving ? c.creating : c.create}
+                {saving ? c.adding : fmt(c.addToBasket, { price: price("card", currency) })}
               </button>
             </div>
             {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
@@ -416,48 +418,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
         </div>
       )}
 
-      {step === "done" && cardId && <Done id={cardId} to={card?.to ?? ""} onAnother={startOver} />}
     </div>
-  );
-}
-
-function Done({ id, to, onAnother }: { id: string; to: string; onAnother: () => void }) {
-  const c = useI18n().t.create;
-  const url = `${window.location.origin}/c/${id}`;
-  const [copied, setCopied] = useState(false);
-
-  const message = fmt(c.whatsappMessage, { url });
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {}
-  };
-
-  return (
-    <section className="mx-auto max-w-md px-4 py-14 text-center">
-      <div className="text-7xl">🎉</div>
-      <h1 className="mt-4 font-brand text-4xl font-bold">{c.readyTitle}</h1>
-      <p className="mt-2 opacity-70">{fmt(c.readyBody, { name: to || c.them })}</p>
-      <div className="mt-6 flex items-center gap-2 rounded-2xl border border-line bg-panel p-2 pl-4">
-        <span className="flex-1 truncate text-start text-sm" dir="ltr">{url}</span>
-        <button onClick={copy} className="rounded-xl bg-brand px-4 py-2 text-sm font-semibold text-white">
-          {copied ? c.copied : c.copy}
-        </button>
-      </div>
-      <div className="mt-4 grid gap-3">
-        <a href={`https://wa.me/?text=${encodeURIComponent(message)}`} target="_blank" rel="noreferrer" className="rounded-full bg-[#25D366] py-3.5 font-semibold text-white">
-          {c.whatsapp}
-        </a>
-        <a href={`/c/${id}`} target="_blank" className="rounded-full border border-line py-3.5 font-semibold">
-          {c.openCard}
-        </a>
-        <button onClick={onAnother} className="py-2 text-sm font-semibold opacity-70">
-          {c.another}
-        </button>
-      </div>
-    </section>
   );
 }
 

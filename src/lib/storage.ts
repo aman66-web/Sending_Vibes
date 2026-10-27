@@ -17,9 +17,9 @@ export const PHOTO_TYPES: Record<string, string> = {
 
 // Uses Supabase when configured, otherwise a local .data folder so the app runs
 // with zero setup in development. Local storage does not work on Vercel.
-// Only the publishable key is needed: cards are read and written through the
-// create_card / get_card database functions (see supabase/migrations), and the
-// cards table itself is not accessible to the public.
+// Cards are read and written with the publishable key, through the create_card /
+// get_card database functions (see supabase/migrations); the cards table itself
+// is not accessible to the public.
 function supabase(): SupabaseClient | null {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_PUBLISHABLE_KEY;
@@ -27,7 +27,18 @@ function supabase(): SupabaseClient | null {
   return createClient(url, key, { auth: { persistSession: false } });
 }
 
-const DATA_DIR = path.join(process.cwd(), ".data");
+export const usingSupabase = () => Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL);
+
+// The secret key, for the few things the public must not be able to do: recording
+// orders and marking cards as paid. Server-only, never sent to the browser.
+export function adminSupabase(): SupabaseClient | null {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SECRET_KEY;
+  if (!url || !key) return null;
+  return createClient(url, key, { auth: { persistSession: false } });
+}
+
+export const DATA_DIR = path.join(process.cwd(), ".data");
 
 export async function saveCard(card: CardData): Promise<string> {
   const id = newId();
@@ -39,11 +50,13 @@ export async function saveCard(card: CardData): Promise<string> {
     return id;
   }
   await fs.mkdir(path.join(DATA_DIR, "cards"), { recursive: true });
-  await fs.writeFile(path.join(DATA_DIR, "cards", `${id}.json`), JSON.stringify(stored));
+  await fs.writeFile(path.join(DATA_DIR, "cards", `${id}.json`), JSON.stringify({ ...stored, paid: false }));
   return id;
 }
 
-export async function getCard(id: string): Promise<StoredCard | null> {
+// paid is false while the card waits in someone's basket. Cards saved before
+// checkout existed have no flag and count as paid.
+export async function getCard(id: string): Promise<(StoredCard & { paid: boolean }) | null> {
   if (!/^[A-Za-z0-9]{12}$/.test(id)) return null;
   const db = supabase();
   let raw: unknown = null;
@@ -62,8 +75,25 @@ export async function getCard(id: string): Promise<StoredCard | null> {
   // directly, so stored data is never trusted to be well-formed.
   const parsed = cardSchema.safeParse(raw);
   if (!parsed.success) return null;
-  const createdAt = (raw as { createdAt?: unknown }).createdAt;
-  return { ...parsed.data, id, createdAt: typeof createdAt === "string" ? createdAt : "" };
+  const { createdAt, paid } = raw as { createdAt?: unknown; paid?: unknown };
+  return { ...parsed.data, id, createdAt: typeof createdAt === "string" ? createdAt : "", paid: paid !== false };
+}
+
+// Opens cards once their order is paid. Safe to repeat.
+export async function markCardsPaid(ids: string[]): Promise<void> {
+  if (!ids.length) return;
+  if (usingSupabase()) {
+    const db = adminSupabase();
+    if (!db) throw new Error("SUPABASE_SECRET_KEY is not set");
+    const { error } = await db.from("cards").update({ paid_at: new Date().toISOString() }).in("id", ids).is("paid_at", null);
+    if (error) throw new Error(`Could not mark cards paid: ${error.message}`);
+    return;
+  }
+  for (const id of ids) {
+    const file = path.join(DATA_DIR, "cards", `${id}.json`);
+    const raw = JSON.parse(await fs.readFile(file, "utf8").catch(() => "null"));
+    if (raw && raw.paid === false) await fs.writeFile(file, JSON.stringify({ ...raw, paid: true }));
+  }
 }
 
 export async function savePhoto(bytes: Buffer, contentType: string): Promise<string> {
