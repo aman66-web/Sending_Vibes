@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { fmt } from "@/i18n/config";
 import { useI18n } from "@/i18n/client";
 import type { Dict } from "@/i18n/en";
@@ -20,9 +20,25 @@ export type Answers = {
   message: string;
   include: (ScreenType | "surprise")[];
   from: string;
+  // Typed into "Other" when none of the choices fit.
+  occasionOther: string;
+  vibeOther: string;
+  includeOther: string;
 };
 
-export const NO_ANSWERS: Answers = { to: "", relation: "", occasion: "", vibes: [], about: "", message: "", include: [], from: "" };
+export const NO_ANSWERS: Answers = {
+  to: "",
+  relation: "",
+  occasion: "",
+  vibes: [],
+  about: "",
+  message: "",
+  include: [],
+  from: "",
+  occasionOther: "",
+  vibeOther: "",
+  includeOther: "",
+};
 
 const QUESTIONS = ["to", "relation", "occasion", "vibe", "about", "message", "include", "from"] as const;
 export const QUIZ_LENGTH = QUESTIONS.length;
@@ -31,14 +47,15 @@ const INCLUDE: ScreenType[] = ["game", "quiz", "question", "photos", "wheel", "s
 // The answers written out for the card writer. Labels are in the visitor's language.
 export function quizPrompt(a: Answers, t: Dict) {
   const lines = [
-    `Occasion: ${a.occasion ? t.occasions[a.occasion].label : "none in particular"}`,
+    `Occasion: ${a.occasion ? t.occasions[a.occasion].label : a.occasionOther.trim() || "none in particular"}`,
     `It's for ${a.to.trim()}${a.relation.trim() ? ` (${a.relation.trim()})` : ""}, from ${a.from.trim()}.`,
   ];
-  if (a.vibes.length) lines.push(`How it should feel: ${a.vibes.map((v) => t.tones[v]).join(", ")}`);
+  const feel = [...a.vibes.map((v) => t.tones[v]), a.vibeOther.trim()].filter(Boolean);
+  if (feel.length) lines.push(`How it should feel: ${feel.join(", ")}`);
   if (a.about.trim()) lines.push(`About ${a.to.trim()}: ${a.about.trim()}`);
   if (a.message.trim()) lines.push(`What I most want them to know: ${a.message.trim()}`);
-  const include = a.include.filter((x): x is ScreenType => x !== "surprise");
-  if (include.length) lines.push(`Please include: ${include.map((x) => t.labels.screens[x]).join(", ")}`);
+  const include = [...a.include.filter((x): x is ScreenType => x !== "surprise").map((x) => t.labels.screens[x]), a.includeOther.trim()].filter(Boolean);
+  if (include.length) lines.push(`Please include: ${include.join(", ")}`);
   return lines.join("\n");
 }
 
@@ -61,7 +78,11 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onDescr
   const last = index === QUESTIONS.length - 1;
   const input = useRef<HTMLInputElement & HTMLTextAreaElement>(null);
   const required = key === "to" || key === "occasion" || key === "from";
-  const ready = key === "to" ? answers.to.trim() : key === "occasion" ? answers.occasion : key === "from" ? answers.from.trim() : true;
+  const ready = key === "to" ? answers.to.trim() : key === "occasion" ? answers.occasion || answers.occasionOther.trim() : key === "from" ? answers.from.trim() : true;
+  // Which questions have their "Other" box open.
+  const [other, setOther] = useState<Partial<Record<(typeof QUESTIONS)[number], boolean>>>({});
+  const openOther = () => setOther((o) => ({ ...o, [key]: true }));
+  const customRelation = Boolean(answers.relation && !q.relations.includes(answers.relation));
 
   useEffect(() => {
     input.current?.focus({ preventScroll: true });
@@ -116,31 +137,54 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onDescr
             <>
               <div className="flex flex-wrap gap-2">
                 {q.relations.map((r) => (
-                  <button key={r} type="button" onClick={() => pickAndGo(() => set("relation", answers.relation === r ? "" : r))} className={chip(answers.relation === r)}>
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => {
+                      setOther((o) => ({ ...o, relation: false }));
+                      pickAndGo(() => set("relation", answers.relation === r ? "" : r));
+                    }}
+                    className={chip(answers.relation === r)}
+                  >
                     {r}
                   </button>
                 ))}
+                <OtherChip label={q.other} on={Boolean(other.relation) || customRelation} onClick={openOther} className={chip} />
               </div>
-              <input
-                value={q.relations.includes(answers.relation) ? "" : answers.relation}
-                maxLength={40}
-                dir="auto"
-                onChange={(e) => set("relation", e.target.value)}
-                placeholder={q.questions.relation.placeholder}
-                aria-label={q.questions.relation.placeholder}
-                className={`${field} mt-4`}
-              />
+              {(other.relation || customRelation) && (
+                <OtherInput value={customRelation ? answers.relation : ""} max={40} onChange={(v) => set("relation", v)} placeholder={q.questions.relation.placeholder} className={field} />
+              )}
             </>
           )}
           {key === "occasion" && (
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {OCCASIONS.map((o) => (
-                <button key={o} type="button" onClick={() => pickAndGo(() => set("occasion", o))} className={chip(answers.occasion === o, "rounded-2xl")}>
-                  <span className="me-1.5">{occasions[o].emoji}</span>
-                  {t.occasions[o].label}
-                </button>
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {OCCASIONS.map((o) => (
+                  <button
+                    key={o}
+                    type="button"
+                    onClick={() => {
+                      setOther((x) => ({ ...x, occasion: false }));
+                      pickAndGo(() => setAnswers((a) => ({ ...a, occasion: o, occasionOther: "" })));
+                    }}
+                    className={chip(answers.occasion === o, "rounded-2xl")}
+                  >
+                    <span className="me-1.5">{occasions[o].emoji}</span>
+                    {t.occasions[o].label}
+                  </button>
+                ))}
+                <OtherChip label={q.other} on={Boolean(other.occasion || answers.occasionOther)} onClick={openOther} className={(on) => chip(on, "rounded-2xl")} />
+              </div>
+              {(other.occasion || answers.occasionOther) && (
+                <OtherInput
+                  value={answers.occasionOther}
+                  max={60}
+                  onChange={(v) => setAnswers((a) => ({ ...a, occasionOther: v, occasion: "" }))}
+                  placeholder={q.questions.occasion.placeholder}
+                  className={field}
+                />
+              )}
+            </>
           )}
           {key === "vibe" && (
             <div className="flex flex-wrap gap-2">
@@ -149,6 +193,10 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onDescr
                   {t.tones[tone]}
                 </button>
               ))}
+              <OtherChip label={q.other} on={Boolean(other.vibe || answers.vibeOther)} onClick={openOther} className={chip} />
+              {(other.vibe || answers.vibeOther) && (
+                <OtherInput value={answers.vibeOther} max={100} onChange={(v) => set("vibeOther", v)} placeholder={q.questions.vibe.placeholder} className={field} />
+              )}
             </div>
           )}
           {(key === "about" || key === "message") && (
@@ -185,6 +233,16 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onDescr
               >
                 ✨ {q.surprise}
               </button>
+              <OtherChip label={q.other} on={Boolean(other.include || answers.includeOther)} onClick={openOther} className={chip} />
+              {(other.include || answers.includeOther) && (
+                <OtherInput
+                  value={answers.includeOther}
+                  max={200}
+                  onChange={(v) => setAnswers((a) => ({ ...a, includeOther: v, include: a.include.filter((x) => x !== "surprise") }))}
+                  placeholder={q.questions.include.placeholder}
+                  className={field}
+                />
+              )}
             </div>
           )}
         </div>
@@ -218,5 +276,29 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onDescr
         </div>
       )}
     </section>
+  );
+}
+
+// "Other", for when none of the choices fit. It opens a box to type your own.
+function OtherChip({ label, on, onClick, className }: { label: string; on: boolean; onClick: () => void; className: (on: boolean) => string }) {
+  return (
+    <button type="button" aria-pressed={on} onClick={onClick} className={className(on)}>
+      ✏️ {label}
+    </button>
+  );
+}
+
+function OtherInput({ value, onChange, placeholder, max, className }: { value: string; onChange: (value: string) => void; placeholder: string; max: number; className: string }) {
+  return (
+    <input
+      autoFocus
+      value={value}
+      maxLength={max}
+      dir="auto"
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      aria-label={placeholder}
+      className={`${className} mt-4 basis-full`}
+    />
   );
 }
