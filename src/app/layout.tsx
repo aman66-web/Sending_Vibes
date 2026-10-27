@@ -1,12 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { Caveat, Fredoka, Instrument_Serif, Nunito } from "next/font/google";
+import { Caveat, Figtree, Fraunces, Fredoka, Nunito } from "next/font/google";
 import { ChatWidget } from "@/components/ChatWidget";
 import "./globals.css";
 
+// The site itself: a soft serif for headings and a plain sans for everything else.
+const brand = Fraunces({ subsets: ["latin"], variable: "--font-brand-face", axes: ["SOFT", "WONK", "opsz"] });
+const ui = Figtree({ subsets: ["latin"], variable: "--font-ui-face" });
+// Inside the cards: rounded and playful.
 const display = Fredoka({ subsets: ["latin"], variable: "--font-display-face", weight: ["500", "600", "700"] });
 const body = Nunito({ subsets: ["latin"], variable: "--font-body" });
 const hand = Caveat({ subsets: ["latin"], variable: "--font-hand-face" });
-const serif = Instrument_Serif({ subsets: ["latin"], variable: "--font-serif-face", weight: "400", style: ["normal", "italic"] });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://sending-vibes.vercel.app"),
@@ -18,13 +21,13 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#ff2e7e",
+  themeColor: "#f3ecdf",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en-GB">
-      <body className={`${display.variable} ${body.variable} ${hand.variable} ${serif.variable} antialiased`}>
+      <body className={`${brand.variable} ${ui.variable} ${display.variable} ${body.variable} ${hand.variable} antialiased`}>
         {children}
         {/* The chat only shows once the Claude API key has been added. */}
         {process.env.ANTHROPIC_API_KEY ? <ChatWidget /> : null}

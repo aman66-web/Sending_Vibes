@@ -66,13 +66,9 @@ export default async function OccasionPage({ params }: Props) {
   const next = nextDate(o);
 
   return (
-    <div className="min-h-dvh overflow-x-clip bg-cream text-ink">
+    <div className="grain min-h-dvh overflow-x-clip bg-cream text-ink">
       <SiteHeader />
       <section className="relative">
-        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -left-40 -top-40 h-[26rem] w-[26rem] rounded-full bg-hot/15 blur-3xl" />
-          <div className="absolute -right-40 top-10 h-[26rem] w-[26rem] rounded-full bg-grape/15 blur-3xl" />
-        </div>
         <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-10 sm:px-6 sm:pt-14">
           <nav className="text-sm font-semibold text-ink/50">
             <Link href="/cards" className="hover:text-ink">All cards</Link>
@@ -82,12 +78,12 @@ export default async function OccasionPage({ params }: Props) {
           <div className="mt-6 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
             <div className="max-w-2xl">
               <span className="text-6xl">{info.emoji}</span>
-              <h1 className="mt-3 font-display text-5xl font-bold leading-[1.05] sm:text-6xl">
+              <h1 className="mt-3 font-brand text-5xl font-bold leading-[1.05] sm:text-6xl">
                 Interactive <span className="text-hot">{info.label}</span> cards
               </h1>
               <p className="mt-4 text-lg text-ink/65">{INTROS[o]}</p>
               {next && (
-                <p className="mt-5 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-bold shadow-sm ring-1 ring-ink/5">
+                <p className="mt-5 inline-flex items-center gap-2 rounded-full border-2 border-ink bg-paper px-4 py-1.5 text-sm font-bold">
                   📅 {next.name} is {formatDay(next.date, next.approx)} · <span className="text-hot">{whenLabel(next.days)}</span>
                 </p>
               )}
@@ -95,11 +91,11 @@ export default async function OccasionPage({ params }: Props) {
             <div className="flex shrink-0 flex-col gap-3 sm:flex-row md:flex-col">
               <Link
                 href={`/create?occasion=${o}`}
-                className="rounded-full bg-ink px-7 py-4 text-center font-display text-lg font-semibold text-white shadow-xl shadow-ink/20 transition hover:-translate-y-0.5 hover:bg-hot"
+                className="btn btn-red px-7 py-3.5 text-lg"
               >
                 Make a {info.label} card · {PRICES.card.label}
               </Link>
-              <a href="#designs" className="rounded-full bg-white px-7 py-4 text-center font-display text-lg font-semibold ring-1 ring-ink/10 transition hover:-translate-y-0.5">
+              <a href="#designs" className="btn btn-paper px-7 py-3.5 text-lg">
                 See the {designs.length} designs ↓
               </a>
             </div>
@@ -108,7 +104,7 @@ export default async function OccasionPage({ params }: Props) {
       </section>
 
       <main id="designs" className="mx-auto max-w-6xl px-4 pb-20 sm:px-6">
-        <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-x-6 md:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-7 md:grid-cols-3 lg:grid-cols-4">
           {designs.map((t) => (
             <ProductTile key={t.slug} template={t} />
           ))}
@@ -120,19 +116,19 @@ export default async function OccasionPage({ params }: Props) {
             { emoji: "🎮", title: "They play it, not just read it", body: "Games, a runaway No button, music and a big finale. It's the card they show everyone." },
             { emoji: "🔗", title: "Send it as a link", body: "WhatsApp, text or Instagram. It opens in their browser on any phone or computer. Nothing to download." },
           ].map((f) => (
-            <div key={f.title} className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-ink/5">
+            <div key={f.title} className="sheet p-6">
               <span className="text-3xl">{f.emoji}</span>
-              <h2 className="mt-3 font-display text-xl font-bold">{f.title}</h2>
+              <h2 className="mt-3 font-brand text-xl font-bold">{f.title}</h2>
               <p className="mt-1 text-ink/65">{f.body}</p>
             </div>
           ))}
         </section>
 
         <section className="mt-20">
-          <h2 className="font-display text-3xl font-bold">More occasions</h2>
+          <h2 className="font-brand text-3xl font-bold">More occasions</h2>
           <div className="mt-5 flex flex-wrap gap-2">
             {OCCASIONS.filter((x) => x !== o).map((x) => (
-              <Link key={x} href={`/occasions/${x}`} className="rounded-full bg-white px-4 py-2 text-sm font-bold text-ink/75 ring-1 ring-ink/10 transition hover:text-ink hover:ring-hot">
+              <Link key={x} href={`/occasions/${x}`} className="rounded-full border-2 border-ink/15 bg-paper px-4 py-1.5 text-sm font-bold text-ink/75 transition hover:border-ink hover:text-ink">
                 {occasions[x].emoji} {occasions[x].label}
               </Link>
             ))}

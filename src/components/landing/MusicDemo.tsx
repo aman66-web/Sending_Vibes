@@ -40,7 +40,7 @@ export function MusicDemo() {
               setPlaying((p) => (p === t ? null : t));
             }}
             aria-pressed={playing === t}
-            className={`rounded-full px-3.5 py-2 text-sm font-bold transition ${playing === t ? "bg-white text-ink shadow" : "bg-white/15 text-white hover:bg-white/25"}`}
+            className={`rounded-full border-2 px-3.5 py-1.5 text-sm font-bold transition ${playing === t ? "border-ink bg-paper text-ink" : "border-white/45 text-white hover:bg-white/15"}`}
           >
             {playing === t ? "■" : "▶"} {MUSIC_LABELS[t]}
           </button>

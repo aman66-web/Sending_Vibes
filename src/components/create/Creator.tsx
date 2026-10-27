@@ -219,6 +219,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
 
   return (
     <div className="min-h-dvh">
+      <div aria-hidden className="airmail h-1.5" />
       <header className="flex items-center justify-between border-b border-line px-4 py-3 sm:px-6">
         <Logo textClass="text-foreground" />
         {step === "edit" && (
@@ -230,7 +231,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
 
       {step === "occasion" && (
         <section className="mx-auto max-w-5xl px-4 py-12">
-          <h1 className="text-center font-display text-4xl font-bold">What are we celebrating?</h1>
+          <h1 className="text-center font-brand text-4xl font-bold">What are we celebrating?</h1>
           <p className="mt-2 text-center opacity-70">
             {OCCASIONS.length} occasions, {TEMPLATES.length} designs. Pick one to see its designs.
           </p>
@@ -248,7 +249,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                   <span className="text-4xl">{occasions[o].emoji}</span>
                   <span className="rounded-full bg-brand-soft px-2 py-0.5 text-xs font-bold text-brand">{TEMPLATES.filter((t) => t.occasion === o).length} designs</span>
                 </div>
-                <div className="mt-3 font-display text-lg font-bold leading-tight">{occasions[o].label}</div>
+                <div className="mt-3 font-brand text-lg font-bold leading-tight">{occasions[o].label}</div>
                 <p className="mt-1 text-sm leading-snug opacity-70">{occasions[o].tagline}</p>
               </button>
             ))}
@@ -261,7 +262,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
           <button onClick={() => setStep("occasion")} className="text-sm font-semibold opacity-70">
             ← All occasions
           </button>
-          <h1 className="mt-4 font-display text-4xl font-bold">
+          <h1 className="mt-4 font-brand text-4xl font-bold">
             Pick a {occasions[occasion].label} design {occasions[occasion].emoji}
           </h1>
           <p className="mt-1 opacity-70">Everything is editable afterwards: words, photos, colours and screens.</p>
@@ -277,7 +278,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                 >
                   <ProductThumb template={t} />
                   <div className="p-3">
-                    <p className="font-display font-bold leading-tight">{t.name}</p>
+                    <p className="font-brand font-bold leading-tight">{t.name}</p>
                     <p className="mt-1 text-xs opacity-70">
                       {toneInfo[t.tone].emoji} {toneInfo[t.tone].label} · {deviceInfo[t.device].emoji} {deviceInfo[t.device].label}
                     </p>
@@ -297,7 +298,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
           <button onClick={() => setStep("design")} className="text-sm font-semibold opacity-70">
             ← {getTemplate(templateSlug)?.name ?? occasions[occasion].label}
           </button>
-          <h1 className="mt-4 font-display text-4xl font-bold">Who&apos;s it for?</h1>
+          <h1 className="mt-4 font-brand text-4xl font-bold">Who&apos;s it for?</h1>
           <form
             className="mt-6 space-y-4"
             onSubmit={(e) => {
@@ -309,7 +310,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
             <Field label="Your name" value={from} max={40} onChange={setFrom} placeholder="e.g. Sam" />
             <button
               disabled={!to.trim() || !from.trim()}
-              className="w-full rounded-full bg-brand py-3.5 font-display text-lg font-semibold text-white disabled:opacity-40"
+              className="w-full rounded-full bg-brand py-3.5 font-brand text-lg font-semibold text-white disabled:opacity-40"
             >
               Next: make it yours →
             </button>
@@ -321,7 +322,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_380px]">
           <div className="min-w-0 space-y-6 pb-28 lg:pb-10">
             <div>
-              <h1 className="font-display text-3xl font-bold">Make it yours</h1>
+              <h1 className="font-brand text-3xl font-bold">Make it yours</h1>
               <p className="mt-1 opacity-70">Change any words, add your photos, and preview as you go.</p>
             </div>
 
@@ -357,7 +358,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
             </Panel>
 
             <div className="space-y-3">
-              <h2 className="font-display text-xl font-bold">Screens</h2>
+              <h2 className="font-brand text-xl font-bold">Screens</h2>
               {card.screens.map((s, i) => {
                 const open = selected === s.id;
                 return (
@@ -408,7 +409,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
               <button onClick={() => setShowPreview(true)} className="flex-1 rounded-full border border-line py-3.5 font-semibold lg:hidden">
                 Preview
               </button>
-              <button onClick={publish} disabled={saving} className="flex-[2] rounded-full bg-brand py-3.5 font-display text-lg font-semibold text-white shadow-lg disabled:opacity-50 lg:w-full">
+              <button onClick={publish} disabled={saving} className="flex-[2] rounded-full bg-brand py-3.5 font-brand text-lg font-semibold text-white shadow-lg disabled:opacity-50 lg:w-full">
                 {saving ? "Creating…" : "Create my card 💌"}
               </button>
             </div>
@@ -456,7 +457,7 @@ function Done({ id, to, onAnother }: { id: string; to: string; onAnother: () => 
   return (
     <section className="mx-auto max-w-md px-4 py-14 text-center">
       <div className="text-7xl">🎉</div>
-      <h1 className="mt-4 font-display text-4xl font-bold">Your card is ready!</h1>
+      <h1 className="mt-4 font-brand text-4xl font-bold">Your card is ready!</h1>
       <p className="mt-2 opacity-70">Send this link to {to || "them"}. Only people with the link can open it.</p>
       <div className="mt-6 flex items-center gap-2 rounded-2xl border border-line bg-panel p-2 pl-4">
         <span className="flex-1 truncate text-left text-sm">{url}</span>
@@ -504,7 +505,7 @@ function summary(s: Screen) {
 function Panel({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="space-y-4 rounded-2xl border border-line bg-panel p-4">
-      <h2 className="font-display text-xl font-bold">{title}</h2>
+      <h2 className="font-brand text-xl font-bold">{title}</h2>
       {children}
     </section>
   );

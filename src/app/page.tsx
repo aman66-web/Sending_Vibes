@@ -55,12 +55,12 @@ function showcaseOrder(): ShowcaseOccasion[] {
 
 export default function Home() {
   return (
-    <div className="overflow-x-clip bg-cream text-ink">
+    <div className="grain overflow-x-clip bg-cream text-ink">
       <SiteHeader />
 
       {/* Every occasion, scrolling past under the header. Hover to pause; each one links to its page. */}
-      <div className="group relative overflow-hidden bg-ink py-3 text-white [contain:paint]">
-        <div className="flex w-max animate-marquee gap-8 whitespace-nowrap font-display text-lg font-semibold will-change-transform [backface-visibility:hidden] group-hover:[animation-play-state:paused] motion-reduce:animate-none sm:text-xl">
+      <div className="group relative overflow-hidden border-b-2 border-ink bg-ink py-3 text-cream [contain:paint]">
+        <div className="flex w-max animate-marquee gap-8 whitespace-nowrap font-brand text-lg font-semibold will-change-transform [backface-visibility:hidden] group-hover:[animation-play-state:paused] motion-reduce:animate-none sm:text-xl">
           {[...OCCASIONS, ...OCCASIONS].map((o, i) => (
             <Link
               key={i}
@@ -71,7 +71,7 @@ export default function Home() {
             >
               <span>{occasions[o].emoji}</span>
               {occasions[o].label}
-              <span className="ml-5 text-hot">✦</span>
+              <span className="ml-5 text-hot">✶</span>
             </Link>
           ))}
         </div>
@@ -79,46 +79,32 @@ export default function Home() {
 
       {/* Hero: says what we do in one glance, then shows it. */}
       <section className="relative">
-        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-          {/* Soft glows drawn as gradients: blurring big shapes every frame makes the page stutter. */}
-          <div className="absolute -left-56 -top-56 h-[44rem] w-[44rem] animate-blob rounded-full bg-[radial-gradient(circle,rgba(255,46,126,0.25)_0%,transparent_65%)] will-change-transform" />
-          <div className="absolute -right-56 -top-6 h-[48rem] w-[48rem] animate-blob rounded-full bg-[radial-gradient(circle,rgba(255,138,61,0.25)_0%,transparent_65%)] will-change-transform [animation-delay:-6s]" />
-          <div className="absolute -bottom-64 left-1/4 h-[44rem] w-[44rem] animate-blob rounded-full bg-[radial-gradient(circle,rgba(124,58,237,0.2)_0%,transparent_65%)] will-change-transform [animation-delay:-12s]" />
-          <div className="absolute inset-0 bg-[radial-gradient(#1d0b17_1px,transparent_1px)] [background-size:22px_22px] opacity-[0.05]" />
-        </div>
-
-        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 pb-10 pt-10 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-6 lg:pt-14">
+        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 pb-12 pt-10 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-6 lg:pt-14">
           <div className="text-center lg:text-left">
-            <span className="inline-flex items-center gap-2 rounded-full bg-white/80 px-3.5 py-1.5 text-sm font-bold text-ink/70 shadow-sm ring-1 ring-ink/5 backdrop-blur">
-              ✏️ Just fill in the blanks · no coding
-            </span>
-            <h1 className="mt-5 font-display text-[clamp(2.75rem,6.2vw,4.6rem)] font-bold leading-[0.92] tracking-tight">
-              <span className="animate-shimmer bg-gradient-to-r from-hot via-tangerine to-grape bg-[length:200%_auto] bg-clip-text pb-1 text-transparent">
-                Personalised
-              </span>
+            <p className="font-hand text-2xl text-ink/70 sm:text-3xl">for birthdays, Diwali, Eid, Valentine&apos;s and the rest</p>
+            <h1 className="mt-2 font-brand text-[clamp(2.9rem,6.6vw,5.1rem)] font-black leading-[0.95] tracking-tight">
+              <span className="text-hot">Personalised</span>
               <br />
-              interactive cards.
+              interactive{" "}
+              <span className="relative inline-block">
+                cards.
+                <svg aria-hidden viewBox="0 0 200 20" preserveAspectRatio="none" className="absolute -bottom-1 left-0 h-3 w-full text-sun sm:-bottom-2 sm:h-4">
+                  <path d="M4 13 C 55 3, 130 3, 196 11" fill="none" stroke="currentColor" strokeWidth="7" strokeLinecap="round" />
+                </svg>
+              </span>
             </h1>
-            <p className="mx-auto mt-5 max-w-lg text-base leading-relaxed text-ink/70 sm:mt-6 sm:text-xl lg:mx-0">
-              Pick a design and fill in the blanks: their name, your photos, your message. That&apos;s it. We turn it into a card they can play, with games and a big finale.
+            <p className="mx-auto mt-6 max-w-lg text-base leading-relaxed text-ink/75 sm:text-xl lg:mx-0">
+              They open an envelope, play a little game, flick through your photos and find your message at the end. You just fill in the blanks.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3 lg:justify-start">
-              <Link
-                href="/create"
-                className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-hot to-tangerine px-6 py-3.5 font-display text-base font-semibold text-white shadow-[0_14px_34px_-10px_rgba(255,46,126,0.8)] transition hover:-translate-y-0.5 sm:px-8 sm:py-4 sm:text-lg"
-              >
-                Make a card · {PRICES.card.label}
-                <span className="transition group-hover:translate-x-1">→</span>
+              <Link href="/create" className="btn btn-red px-6 py-3.5 text-base sm:px-8 sm:text-lg">
+                Make a card · {PRICES.card.label} →
               </Link>
-              <Link href="/cards" className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 font-display text-base font-semibold shadow-sm ring-1 ring-ink/10 transition hover:-translate-y-0.5 sm:px-8 sm:py-4 sm:text-lg">
+              <Link href="/cards" className="btn btn-paper px-6 py-3.5 text-base sm:px-8 sm:text-lg">
                 See all {TEMPLATES.length} designs
               </Link>
             </div>
-            <ul className="mt-7 hidden flex-wrap justify-center gap-x-5 gap-y-2 text-sm font-bold text-ink/70 sm:flex lg:justify-start">
-              <li>✓ No coding</li>
-              <li>✓ No design skills</li>
-              <li>✓ Ready in 2 minutes</li>
-            </ul>
+            <p className="mt-6 text-sm font-semibold text-ink/55">No app to download. No account. About two minutes.</p>
           </div>
 
           <HeroShowcase />
@@ -126,19 +112,17 @@ export default function Home() {
 
         {/* The whole process in one line. */}
         <div className="relative mx-auto max-w-5xl px-4 pb-16 sm:px-6">
-          <ol className="grid gap-3 rounded-3xl bg-white/80 p-4 shadow-sm ring-1 ring-ink/5 backdrop-blur sm:grid-cols-3 sm:gap-0 sm:p-3">
+          <ol className="sheet grid divide-y-2 divide-dashed divide-ink/15 sm:grid-cols-3 sm:divide-x-2 sm:divide-y-0">
             {[
-              { emoji: "🎨", title: "Pick a design", body: `${TEMPLATES.length} designs, ${OCCASIONS.length} occasions` },
-              { emoji: "✏️", title: "Fill in the blanks", body: "Names, photos and your message" },
-              { emoji: "💬", title: "Send the link", body: "WhatsApp, text or Instagram" },
+              { title: "Pick a design", body: `${TEMPLATES.length} designs for ${OCCASIONS.length} occasions` },
+              { title: "Fill in the blanks", body: "Names, photos and your message" },
+              { title: "Send the link", body: "WhatsApp, text or Instagram" },
             ].map((step, i) => (
-              <li key={step.title} className={`flex items-center gap-3 px-3 py-1 ${i > 0 ? "sm:border-l sm:border-ink/10" : ""}`}>
-                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-cream text-2xl">{step.emoji}</span>
+              <li key={step.title} className="flex items-center gap-4 px-5 py-4">
+                <span className="font-brand text-5xl font-black leading-none text-hot">{i + 1}</span>
                 <span>
-                  <span className="block font-display font-bold leading-tight">
-                    {i + 1}. {step.title}
-                  </span>
-                  <span className="block text-sm text-ink/55">{step.body}</span>
+                  <span className="block font-brand text-lg font-bold leading-tight">{step.title}</span>
+                  <span className="block text-sm text-ink/60">{step.body}</span>
                 </span>
               </li>
             ))}
@@ -147,15 +131,13 @@ export default function Home() {
       </section>
 
       {/* Coming up */}
-      <section className="mx-auto max-w-6xl px-4 pt-24 sm:px-6">
-        <Reveal className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
+      <section className="mx-auto max-w-6xl px-4 pt-16 sm:px-6">
+        <Reveal className="flex flex-col items-start justify-between gap-3 md:flex-row md:items-end">
           <div>
-            <p className="font-bold uppercase tracking-[0.2em] text-hot">Coming up</p>
-            <h2 className="mt-3 font-display text-4xl font-bold leading-tight sm:text-5xl">
-              Don&apos;t leave it to the <span className="font-serif font-normal italic text-hot">last minute</span>
-            </h2>
+            <h2 className="font-brand text-4xl font-bold leading-tight sm:text-5xl">Coming up</h2>
+            <p className="mt-2 text-lg text-ink/65">Sort it now and it&apos;s one less thing to remember.</p>
           </div>
-          <Link href="/occasions" className="shrink-0 font-display font-semibold text-hot">
+          <Link href="/occasions" className="shrink-0 font-semibold underline decoration-hot decoration-2 underline-offset-4">
             All {OCCASIONS.length} occasions →
           </Link>
         </Reveal>
@@ -165,29 +147,26 @@ export default function Home() {
       </section>
 
       {/* Features */}
-      <section id="features" className="mx-auto max-w-6xl px-4 py-28 sm:px-6">
-        <Reveal className="mx-auto max-w-2xl text-center">
-          <p className="font-bold uppercase tracking-[0.2em] text-hot">Why it hits different</p>
-          <h2 className="mt-3 font-display text-5xl font-bold leading-tight sm:text-6xl">
-            Not a card. A little <span className="font-serif font-normal italic text-hot">adventure</span>.
-          </h2>
-          <p className="mt-4 text-lg text-ink/65">Every card is a set of interactive screens. Here are a few of the building blocks. Go ahead and play with them.</p>
+      <section id="features" className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
+        <Reveal className="max-w-2xl">
+          <h2 className="font-brand text-5xl font-bold leading-[1.02] sm:text-6xl">A card they play, not just read</h2>
+          <p className="mt-4 text-lg text-ink/65">Every card is a handful of screens you put together. Here are a few of them. Have a go.</p>
         </Reveal>
 
-        <div className="mt-16 grid gap-5 md:grid-cols-6">
+        <div className="mt-12 grid gap-6 md:grid-cols-6">
           <Reveal className="md:col-span-4">
-            <div className="h-full rounded-[2rem] bg-gradient-to-br from-[#ffe4ec] to-[#ffc2d4] p-7 sm:p-9">
-              <h3 className="font-display text-3xl font-bold">The No button that runs away</h3>
-              <p className="mt-2 max-w-md text-ink/70">They can try. They will fail. The Yes button gets bigger every time they miss.</p>
+            <div className="sheet h-full bg-rose p-7 sm:p-9">
+              <h3 className="font-brand text-3xl font-bold">The No button that runs away</h3>
+              <p className="mt-2 max-w-md text-ink/75">They can try. They won&apos;t manage it, and the Yes button grows every time they miss.</p>
               <div className="mt-6">
                 <RunawayDemo />
               </div>
             </div>
           </Reveal>
           <Reveal delay={100} className="md:col-span-2">
-            <div className="flex h-full flex-col rounded-[2rem] bg-gradient-to-b from-[#3f1158] to-[#1a0626] p-7 text-[#fff4dc] sm:p-9">
-              <h3 className="font-display text-3xl font-bold">21 mini games</h3>
-              <p className="mt-2 text-[#fff4dc]/70">Light the diyas, smash a piñata, launch fireworks, whack the ghosts.</p>
+            <div className="sheet flex h-full flex-col bg-air p-7 text-paper sm:p-9">
+              <h3 className="font-brand text-3xl font-bold">21 mini games</h3>
+              <p className="mt-2 text-paper/75">Light the diyas, smash a piñata, launch fireworks, whack the ghosts.</p>
               <div className="mt-auto flex justify-center gap-2 pt-10 text-5xl">
                 {[0, 1, 2, 3, 4].map((i) => (
                   <span key={i} className="animate-glow" style={{ animationDelay: `${i * 0.35}s` }}>
@@ -199,53 +178,52 @@ export default function Home() {
           </Reveal>
 
           <Reveal className="md:col-span-2">
-            <div className="group h-full overflow-hidden rounded-[2rem] bg-white p-7 shadow-sm ring-1 ring-ink/5 sm:p-9">
-              <h3 className="font-display text-3xl font-bold">Your photos, polaroid-style</h3>
-              <p className="mt-2 text-ink/65">Tap through them like a stack on the table.</p>
+            <div className="sheet group h-full overflow-hidden p-7 sm:p-9">
+              <h3 className="font-brand text-3xl font-bold">Your photos, like a pile of prints</h3>
+              <p className="mt-2 text-ink/65">They flick through them one at a time.</p>
               <div className="relative mx-auto mt-8 h-48 w-40">
                 {["/demo/coffee.svg", "/demo/balloons.svg", "/demo/sunset.svg"].map((src, i) => (
                   <div
                     key={src}
-                    className="absolute inset-0 rounded-md bg-white p-2 pb-8 shadow-lg ring-1 ring-black/5 transition duration-500"
+                    className="absolute inset-0 bg-white p-2 pb-8 shadow-md ring-1 ring-ink/15 transition duration-500"
                     style={{ transform: `rotate(${(i - 1) * 9}deg) translateX(${(i - 1) * 14}px)` }}
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element -- decorative */}
-                    <img src={src} alt="" className="h-full w-full rounded-sm object-cover" />
+                    <img src={src} alt="" className="h-full w-full object-cover" />
                   </div>
                 ))}
               </div>
             </div>
           </Reveal>
           <Reveal delay={100} className="md:col-span-2">
-            <div className="relative h-full min-h-80 overflow-hidden rounded-[2rem] bg-ink p-7 text-white sm:p-9">
+            <div className="sheet relative h-full min-h-80 overflow-hidden bg-ink p-7 text-paper shadow-[5px_5px_0_var(--color-hot)] sm:p-9">
               <Particles mode="fireworks" loop />
-              <h3 className="relative font-display text-3xl font-bold">A finale worth a screenshot</h3>
-              <p className="relative mt-2 text-white/65">Fireworks, confetti or a storm of hearts.</p>
+              <h3 className="relative font-brand text-3xl font-bold">A finale worth a screenshot</h3>
+              <p className="relative mt-2 text-paper/70">Fireworks, confetti or a storm of hearts.</p>
             </div>
           </Reveal>
           <Reveal delay={200} className="md:col-span-2">
-            <div className="h-full rounded-[2rem] bg-[#fff1dc] p-7 sm:p-9">
-              <h3 className="font-display text-3xl font-bold">Words that write themselves</h3>
-              <p className="mt-2 text-ink/65">Your message types out like a handwritten note.</p>
-              <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm">
+            <div className="sheet h-full bg-sun p-7 sm:p-9">
+              <h3 className="font-brand text-3xl font-bold">Your message, written out as they watch</h3>
+              <div className="mt-6 -rotate-1 border-2 border-ink bg-paper p-5">
                 <TypewriterLoop />
               </div>
             </div>
           </Reveal>
 
           <Reveal className="md:col-span-3">
-            <div className="flex h-full flex-col rounded-[2rem] bg-gradient-to-br from-[#fff7d6] to-[#ffd6a5] p-7 sm:p-9">
-              <h3 className="font-display text-3xl font-bold">Spin the wheel</h3>
-              <p className="mt-2 text-ink/65">For date nights, birthday presents or a kiss. You can secretly rig where it lands. 😏</p>
+            <div className="sheet flex h-full flex-col p-7 sm:p-9">
+              <h3 className="font-brand text-3xl font-bold">Spin the wheel</h3>
+              <p className="mt-2 text-ink/65">For date nights, birthday presents or a kiss. You can secretly decide where it lands.</p>
               <div className="mt-6 flex flex-1 items-center justify-center">
                 <WheelDemo />
               </div>
             </div>
           </Reveal>
           <Reveal delay={100} className="md:col-span-3">
-            <div className="flex h-full flex-col rounded-[2rem] bg-gradient-to-br from-[#0b1238] to-[#3b1d6e] p-7 text-white sm:p-9">
-              <h3 className="font-display text-3xl font-bold">Music &amp; sound 🎵</h3>
-              <p className="mt-2 text-white/65">Every card has sound effects and its own tune, from Happy Birthday to something spooky. Have a listen:</p>
+            <div className="sheet flex h-full flex-col bg-hot p-7 text-white sm:p-9">
+              <h3 className="font-brand text-3xl font-bold">Music and sound</h3>
+              <p className="mt-2 text-white/80">Every card has sound effects and its own tune, from Happy Birthday to something spooky. Have a listen:</p>
               <div className="mt-6 flex flex-1 items-center justify-center">
                 <MusicDemo />
               </div>
@@ -253,16 +231,16 @@ export default function Home() {
           </Reveal>
 
           <Reveal className="md:col-span-6">
-            <div className="grid gap-3 rounded-[2rem] bg-white p-7 shadow-sm ring-1 ring-ink/5 sm:grid-cols-2 sm:p-9 lg:grid-cols-4">
+            <div className="sheet grid gap-3 p-5 sm:grid-cols-2 sm:p-7 lg:grid-cols-4">
               {[
                 { emoji: "🎟️", title: "Coupon books", body: "Breakfast in bed, a foot rub, you pick the film. Tap to redeem." },
                 { emoji: "🫙", title: "A jar of reasons", body: "They pull out every reason you love them, one note at a time." },
                 { emoji: "🗓️", title: "Your story", body: "From the day you met to today, moment by moment." },
                 { emoji: "🎁", title: "Mystery boxes", body: "Three boxes, one choice. (Psst: put the same thing in all three.)" },
               ].map((b) => (
-                <div key={b.title} className="rounded-2xl bg-cream p-5">
+                <div key={b.title} className="rounded-xl border-2 border-dashed border-ink/20 p-5">
                   <span className="text-3xl">{b.emoji}</span>
-                  <p className="mt-2 font-display text-lg font-bold">{b.title}</p>
+                  <p className="mt-2 font-brand text-xl font-bold">{b.title}</p>
                   <p className="mt-1 text-sm text-ink/65">{b.body}</p>
                 </div>
               ))}
@@ -270,12 +248,13 @@ export default function Home() {
           </Reveal>
 
           <Reveal className="md:col-span-6">
-            <div className="relative grid items-center gap-8 overflow-hidden rounded-[2rem] bg-gradient-to-br from-grape via-[#b5179e] to-hot p-7 text-white sm:p-10 md:grid-cols-2">
+            <div className="sheet relative grid items-center gap-8 overflow-hidden bg-ink p-7 pt-10 text-paper shadow-[5px_5px_0_var(--color-hot)] sm:p-10 sm:pt-12 md:grid-cols-2">
+              <div aria-hidden className="airmail absolute inset-x-0 top-0 h-2.5" />
               <div>
-                <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-bold uppercase tracking-widest">Coming soon</span>
-                <h3 className="mt-4 font-display text-4xl font-bold">Just say what you want.</h3>
-                <p className="mt-3 max-w-md text-lg text-white/80">
-                  Type it like you&apos;re texting a friend and the AI rebuilds your card: new colours, new games, a quiz about your first date.
+                <span className="inline-block -rotate-6 rounded-md border-[3px] border-sun px-3 py-0.5 font-brand text-lg font-black uppercase tracking-wider text-sun">Coming soon</span>
+                <h3 className="mt-5 font-brand text-4xl font-bold">Just say what you want.</h3>
+                <p className="mt-3 max-w-md text-lg text-paper/75">
+                  Type it like you&apos;re texting a friend and your card gets rebuilt: new colours, new games, a quiz about your first date.
                 </p>
               </div>
               <AiPromptDemo />
@@ -285,13 +264,11 @@ export default function Home() {
       </section>
 
       {/* Occasions */}
-      <section id="occasions" className="bg-white py-28">
+      <section id="occasions" className="border-y-2 border-ink bg-paper py-24">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <Reveal className="mx-auto mb-10 max-w-2xl text-center">
-            <p className="font-bold uppercase tracking-[0.2em] text-hot">Occasions</p>
-            <h2 className="mt-3 font-display text-5xl font-bold sm:text-6xl">
-              Pick your <span className="font-serif font-normal italic text-hot">vibe</span>
-            </h2>
+          <Reveal className="mb-10 max-w-2xl">
+            <h2 className="font-brand text-5xl font-bold sm:text-6xl">Try one now</h2>
+            <p className="mt-3 text-lg text-ink/65">These are real cards, running live. Tap through them.</p>
           </Reveal>
           <Reveal>
             <OccasionShowcase order={showcaseOrder()} />
@@ -300,16 +277,13 @@ export default function Home() {
       </section>
 
       {/* Products */}
-      <section id="cards" className="mx-auto max-w-6xl px-4 py-28 sm:px-6">
+      <section id="cards" className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
         <Reveal className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
           <div className="max-w-2xl">
-            <p className="font-bold uppercase tracking-[0.2em] text-hot">Shop the cards</p>
-            <h2 className="mt-3 font-display text-5xl font-bold leading-tight sm:text-6xl">
-              {TEMPLATES.length} ways to make their <span className="font-serif font-normal italic text-hot">day</span>
-            </h2>
-            <p className="mt-4 text-lg text-ink/65">Funny, heartfelt, cute or festive. Hover over a card and hit play to see it in action.</p>
+            <h2 className="font-brand text-5xl font-bold leading-tight sm:text-6xl">Popular right now</h2>
+            <p className="mt-3 text-lg text-ink/65">Funny, soppy, cute or festive. Scroll past one and it plays itself.</p>
           </div>
-          <Link href="/cards" className="shrink-0 rounded-full bg-white px-6 py-3.5 font-display font-semibold shadow-sm ring-1 ring-ink/10 transition hover:-translate-y-0.5">
+          <Link href="/cards" className="btn btn-paper shrink-0">
             Browse all {TEMPLATES.length} →
           </Link>
         </Reveal>
@@ -319,46 +293,47 @@ export default function Home() {
       </section>
 
       {/* How it works */}
-      <section id="how" className="mx-auto max-w-6xl px-4 py-28 sm:px-6">
-        <Reveal className="mx-auto max-w-2xl text-center">
-          <p className="font-bold uppercase tracking-[0.2em] text-hot">How it works</p>
-          <h2 className="mt-3 font-display text-5xl font-bold sm:text-6xl">
-            Two minutes. <span className="font-serif font-normal italic text-hot">Zero</span> effort.
-          </h2>
+      <section id="how" className="mx-auto max-w-6xl px-4 pb-24 sm:px-6">
+        <Reveal className="max-w-2xl">
+          <h2 className="font-brand text-5xl font-bold sm:text-6xl">How it works</h2>
+          <p className="mt-3 text-lg text-ink/65">Two minutes, start to finish.</p>
         </Reveal>
-        <div className="relative mt-16 grid gap-6 md:grid-cols-3">
-          <div aria-hidden className="absolute left-[16%] right-[16%] top-8 hidden border-t-2 border-dashed border-hot/30 md:block" />
+        <div className="relative mt-12 grid gap-6 md:grid-cols-3">
+          <div aria-hidden className="absolute left-[16%] right-[16%] top-12 hidden border-t-2 border-dashed border-ink/30 md:block" />
           {[
             {
               title: "Pick a design",
-              body: `${OCCASIONS.length} occasions and ${TEMPLATES.length} designs, from funny to heartfelt.`,
+              body: `${OCCASIONS.length} occasions and ${TEMPLATES.length} designs, from silly to soppy.`,
               mock: (
                 <div className="flex flex-wrap justify-center gap-2">
-                  <span className="rounded-full bg-ink px-3 py-1.5 text-sm font-bold text-white">💘 Valentine&apos;s</span>
-                  <span className="rounded-full bg-white px-3 py-1.5 text-sm font-bold ring-1 ring-ink/10">🪔 Diwali</span>
-                  <span className="rounded-full bg-white px-3 py-1.5 text-sm font-bold ring-1 ring-ink/10">🎂 Birthday</span>
+                  <span className="rounded-full border-2 border-ink bg-ink px-3 py-1 text-sm font-bold text-paper">💘 Valentine&apos;s</span>
+                  <span className="rounded-full border-2 border-ink/20 bg-paper px-3 py-1 text-sm font-bold">🪔 Diwali</span>
+                  <span className="rounded-full border-2 border-ink/20 bg-paper px-3 py-1 text-sm font-bold">🎂 Birthday</span>
                 </div>
               ),
             },
             {
               title: "Make it yours",
-              body: "Add names, photos and inside jokes. Watch it update live.",
+              body: "Add names, photos and inside jokes. The preview updates as you type.",
               mock: (
                 <div className="space-y-2 text-left text-sm">
-                  <div className="rounded-xl bg-white px-3 py-2 ring-1 ring-ink/10"><span className="text-ink/40">To </span><b>Priya</b></div>
-                  <div className="flex gap-2">
+                  <div className="border-b-2 border-dashed border-ink/25 px-1 pb-1">
+                    <span className="font-brand text-ink/50">To: </span>
+                    <span className="font-hand text-2xl leading-none">Priya</span>
+                  </div>
+                  <div className="flex gap-2 pt-1">
                     {["/demo/sunset.svg", "/demo/coffee.svg", "/demo/lights.svg"].map((src) => (
                       // eslint-disable-next-line @next/next/no-img-element -- decorative
-                      <img key={src} src={src} alt="" className="h-12 w-12 rounded-lg object-cover" />
+                      <img key={src} src={src} alt="" className="h-12 w-12 bg-white object-cover p-0.5 ring-1 ring-ink/15" />
                     ))}
-                    <span className="grid h-12 w-12 place-items-center rounded-lg border-2 border-dashed border-ink/20 text-ink/40">+</span>
+                    <span className="grid h-12 w-12 place-items-center border-2 border-dashed border-ink/25 text-ink/40">+</span>
                   </div>
                 </div>
               ),
             },
             {
               title: "Send the link",
-              body: "WhatsApp, Instagram, text. They open it and the fun starts.",
+              body: "WhatsApp, Instagram, text. They tap it and the fun starts.",
               mock: (
                 <div className="ml-auto max-w-[15rem] rounded-2xl rounded-tr-sm bg-[#dcf8c6] p-2 text-left text-sm shadow-sm">
                   <div className="rounded-xl bg-white/70 p-2">
@@ -371,13 +346,11 @@ export default function Home() {
             },
           ].map((step, i) => (
             <Reveal key={step.title} delay={i * 120}>
-              <div className="relative h-full rounded-[2rem] bg-white p-7 shadow-sm ring-1 ring-ink/5">
-                <span className="relative z-10 grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-hot to-tangerine font-display text-3xl font-bold text-white shadow-lg">
-                  {i + 1}
-                </span>
-                <h3 className="mt-5 font-display text-2xl font-bold">{step.title}</h3>
+              <div className="sheet relative h-full p-7">
+                <span className="relative z-10 grid h-14 w-14 place-items-center rounded-full border-2 border-ink bg-hot font-brand text-3xl font-black text-white">{i + 1}</span>
+                <h3 className="mt-5 font-brand text-2xl font-bold">{step.title}</h3>
                 <p className="mt-1 text-ink/65">{step.body}</p>
-                <div className="mt-6 rounded-2xl bg-cream p-4">{step.mock}</div>
+                <div className="mt-6 rounded-xl bg-cream p-4">{step.mock}</div>
               </div>
             </Reveal>
           ))}
@@ -385,42 +358,40 @@ export default function Home() {
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="relative overflow-hidden bg-ink py-28 text-white">
-        <div aria-hidden className="absolute left-1/2 top-0 h-96 w-[48rem] -translate-x-1/2 rounded-full bg-hot/20 blur-3xl" />
+      <section id="pricing" className="relative overflow-hidden border-y-2 border-ink bg-air py-24 text-paper">
         <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
-          <Reveal className="mx-auto max-w-2xl text-center">
-            <p className="font-bold uppercase tracking-[0.2em] text-hot">Pricing</p>
-            <h2 className="mt-3 font-display text-5xl font-bold sm:text-6xl">
-              Cheaper than <span className="font-serif font-normal italic text-sun">flowers</span>.
-            </h2>
-            <p className="mt-4 text-lg text-white/60">One price per card. No subscriptions.</p>
+          <Reveal className="max-w-2xl">
+            <h2 className="font-brand text-5xl font-bold sm:text-6xl">Cheaper than a bunch of flowers</h2>
+            <p className="mt-3 text-lg text-paper/75">One price per card. No subscription, nothing to cancel.</p>
           </Reveal>
-          <div className="mx-auto mt-14 grid max-w-4xl gap-5 md:grid-cols-2">
+          <div className="mt-12 grid max-w-4xl gap-6 md:grid-cols-2">
             {TIERS.map((t, i) => (
               <Reveal key={t.name} delay={i * 100}>
-                <div
-                  className={`relative flex h-full flex-col rounded-[2rem] p-8 ${t.featured ? "bg-gradient-to-br from-hot via-[#d6246e] to-grape shadow-[0_30px_60px_-20px_rgba(255,46,126,0.6)]" : "bg-white/5 ring-1 ring-white/10"}`}
-                >
-                  {t.featured && <span className="absolute -top-3 right-6 rounded-full bg-sun px-3 py-1 text-xs font-bold text-ink">Most magical ✨</span>}
-                  <h3 className="font-display text-2xl font-bold">{t.name}</h3>
-                  <p className="mt-3 font-display text-5xl font-bold">
+                <div className={`sheet relative flex h-full flex-col p-8 text-ink ${t.featured ? "bg-sun" : ""}`}>
+                  {t.featured && (
+                    <span className="absolute right-5 top-5 rotate-6 rounded-md border-[3px] border-hot px-2.5 py-0.5 font-brand text-sm font-black uppercase tracking-wider text-hot">
+                      Coming soon
+                    </span>
+                  )}
+                  <h3 className="font-brand text-2xl font-bold">{t.name}</h3>
+                  <p className="mt-3 font-brand text-6xl font-black">
                     {t.price}
-                    <span className="ml-1 text-base font-semibold text-white/60">{t.note}</span>
+                    <span className="ml-2 font-sans text-base font-semibold text-ink/55">{t.note}</span>
                   </p>
                   <ul className="mt-6 flex-1 space-y-3">
                     {t.points.map((p) => (
-                      <li key={p} className="flex gap-3 text-white/85">
-                        <span className="text-sun">✓</span>
+                      <li key={p} className="flex gap-3 text-ink/80">
+                        <span className="font-bold text-hot">✓</span>
                         {p}
                       </li>
                     ))}
                   </ul>
                   {t.live ? (
-                    <Link href="/create" className="mt-8 rounded-full bg-white py-3.5 text-center font-display font-semibold text-ink transition hover:bg-sun">
+                    <Link href="/create" className="btn btn-red mt-8">
                       Make a card
                     </Link>
                   ) : (
-                    <span className="mt-8 rounded-full bg-white/10 py-3.5 text-center font-display font-semibold text-white/70">Coming soon</span>
+                    <span className="mt-8 rounded-full border-2 border-dashed border-ink/40 py-3 text-center font-brand font-semibold text-ink/60">Not quite ready yet</span>
                   )}
                 </div>
               </Reveal>
@@ -430,37 +401,35 @@ export default function Home() {
       </section>
 
       {/* FAQ */}
-      <section id="faq" className="mx-auto max-w-3xl px-4 py-28 sm:px-6">
-        <Reveal className="text-center">
-          <h2 className="font-display text-5xl font-bold">Questions?</h2>
+      <section id="faq" className="mx-auto max-w-3xl px-4 py-24 sm:px-6">
+        <Reveal>
+          <h2 className="font-brand text-5xl font-bold">Questions people ask</h2>
         </Reveal>
-        <div className="mt-10 space-y-3">
+        <div className="mt-10 space-y-4">
           {FAQS.map((f) => (
-            <details key={f.q} className="group rounded-2xl bg-white p-6 shadow-sm ring-1 ring-ink/5 open:ring-hot/30">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-display text-xl font-semibold">
+            <details key={f.q} className="group rounded-2xl border-2 border-ink bg-paper p-6 shadow-[3px_3px_0_var(--color-ink)] open:shadow-[5px_5px_0_var(--color-hot)]">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-brand text-xl font-semibold [&::-webkit-details-marker]:hidden">
                 {f.q}
-                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-cream text-hot transition group-open:rotate-45">+</span>
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border-2 border-ink font-sans text-xl font-bold leading-none transition group-open:rotate-45 group-open:bg-hot group-open:text-white">+</span>
               </summary>
-              <p className="mt-3 text-ink/70">{f.a}</p>
+              <p className="mt-3 text-ink/75">{f.a}</p>
             </details>
           ))}
         </div>
+        <p className="mt-8 text-ink/65">
+          Anything else? The <Link href="/help" className="font-semibold underline decoration-hot decoration-2 underline-offset-4">help page</Link> has the rest.
+        </p>
       </section>
 
       {/* Final call to action */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#2a0b3d] via-ink to-[#5b1a7a] py-32 text-center text-white">
+      <section className="relative overflow-hidden border-t-2 border-ink bg-ink py-28 text-center text-paper">
         <Particles mode="fireworks" loop />
         <div className="relative mx-auto max-w-3xl px-4">
-          <h2 className="font-display text-5xl font-bold leading-tight sm:text-7xl">
-            Someone deserves a <span className="font-serif font-normal italic text-sun">moment</span> today.
-          </h2>
-          <Link
-            href="/create"
-            className="mt-10 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-hot to-tangerine px-10 py-5 font-display text-xl font-semibold shadow-[0_14px_34px_-10px_rgba(255,46,126,0.8)] transition hover:-translate-y-0.5"
-          >
+          <h2 className="font-brand text-5xl font-black leading-tight sm:text-7xl">Go on. Make someone&apos;s day.</h2>
+          <Link href="/create" className="btn btn-red mt-10 px-10 py-4 text-xl shadow-[4px_4px_0_var(--color-sun)]">
             Make your card →
           </Link>
-          <p className="mt-5 text-white/60">{PRICES.card.label} per card. No sign-up needed.</p>
+          <p className="mt-6 text-paper/60">{PRICES.card.label} a card. No sign-up needed.</p>
         </div>
       </section>
 

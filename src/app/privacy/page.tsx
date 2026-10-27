@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <InfoPage kicker="Privacy" title="Your cards, your business" intro="In plain English: what we store when you make a card, who can see it and what we don't do.">
+    <InfoPage title="Your cards, your business" intro="In plain English: what we store when you make a card, who can see it and what we don't do.">
       <InfoSection title="What we store">
         <p>When you create a card we store what you put in it, so it can be shown to the person you send it to:</p>
         <ul>

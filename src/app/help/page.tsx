@@ -75,26 +75,27 @@ const GROUPS: { title: string; items: { q: string; a: React.ReactNode }[] }[] = 
 
 export default function HelpPage() {
   return (
-    <InfoPage kicker="Help" title="Questions? Answers." intro="Everything you need to know about making, sending and opening an interactive card.">
+    <InfoPage title="Help and questions" intro="Everything you need to know about making, sending and opening an interactive card.">
       {GROUPS.map((g) => (
         <section key={g.title}>
-          <h2 className="font-display text-2xl font-bold">{g.title}</h2>
+          <h2 className="font-brand text-2xl font-bold">{g.title}</h2>
           <div className="mt-4 space-y-3">
             {g.items.map((item) => (
-              <details key={item.q} className="group rounded-2xl bg-white p-5 shadow-sm ring-1 ring-ink/5 open:shadow-md">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-display text-lg font-semibold">
+              <details key={item.q} className="group rounded-2xl border-2 border-ink bg-paper p-5 shadow-[3px_3px_0_var(--color-ink)] open:shadow-[5px_5px_0_var(--color-hot)]">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-brand text-lg font-semibold [&::-webkit-details-marker]:hidden">
                   {item.q}
-                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-cream text-hot transition group-open:rotate-45">+</span>
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border-2 border-ink font-sans text-xl font-bold leading-none transition group-open:rotate-45 group-open:bg-hot group-open:text-white">+</span>
                 </summary>
-                <div className="mt-3 leading-relaxed text-ink/70 [&_a]:font-semibold [&_a]:text-hot [&_a]:underline [&_a]:underline-offset-2">{item.a}</div>
+                <div className="mt-3 leading-relaxed text-ink/70 [&_a]:font-semibold [&_a]:underline [&_a]:decoration-hot [&_a]:decoration-2 [&_a]:underline-offset-4">{item.a}</div>
               </details>
             ))}
           </div>
         </section>
       ))}
-      <div className="rounded-3xl bg-ink p-8 text-center text-white">
-        <p className="font-display text-2xl font-bold">Ready to make one?</p>
-        <Link href="/create" className="mt-4 inline-block rounded-full bg-hot px-6 py-3 font-display font-semibold">
+      <div className="sheet relative overflow-hidden bg-ink p-8 pt-10 text-center text-paper">
+        <div aria-hidden className="airmail absolute inset-x-0 top-0 h-2" />
+        <p className="font-brand text-2xl font-bold">Ready to make one?</p>
+        <Link href="/create" className="btn btn-red mt-4 shadow-[3px_3px_0_var(--color-sun)]">
           Make a card →
         </Link>
       </div>

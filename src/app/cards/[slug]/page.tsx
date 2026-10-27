@@ -38,7 +38,7 @@ export default async function ProductPage({ params }: Props) {
   };
 
   return (
-    <div className="min-h-dvh overflow-x-clip bg-cream text-ink">
+    <div className="grain min-h-dvh overflow-x-clip bg-cream text-ink">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJson).replace(/</g, "\\u003c") }} />
       <SiteHeader />
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
@@ -53,14 +53,14 @@ export default async function ProductPage({ params }: Props) {
 
         <section className="mt-24">
           <div className="flex items-end justify-between gap-4">
-            <h2 className="font-display text-3xl font-bold">
+            <h2 className="font-brand text-3xl font-bold">
               {related.length ? `More ${occasions[t.occasion].label} cards` : "You might also like"}
             </h2>
-            <Link href="/cards" className="shrink-0 text-sm font-bold text-hot">
+            <Link href="/cards" className="shrink-0 text-sm font-bold underline decoration-hot decoration-2 underline-offset-4">
               See all →
             </Link>
           </div>
-          <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-x-6 md:grid-cols-4">
+          <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-7 md:grid-cols-4">
             {more.map((x) => (
               <ProductTile key={x.slug} template={x} />
             ))}

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Postmark } from "@/components/Postmark";
 import { formatDay, upcoming, whenLabel } from "@/lib/calendar";
 import { TEMPLATES } from "@/lib/catalog";
 import { occasions } from "@/lib/templates";
@@ -7,25 +8,29 @@ import { occasions } from "@/lib/templates";
 export function ComingUp() {
   const next = upcoming(new Date(), 4);
   return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {next.map((d, i) => {
         const count = TEMPLATES.filter((t) => t.occasion === d.occasion).length;
+        const first = i === 0;
         return (
           <Link
             key={`${d.occasion}-${d.date.toISOString()}`}
             href={`/occasions/${d.occasion}`}
-            className={`group relative overflow-hidden rounded-3xl p-5 shadow-sm ring-1 transition hover:-translate-y-1 hover:shadow-lg ${
-              i === 0 ? "bg-ink text-white ring-ink" : "bg-white ring-ink/5"
-            }`}
+            className={`sheet group relative flex min-h-44 flex-col overflow-hidden p-5 transition hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[7px_7px_0_var(--color-ink)] ${first ? "bg-hot text-white" : ""}`}
           >
-            <div className="flex items-start justify-between">
-              <span className="text-4xl transition group-hover:scale-110">{occasions[d.occasion].emoji}</span>
-              <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${i === 0 ? "bg-hot text-white" : "bg-hot/10 text-hot"}`}>{whenLabel(d.days)}</span>
-            </div>
-            <p className="mt-4 font-display text-xl font-bold leading-tight">{d.name}</p>
-            <p className={`mt-0.5 text-sm font-semibold ${i === 0 ? "text-white/60" : "text-ink/50"}`}>{formatDay(d.date, d.approx)}</p>
-            <p className={`mt-3 text-sm font-bold ${i === 0 ? "text-sun" : "text-hot"}`}>
-              {count} designs <span className="inline-block transition group-hover:translate-x-1">→</span>
+            <Postmark
+              id={`pm-${i}`}
+              middle={whenLabel(d.days)}
+              bottom={formatDay(d.date)}
+              className={`absolute -right-6 top-3 w-40 -rotate-[8deg] ${first ? "text-white/90" : "text-hot/85"}`}
+            />
+            <span className="text-4xl transition group-hover:-rotate-6">{occasions[d.occasion].emoji}</span>
+            <p className="mt-auto pt-8 font-brand text-2xl font-bold leading-tight">{d.name}</p>
+            <p className={`mt-0.5 text-sm font-semibold ${first ? "text-white/75" : "text-ink/55"}`}>
+              {formatDay(d.date, d.approx)} · {whenLabel(d.days).toLowerCase()}
+            </p>
+            <p className={`mt-3 text-sm font-bold underline decoration-2 underline-offset-4 ${first ? "decoration-white/60" : "decoration-hot/50"}`}>
+              {count} designs →
             </p>
           </Link>
         );

@@ -42,10 +42,10 @@ export function ProductThumb({ template, className = "" }: { template: Template;
         <p className="mt-4 font-display text-xl font-bold leading-tight">{template.headline}</p>
       </div>
       {NEW_DESIGNS.has(template.slug) && (
-        <span className="absolute right-3 top-3 rotate-6 rounded-full bg-sun px-2.5 py-1 text-[11px] font-black uppercase tracking-wide text-ink shadow">New</span>
+        <span className="absolute right-3 top-3 rotate-6 rounded-sm border-2 border-ink bg-sun px-2 py-0.5 font-sans text-[11px] font-black uppercase tracking-wide text-ink">New</span>
       )}
       {template.device !== "everywhere" && (
-        <span className="absolute left-3 top-3 rounded-full bg-black/70 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-white backdrop-blur">
+        <span className="absolute left-3 top-3 rounded-full bg-ink/80 px-2.5 py-1 font-sans text-[11px] font-bold uppercase tracking-wide text-paper">
           {deviceInfo[template.device].emoji} {deviceInfo[template.device].label}
         </span>
       )}

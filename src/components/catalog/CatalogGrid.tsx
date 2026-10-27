@@ -43,7 +43,7 @@ export function CatalogGrid({ limit, allFilters = false, initialOccasion }: Prop
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search: proposal, dad jokes, coupons…"
-              className="w-full rounded-full bg-white py-3.5 pl-12 pr-5 font-semibold shadow-sm outline-none ring-1 ring-ink/10 placeholder:text-ink/35 focus:ring-2 focus:ring-hot"
+              className="w-full rounded-full border-2 border-ink bg-paper py-3 pl-12 pr-5 font-semibold shadow-[3px_3px_0_var(--color-ink)] outline-none placeholder:text-ink/40 focus:shadow-[3px_3px_0_var(--color-hot)]"
             />
           </label>
         )}
@@ -84,15 +84,15 @@ export function CatalogGrid({ limit, allFilters = false, initialOccasion }: Prop
       )}
 
       {results.length ? (
-        <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-x-6 md:grid-cols-3 lg:grid-cols-4">
+        <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-7 md:grid-cols-3 lg:grid-cols-4">
           {results.map((t) => (
             <ProductTile key={t.slug} template={t} />
           ))}
         </div>
       ) : (
-        <div className="mt-10 rounded-3xl bg-white p-10 text-center ring-1 ring-ink/5">
+        <div className="sheet mt-10 p-10 text-center">
           <p className="text-4xl">🔍</p>
-          <p className="mt-2 font-display text-xl font-bold">Nothing matches all of those yet</p>
+          <p className="mt-2 font-brand text-xl font-bold">Nothing matches all of those yet</p>
           <button
             onClick={() => {
               setOccasion("all");
@@ -100,7 +100,7 @@ export function CatalogGrid({ limit, allFilters = false, initialOccasion }: Prop
               setDevice("all");
               setQuery("");
             }}
-            className="mt-4 rounded-full bg-ink px-5 py-2.5 text-sm font-bold text-white"
+            className="btn btn-ink mt-4 px-5 py-2 text-sm"
           >
             Clear filters
           </button>
@@ -113,7 +113,7 @@ export function CatalogGrid({ limit, allFilters = false, initialOccasion }: Prop
 function ChipRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-3">
-      <span className="hidden w-20 shrink-0 text-xs font-bold uppercase tracking-widest text-ink/40 sm:block">{label}</span>
+      <span className="hidden w-20 shrink-0 font-brand text-sm font-semibold text-ink/50 sm:block">{label}</span>
       <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0">{children}</div>
     </div>
   );
@@ -124,7 +124,7 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
     <button
       onClick={onClick}
       aria-pressed={active}
-      className={`shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-sm font-bold transition ${active ? "bg-ink text-white shadow" : "bg-white text-ink/70 ring-1 ring-ink/10 hover:text-ink"}`}
+      className={`shrink-0 whitespace-nowrap rounded-full border-2 px-3.5 py-1.5 text-sm font-bold transition ${active ? "border-ink bg-ink text-paper" : "border-ink/15 bg-paper text-ink/75 hover:border-ink hover:text-ink"}`}
     >
       {children}
     </button>

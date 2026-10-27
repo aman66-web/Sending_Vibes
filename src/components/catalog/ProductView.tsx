@@ -85,18 +85,16 @@ export function ProductView({ slug }: { slug: string }) {
   return (
     <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_400px]">
       {/* Live preview */}
-      <div className="relative overflow-hidden rounded-[2.5rem] bg-white p-5 shadow-sm ring-1 ring-ink/5 sm:p-8">
-        <div aria-hidden className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-hot/15 blur-3xl" />
-        <div aria-hidden className="absolute -bottom-24 -right-16 h-72 w-72 rounded-full bg-grape/15 blur-3xl" />
+      <div className="sheet relative overflow-hidden p-5 sm:p-8">
         <div className="relative flex flex-col items-center gap-6">
-          <div role="tablist" className="flex gap-1 rounded-full bg-cream p-1.5 ring-1 ring-ink/5">
+          <div role="tablist" className="flex gap-1 rounded-full border-2 border-ink bg-cream p-1">
             {(["phone", "desktop"] as const).map((f) => (
               <button
                 key={f}
                 role="tab"
                 aria-selected={frame === f}
                 onClick={() => setFrame(f)}
-                className={`rounded-full px-5 py-2 text-sm font-bold transition ${frame === f ? "bg-ink text-white shadow" : "text-ink/60 hover:text-ink"}`}
+                className={`rounded-full px-5 py-2 text-sm font-bold transition ${frame === f ? "bg-ink text-paper" : "text-ink/65 hover:text-ink"}`}
               >
                 {f === "phone" ? "📱 On a phone" : "💻 On a computer"}
               </button>
@@ -115,7 +113,7 @@ export function ProductView({ slug }: { slug: string }) {
           {card.music && card.music !== "none" && (
             <p className="-mt-4 text-sm font-semibold text-ink/50">🔊 Sound on: it plays {MUSIC_LABELS[card.music]} when you open it</p>
           )}
-          <a href={`/cards/${slug}/play`} target="_blank" rel="noreferrer" className="text-sm font-bold text-hot underline underline-offset-4">
+          <a href={`/cards/${slug}/play`} target="_blank" rel="noreferrer" className="text-sm font-bold underline decoration-hot decoration-2 underline-offset-4">
             Open full screen ↗
           </a>
         </div>
@@ -124,24 +122,24 @@ export function ProductView({ slug }: { slug: string }) {
       {/* Details */}
       <div className="lg:sticky lg:top-24 lg:self-start">
         <div className="flex flex-wrap gap-2 text-xs font-bold">
-          <span className="rounded-full bg-white px-3 py-1.5 ring-1 ring-ink/10">
+          <span className="rounded-full border-2 border-ink/15 bg-paper px-3 py-1">
             {occasions[template.occasion].emoji} {occasions[template.occasion].label}
           </span>
-          <span className="rounded-full bg-white px-3 py-1.5 ring-1 ring-ink/10">
+          <span className="rounded-full border-2 border-ink/15 bg-paper px-3 py-1">
             {toneInfo[template.tone].emoji} {toneInfo[template.tone].label}
           </span>
-          <span className="rounded-full bg-ink px-3 py-1.5 text-white">
+          <span className="rounded-full border-2 border-ink bg-ink px-3 py-1 text-paper">
             {deviceInfo[template.device].emoji} {deviceInfo[template.device].label}
           </span>
         </div>
-        <h1 className="mt-4 font-display text-4xl font-bold leading-tight sm:text-5xl">{template.name}</h1>
+        <h1 className="mt-4 font-brand text-4xl font-bold leading-tight sm:text-5xl">{template.name}</h1>
         <p className="mt-3 text-lg text-ink/70">{template.blurb}</p>
-        <p className="mt-4 font-display text-2xl font-bold">
+        <p className="mt-4 font-brand text-3xl font-black text-hot">
           {PRICES.card.label} <span className="text-base font-semibold text-ink/50">per card</span>
         </p>
 
-        <div className="mt-6 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-ink/5">
-          <p className="font-display text-lg font-bold">Try it with your names</p>
+        <div className="sheet mt-6 p-5">
+          <p className="font-brand text-lg font-bold">Try it with your names</p>
           <p className="text-sm text-ink/60">Watch the preview update as you type.</p>
           <div className="mt-4 grid grid-cols-2 gap-3">
             <NameInput label="Their name" value={to} onChange={setTo} placeholder={template.demo.to} />
@@ -162,7 +160,7 @@ export function ProductView({ slug }: { slug: string }) {
           </div>
           <Link
             href={`/create?${params.toString()}`}
-            className="mt-5 flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-hot to-tangerine py-4 font-display text-lg font-semibold text-white shadow-[0_14px_34px_-10px_rgba(255,46,126,0.8)] transition hover:-translate-y-0.5"
+            className="btn btn-red mt-5 w-full py-3.5 text-lg"
           >
             Customise this card →
           </Link>
@@ -170,11 +168,11 @@ export function ProductView({ slug }: { slug: string }) {
         </div>
 
         <div className="mt-8">
-          <h2 className="font-display text-xl font-bold">What&apos;s inside</h2>
+          <h2 className="font-brand text-xl font-bold">What&apos;s inside</h2>
           <ol className="mt-3 space-y-2.5">
             {screens.map((s, i) => (
               <li key={s.id} className="flex gap-3">
-                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white text-lg ring-1 ring-ink/5">{SCREEN_ICONS[s.type]}</span>
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border-2 border-ink/15 bg-paper text-lg">{SCREEN_ICONS[s.type]}</span>
                 <div className="min-w-0">
                   <p className="text-sm font-bold">
                     {i + 1}. {SCREEN_LABELS[s.type]}
@@ -187,7 +185,7 @@ export function ProductView({ slug }: { slug: string }) {
         </div>
 
         <div className="mt-8">
-          <h2 className="font-display text-xl font-bold">What you can customise</h2>
+          <h2 className="font-brand text-xl font-bold">What you can change</h2>
           <ul className="mt-3 space-y-2 text-ink/75">
             <li>✓ Their name and yours</li>
             <li>✓ Every word on every screen</li>
@@ -196,7 +194,7 @@ export function ProductView({ slug }: { slug: string }) {
             <li>✓ Colours ({THEMES.length} themes) and the background effect</li>
             <li>✓ Add, remove or reorder screens: games, quizzes, scratch cards and more</li>
           </ul>
-          <div className="mt-6 rounded-2xl bg-white p-4 text-sm ring-1 ring-ink/5">
+          <div className="mt-6 rounded-xl border-2 border-dashed border-ink/25 p-4 text-sm">
             <p className="font-bold">
               {deviceInfo[template.device].emoji} {deviceInfo[template.device].label}
             </p>
@@ -217,7 +215,7 @@ function NameInput({ label, value, onChange, placeholder }: { label: string; val
         maxLength={40}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="mt-1 w-full rounded-xl bg-cream px-3 py-2.5 font-semibold outline-none ring-1 ring-ink/10 placeholder:text-ink/30 focus:ring-2 focus:ring-hot"
+        className="mt-1 w-full border-b-2 border-dashed border-ink/30 bg-transparent px-1 py-1 font-hand text-2xl leading-none outline-none placeholder:text-ink/25 focus:border-solid focus:border-hot"
       />
     </label>
   );

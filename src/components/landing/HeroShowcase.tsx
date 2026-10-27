@@ -35,11 +35,14 @@ export function HeroShowcase() {
     <div>
       {/* Built at one design size (600×520) and scaled to fit each breakpoint. */}
       <div className="relative mx-auto mt-6 h-[312px] w-full sm:mt-10 sm:h-[468px] lg:mt-0 lg:h-[375px] xl:h-[416px]">
-        <div aria-hidden className="absolute inset-x-6 top-10 h-3/4 rounded-full bg-gradient-to-br from-hot/40 via-tangerine/30 to-grape/30 blur-3xl" />
         <div className="absolute left-1/2 top-0 h-[520px] w-[600px] origin-top -translate-x-1/2 scale-[0.6] sm:scale-90 lg:scale-[0.72] xl:scale-[0.8]">
-          <span className="absolute left-3 top-0 z-20 whitespace-nowrap rounded-full bg-ink px-5 py-2.5 font-display text-xl font-semibold text-white shadow-xl">
-            💻 On a laptop · try pressing No
-          </span>
+          <p className="absolute left-4 top-0 z-20 flex items-end gap-2 whitespace-nowrap font-hand text-[2.1rem] leading-none text-hot">
+            go on, try pressing No
+            <svg width="54" height="44" viewBox="0 0 54 44" aria-hidden className="mb-[-26px] text-hot">
+              <path d="M3 4 C 22 4 38 12 44 34" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" />
+              <path d="M36 28 L44 36 L49 26" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </p>
           <div className="absolute left-0 top-14">
             {/* A slightly smaller virtual screen keeps the card legible at this size. */}
             <LaptopFrame screenWidth={760} screenHeight={475} scale={504 / 760}>
@@ -55,21 +58,19 @@ export function HeroShowcase() {
               </PhoneFrame>
             </div>
           </div>
-          <span className="absolute right-0 top-[470px] z-20 whitespace-nowrap rounded-full bg-white px-5 py-2.5 font-display text-xl font-semibold text-ink shadow-xl">
-            📱 On a phone
-          </span>
+          <p className="absolute right-2 top-[472px] z-20 whitespace-nowrap font-hand text-[2.1rem] leading-none text-ink/70">and on a phone ↑</p>
         </div>
       </div>
 
       {/* Kept outside the scaled mockup so the inputs stay full size (and phones don't zoom in on them). */}
-      <div className="relative z-30 mx-auto -mt-2 w-full max-w-sm rounded-3xl bg-white p-5 shadow-2xl ring-1 ring-ink/5 sm:-mt-6 lg:-mt-24 lg:ml-0 lg:w-[280px]">
-        <div className="flex items-center justify-between">
-          <p className="font-display text-lg font-bold">✏️ Fill in the blanks</p>
-          <span className="rounded-full bg-hot/10 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-hot">Try it</span>
+      <div className="sheet relative z-30 mx-auto -mt-2 w-full max-w-sm -rotate-1 p-5 sm:-mt-6 lg:-mt-24 lg:ml-0 lg:w-[290px]">
+        <div className="flex items-baseline justify-between">
+          <p className="font-brand text-xl font-bold">Fill in the blanks</p>
+          <span className="font-hand text-xl text-hot">try it!</span>
         </div>
-        <div className="mt-3 grid grid-cols-2 gap-2.5">
-          <label className="block">
-            <span className="text-xs font-bold text-ink/50">Their name</span>
+        <div className="mt-3 space-y-2">
+          <label className="flex items-baseline gap-2">
+            <span className="w-12 shrink-0 font-brand text-sm font-semibold text-ink/60">To:</span>
             <input
               value={to}
               onChange={(e) => {
@@ -79,11 +80,12 @@ export function HeroShowcase() {
               onFocus={startTyping}
               maxLength={40}
               placeholder="Priya"
-              className="mt-1 w-full rounded-xl bg-cream px-3 py-2 text-base font-semibold outline-none ring-1 ring-ink/10 placeholder:text-ink/30 focus:ring-2 focus:ring-hot"
+              aria-label="Their name"
+              className="w-full border-b-2 border-dashed border-ink/30 bg-transparent px-1 py-1 font-hand text-2xl leading-none outline-none placeholder:text-ink/25 focus:border-solid focus:border-hot"
             />
           </label>
-          <label className="block">
-            <span className="text-xs font-bold text-ink/50">Your name</span>
+          <label className="flex items-baseline gap-2">
+            <span className="w-12 shrink-0 font-brand text-sm font-semibold text-ink/60">From:</span>
             <input
               value={from}
               onChange={(e) => {
@@ -93,23 +95,21 @@ export function HeroShowcase() {
               onFocus={startTyping}
               maxLength={40}
               placeholder="Sam"
-              className="mt-1 w-full rounded-xl bg-cream px-3 py-2 text-base font-semibold outline-none ring-1 ring-ink/10 placeholder:text-ink/30 focus:ring-2 focus:ring-hot"
+              aria-label="Your name"
+              className="w-full border-b-2 border-dashed border-ink/30 bg-transparent px-1 py-1 font-hand text-2xl leading-none outline-none placeholder:text-ink/25 focus:border-solid focus:border-hot"
             />
           </label>
         </div>
-        <div className="mt-3 flex items-center gap-2">
-          {["/demo/sunset.svg", "/demo/coffee.svg", "/demo/lights.svg"].map((src) => (
+        <div className="mt-4 flex items-center gap-2">
+          {["/demo/sunset.svg", "/demo/coffee.svg", "/demo/lights.svg"].map((src, i) => (
             // eslint-disable-next-line @next/next/no-img-element -- decorative sample photos
-            <img key={src} src={src} alt="" className="h-10 w-10 rounded-lg object-cover ring-1 ring-ink/5" />
+            <img key={src} src={src} alt="" className="h-10 w-10 bg-white object-cover p-0.5 shadow-sm ring-1 ring-ink/15" style={{ rotate: `${(i - 1) * 6}deg` }} />
           ))}
-          <span className="grid h-10 w-10 place-items-center rounded-lg border-2 border-dashed border-ink/15 text-ink/30">+</span>
-          <span className="ml-auto text-xs font-bold text-ink/50">Your photos</span>
+          <span className="grid h-10 w-10 place-items-center border-2 border-dashed border-ink/25 text-ink/40">+</span>
+          <span className="ml-auto text-xs font-semibold text-ink/50">your photos</span>
         </div>
         <p className="mt-3 text-sm text-ink/60">{to.trim() ? "See? The card on the laptop just changed. That's all it takes." : "Type a name and watch the card on the laptop change."}</p>
-        <Link
-          href={`/create?${params.toString()}`}
-          className="mt-3 flex items-center justify-center gap-2 rounded-full bg-ink py-3 font-display font-semibold text-white transition hover:bg-hot"
-        >
+        <Link href={`/create?${params.toString()}`} className="btn btn-ink mt-3 w-full py-2.5">
           Finish this card →
         </Link>
       </div>
