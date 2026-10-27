@@ -20,6 +20,11 @@ export const LANGUAGES: Record<Locale, { name: string; english: string; tag: str
 
 export const isLocale = (value: unknown): value is Locale => typeof value === "string" && (LOCALES as readonly string[]).includes(value);
 
+// The languages visitors can use right now. The others are translated and kept
+// ready; add them here to switch them back on.
+export const LIVE_LOCALES: readonly Locale[] = ["en"];
+export const isLive = (value: unknown): value is Locale => isLocale(value) && LIVE_LOCALES.includes(value);
+
 // Fills in {placeholders}: fmt("{n} designs", { n: 5 }) → "5 designs".
 export function fmt(text: string, values: Record<string, string | number>) {
   return text.replace(/\{(\w+)\}/g, (match, key) => (key in values ? String(values[key]) : match));

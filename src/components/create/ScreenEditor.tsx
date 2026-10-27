@@ -356,7 +356,7 @@ function QuizField({ screen, onChange }: { screen: QuizScreen; onChange: Update 
 
 type PhotosScreen = Extract<Screen, { type: "photos" }>;
 
-function PhotoField({ screen, onChange }: { screen: PhotosScreen; onChange: Update }) {
+export function PhotoField({ screen, onChange }: { screen: PhotosScreen; onChange: Update }) {
   const e = useI18n().t.editor;
   const input = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(0);

@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
-import { DEFAULT_LOCALE, LOCALE_COOKIE, isLocale } from "@/i18n/config";
+import { DEFAULT_LOCALE, LOCALE_COOKIE, isLive } from "@/i18n/config";
 import { DICTS } from "@/i18n/dictionaries";
 import { cardSchema } from "@/lib/card";
 import { GenerateError, generateCard, generateReady } from "@/lib/generate";
@@ -39,7 +39,7 @@ function allowed(ip: string) {
 
 export async function POST(req: NextRequest) {
   const lang = req.cookies.get(LOCALE_COOKIE)?.value;
-  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
+  const locale = isLive(lang) ? lang : DEFAULT_LOCALE;
   const errors = DICTS[locale].custom.errors;
   const fail = (error: string, status: number) => NextResponse.json({ error }, { status });
 

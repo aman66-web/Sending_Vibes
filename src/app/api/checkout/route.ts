@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import type Stripe from "stripe";
 import { z } from "zod";
-import { DEFAULT_LOCALE, LOCALE_COOKIE, fmt, isLocale, type Locale } from "@/i18n/config";
+import { DEFAULT_LOCALE, LOCALE_COOKIE, fmt, isLive, type Locale } from "@/i18n/config";
 import { DICTS } from "@/i18n/dictionaries";
 import { currentAccount } from "@/lib/auth";
 import { MAX_BASKET, MAX_SCHEDULE_DAYS } from "@/lib/basket";
@@ -46,7 +46,7 @@ function allowed(ip: string) {
 
 export async function POST(req: NextRequest) {
   const lang = req.cookies.get(LOCALE_COOKIE)?.value;
-  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
+  const locale = isLive(lang) ? lang : DEFAULT_LOCALE;
   const errors = DICTS[locale].basket.errors;
   const fail = (error: string, status: number, extra: Record<string, unknown> = {}) => NextResponse.json({ error, ...extra }, { status });
 
