@@ -16,8 +16,13 @@ export const PRICES = {
 
 const SYMBOLS: Record<Currency, string> = { gbp: "£", usd: "$" };
 
+// An amount in pence or cents, e.g. 2997 → "£29.97".
+export function formatMoney(minor: number, currency: Currency) {
+  return `${SYMBOLS[currency]}${(minor / 100).toFixed(2)}`;
+}
+
 export function price(item: keyof typeof PRICES, currency: Currency) {
-  return `${SYMBOLS[currency]}${(PRICES[item] / 100).toFixed(2)}`;
+  return formatMoney(PRICES[item], currency);
 }
 
 // Visitors in the UK (and the Crown Dependencies) pay in pounds, everyone else in dollars.
