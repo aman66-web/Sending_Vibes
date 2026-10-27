@@ -1,4 +1,5 @@
 import type { CardData, Device, Effect, Game, Layout, Music, Occasion, QuizQuestion, Screen, ThemeName, TimelineEvent } from "./card";
+import type { Tier } from "./pricing";
 
 // The card designs people can browse and start from. Each one is a preset list
 // of building-block screens plus a look; everything stays editable afterwards.
@@ -1929,6 +1930,18 @@ export function buildCard(t: Template, to: string, from: string): CardData {
     music: t.music ?? OCCASION_MUSIC[t.occasion],
     screens: t.screens(to, from),
   };
+}
+
+// Premade: one of our designs with its screens as they come (every word, photo, colour
+// and tune can still change). Anything else is custom: a card written from a
+// description, or one with screens added, taken out or moved. The checkout works this
+// out from the saved card, so the price never depends on what the browser says.
+export function cardTier(card: Pick<CardData, "template" | "screens">): Tier {
+  const template = getTemplate(card.template);
+  if (!template) return "custom";
+  const want = template.screens("", "").map((s) => s.type);
+  const got = card.screens.map((s) => s.type);
+  return want.length === got.length && want.every((type, i) => type === got[i]) ? "premade" : "custom";
 }
 
 // The card as shown in previews: sample names and illustrated photos.

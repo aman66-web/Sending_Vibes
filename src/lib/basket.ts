@@ -1,4 +1,5 @@
 import type { Occasion, ThemeName } from "./card";
+import type { Tier } from "./pricing";
 
 // The basket lives in the browser until checkout. Each card in it is already saved
 // (unpaid) so its link exists, but the link only opens once the order is paid.
@@ -14,6 +15,8 @@ export type BasketItem = {
   occasion: Occasion;
   theme: ThemeName;
   template?: string;
+  // Sets the price shown here; the checkout works it out again from the saved card.
+  tier?: Tier;
   delivery: "self" | "email";
   email?: string;
   // A later day to email it on (YYYY-MM-DD); empty sends it as soon as it's paid.

@@ -7,7 +7,7 @@ import { fmt } from "@/i18n/config";
 import { useI18n } from "@/i18n/client";
 import { MAX_SCHEDULE_DAYS, basketSnapshot, onBasketChange, removeFromBasket, serverBasket, writeBasket, type BasketItem } from "@/lib/basket";
 import { getTemplate } from "@/lib/catalog";
-import { PRICES, formatMoney } from "@/lib/pricing";
+import { formatMoney, tierPrice } from "@/lib/pricing";
 import { themes } from "@/lib/themes";
 
 const noop = () => () => {};
@@ -64,7 +64,7 @@ export function Basket({ emailReady }: { emailReady: boolean }) {
     );
   }
 
-  const total = formatMoney(PRICES.card * items.length, currency);
+  const total = formatMoney(items.reduce((sum, i) => sum + tierPrice(i.tier ?? "premade"), 0), currency);
 
   const pay = async () => {
     const problems: Record<string, string> = {};
@@ -121,7 +121,7 @@ export function Basket({ emailReady }: { emailReady: boolean }) {
                     {fmt(b.fromLine, { from: item.from })}
                     {template && <span className="text-ink/45"> · {template.name}</span>}
                   </p>
-                  <p className="mt-1 font-semibold">{formatMoney(PRICES.card, currency)}</p>
+                  <p className="mt-1 font-semibold">{formatMoney(tierPrice(item.tier ?? "premade"), currency)}</p>
                 </div>
                 <button onClick={() => removeFromBasket([item.id])} className="self-start text-sm font-semibold text-ink/60 underline-offset-4 hover:text-ink hover:underline">
                   {b.remove}

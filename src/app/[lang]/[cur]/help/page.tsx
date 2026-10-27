@@ -19,7 +19,7 @@ export default async function HelpPage() {
     n: TEMPLATES.length,
     o: OCCASIONS.length,
     price: price("card", currency),
-    aiPrice: price("aiCustom", currency),
+    aiPrice: price("custom", currency),
     gbp: price("card", "gbp"),
     usd: price("card", "usd"),
   };

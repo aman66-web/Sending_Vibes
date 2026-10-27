@@ -1,5 +1,7 @@
 // Every card is paid. One place for prices so the site never disagrees with itself.
 // Prices are the same number in each currency: £9.99 in the UK, $9.99 everywhere else.
+// A premade card is one of our designs as it comes; a custom card is written from a
+// description, or has had screens added, removed or moved (see cardTier in catalog.ts).
 
 export const CURRENCIES = ["gbp", "usd"] as const;
 export type Currency = (typeof CURRENCIES)[number];
@@ -11,8 +13,11 @@ export const isCurrency = (value: unknown): value is Currency => typeof value ==
 // In pence or cents.
 export const PRICES = {
   card: 999,
-  aiCustom: 1499,
+  custom: 1499,
 } as const;
+
+export type Tier = "premade" | "custom";
+export const tierPrice = (tier: Tier) => (tier === "custom" ? PRICES.custom : PRICES.card);
 
 const SYMBOLS: Record<Currency, string> = { gbp: "£", usd: "$" };
 

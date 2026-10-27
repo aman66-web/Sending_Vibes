@@ -4,8 +4,9 @@ import path from "path";
 import { customAlphabet } from "nanoid";
 import type Stripe from "stripe";
 import type { Locale } from "@/i18n/config";
+import type { Occasion, ThemeName } from "./card";
 import { emailReady, sendOrderEmails } from "./email";
-import type { Currency } from "./pricing";
+import type { Currency, Tier } from "./pricing";
 import { DATA_DIR, adminSupabase, markCardsPaid, usingSupabase } from "./storage";
 import { stripe } from "./stripe";
 
@@ -16,6 +17,11 @@ export type OrderItem = {
   to: string;
   from: string;
   delivery: "self" | "email";
+  // Older orders don't have these. They were all premade.
+  tier?: Tier;
+  // For showing the card in someone's account.
+  occasion?: Occasion;
+  theme?: ThemeName;
   email?: string;
   // When the buyer picked a later day: that day as they chose it (YYYY-MM-DD), and the
   // moment to email it (9am their time).
@@ -33,6 +39,8 @@ export type Order = {
   items: OrderItem[];
   stripeSessionId?: string;
   buyerEmail?: string;
+  // Who was signed in when they bought it, if anyone.
+  userId?: string;
   amountTotal?: number;
   createdAt: string;
   paidAt?: string;
@@ -48,6 +56,7 @@ type Row = {
   items: OrderItem[];
   stripe_session_id: string | null;
   buyer_email: string | null;
+  user_id: string | null;
   amount_total: number | null;
   created_at: string;
   paid_at: string | null;
@@ -63,6 +72,7 @@ const fromRow = (r: Row): Order => ({
   items: r.items,
   stripeSessionId: r.stripe_session_id ?? undefined,
   buyerEmail: r.buyer_email ?? undefined,
+  userId: r.user_id ?? undefined,
   amountTotal: r.amount_total ?? undefined,
   createdAt: r.created_at,
   paidAt: r.paid_at ?? undefined,
@@ -102,12 +112,40 @@ export async function createOrder(order: Omit<Order, "id" | "status" | "createdA
       locale: full.locale,
       site: full.site,
       items: full.items,
+      user_id: full.userId ?? null,
     });
     if (error) throw new Error(`Could not save order: ${error.message}`);
   } else {
     await writeLocal(full);
   }
   return full;
+}
+
+// Paid orders for a signed-in buyer: the ones placed while signed in, and any paid
+// for with the same (confirmed) email address. Newest first.
+export async function ordersFor(account: { id: string; email: string | null }): Promise<Order[]> {
+  const email = account.email?.toLowerCase();
+  const mine = (o: Order) => o.status === "paid" && (o.userId === account.id || (!!email && o.buyerEmail?.toLowerCase() === email));
+  let orders: Order[];
+  if (!usingSupabase()) {
+    const dir = path.join(DATA_DIR, "orders");
+    const files = await fs.readdir(dir).catch(() => [] as string[]);
+    orders = (await Promise.all(files.map((f) => readLocal(f.replace(/\.json$/, ""))))).filter((o): o is Order => o !== null);
+  } else {
+    const paid = () => db().select("*").eq("status", "paid").order("paid_at", { ascending: false }).limit(100);
+    const results = await Promise.all([
+      paid().eq("user_id", account.id),
+      // ilike so the case doesn't matter; escape its wildcards so it's an exact match.
+      email ? paid().ilike("buyer_email", email.replace(/[\\%_]/g, (c) => `\\${c}`)) : null,
+    ]);
+    const rows = results.flatMap((r) => {
+      if (r?.error) throw new Error(`Could not load orders: ${r.error.message}`);
+      return (r?.data ?? []) as Row[];
+    });
+    orders = rows.map(fromRow);
+  }
+  const unique = new Map(orders.filter(mine).map((o) => [o.id, o]));
+  return [...unique.values()].sort((a, b) => (b.paidAt ?? b.createdAt).localeCompare(a.paidAt ?? a.createdAt));
 }
 
 export async function getOrder(id: string): Promise<Order | null> {
