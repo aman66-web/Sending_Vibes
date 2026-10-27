@@ -4,7 +4,7 @@ import { useState } from "react";
 import { fmt } from "@/i18n/config";
 import { useI18n } from "@/i18n/client";
 
-// Signing in or up: Continue with Google, or a 6-digit code emailed to them. Used on
+// Signing in or up: Continue with Google, or a code emailed to them. Used on
 // the last step of the questions and on My cards. Google leaves the site and comes
 // back to `next`, so anything worth keeping is saved first (onGoogle).
 
