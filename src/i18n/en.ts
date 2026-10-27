@@ -846,15 +846,15 @@ export const en = {
     questions: {
       to: { title: "Who's this card for?", hint: "Their name, or whatever you call them.", placeholder: "e.g. Olivia" },
       relation: { title: "Who is {name} to you?", hint: "Tap one, or type your own.", placeholder: "Someone else? Type it here" },
-      occasion: { title: "What's the occasion?", hint: "Tap one.", placeholder: "" },
-      vibe: { title: "How should it feel?", hint: "Pick as many as you like.", placeholder: "" },
+      occasion: { title: "What's the occasion?", hint: "Tap one." },
+      vibe: { title: "How should it feel?", hint: "Pick as many as you like." },
       about: {
         title: "Tell us about {name}",
         hint: "What do they love? Any nicknames, hobbies, habits or inside jokes? The more you share, the more personal it gets.",
         placeholder: "e.g. Obsessed with her cat Biscuit, always late, sings in the shower, loves spicy food",
       },
       message: { title: "What do you most want {name} to know?", hint: "Say it however it comes out. We'll help with the wording.", placeholder: "e.g. That I'm so proud of her and I'll always be there" },
-      include: { title: "What should {name} get to play with?", hint: "Pick as many as you like, or let us choose.", placeholder: "" },
+      include: { title: "What should {name} get to play with?", hint: "Pick as many as you like, or let us choose." },
       from: { title: "Last one: who's it from?", hint: "Your name, as you'd sign it. It can be from more than one person.", placeholder: "e.g. Sam" },
     },
   },
