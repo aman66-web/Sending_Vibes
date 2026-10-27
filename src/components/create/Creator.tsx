@@ -823,14 +823,15 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                 premade={mode === "premade"}
                 onSubmit={(id) => changeByTyping(screenAsk, id)}
               />
+              <PreviewControls card={card} viewing={viewing} onGo={goToScreen} wordMode={wordMode} setWordMode={setWordMode} />
               <div className="relative">
                 <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onOther={() => setSelected(viewing)}>
                   {view === "phone" ? (
-                    <PhoneFrame className="mx-auto h-[540px] w-[270px]">
+                    <PhoneFrame className="mx-auto h-[520px] w-[260px]">
                       <CardPlayer key="phone" card={card} preview sound focusScreenId={selected} focusNonce={nudge} onScreenChange={setViewing} />
                     </PhoneFrame>
                   ) : (
-                    <BrowserFrame className="h-[500px]">
+                    <BrowserFrame className="h-[480px]">
                       <CardPlayer key="computer" card={card} preview sound focusScreenId={selected} focusNonce={nudge} onScreenChange={setViewing} />
                     </BrowserFrame>
                   )}
@@ -843,7 +844,6 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                   </div>
                 )}
               </div>
-              <PreviewControls card={card} viewing={viewing} onGo={goToScreen} wordMode={wordMode} setWordMode={setWordMode} />
             </div>
           </aside>
         </div>
