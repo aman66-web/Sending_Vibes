@@ -802,13 +802,11 @@ export const ur: Dict = {
       scratch: "کھرچ کر پیغام دیکھیں",
       typeit: "پاس ورڈ سے کھولیں",
     },
-    them: "ان",
     copy: "کاپی کریں",
     copied: "کاپی ہو گیا!",
     whatsapp: "WhatsApp پر بھیجیں",
     whatsappMessage: "میں نے آپ کے لیے کچھ بنایا ہے 💌 {url}",
     openCard: "کارڈ کھولیں",
-    another: "ایک اور بنائیں",
   },
 
   editor: {

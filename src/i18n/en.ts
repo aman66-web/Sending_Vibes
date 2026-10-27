@@ -804,13 +804,11 @@ export const en = {
       scratch: "Scratch to reveal a message",
       typeit: "Unlock it with a password",
     },
-    them: "them",
     copy: "Copy",
     copied: "Copied!",
     whatsapp: "Send on WhatsApp",
     whatsappMessage: "I made you something 💌 {url}",
     openCard: "Open the card",
-    another: "Make another one",
   },
 
   editor: {

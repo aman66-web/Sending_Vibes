@@ -806,13 +806,11 @@ export const es: Dict = {
       scratch: "Rasca para descubrir un mensaje",
       typeit: "Se desbloquea con una contraseña",
     },
-    them: "esa persona",
     copy: "Copiar",
     copied: "¡Copiado!",
     whatsapp: "Enviar por WhatsApp",
     whatsappMessage: "Te he hecho algo 💌 {url}",
     openCard: "Abrir la tarjeta",
-    another: "Crear otra",
   },
 
   editor: {

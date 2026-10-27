@@ -802,13 +802,11 @@ export const ar: Dict = {
       scratch: "اكشط لتكشف رسالة",
       typeit: "افتحها بكلمة سر",
     },
-    them: "المستلم",
     copy: "نسخ",
     copied: "تم النسخ!",
     whatsapp: "أرسل عبر WhatsApp",
     whatsappMessage: "صنعت لك شيئًا 💌 {url}",
     openCard: "افتح البطاقة",
-    another: "اصنع بطاقة أخرى",
   },
 
   editor: {

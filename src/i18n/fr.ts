@@ -802,13 +802,11 @@ export const fr: Dict = {
       scratch: "Gratte pour révéler un message",
       typeit: "À débloquer avec un mot de passe",
     },
-    them: "cette personne",
     copy: "Copier",
     copied: "Copié !",
     whatsapp: "Envoyer sur WhatsApp",
     whatsappMessage: "Je t'ai préparé un petit truc 💌 {url}",
     openCard: "Ouvrir la carte",
-    another: "En créer une autre",
   },
 
   editor: {

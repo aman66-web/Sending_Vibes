@@ -802,13 +802,11 @@ export const bn: Dict = {
       scratch: "ঘষে বার্তা দেখুন",
       typeit: "পাসওয়ার্ড দিয়ে খুলুন",
     },
-    them: "সে",
     copy: "কপি",
     copied: "কপি হয়েছে!",
     whatsapp: "WhatsApp-এ পাঠান",
     whatsappMessage: "তোমার জন্য একটা জিনিস বানিয়েছি 💌 {url}",
     openCard: "কার্ডটা খুলুন",
-    another: "আরেকটা বানান",
   },
 
   editor: {

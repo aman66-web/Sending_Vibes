@@ -805,13 +805,11 @@ export const pl: Dict = {
       scratch: "Zdrap, żeby odkryć wiadomość",
       typeit: "Odblokowanie hasłem",
     },
-    them: "ta osoba",
     copy: "Kopiuj",
     copied: "Skopiowano!",
     whatsapp: "Wyślij przez WhatsApp",
     whatsappMessage: "Mam coś dla ciebie 💌 {url}",
     openCard: "Otwórz kartkę",
-    another: "Zrób kolejną",
   },
 
   editor: {
