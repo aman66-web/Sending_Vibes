@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { LogoMark } from "@/components/Logo";
 import { usePathname } from "next/navigation";
 import { Fragment, useEffect, useRef, useState } from "react";
 
@@ -193,7 +194,7 @@ export function Chat() {
         aria-expanded={open}
         aria-controls="site-chat"
         aria-label={open ? "Close chat" : "Chat with us"}
-        className={`fixed right-4 z-40 flex h-14 items-center gap-2 rounded-full bg-ink px-4 font-display font-semibold text-white shadow-[0_10px_30px_-8px_rgba(29,11,23,0.6)] transition hover:-translate-y-0.5 sm:right-5 ${lift} ${open ? "max-sm:hidden" : ""}`}
+        className={`btn btn-ink fixed right-4 z-40 h-14 px-4 shadow-[3px_3px_0_var(--color-hot)] sm:right-5 ${lift} ${open ? "max-sm:hidden" : ""}`}
       >
         {open ? (
           <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
@@ -212,14 +213,12 @@ export function Chat() {
           id="site-chat"
           role="dialog"
           aria-label="Chat with Sending Vibes"
-          className={`fixed inset-x-3 z-[60] flex animate-[fade-in_0.2s_ease-out] flex-col overflow-hidden rounded-3xl border border-ink/10 bg-cream text-ink shadow-[0_24px_60px_-20px_rgba(29,11,23,0.55)] max-sm:bottom-3 max-sm:top-[max(0.75rem,env(safe-area-inset-top))] sm:inset-x-auto sm:right-5 sm:h-[min(580px,calc(100dvh-8rem))] sm:w-[380px] ${path.startsWith("/create") ? "sm:bottom-44 lg:bottom-24" : "sm:bottom-24"}`}
+          className={`fixed inset-x-3 z-[60] flex animate-[fade-in_0.2s_ease-out] flex-col overflow-hidden rounded-2xl border-2 border-ink bg-cream text-ink shadow-[5px_5px_0_var(--color-ink)] max-sm:bottom-3 max-sm:top-[max(0.75rem,env(safe-area-inset-top))] sm:inset-x-auto sm:right-5 sm:h-[min(580px,calc(100dvh-8rem))] sm:w-[380px] ${path.startsWith("/create") ? "sm:bottom-44 lg:bottom-24" : "sm:bottom-24"}`}
         >
-          <header className="flex items-center gap-3 bg-ink px-4 py-3 text-white">
-            <span className="grid h-9 w-9 place-items-center rounded-full bg-hot text-lg" aria-hidden>
-              💌
-            </span>
+          <header className="flex items-center gap-3 border-b-2 border-ink bg-ink px-4 py-3 text-paper">
+            <LogoMark className="h-9 w-9 shrink-0" />
             <div className="min-w-0 flex-1">
-              <p className="font-display font-semibold leading-tight">Sending Vibes</p>
+              <p className="font-brand font-semibold leading-tight">Sending Vibes</p>
               <p className="text-xs text-white/60">AI helper · usually replies in seconds</p>
             </div>
             {messages.length > 0 && (
@@ -235,11 +234,11 @@ export function Chat() {
           </header>
 
           <div ref={list} className="flex-1 space-y-3 overflow-y-auto overscroll-contain px-4 py-4 text-[15px] leading-relaxed" aria-live="polite">
-            <div className="max-w-[85%] rounded-2xl rounded-tl-md bg-white px-3.5 py-2.5 shadow-sm">{GREETING}</div>
+            <div className="max-w-[85%] rounded-2xl rounded-tl-md border-2 border-ink/10 bg-paper px-3.5 py-2.5">{GREETING}</div>
             {messages.length === 0 && (
               <div className="flex flex-wrap gap-2 pt-1">
                 {STARTERS.map((s) => (
-                  <button key={s} onClick={() => send(s)} className="rounded-full border border-ink/15 bg-white px-3 py-1.5 text-sm font-semibold transition hover:border-hot hover:text-hot">
+                  <button key={s} onClick={() => send(s)} className="rounded-full border-2 border-ink/15 bg-paper px-3 py-1 text-sm font-semibold transition hover:border-ink">
                     {s}
                   </button>
                 ))}
@@ -251,11 +250,11 @@ export function Chat() {
                   {m.content}
                 </div>
               ) : m.content ? (
-                <div key={i} className="max-w-[85%] space-y-2 break-words rounded-2xl rounded-tl-md bg-white px-3.5 py-2.5 shadow-sm">
+                <div key={i} className="max-w-[85%] space-y-2 break-words rounded-2xl rounded-tl-md border-2 border-ink/10 bg-paper px-3.5 py-2.5">
                   <Rich text={m.content} onLink={closeOnPhone} />
                 </div>
               ) : (
-                <div key={i} className="flex w-fit gap-1 rounded-2xl rounded-tl-md bg-white px-4 py-3.5 shadow-sm" aria-label="Typing">
+                <div key={i} className="flex w-fit gap-1 rounded-2xl rounded-tl-md border-2 border-ink/10 bg-paper px-4 py-3.5" aria-label="Typing">
                   {[0, 1, 2].map((d) => (
                     <span key={d} className="h-2 w-2 animate-bounce rounded-full bg-ink/40" style={{ animationDelay: `${d * 150}ms` }} />
                   ))}
@@ -279,7 +278,7 @@ export function Chat() {
               e.preventDefault();
               send(draft);
             }}
-            className="flex items-end gap-2 border-t border-ink/10 bg-white p-3"
+            className="flex items-end gap-2 border-t-2 border-ink bg-paper p-3"
           >
             <textarea
               ref={input}
@@ -295,20 +294,20 @@ export function Chat() {
               maxLength={MAX_LENGTH}
               placeholder="Ask anything about cards…"
               aria-label="Your message"
-              className="max-h-32 min-h-11 flex-1 resize-none rounded-2xl border border-ink/15 bg-cream px-3.5 py-2.5 text-base outline-none [field-sizing:content] focus:border-hot"
+              className="max-h-32 min-h-11 flex-1 resize-none rounded-2xl border-2 border-ink/20 bg-cream px-3.5 py-2 text-base outline-none [field-sizing:content] focus:border-ink"
             />
             <button
               type="submit"
               disabled={busy || !draft.trim()}
               aria-label="Send"
-              className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-hot text-white transition enabled:hover:bg-ink disabled:opacity-40"
+              className="grid h-11 w-11 shrink-0 place-items-center rounded-full border-2 border-ink bg-hot text-white transition enabled:hover:bg-ink disabled:opacity-40"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden fill="currentColor">
                 <path d="M3.4 20.4 21 12 3.4 3.6 3.4 10l12.6 2-12.6 2z" />
               </svg>
             </button>
           </form>
-          <p className="bg-white px-4 pb-2 text-center text-[11px] text-ink/45">AI can make mistakes. Don&apos;t share card or payment details.</p>
+          <p className="bg-paper px-4 pb-2 text-center text-[11px] text-ink/50">AI can make mistakes. Don&apos;t share card or payment details.</p>
         </section>
       )}
     </>

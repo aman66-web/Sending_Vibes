@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { OgEnvelope } from "@/components/OgEnvelope";
+import { PRICES } from "@/lib/pricing";
 
 export const alt = "Sending Vibes: interactive cards they'll actually remember";
 export const size = { width: 1200, height: 630 };
@@ -13,20 +14,32 @@ export default function OgImage() {
           width: "100%",
           height: "100%",
           display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "70px 90px",
-          background: "linear-gradient(135deg, #ff2e7e 0%, #ff8a3d 55%, #7c3aed 100%)",
-          color: "white",
+          padding: 22,
+          backgroundImage: "repeating-linear-gradient(-45deg, #d8432f 0px, #d8432f 26px, #fbf7ef 26px, #fbf7ef 40px, #2b5aa6 40px, #2b5aa6 66px, #fbf7ef 66px, #fbf7ef 80px)",
         }}
       >
-        <div style={{ display: "flex", flexDirection: "column", maxWidth: 640 }}>
-          <div style={{ fontSize: 34, fontWeight: 700, opacity: 0.85 }}>Sending Vibes</div>
-          <div style={{ fontSize: 86, fontWeight: 800, lineHeight: 1.02, marginTop: 24 }}>Don&apos;t send a card. Send a moment.</div>
-          <div style={{ fontSize: 30, marginTop: 28, opacity: 0.9 }}>Runaway No buttons, mini games, your photos and a big finale.</div>
-        </div>
-        <div style={{ display: "flex", transform: "rotate(-8deg)" }}>
-          <OgEnvelope size={380} />
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "50px 70px",
+            background: "#f3ecdf",
+            color: "#1f1b16",
+          }}
+        >
+          <div style={{ display: "flex", flexDirection: "column", maxWidth: 660 }}>
+            <div style={{ fontSize: 34, fontWeight: 700, color: "#d8432f" }}>Sending Vibes</div>
+            <div style={{ display: "flex", flexDirection: "column", fontSize: 92, fontWeight: 800, lineHeight: 1, marginTop: 22, letterSpacing: -2 }}>
+              <span style={{ color: "#d8432f" }}>Personalised</span>
+              <span>interactive cards.</span>
+            </div>
+            <div style={{ fontSize: 30, marginTop: 28, color: "#5b534a" }}>{`Runaway No buttons, mini games, your photos and a big finale. ${PRICES.card.label} a card.`}</div>
+          </div>
+          <div style={{ display: "flex", transform: "rotate(-8deg)" }}>
+            <OgEnvelope size={330} />
+          </div>
         </div>
       </div>
     ),

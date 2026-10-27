@@ -99,7 +99,7 @@ export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 
       onPointerUpCapture={unlock}
       onClickCapture={unlock}
       onKeyDownCapture={unlock}
-      className={`@container relative flex w-full flex-col overflow-hidden ${preview ? "h-full" : "min-h-dvh"}`}
+      className={`@container relative flex w-full flex-col overflow-hidden font-card ${preview ? "h-full" : "min-h-dvh"}`}
     >
       <EmojiRain effect={card.ambient} />
       {!preview && card.device && card.device !== "everywhere" && <DeviceTip device={card.device} />}

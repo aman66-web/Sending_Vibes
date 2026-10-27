@@ -1,22 +1,22 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fff7f9;
-  --foreground: #2a0f1c;
-  --brand: #e11d63;
-  --brand-soft: #ffe4ec;
-  --line: rgba(42, 15, 28, 0.1);
-  --panel: #ffffff;
+  --background: #f3ecdf;
+  --foreground: #1f1b16;
+  --brand: #d8432f;
+  --brand-soft: #f7ddd5;
+  --line: rgba(31, 27, 22, 0.12);
+  --panel: #fbf7ef;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #140a10;
-    --foreground: #fbeef3;
-    --brand: #ff4d8d;
-    --brand-soft: #3a1426;
-    --line: rgba(251, 238, 243, 0.12);
-    --panel: #1e1118;
+    --background: #16120e;
+    --foreground: #f5efe3;
+    --brand: #f06a52;
+    --brand-soft: #3a1d16;
+    --line: rgba(245, 239, 227, 0.12);
+    --panel: #221c16;
   }
 }
 
@@ -27,18 +27,24 @@
   --color-brand-soft: var(--brand-soft);
   --color-line: var(--line);
   --color-panel: var(--panel);
-  --font-sans: var(--font-body);
+  --font-sans: var(--font-ui-face);
+  --font-brand: var(--font-brand-face);
+  /* Inside the cards. */
+  --font-card: var(--font-body);
   --font-display: var(--font-display-face);
   --font-hand: var(--font-hand-face);
-  --font-serif: var(--font-serif-face);
 
-  /* Fixed brand palette for the marketing pages (doesn't flip in dark mode). */
-  --color-ink: #1d0b17;
-  --color-cream: #fff7f1;
-  --color-hot: #ff2e7e;
-  --color-tangerine: #ff8a3d;
-  --color-grape: #7c3aed;
-  --color-sun: #ffc23d;
+  /* Stationery palette for the site (doesn't flip in dark mode): paper, ink,
+     postbox red, airmail blue and mustard. The cards have their own themes. */
+  --color-ink: #1f1b16;
+  --color-cream: #f3ecdf;
+  --color-paper: #fbf7ef;
+  --color-hot: #d8432f;
+  --color-air: #2b5aa6;
+  --color-sun: #ecb340;
+  --color-rose: #f2b8c0;
+  --color-tangerine: #e9813f;
+  --color-grape: #2b5aa6;
 
   --animate-float-up: float-up 10s linear infinite;
   --animate-float-down: float-down 10s linear infinite;
@@ -51,10 +57,8 @@
   --animate-smoke: smoke 1.2s ease-out forwards;
   --animate-wiggle: wiggle 2.4s ease-in-out infinite;
   --animate-screen-in: screen-in 0.45s ease-out both;
-  --animate-blob: blob 18s ease-in-out infinite;
   --animate-marquee: marquee 75s linear infinite;
   --animate-bob: bob 5s ease-in-out infinite;
-  --animate-shimmer: shimmer 6s linear infinite;
   --animate-glow: glow 2.4s ease-in-out infinite;
   --animate-ping-once: ping-once 0.5s ease-out;
   --animate-burst: burst 1.1s ease-out forwards;
@@ -109,11 +113,6 @@
     0%, 100% { transform: rotate(-6deg); }
     50% { transform: rotate(6deg) scale(1.06); }
   }
-  @keyframes blob {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33% { transform: translate(6%, -8%) scale(1.12); }
-    66% { transform: translate(-6%, 6%) scale(0.92); }
-  }
   @keyframes marquee {
     from { transform: translate3d(0, 0, 0); }
     to { transform: translate3d(-50%, 0, 0); }
@@ -121,10 +120,6 @@
   @keyframes bob {
     0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); }
     50% { transform: translateY(-12px) rotate(var(--r, 0deg)); }
-  }
-  @keyframes shimmer {
-    from { background-position: 0% 50%; }
-    to { background-position: 200% 50%; }
   }
   @keyframes glow {
     0%, 100% { opacity: 0.35; filter: saturate(0.6); }
@@ -189,7 +184,86 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-body), system-ui, sans-serif;
+  font-family: var(--font-ui-face), system-ui, sans-serif;
+}
+
+@layer components {
+  /* Headings: Fraunces with its soft, slightly wonky letterforms switched on. */
+  .font-brand {
+    font-variation-settings: "SOFT" 100, "WONK" 1;
+    letter-spacing: -0.015em;
+  }
+
+  /* A faint paper texture. */
+  .grain {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.07'/%3E%3C/svg%3E");
+  }
+
+  /* Chunky buttons with a printed offset shadow. */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: 2px solid var(--color-ink);
+    border-radius: 9999px;
+    padding: 0.8rem 1.5rem;
+    font-family: var(--font-brand-face);
+    font-variation-settings: "SOFT" 100, "WONK" 1;
+    font-weight: 650;
+    line-height: 1.2;
+    box-shadow: 3px 3px 0 var(--color-ink);
+    transition: transform 0.15s, box-shadow 0.15s, background-color 0.15s, color 0.15s;
+  }
+  .btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 5px 5px 0 var(--color-ink);
+  }
+  .btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 var(--color-ink);
+  }
+  .btn-red {
+    background: var(--color-hot);
+    color: #fff;
+  }
+  .btn-ink {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+  .btn-paper {
+    background: var(--color-paper);
+    color: var(--color-ink);
+  }
+  .btn-paper:hover {
+    background: #fff;
+  }
+
+  /* A sheet of paper with an ink outline. */
+  .sheet {
+    border: 2px solid var(--color-ink);
+    border-radius: 1.25rem;
+    background: var(--color-paper);
+    box-shadow: 5px 5px 0 var(--color-ink);
+  }
+
+  /* The red and blue stripes round the edge of an airmail envelope. */
+  .airmail {
+    background: repeating-linear-gradient(-45deg, var(--color-hot) 0 14px, var(--color-paper) 14px 22px, var(--color-air) 22px 36px, var(--color-paper) 36px 44px);
+  }
+
+  /* Perforated postage-stamp edges. Holes sit on the padding; the content stays whole. */
+  .stamp {
+    --hole: 5px;
+    padding: calc(var(--hole) * 2);
+    background: #fff;
+    -webkit-mask:
+      radial-gradient(var(--hole), #0000 97%, #000) round calc(var(--hole) * -1.5) calc(var(--hole) * -1.5) / calc(var(--hole) * 3) calc(var(--hole) * 3),
+      linear-gradient(#000 0 0) content-box;
+    mask:
+      radial-gradient(var(--hole), #0000 97%, #000) round calc(var(--hole) * -1.5) calc(var(--hole) * -1.5) / calc(var(--hole) * 3) calc(var(--hole) * 3),
+      linear-gradient(#000 0 0) content-box;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

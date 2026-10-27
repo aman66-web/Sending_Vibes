@@ -17,39 +17,39 @@ function RunawayRound({ onReset }: { onReset: () => void }) {
   const noButton = (
     <button
       {...noProps}
-      className={`${moved ? "absolute transition-[left,top] duration-200 ease-out" : ""} whitespace-nowrap rounded-full bg-white px-5 py-2.5 font-display font-semibold text-ink shadow ring-1 ring-black/10`}
+      className={`${moved ? "absolute transition-[left,top] duration-200 ease-out" : ""} whitespace-nowrap rounded-full border-2 border-ink bg-paper px-5 py-2 font-brand font-semibold text-ink`}
     >
       {label("No")}
     </button>
   );
 
   return (
-    <div ref={area} className="relative h-60 w-full overflow-hidden rounded-3xl bg-white/60 ring-1 ring-white backdrop-blur">
+    <div ref={area} className="relative h-60 w-full overflow-hidden rounded-xl border-2 border-ink bg-paper">
       {saidYes ? (
         <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
           <Particles mode="confetti" />
           <div className="animate-pop text-6xl">🥰</div>
-          <p className="font-display text-2xl font-bold text-ink">Knew you&apos;d say yes.</p>
+          <p className="font-brand text-2xl font-bold text-ink">Knew you&apos;d say yes.</p>
           <button onClick={onReset} className="relative text-sm font-semibold text-ink/60 underline underline-offset-4">
             Try again
           </button>
         </div>
       ) : (
         <>
-          <p className="pt-7 text-center font-display text-2xl font-bold text-ink">Will you be my Valentine?</p>
+          <p className="pt-7 text-center font-brand text-2xl font-bold text-ink">Will you be my Valentine?</p>
           <div className="mt-5 flex items-center justify-center gap-3">
             <button
               ref={yes}
               onClick={() => setSaidYes(true)}
               style={{ transform: `scale(${Math.min(1 + dodges * 0.1, 1.6)})` }}
-              className="rounded-full bg-gradient-to-r from-hot to-tangerine px-7 py-2.5 font-display font-semibold text-white shadow-lg transition-transform duration-300"
+              className="rounded-full border-2 border-ink bg-hot px-7 py-2 font-brand font-semibold text-white shadow-[3px_3px_0_var(--color-ink)] transition-transform duration-300"
             >
               Yes 💖
             </button>
             {!moved && noButton}
           </div>
           {moved && noButton}
-          <p className="absolute inset-x-0 bottom-4 text-center text-xs font-semibold uppercase tracking-widest text-ink/40">
+          <p className="absolute inset-x-0 bottom-3 text-center font-hand text-xl text-ink/50">
             {dodges === 0 ? "Go on, try pressing No" : `Escaped ${dodges} time${dodges === 1 ? "" : "s"}`}
           </p>
         </>
@@ -114,7 +114,7 @@ export function AiPromptDemo() {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-start gap-3 rounded-2xl bg-white/15 p-4 ring-1 ring-white/25 backdrop-blur">
+      <div className="flex items-start gap-3 rounded-xl border-2 border-paper/30 bg-paper/10 p-4">
         <span className="mt-0.5 text-xl">✍️</span>
         <p className="min-h-[3rem] text-lg font-semibold text-white">
           {PROMPT.slice(0, typed)}
@@ -123,7 +123,7 @@ export function AiPromptDemo() {
       </div>
       <div className="flex min-h-[2.75rem] flex-wrap gap-2">
         {RESULTS.slice(0, shown).map((r) => (
-          <span key={r} className="animate-pop rounded-full bg-white px-3.5 py-2 text-sm font-bold text-grape shadow">
+          <span key={r} className="animate-pop rounded-full border-2 border-ink bg-paper px-3.5 py-1.5 text-sm font-bold text-ink">
             {r}
           </span>
         ))}
@@ -133,12 +133,12 @@ export function AiPromptDemo() {
 }
 
 const WHEEL = [
-  { label: "Pizza", emoji: "🍕", color: "#ff2e7e" },
-  { label: "A film", emoji: "🎬", color: "#ffffff" },
-  { label: "Cake", emoji: "🍰", color: "#ff8a3d" },
-  { label: "Flowers", emoji: "💐", color: "#ffffff" },
-  { label: "A hug", emoji: "🤗", color: "#7c3aed" },
-  { label: "A kiss", emoji: "💋", color: "#ffffff" },
+  { label: "Pizza", emoji: "🍕", color: "#d8432f" },
+  { label: "A film", emoji: "🎬", color: "#fbf7ef" },
+  { label: "Cake", emoji: "🍰", color: "#ecb340" },
+  { label: "Flowers", emoji: "💐", color: "#fbf7ef" },
+  { label: "A hug", emoji: "🤗", color: "#2b5aa6" },
+  { label: "A kiss", emoji: "💋", color: "#fbf7ef" },
 ];
 
 // A small prize wheel for the features section. Tap to spin.
@@ -168,22 +168,23 @@ export function WheelDemo() {
   return (
     <div className="flex flex-col items-center gap-4">
       <button onClick={spin} aria-label="Spin the wheel" className="relative h-44 w-44 transition hover:scale-[1.03]">
-        <svg viewBox="-100 -104 200 208" className="h-full w-full drop-shadow-lg">
+        <svg viewBox="-100 -104 200 208" className="h-full w-full">
           <g style={{ transform: `rotate(${rotation}deg)`, transition: spinning ? "transform 3s cubic-bezier(0.33, 1, 0.68, 1)" : "none" }}>
             {WHEEL.map((s, i) => (
               <g key={s.label}>
-                <path d={`M0 0 L${point(i * slice)} A96 96 0 0 1 ${point((i + 1) * slice)} Z`} fill={s.color} stroke="#1d0b17" strokeOpacity="0.08" strokeWidth="2" />
+                <path d={`M0 0 L${point(i * slice)} A96 96 0 0 1 ${point((i + 1) * slice)} Z`} fill={s.color} stroke="#1f1b16" strokeWidth="1.5" />
                 <text transform={`rotate(${i * slice + slice / 2}) translate(0 -64)`} textAnchor="middle" dominantBaseline="middle" fontSize="24">
                   {s.emoji}
                 </text>
               </g>
             ))}
           </g>
-          <circle r="14" fill="#1d0b17" stroke="white" strokeWidth="4" />
-          <path d="M-10 -104 L10 -104 L0 -84 Z" fill="#1d0b17" stroke="white" strokeWidth="2.5" strokeLinejoin="round" />
+          <circle r="96" fill="none" stroke="#1f1b16" strokeWidth="3" />
+          <circle r="14" fill="#1f1b16" stroke="#fbf7ef" strokeWidth="4" />
+          <path d="M-10 -104 L10 -104 L0 -84 Z" fill="#1f1b16" stroke="#fbf7ef" strokeWidth="2.5" strokeLinejoin="round" />
         </svg>
       </button>
-      <p className="h-7 font-display text-lg font-bold">
+      <p className="h-7 font-brand text-lg font-bold">
         {result !== null ? `${WHEEL[result].emoji} ${WHEEL[result].label}!` : spinning ? "Spinning…" : "Tap the wheel"}
       </p>
     </div>
