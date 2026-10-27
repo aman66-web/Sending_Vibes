@@ -35,6 +35,13 @@ export const es: Dict = {
   },
 
   common: {
+    worldwide: "Llega al instante por enlace, a cualquier parte del mundo.",
+    worldwideShort: "Entrega al instante, en todo el mundo",
+    currency: "Moneda",
+    abroad: {
+      q: "¿Puedo enviar una tarjeta al extranjero?",
+      a: "Sí. Las tarjetas llegan al instante como enlace, así que llegan a cualquiera, en cualquier parte del mundo, sin sellos ni esperas. Una tarjeta cuesta {gbp} en el Reino Unido y {usd} en el resto del mundo.",
+    },
     perCard: "por tarjeta",
     designs: "{n} diseños",
     oneDesign: "1 diseño",

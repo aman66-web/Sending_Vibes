@@ -29,7 +29,7 @@ export default async function ProductPage({ params }: Props) {
   if (!t) notFound();
   const related = TEMPLATES.filter((x) => x.occasion === t.occasion && x.slug !== t.slug).slice(0, 4);
   const more = related.length ? related : TEMPLATES.filter((x) => x.featured && x.slug !== t.slug).slice(0, 4);
-  const { t: d } = await getI18n();
+  const { t: d, currency } = await getI18n();
   const occasionLabel = d.occasions[t.occasion].label;
 
   // Lets search engines show the price and description with the result.
@@ -39,7 +39,7 @@ export default async function ProductPage({ params }: Props) {
     name: `${t.name}: interactive ${occasions[t.occasion].label} card`,
     description: t.blurb,
     brand: { "@type": "Brand", name: "Sending Vibes" },
-    offers: { "@type": "Offer", price: (PRICES.card.pence / 100).toFixed(2), priceCurrency: "GBP", availability: "https://schema.org/InStock" },
+    offers: { "@type": "Offer", price: (PRICES.card / 100).toFixed(2), priceCurrency: currency.toUpperCase(), availability: "https://schema.org/InStock" },
   };
 
   return (

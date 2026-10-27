@@ -4,7 +4,7 @@ import { en } from "@/i18n/en";
 import { formatDay, upcoming, whenLabel } from "./calendar";
 import { OCCASIONS } from "./card";
 import { TEMPLATES, deviceInfo, toneInfo } from "./catalog";
-import { PRICES } from "./pricing";
+import { price } from "./pricing";
 import { occasions } from "./templates";
 
 // What the chat assistant knows about the shop. Built from the real catalogue so
@@ -23,8 +23,9 @@ export const CHAT_SYSTEM = `You are the helper in the chat box on Sending Vibes,
 - The person can open the card as many times as they like, and there's a "Play it again" button at the end.
 - Most designs work on any device. Some are made for phones (shaking, scratching) or for computers (mouse games, photo walls); each design says which.
 - Privacy: only people with the link can see a card. Links are long random codes and cards are never listed or searchable. Photos are resized on the sender's own device before upload, which also strips hidden location data.
-- Price: ${PRICES.card.label} per card, paid once. No subscription, no hidden extras.
-- AI Custom (${PRICES.aiCustom.label}) is coming soon: describe changes in plain English and have them made for you. It isn't available yet.
+- Price: ${price("card", "gbp")} per card in the UK, ${price("card", "usd")} everywhere else, paid once. No subscription, no hidden extras.
+- Cards are delivered instantly as a link, so they can be sent to anyone, anywhere in the world. No postage, no waiting.
+- AI Custom (${price("aiCustom", "gbp")} / ${price("aiCustom", "usd")}) is coming soon: describe changes in plain English and have them made for you. It isn't available yet.
 - Cards are written in English, but the sender can type their own words in any language.
 
 # Occasions (${OCCASIONS.length})

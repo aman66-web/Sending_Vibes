@@ -9,7 +9,7 @@ import { getI18n } from "@/i18n/server";
 import { formatDay, nextDate, whenLabel } from "@/lib/calendar";
 import { OCCASIONS } from "@/lib/card";
 import { TEMPLATES } from "@/lib/catalog";
-import { PRICES } from "@/lib/pricing";
+import { price } from "@/lib/pricing";
 import { occasions } from "@/lib/templates";
 
 // Refreshed hourly so "in 5 days" stays true.
@@ -40,7 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function OccasionPage({ params }: Props) {
   const o = find((await params).occasion);
   if (!o) notFound();
-  const { locale, t } = await getI18n();
+  const { locale, currency, t } = await getI18n();
   const { tag } = LANGUAGES[locale];
   const info = { ...occasions[o], ...t.occasions[o] };
   const [titleBefore, titleAfter] = t.occasionPage.title.split("{label}");
@@ -77,7 +77,7 @@ export default async function OccasionPage({ params }: Props) {
                 href={`/create?occasion=${o}`}
                 className="btn btn-red px-7 py-3.5 text-lg"
               >
-                {fmt(t.occasionPage.make, { label: info.label, price: PRICES.card.label })}
+                {fmt(t.occasionPage.make, { label: info.label, price: price("card", currency) })}
               </Link>
               <a href="#designs" className="btn btn-paper px-7 py-3.5 text-lg">
                 {fmt(t.occasionPage.see, { n: designs.length })}

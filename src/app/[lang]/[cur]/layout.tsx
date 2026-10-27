@@ -4,7 +4,7 @@ import { ChatWidget } from "@/components/ChatWidget";
 import { I18nProvider } from "@/i18n/client";
 import { LANGUAGES } from "@/i18n/config";
 import { getI18n } from "@/i18n/server";
-import "../globals.css";
+import "../../globals.css";
 
 // The site itself: a soft serif for headings and a plain sans for everything else.
 const brand = Fraunces({ subsets: ["latin"], variable: "--font-brand-face", axes: ["SOFT", "WONK", "opsz"] });
@@ -23,9 +23,12 @@ const arabic = Noto_Sans_Arabic({ subsets: ["arabic"], variable: "--font-arabic"
 
 const fonts = [brand, ui, display, body, hand, devanagari, gurmukhi, gujarati, bengali, arabic].map((f) => f.variable).join(" ");
 
-// English pages are built ahead of time; other languages are built on first visit and then kept.
+// English pages are built ahead of time in both currencies; other languages are built on first visit and then kept.
 export function generateStaticParams() {
-  return [{ lang: "en" }];
+  return [
+    { lang: "en", cur: "gbp" },
+    { lang: "en", cur: "usd" },
+  ];
 }
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -44,12 +47,12 @@ export const viewport: Viewport = {
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const { locale, t } = await getI18n();
+  const { locale, currency, t } = await getI18n();
   const { tag, dir } = LANGUAGES[locale];
   return (
     <html lang={tag} dir={dir}>
       <body className={`${fonts} antialiased`}>
-        <I18nProvider locale={locale} t={t}>
+        <I18nProvider locale={locale} currency={currency} t={t}>
           {children}
           {/* The chat only shows once the Claude API key has been added. */}
           {process.env.ANTHROPIC_API_KEY ? <ChatWidget /> : null}

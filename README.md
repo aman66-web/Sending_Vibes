@@ -75,10 +75,14 @@ No secret key is needed. The `cards` table can't be read or listed directly; a c
 
 The site (not the cards) can be shown in English, Hindi, Punjabi, Gujarati, Bengali, Urdu, Arabic, Polish, Spanish and French, picked with the globe button in the header.
 
-- Every page lives under `src/app/[lang]/`. `src/proxy.ts` serves `/cards` from `/hi/cards` (etc.) based on the `lang` cookie, or the browser's language on a first visit, so addresses stay the same.
+- Every page lives under `src/app/[lang]/[cur]/`. `src/proxy.ts` serves `/cards` from `/hi/gbp/cards` (etc.) based on the `lang` cookie, or the browser's language on a first visit, so addresses stay the same.
 - All site text is in `src/i18n/en.ts`. The other languages in `src/i18n/` are copies with the same keys; TypeScript complains if one is missing a key. Server components use `getI18n()`, client components `useI18n()`.
 - English pages are built ahead of time; other languages are built on first visit and then cached.
 - Urdu and Arabic pages read right to left. The cards themselves stay in English and left to right.
+
+## Prices and currency
+
+A card is £9.99 in the UK and $9.99 everywhere else (`src/lib/pricing.ts`). The proxy picks the currency from the visitor's country (Vercel's `x-vercel-ip-country` header) on their first visit and keeps it in a `cur` cookie, so pages live under `app/[lang]/[cur]` and are static per currency too. Visitors can switch in the globe menu.
 
 ## Live chat (Claude)
 
@@ -92,7 +96,7 @@ What it knows comes from `src/lib/chat-prompt.ts`, built from the real catalogue
 
 ## Roadmap
 
-- [ ] Stripe checkout: every card is paid (£3.99, or £9.99 for AI Custom)
+- [ ] Stripe checkout: every card is paid (£9.99 in the UK, $9.99 elsewhere; AI Custom £14.99 / $14.99)
 - [ ] AI editor: "describe what you want" edits to the card's blocks
 - [x] More occasions: Christmas, Eid, anniversary, sorry, thank you, congrats
 - [x] Quiz, scratch-to-reveal, memory match and more games

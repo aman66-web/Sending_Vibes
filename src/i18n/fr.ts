@@ -31,6 +31,13 @@ export const fr: Dict = {
   },
 
   common: {
+    worldwide: "Livrée instantanément par lien, partout dans le monde.",
+    worldwideShort: "Livraison instantanée, partout dans le monde",
+    currency: "Devise",
+    abroad: {
+      q: "Puis-je envoyer une carte à l’étranger ?",
+      a: "Oui. Les cartes arrivent instantanément sous forme de lien : elles atteignent n’importe qui, partout dans le monde, sans timbre ni attente. Une carte coûte {gbp} au Royaume-Uni et {usd} partout ailleurs.",
+    },
     perCard: "par carte",
     designs: "{n} modèles",
     oneDesign: "1 modèle",

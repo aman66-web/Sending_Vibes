@@ -15,7 +15,7 @@ import { OCCASIONS } from "@/lib/card";
 import { TEMPLATES } from "@/lib/catalog";
 import { occasions } from "@/lib/templates";
 import { nextDate } from "@/lib/calendar";
-import { PRICES } from "@/lib/pricing";
+import { price as priceOf } from "@/lib/pricing";
 import { fmt } from "@/i18n/config";
 import { getI18n } from "@/i18n/server";
 
@@ -28,14 +28,15 @@ function showcaseOrder(): ShowcaseOccasion[] {
 }
 
 export default async function Home() {
-  const { t } = await getI18n();
+  const { t, currency } = await getI18n();
   const h = t.home;
   const n = TEMPLATES.length;
   const o = OCCASIONS.length;
-  const price = PRICES.card.label;
+  const price = priceOf("card", currency);
+  const aiPrice = priceOf("aiCustom", currency);
   const TIERS = [
-    { name: h.tierCard, price, points: h.tierCardPoints.map((p) => fmt(p, { n })), live: true, featured: false },
-    { name: h.tierAi, price: PRICES.aiCustom.label, points: h.tierAiPoints.map((p) => fmt(p, { price })), live: false, featured: true },
+    { name: h.tierCard, price, points: [...h.tierCardPoints.map((p) => fmt(p, { n })), t.common.worldwideShort], live: true, featured: false },
+    { name: h.tierAi, price: aiPrice, points: h.tierAiPoints.map((p) => fmt(p, { price })), live: false, featured: true },
   ];
   return (
     <div className="grain overflow-x-clip bg-cream text-ink">
@@ -87,7 +88,11 @@ export default async function Home() {
                 {fmt(h.seeAll, { n })}
               </Link>
             </div>
-            <p className="mt-6 text-sm font-semibold text-ink/55">{h.reassure}</p>
+            <p className="mt-6 text-sm font-semibold text-ink/55">
+              {h.reassure}
+              <br />
+              🌍 {t.common.worldwide}
+            </p>
           </div>
 
           <HeroShowcase />
@@ -375,13 +380,13 @@ export default async function Home() {
           <h2 className="font-brand text-5xl font-bold">{h.faqTitle}</h2>
         </Reveal>
         <div className="mt-10 space-y-4">
-          {h.faqs.map((f) => (
+          {[...h.faqs.slice(0, -1), t.common.abroad, ...h.faqs.slice(-1)].map((f) => (
             <details key={f.q} className="group rounded-2xl border-2 border-ink bg-paper p-6 shadow-[3px_3px_0_var(--color-ink)] open:shadow-[5px_5px_0_var(--color-hot)]">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-brand text-xl font-semibold [&::-webkit-details-marker]:hidden">
                 {f.q}
                 <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border-2 border-ink font-sans text-xl font-bold leading-none transition group-open:rotate-45 group-open:bg-hot group-open:text-white">+</span>
               </summary>
-              <p className="mt-3 text-ink/75">{fmt(f.a, { price, aiPrice: PRICES.aiCustom.label })}</p>
+              <p className="mt-3 text-ink/75">{fmt(f.a, { price, aiPrice, gbp: priceOf("card", "gbp"), usd: priceOf("card", "usd") })}</p>
             </details>
           ))}
         </div>
