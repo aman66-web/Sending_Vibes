@@ -1,16 +1,20 @@
 import Link from "next/link";
 import { Postmark } from "@/components/Postmark";
+import { fmt, LANGUAGES } from "@/i18n/config";
+import { getI18n } from "@/i18n/server";
 import { formatDay, upcoming, whenLabel } from "@/lib/calendar";
 import { TEMPLATES } from "@/lib/catalog";
 import { occasions } from "@/lib/templates";
 
 // The next few occasions, so people remember to send something in time.
-export function ComingUp() {
+export async function ComingUp() {
+  const { locale, t } = await getI18n();
+  const { tag } = LANGUAGES[locale];
   const next = upcoming(new Date(), 4);
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {next.map((d, i) => {
-        const count = TEMPLATES.filter((t) => t.occasion === d.occasion).length;
+        const count = TEMPLATES.filter((x) => x.occasion === d.occasion).length;
         const first = i === 0;
         return (
           <Link
@@ -20,17 +24,17 @@ export function ComingUp() {
           >
             <Postmark
               id={`pm-${i}`}
-              middle={whenLabel(d.days)}
-              bottom={formatDay(d.date)}
+              middle={whenLabel(d.days, t)}
+              bottom={formatDay(d.date, tag, t)}
               className={`absolute -right-6 top-3 w-40 -rotate-[8deg] ${first ? "text-white/90" : "text-hot/85"}`}
             />
             <span className="text-4xl transition group-hover:-rotate-6">{occasions[d.occasion].emoji}</span>
-            <p className="mt-auto pt-8 font-brand text-2xl font-bold leading-tight">{d.name}</p>
+            <p className="mt-auto pt-8 font-brand text-2xl font-bold leading-tight">{t.calendar[d.key]}</p>
             <p className={`mt-0.5 text-sm font-semibold ${first ? "text-white/75" : "text-ink/55"}`}>
-              {formatDay(d.date, d.approx)} · {whenLabel(d.days).toLowerCase()}
+              {formatDay(d.date, tag, t, d.approx)} · {whenLabel(d.days, t)}
             </p>
             <p className={`mt-3 text-sm font-bold underline decoration-2 underline-offset-4 ${first ? "decoration-white/60" : "decoration-hot/50"}`}>
-              {count} designs →
+              {fmt(t.common.designs, { n: count })} →
             </p>
           </Link>
         );

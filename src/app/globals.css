@@ -27,8 +27,9 @@
   --color-brand-soft: var(--brand-soft);
   --color-line: var(--line);
   --color-panel: var(--panel);
-  --font-sans: var(--font-ui-face);
-  --font-brand: var(--font-brand-face);
+  /* Fraunces and Figtree only have Latin letters; Indian and Arabic scripts fall through to Noto. */
+  --font-sans: var(--font-ui-face), var(--font-devanagari), var(--font-gurmukhi), var(--font-gujarati), var(--font-bengali), var(--font-arabic), system-ui, sans-serif;
+  --font-brand: var(--font-brand-face), var(--font-devanagari), var(--font-gurmukhi), var(--font-gujarati), var(--font-bengali), var(--font-arabic), serif;
   /* Inside the cards. */
   --font-card: var(--font-body);
   --font-display: var(--font-display-face);
@@ -184,7 +185,7 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-ui-face), system-ui, sans-serif;
+  font-family: var(--font-ui-face), var(--font-devanagari), var(--font-gurmukhi), var(--font-gujarati), var(--font-bengali), var(--font-arabic), system-ui, sans-serif;
 }
 
 @layer components {
@@ -208,7 +209,7 @@ body {
     border: 2px solid var(--color-ink);
     border-radius: 9999px;
     padding: 0.8rem 1.5rem;
-    font-family: var(--font-brand-face);
+    font-family: var(--font-brand-face), var(--font-devanagari), var(--font-gurmukhi), var(--font-gujarati), var(--font-bengali), var(--font-arabic), serif;
     font-variation-settings: "SOFT" 100, "WONK" 1;
     font-weight: 650;
     line-height: 1.2;

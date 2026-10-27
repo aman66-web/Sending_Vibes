@@ -1,6 +1,8 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { DEFAULT_LOCALE, LOCALES, isLocale } from "@/i18n/config";
+import { DICTS } from "@/i18n/dictionaries";
 import { CHAT_SYSTEM, chatContext } from "@/lib/chat-prompt";
 
 // The live chat. Streams the reply back as one JSON event per line:
@@ -24,6 +26,7 @@ const bodySchema = z.object({
     .min(1)
     .max(40),
   page: z.string().max(200).optional(),
+  locale: z.enum(LOCALES).optional(),
 });
 
 // A rough per-visitor limit so nobody can run up the bill. It lives in memory, so
@@ -50,22 +53,25 @@ const fail = (message: string, status: number) => NextResponse.json({ error: mes
 let client: Anthropic | undefined;
 
 export async function POST(req: Request) {
-  if (!process.env.ANTHROPIC_API_KEY) return fail("Chat isn't switched on yet. Have a look at Help & FAQ in the meantime.", 503);
+  // Errors are shown in the visitor's language, read from the language cookie.
+  const saved = req.headers.get("cookie")?.match(/(?:^|;\s*)lang=([a-z]{2})/)?.[1];
+  const errors = DICTS[isLocale(saved) ? saved : DEFAULT_LOCALE].chat.errors;
+  if (!process.env.ANTHROPIC_API_KEY) return fail(errors.off, 503);
 
   // Only our own pages can use the chat.
   const origin = req.headers.get("origin");
-  if (origin && (!URL.canParse(origin) || new URL(origin).host !== req.headers.get("host"))) return fail("Not allowed.", 403);
+  if (origin && (!URL.canParse(origin) || new URL(origin).host !== req.headers.get("host"))) return fail(errors.notAllowed, 403);
 
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || req.headers.get("x-real-ip") || "unknown";
-  if (!allowed(ip)) return fail("You've sent a lot of messages. Have a short break and try again in a few minutes.", 429);
+  if (!allowed(ip)) return fail(errors.tooMany, 429);
 
   const parsed = bodySchema.safeParse(await req.json().catch(() => null));
-  if (!parsed.success) return fail("That message couldn't be sent. Keep it under 800 characters.", 400);
+  if (!parsed.success) return fail(errors.tooLong, 400);
 
   let messages = parsed.data.messages.slice(-KEEP_MESSAGES);
   while (messages[0]?.role === "assistant") messages = messages.slice(1);
   if (!messages.length || messages.at(-1)?.role !== "user" || messages.some((m, i) => i > 0 && m.role === messages[i - 1].role)) {
-    return fail("That conversation doesn't look right. Try starting a new chat.", 400);
+    return fail(errors.badChat, 400);
   }
 
   client ??= new Anthropic();
@@ -76,7 +82,7 @@ export async function POST(req: Request) {
     output_config: { effort: "low" },
     system: [
       { type: "text", text: CHAT_SYSTEM, cache_control: { type: "ephemeral" } },
-      { type: "text", text: chatContext(parsed.data.page) },
+      { type: "text", text: chatContext(parsed.data.page, parsed.data.locale) },
     ],
     messages,
     // If the model declines, the API retries on its recommended fallback model.
@@ -96,14 +102,14 @@ export async function POST(req: Request) {
         const final = await stream.finalMessage();
         if (final.stop_reason === "refusal") {
           send({ type: "reset" });
-          send({ type: "text", text: "Sorry, I can't help with that one. I'm happy to help you pick a card or write the words for it." });
+          send({ type: "text", text: errors.refusal });
         } else if (final.stop_reason === "max_tokens") {
           send({ type: "text", text: "…" });
         }
       } catch (error) {
         console.error("chat failed", error);
         const busy = error instanceof Anthropic.RateLimitError || (error instanceof Anthropic.APIError && (error.status === 529 || error.status === 503));
-        send({ type: "error", message: busy ? "I'm a bit busy right now. Try again in a minute." : "Something went wrong on our side. Try again in a moment." });
+        send({ type: "error", message: busy ? errors.busy : errors.generic });
       }
       send({ type: "done" });
       controller.close();

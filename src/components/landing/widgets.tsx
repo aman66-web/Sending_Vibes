@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { Particles } from "@/components/card/effects";
 import { useRunaway } from "@/components/card/runaway";
+import { fmt } from "@/i18n/config";
+import { useI18n } from "@/i18n/client";
 
 // Homepage version of the card's question screen, sized for a feature tile.
 export function RunawayDemo() {
@@ -11,6 +13,8 @@ export function RunawayDemo() {
 }
 
 function RunawayRound({ onReset }: { onReset: () => void }) {
+  const { t } = useI18n();
+  const d = t.demos;
   const { area, yes, noProps, dodges, moved, label } = useRunaway();
   const [saidYes, setSaidYes] = useState(false);
 
@@ -19,7 +23,7 @@ function RunawayRound({ onReset }: { onReset: () => void }) {
       {...noProps}
       className={`${moved ? "absolute transition-[left,top] duration-200 ease-out" : ""} whitespace-nowrap rounded-full border-2 border-ink bg-paper px-5 py-2 font-brand font-semibold text-ink`}
     >
-      {label("No")}
+      {label(d.no)}
     </button>
   );
 
@@ -29,14 +33,14 @@ function RunawayRound({ onReset }: { onReset: () => void }) {
         <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
           <Particles mode="confetti" />
           <div className="animate-pop text-6xl">🥰</div>
-          <p className="font-brand text-2xl font-bold text-ink">Knew you&apos;d say yes.</p>
+          <p className="font-brand text-2xl font-bold text-ink">{d.saidYes}</p>
           <button onClick={onReset} className="relative text-sm font-semibold text-ink/60 underline underline-offset-4">
-            Try again
+            {d.tryAgain}
           </button>
         </div>
       ) : (
         <>
-          <p className="pt-7 text-center font-brand text-2xl font-bold text-ink">Will you be my Valentine?</p>
+          <p className="pt-7 text-center font-brand text-2xl font-bold text-ink">{d.question}</p>
           <div className="mt-5 flex items-center justify-center gap-3">
             <button
               ref={yes}
@@ -44,13 +48,13 @@ function RunawayRound({ onReset }: { onReset: () => void }) {
               style={{ transform: `scale(${Math.min(1 + dodges * 0.1, 1.6)})` }}
               className="rounded-full border-2 border-ink bg-hot px-7 py-2 font-brand font-semibold text-white shadow-[3px_3px_0_var(--color-ink)] transition-transform duration-300"
             >
-              Yes 💖
+              {d.yes}
             </button>
             {!moved && noButton}
           </div>
           {moved && noButton}
           <p className="absolute inset-x-0 bottom-3 text-center font-hand text-xl text-ink/50">
-            {dodges === 0 ? "Go on, try pressing No" : `Escaped ${dodges} time${dodges === 1 ? "" : "s"}`}
+            {dodges === 0 ? d.goOn : dodges === 1 ? d.escapedOnce : fmt(d.escaped, { n: dodges })}
           </p>
         </>
       )}
@@ -58,14 +62,9 @@ function RunawayRound({ onReset }: { onReset: () => void }) {
   );
 }
 
-const MESSAGES = [
-  "Every day with you is my favourite day.",
-  "Happy Diwali to the brightest person I know.",
-  "Another year older, still my favourite human.",
-];
-
 // Types a message out, holds it, deletes it, then moves on to the next.
 export function TypewriterLoop() {
+  const MESSAGES = useI18n().t.demos.messages;
   const [index, setIndex] = useState(0);
   const [length, setLength] = useState(0);
   const [deleting, setDeleting] = useState(false);
@@ -82,7 +81,7 @@ export function TypewriterLoop() {
       } else setLength((l) => l + (deleting ? -1 : 1));
     }, delay);
     return () => clearTimeout(t);
-  }, [length, deleting, text]);
+  }, [length, deleting, text, MESSAGES.length]);
 
   return (
     <p className="min-h-[5.5rem] font-hand text-3xl leading-snug text-ink">
@@ -92,11 +91,11 @@ export function TypewriterLoop() {
   );
 }
 
-const PROMPT = "Make it pink, add a quiz about our first date, and end with fireworks";
-const RESULTS = ["🎨 Colours → Rose pink", "❓ Added: First-date quiz", "🎆 Finale → Fireworks"];
-
 // A preview of the planned "describe what you want" editor.
 export function AiPromptDemo() {
+  const { t } = useI18n();
+  const PROMPT = t.demos.aiPrompt;
+  const RESULTS = t.demos.aiResults;
   const [typed, setTyped] = useState(0);
   const [shown, setShown] = useState(0);
 
@@ -110,7 +109,7 @@ export function AiPromptDemo() {
         setShown(0);
       }, 3500);
     return () => clearTimeout(t);
-  }, [typed, shown]);
+  }, [typed, shown, PROMPT.length, RESULTS.length]);
 
   return (
     <div className="space-y-3">
@@ -133,16 +132,17 @@ export function AiPromptDemo() {
 }
 
 const WHEEL = [
-  { label: "Pizza", emoji: "🍕", color: "#d8432f" },
-  { label: "A film", emoji: "🎬", color: "#fbf7ef" },
-  { label: "Cake", emoji: "🍰", color: "#ecb340" },
-  { label: "Flowers", emoji: "💐", color: "#fbf7ef" },
-  { label: "A hug", emoji: "🤗", color: "#2b5aa6" },
-  { label: "A kiss", emoji: "💋", color: "#fbf7ef" },
+  { emoji: "🍕", color: "#d8432f" },
+  { emoji: "🎬", color: "#fbf7ef" },
+  { emoji: "🍰", color: "#ecb340" },
+  { emoji: "💐", color: "#fbf7ef" },
+  { emoji: "🤗", color: "#2b5aa6" },
+  { emoji: "💋", color: "#fbf7ef" },
 ];
 
 // A small prize wheel for the features section. Tap to spin.
 export function WheelDemo() {
+  const { t } = useI18n();
   const [rotation, setRotation] = useState(0);
   const [result, setResult] = useState<number | null>(null);
   const [spinning, setSpinning] = useState(false);
@@ -167,11 +167,11 @@ export function WheelDemo() {
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <button onClick={spin} aria-label="Spin the wheel" className="relative h-44 w-44 transition hover:scale-[1.03]">
+      <button onClick={spin} aria-label={t.demos.spinAria} className="relative h-44 w-44 transition hover:scale-[1.03]">
         <svg viewBox="-100 -104 200 208" className="h-full w-full">
           <g style={{ transform: `rotate(${rotation}deg)`, transition: spinning ? "transform 3s cubic-bezier(0.33, 1, 0.68, 1)" : "none" }}>
             {WHEEL.map((s, i) => (
-              <g key={s.label}>
+              <g key={i}>
                 <path d={`M0 0 L${point(i * slice)} A96 96 0 0 1 ${point((i + 1) * slice)} Z`} fill={s.color} stroke="#1f1b16" strokeWidth="1.5" />
                 <text transform={`rotate(${i * slice + slice / 2}) translate(0 -64)`} textAnchor="middle" dominantBaseline="middle" fontSize="24">
                   {s.emoji}
@@ -185,7 +185,7 @@ export function WheelDemo() {
         </svg>
       </button>
       <p className="h-7 font-brand text-lg font-bold">
-        {result !== null ? `${WHEEL[result].emoji} ${WHEEL[result].label}!` : spinning ? "Spinning…" : "Tap the wheel"}
+        {result !== null ? `${WHEEL[result].emoji} ${t.demos.wheel[result]}!` : spinning ? t.demos.spinning : t.demos.tapWheel}
       </p>
     </div>
   );

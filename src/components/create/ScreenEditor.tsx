@@ -1,68 +1,12 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { EFFECTS, GAMES, type Screen } from "@/lib/card";
+import { fmt } from "@/i18n/config";
+import { useI18n } from "@/i18n/client";
+import type { Screen } from "@/lib/card";
 import { uploadPhoto } from "./image";
 
 const MAX_PHOTOS = 6;
-
-export const GAME_LABELS: Record<(typeof GAMES)[number], string> = {
-  "catch-hearts": "Catch the falling hearts",
-  "light-diyas": "Light the diyas",
-  "blow-candles": "Blow out the candles",
-  "pop-balloons": "Pop the balloons",
-  "catch-snowflakes": "Catch the snowflakes",
-  "catch-stars": "Catch the stars",
-  "memory-match": "Memory match",
-  "unwrap-gift": "Unwrap the present",
-  "shake-it": "Shake the phone (best on phone)",
-  "cursor-chase": "Chase the heart with the mouse (best on desktop)",
-  "loves-me-not": "Loves me, loves me not",
-  "whack-ghosts": "Whack the ghosts",
-  "launch-fireworks": "Launch fireworks",
-  "release-lanterns": "Release the sky lanterns",
-  "bubble-wrap": "Pop the bubble wrap",
-  pinata: "Smash the piñata",
-  "grow-flower": "Grow a flower",
-  "throw-colours": "Throw colours (Holi)",
-  "slot-machine": "Slot machine jackpot",
-  "hold-hug": "Press and hold to send a hug",
-  "catch-candy": "Catch the sweets",
-};
-
-export const EFFECT_LABELS: Record<(typeof EFFECTS)[number], string> = {
-  hearts: "Floating hearts",
-  fireworks: "Fireworks",
-  confetti: "Confetti",
-  sparkles: "Sparkles",
-  snow: "Snow",
-  stars: "Stars",
-  petals: "Falling petals",
-  spooky: "Bats and ghosts",
-  colours: "Holi colours",
-  lanterns: "Lanterns",
-  bubbles: "Bubbles",
-  balloons: "Balloons",
-  none: "Nothing",
-};
-
-export const SCREEN_LABELS: Record<Screen["type"], string> = {
-  intro: "Opening",
-  question: "Runaway question",
-  photos: "Photos",
-  message: "Message",
-  game: "Mini game",
-  quiz: "Quiz",
-  scratch: "Scratch card",
-  typeit: "Secret password",
-  wheel: "Spin the wheel",
-  coupons: "Coupon book",
-  reasons: "Reasons jar",
-  slider: "Love-o-meter",
-  timeline: "Our story",
-  boxes: "Pick a box",
-  finale: "Big finale",
-};
 
 // Updates are functions of the latest screen, so photo uploads finishing one by
 // one never overwrite each other or edits made in the meantime.
@@ -70,6 +14,8 @@ type Update = (update: (prev: Screen) => Screen) => void;
 type Props = { screen: Screen; onChange: Update };
 
 export function ScreenEditor({ screen, onChange }: Props) {
+  const { t } = useI18n();
+  const e = t.editor;
   // Each field edit produces a new screen of the same type.
   const set = (key: string, value: string) => onChange((prev) => ({ ...prev, [key]: value }) as Screen);
   const setList = (key: string) => (fn: (items: string[]) => string[]) =>
@@ -79,83 +25,84 @@ export function ScreenEditor({ screen, onChange }: Props) {
     case "intro":
       return (
         <>
-          <Field label="Title" value={screen.title} max={120} onChange={(v) => set("title", v)} />
-          <Field label="Subtitle" value={screen.subtitle} max={200} onChange={(v) => set("subtitle", v)} />
-          <Field label="Button text" value={screen.button} max={40} onChange={(v) => set("button", v)} />
+          <Field label={e.title} value={screen.title} max={120} onChange={(v) => set("title", v)} />
+          <Field label={e.subtitle} value={screen.subtitle} max={200} onChange={(v) => set("subtitle", v)} />
+          <Field label={e.button} value={screen.button} max={40} onChange={(v) => set("button", v)} />
         </>
       );
     case "question":
       return (
         <>
-          <Field label="The question" value={screen.question} max={140} onChange={(v) => set("question", v)} />
+          <Field label={e.question} value={screen.question} max={140} onChange={(v) => set("question", v)} />
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Yes button" value={screen.yes} max={30} onChange={(v) => set("yes", v)} />
-            <Field label="No button (it runs away)" value={screen.no} max={30} onChange={(v) => set("no", v)} />
+            <Field label={e.yes} value={screen.yes} max={30} onChange={(v) => set("yes", v)} />
+            <Field label={e.no} value={screen.no} max={30} onChange={(v) => set("no", v)} />
           </div>
-          <Field label="After they say yes" value={screen.afterYes} max={140} onChange={(v) => set("afterYes", v)} />
+          <Field label={e.afterYes} value={screen.afterYes} max={140} onChange={(v) => set("afterYes", v)} />
         </>
       );
     case "photos":
       return (
         <>
-          <Field label="Title" value={screen.title} max={120} onChange={(v) => set("title", v)} />
+          <Field label={e.title} value={screen.title} max={120} onChange={(v) => set("title", v)} />
           <PhotoField screen={screen} onChange={onChange} />
         </>
       );
     case "message":
       return (
         <>
-          <Field label="Title" value={screen.title} max={120} onChange={(v) => set("title", v)} />
-          <Field label="Your message" value={screen.body} max={1500} rows={6} onChange={(v) => set("body", v)} />
+          <Field label={e.title} value={screen.title} max={120} onChange={(v) => set("title", v)} />
+          <Field label={e.message} value={screen.body} max={1500} rows={6} onChange={(v) => set("body", v)} />
         </>
       );
     case "game":
       return (
         <>
-          <Select label="Game" value={screen.game} options={GAME_LABELS} onChange={(v) => set("game", v)} />
-          <Field label="Title" value={screen.title} max={120} onChange={(v) => set("title", v)} />
-          <Field label="Instructions" value={screen.instructions} max={200} onChange={(v) => set("instructions", v)} />
-          <Field label="When they win" value={screen.winText} max={140} onChange={(v) => set("winText", v)} />
+          <Select label={e.game} value={screen.game} options={t.labels.games} onChange={(v) => set("game", v)} />
+          <Field label={e.title} value={screen.title} max={120} onChange={(v) => set("title", v)} />
+          <Field label={e.instructions} value={screen.instructions} max={200} onChange={(v) => set("instructions", v)} />
+          <Field label={e.winText} value={screen.winText} max={140} onChange={(v) => set("winText", v)} />
         </>
       );
     case "quiz":
       return (
         <>
-          <Field label="Quiz name" value={screen.title} max={120} onChange={(v) => set("title", v)} />
+          <Field label={e.quizName} value={screen.title} max={120} onChange={(v) => set("title", v)} />
           <QuizField screen={screen} onChange={onChange} />
-          <Field label="When they finish" value={screen.winText} max={140} onChange={(v) => set("winText", v)} />
+          <Field label={e.quizDone} value={screen.winText} max={140} onChange={(v) => set("winText", v)} />
         </>
       );
     case "scratch":
       return (
         <>
-          <Field label="Title" value={screen.title} max={120} onChange={(v) => set("title", v)} />
-          <Field label="Instructions" value={screen.instructions} max={200} onChange={(v) => set("instructions", v)} />
-          <Field label="Hidden message (revealed when scratched)" value={screen.hidden} max={200} onChange={(v) => set("hidden", v)} />
+          <Field label={e.title} value={screen.title} max={120} onChange={(v) => set("title", v)} />
+          <Field label={e.instructions} value={screen.instructions} max={200} onChange={(v) => set("instructions", v)} />
+          <Field label={e.hidden} value={screen.hidden} max={200} onChange={(v) => set("hidden", v)} />
         </>
       );
     case "typeit":
       return (
         <>
-          <Field label="Title" value={screen.title} max={120} onChange={(v) => set("title", v)} />
-          <Field label="Clue" value={screen.instructions} max={200} onChange={(v) => set("instructions", v)} />
-          <Field label="Secret password they have to type" value={screen.phrase} max={40} onChange={(v) => set("phrase", v)} />
-          <Field label="When they get it" value={screen.winText} max={140} onChange={(v) => set("winText", v)} />
+          <Field label={e.title} value={screen.title} max={120} onChange={(v) => set("title", v)} />
+          <Field label={e.clue} value={screen.instructions} max={200} onChange={(v) => set("instructions", v)} />
+          <Field label={e.phrase} value={screen.phrase} max={40} onChange={(v) => set("phrase", v)} />
+          <Field label={e.phraseDone} value={screen.winText} max={140} onChange={(v) => set("winText", v)} />
         </>
       );
     case "wheel":
       return (
         <>
-          <Field label="Title" value={screen.title} max={120} onChange={(v) => set("title", v)} />
-          <Field label="Instructions" value={screen.instructions} max={200} onChange={(v) => set("instructions", v)} />
+          <Field label={e.title} value={screen.title} max={120} onChange={(v) => set("title", v)} />
+          <Field label={e.instructions} value={screen.instructions} max={200} onChange={(v) => set("instructions", v)} />
           <ListField
-            label="What's on the wheel"
+            label={e.wheelItems}
             items={screen.options}
             min={2}
             max={8}
             maxLength={40}
-            placeholder="e.g. Breakfast in bed"
-            addLabel="+ Add a slice"
+            placeholder={e.wheelExample}
+            addLabel={e.addSlice}
+            removeLabel={e.remove}
             onChange={(fn) =>
               onChange((prev) => {
                 if (prev.type !== "wheel") return prev;
@@ -169,64 +116,64 @@ export function ScreenEditor({ screen, onChange }: Props) {
             }
           />
           <Select
-            label="Where it lands"
+            label={e.landsWhere}
             value={String(screen.landOn)}
-            options={[["-1", "Anywhere (a fair spin)"], ...screen.options.map((o, i): [string, string] => [String(i), `Always on "${o || `slice ${i + 1}`}" (rigged 😏)`])]}
+            options={[["-1", e.landsAnywhere], ...screen.options.map((o, i): [string, string] => [String(i), fmt(e.landsOn, { option: o || fmt(e.slice, { n: i + 1 }) })])]}
             onChange={(v) => onChange((prev) => (prev.type === "wheel" ? { ...prev, landOn: Number(v) } : prev))}
           />
-          <Field label="When it stops" value={screen.winText} max={140} onChange={(v) => set("winText", v)} />
+          <Field label={e.wheelDone} value={screen.winText} max={140} onChange={(v) => set("winText", v)} />
         </>
       );
     case "coupons":
       return (
         <>
-          <Field label="Title" value={screen.title} max={120} onChange={(v) => set("title", v)} />
-          <Field label="Instructions" value={screen.instructions} max={200} onChange={(v) => set("instructions", v)} />
-          <ListField label="Coupons" items={screen.coupons} min={1} max={6} maxLength={80} placeholder="e.g. One foot rub" addLabel="+ Add a coupon" onChange={setList("coupons")} />
+          <Field label={e.title} value={screen.title} max={120} onChange={(v) => set("title", v)} />
+          <Field label={e.instructions} value={screen.instructions} max={200} onChange={(v) => set("instructions", v)} />
+          <ListField label={e.coupons} items={screen.coupons} min={1} max={6} maxLength={80} placeholder={e.couponExample} addLabel={e.addCoupon} removeLabel={e.remove} onChange={setList("coupons")} />
         </>
       );
     case "reasons":
       return (
         <>
-          <Field label="Title" value={screen.title} max={120} onChange={(v) => set("title", v)} />
-          <Field label="Instructions" value={screen.instructions} max={200} onChange={(v) => set("instructions", v)} />
-          <ListField label="Notes in the jar" items={screen.reasons} min={1} max={12} maxLength={160} placeholder="e.g. Your terrible jokes" addLabel="+ Add a note" onChange={setList("reasons")} />
+          <Field label={e.title} value={screen.title} max={120} onChange={(v) => set("title", v)} />
+          <Field label={e.instructions} value={screen.instructions} max={200} onChange={(v) => set("instructions", v)} />
+          <ListField label={e.notes} items={screen.reasons} min={1} max={12} maxLength={160} placeholder={e.noteExample} addLabel={e.addNote} removeLabel={e.remove} onChange={setList("reasons")} />
         </>
       );
     case "slider":
       return (
         <>
-          <Field label="The question" value={screen.title} max={120} onChange={(v) => set("title", v)} />
+          <Field label={e.question} value={screen.title} max={120} onChange={(v) => set("title", v)} />
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Low end" value={screen.low} max={30} onChange={(v) => set("low", v)} />
-            <Field label="High end" value={screen.high} max={30} onChange={(v) => set("high", v)} />
+            <Field label={e.low} value={screen.low} max={30} onChange={(v) => set("low", v)} />
+            <Field label={e.high} value={screen.high} max={30} onChange={(v) => set("high", v)} />
           </div>
-          <p className="text-xs opacity-60">However they drag it, it only goes up. 😌</p>
-          <Field label="When it hits 100%" value={screen.winText} max={140} onChange={(v) => set("winText", v)} />
+          <p className="text-xs opacity-60">{e.sliderTip}</p>
+          <Field label={e.sliderDone} value={screen.winText} max={140} onChange={(v) => set("winText", v)} />
         </>
       );
     case "timeline":
       return (
         <>
-          <Field label="Title" value={screen.title} max={120} onChange={(v) => set("title", v)} />
+          <Field label={e.title} value={screen.title} max={120} onChange={(v) => set("title", v)} />
           <TimelineField screen={screen} onChange={onChange} />
         </>
       );
     case "boxes":
       return (
         <>
-          <Field label="Title" value={screen.title} max={120} onChange={(v) => set("title", v)} />
-          <Field label="Instructions" value={screen.instructions} max={200} onChange={(v) => set("instructions", v)} />
-          <ListField label="What's in each box" items={screen.prizes} min={2} max={3} maxLength={80} placeholder="e.g. A hug" addLabel="+ Add a box" onChange={setList("prizes")} />
-          <p className="text-xs opacity-60">Tip: put the same thing in every box. They&apos;ll never know.</p>
+          <Field label={e.title} value={screen.title} max={120} onChange={(v) => set("title", v)} />
+          <Field label={e.instructions} value={screen.instructions} max={200} onChange={(v) => set("instructions", v)} />
+          <ListField label={e.boxes} items={screen.prizes} min={2} max={3} maxLength={80} placeholder={e.boxExample} addLabel={e.addBox} removeLabel={e.remove} onChange={setList("prizes")} />
+          <p className="text-xs opacity-60">{e.boxTip}</p>
         </>
       );
     case "finale":
       return (
         <>
-          <Field label="Title" value={screen.title} max={140} onChange={(v) => set("title", v)} />
-          <Field label="Final words" value={screen.body} max={600} rows={3} onChange={(v) => set("body", v)} />
-          <Select label="Celebration effect" value={screen.effect} options={EFFECT_LABELS} onChange={(v) => set("effect", v)} />
+          <Field label={e.title} value={screen.title} max={140} onChange={(v) => set("title", v)} />
+          <Field label={e.finalWords} value={screen.body} max={600} rows={3} onChange={(v) => set("body", v)} />
+          <Select label={e.effect} value={screen.effect} options={t.labels.effects} onChange={(v) => set("effect", v)} />
         </>
       );
   }
@@ -241,6 +188,7 @@ function ListField({
   maxLength,
   placeholder,
   addLabel,
+  removeLabel,
   onChange,
 }: {
   label: string;
@@ -250,6 +198,7 @@ function ListField({
   maxLength: number;
   placeholder?: string;
   addLabel: string;
+  removeLabel: string;
   onChange: (fn: (items: string[]) => string[]) => void;
 }) {
   return (
@@ -259,7 +208,7 @@ function ListField({
       </span>
       {items.map((item, i) => (
         <div key={i} className="flex items-center gap-2">
-          <span className="w-5 shrink-0 text-right text-xs font-bold opacity-50">{i + 1}</span>
+          <span className="w-5 shrink-0 text-end text-xs font-bold opacity-50">{i + 1}</span>
           <input
             value={item}
             maxLength={maxLength}
@@ -269,7 +218,7 @@ function ListField({
             className="min-w-0 flex-1 rounded-lg border border-line bg-panel px-3 py-2 text-sm outline-none focus:border-brand"
           />
           {items.length > min && (
-            <button aria-label="Remove" onClick={() => onChange((list) => list.filter((_, j) => j !== i))} className="px-1 text-sm opacity-60 hover:opacity-100">
+            <button aria-label={removeLabel} onClick={() => onChange((list) => list.filter((_, j) => j !== i))} className="px-1 text-sm opacity-60 hover:opacity-100">
               ✕
             </button>
           )}
@@ -287,32 +236,33 @@ function ListField({
 type TimelineScreen = Extract<Screen, { type: "timeline" }>;
 
 function TimelineField({ screen, onChange }: { screen: TimelineScreen; onChange: Update }) {
+  const e = useI18n().t.editor;
   const update = (fn: (events: TimelineScreen["events"]) => TimelineScreen["events"]) =>
     onChange((prev) => (prev.type === "timeline" ? { ...prev, events: fn(prev.events) } : prev));
   const cls = "rounded-lg border border-line bg-panel px-3 py-2 text-sm outline-none focus:border-brand";
   return (
     <div className="space-y-2">
-      <span className="text-sm font-semibold">Moments ({screen.events.length}/8)</span>
+      <span className="text-sm font-semibold">{fmt(e.moments, { n: screen.events.length })}</span>
       {screen.events.map((ev, i) => (
         <div key={i} className="flex items-start gap-2">
           <input
             value={ev.when}
             maxLength={40}
-            placeholder="When"
-            aria-label={`Moment ${i + 1} date`}
+            placeholder={e.when}
+            aria-label={fmt(e.momentDate, { n: i + 1 })}
             onChange={(e) => update((list) => list.map((x, j) => (j === i ? { ...x, when: e.target.value } : x)))}
             className={`w-28 shrink-0 ${cls}`}
           />
           <input
             value={ev.what}
             maxLength={160}
-            placeholder="What happened"
-            aria-label={`Moment ${i + 1}`}
+            placeholder={e.what}
+            aria-label={fmt(e.moment, { n: i + 1 })}
             onChange={(e) => update((list) => list.map((x, j) => (j === i ? { ...x, what: e.target.value } : x)))}
             className={`min-w-0 flex-1 ${cls}`}
           />
           {screen.events.length > 1 && (
-            <button aria-label="Remove moment" onClick={() => update((list) => list.filter((_, j) => j !== i))} className="px-1 pt-2 text-sm opacity-60 hover:opacity-100">
+            <button aria-label={e.removeMoment} onClick={() => update((list) => list.filter((_, j) => j !== i))} className="px-1 pt-2 text-sm opacity-60 hover:opacity-100">
               ✕
             </button>
           )}
@@ -320,7 +270,7 @@ function TimelineField({ screen, onChange }: { screen: TimelineScreen; onChange:
       ))}
       {screen.events.length < 8 && (
         <button onClick={() => update((list) => [...list, { when: "", what: "" }])} className="text-xs font-semibold text-brand">
-          + Add a moment
+          {e.addMoment}
         </button>
       )}
     </div>
@@ -331,6 +281,7 @@ type QuizScreen = Extract<Screen, { type: "quiz" }>;
 const MAX_QUESTIONS = 6;
 
 function QuizField({ screen, onChange }: { screen: QuizScreen; onChange: Update }) {
+  const e = useI18n().t.editor;
   const update = (fn: (questions: QuizScreen["questions"]) => QuizScreen["questions"]) =>
     onChange((prev) => (prev.type === "quiz" ? { ...prev, questions: fn(prev.questions) } : prev));
   const setQuestion = (qi: number, patch: Partial<QuizScreen["questions"][number]>) =>
@@ -341,16 +292,16 @@ function QuizField({ screen, onChange }: { screen: QuizScreen; onChange: Update 
       {screen.questions.map((q, qi) => (
         <div key={qi} className="space-y-3 rounded-xl border border-line p-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-bold">Question {qi + 1}</span>
+            <span className="text-sm font-bold">{fmt(e.questionN, { n: qi + 1 })}</span>
             {screen.questions.length > 1 && (
               <button onClick={() => update((qs) => qs.filter((_, i) => i !== qi))} className="text-xs font-semibold text-red-600">
-                Remove
+                {e.remove}
               </button>
             )}
           </div>
-          <Field label="Question" value={q.question} max={140} onChange={(v) => setQuestion(qi, { question: v })} />
+          <Field label={e.questionLabel} value={q.question} max={140} onChange={(v) => setQuestion(qi, { question: v })} />
           <div className="space-y-2">
-            <span className="text-sm font-semibold">Answers (tick the right one)</span>
+            <span className="text-sm font-semibold">{e.answers}</span>
             {q.options.map((opt, oi) => (
               <div key={oi} className="flex items-center gap-2">
                 <input
@@ -358,7 +309,7 @@ function QuizField({ screen, onChange }: { screen: QuizScreen; onChange: Update 
                   name={`quiz-${screen.id}-${qi}`}
                   checked={q.answer === oi}
                   onChange={() => setQuestion(qi, { answer: oi })}
-                  aria-label={`Answer ${oi + 1} is correct`}
+                  aria-label={fmt(e.answerCorrect, { n: oi + 1 })}
                   className="h-4 w-4 accent-[var(--brand)]"
                 />
                 <input
@@ -369,7 +320,7 @@ function QuizField({ screen, onChange }: { screen: QuizScreen; onChange: Update 
                 />
                 {q.options.length > 2 && (
                   <button
-                    aria-label="Remove answer"
+                    aria-label={e.removeAnswer}
                     onClick={() =>
                       setQuestion(qi, {
                         options: q.options.filter((_, j) => j !== oi),
@@ -385,7 +336,7 @@ function QuizField({ screen, onChange }: { screen: QuizScreen; onChange: Update 
             ))}
             {q.options.length < 4 && (
               <button onClick={() => setQuestion(qi, { options: [...q.options, ""] })} className="text-xs font-semibold text-brand">
-                + Add an answer
+                {e.addAnswer}
               </button>
             )}
           </div>
@@ -396,7 +347,7 @@ function QuizField({ screen, onChange }: { screen: QuizScreen; onChange: Update 
           onClick={() => update((qs) => [...qs, { question: "", options: ["", ""], answer: 0 }])}
           className="rounded-full border border-line px-3 py-1.5 text-sm font-semibold hover:border-brand hover:text-brand"
         >
-          + Add a question
+          {e.addQuestion}
         </button>
       )}
     </div>
@@ -406,6 +357,7 @@ function QuizField({ screen, onChange }: { screen: QuizScreen; onChange: Update 
 type PhotosScreen = Extract<Screen, { type: "photos" }>;
 
 function PhotoField({ screen, onChange }: { screen: PhotosScreen; onChange: Update }) {
+  const e = useI18n().t.editor;
   const input = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -416,14 +368,14 @@ function PhotoField({ screen, onChange }: { screen: PhotosScreen; onChange: Upda
     setError(null);
     const room = MAX_PHOTOS - screen.photos.length;
     const picked = Array.from(files).slice(0, room);
-    if (files.length > room) setError(`You can add up to ${MAX_PHOTOS} photos.`);
+    if (files.length > room) setError(fmt(e.tooManyPhotos, { n: MAX_PHOTOS }));
     setUploading((n) => n + picked.length);
     for (const file of picked) {
       try {
         const url = await uploadPhoto(file);
         update((s) => ({ ...s, photos: [...s.photos, url], captions: [...s.captions, ""] }));
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "Upload failed.");
+      } catch {
+        setError(e.uploadFailed);
       } finally {
         setUploading((n) => n - 1);
       }
@@ -438,7 +390,7 @@ function PhotoField({ screen, onChange }: { screen: PhotosScreen; onChange: Upda
 
   return (
     <div className="space-y-3">
-      <span className="text-sm font-semibold">Photos ({screen.photos.length}/{MAX_PHOTOS})</span>
+      <span className="text-sm font-semibold">{fmt(e.photos, { n: screen.photos.length, max: MAX_PHOTOS })}</span>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {screen.photos.map((src, i) => (
           <div key={src} className="space-y-1.5">
@@ -447,8 +399,8 @@ function PhotoField({ screen, onChange }: { screen: PhotosScreen; onChange: Upda
               <img src={src} alt="" className="h-full w-full object-cover" />
               <button
                 onClick={() => remove(i)}
-                aria-label="Remove photo"
-                className="absolute right-1.5 top-1.5 grid h-7 w-7 place-items-center rounded-full bg-black/60 text-sm text-white"
+                aria-label={e.removePhoto}
+                className="absolute end-1.5 top-1.5 grid h-7 w-7 place-items-center rounded-full bg-black/60 text-sm text-white"
               >
                 ✕
               </button>
@@ -457,14 +409,14 @@ function PhotoField({ screen, onChange }: { screen: PhotosScreen; onChange: Upda
               value={screen.captions[i] ?? ""}
               maxLength={120}
               onChange={(e) => caption(i, e.target.value)}
-              placeholder="Caption (optional)"
+              placeholder={e.caption}
               className="w-full rounded-lg border border-line bg-transparent px-2 py-1.5 text-sm outline-none focus:border-brand"
             />
           </div>
         ))}
         {Array.from({ length: uploading }, (_, i) => (
           <div key={`up-${i}`} className="grid aspect-square animate-pulse place-items-center rounded-xl bg-brand-soft text-sm">
-            Uploading…
+            {e.uploading}
           </div>
         ))}
         {screen.photos.length + uploading < MAX_PHOTOS && (
@@ -472,7 +424,7 @@ function PhotoField({ screen, onChange }: { screen: PhotosScreen; onChange: Upda
             onClick={() => input.current?.click()}
             className="grid aspect-square place-items-center rounded-xl border-2 border-dashed border-line text-sm font-semibold hover:border-brand hover:text-brand"
           >
-            + Add photos
+            {e.addPhotos}
           </button>
         )}
       </div>

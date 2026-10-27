@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { DEVICES, OCCASIONS, type Device, type Occasion } from "@/lib/card";
 import { TEMPLATES, TONES, deviceInfo, toneInfo, type Tone } from "@/lib/catalog";
+import { fmt } from "@/i18n/config";
+import { useI18n } from "@/i18n/client";
+import type { Dict } from "@/i18n/en";
 import { occasions } from "@/lib/templates";
 import { ProductTile } from "./ProductTile";
 
@@ -14,6 +17,8 @@ type Props = {
 };
 
 export function CatalogGrid({ limit, allFilters = false, initialOccasion }: Props) {
+  const { t } = useI18n();
+  const c = t.catalog;
   const [occasion, setOccasion] = useState<Occasion | "all">(initialOccasion ?? "all");
   const [tone, setTone] = useState<Tone | "all">("all");
   const [device, setDevice] = useState<Device | "all">("all");
@@ -21,11 +26,11 @@ export function CatalogGrid({ limit, allFilters = false, initialOccasion }: Prop
   const words = query.toLowerCase().split(/\s+/).filter(Boolean);
 
   let results = TEMPLATES.filter(
-    (t) =>
-      (occasion === "all" || t.occasion === occasion) &&
-      (tone === "all" || t.tone === tone) &&
-      (device === "all" || t.device === device) &&
-      words.every((w) => searchText(t).includes(w)),
+    (tpl) =>
+      (occasion === "all" || tpl.occasion === occasion) &&
+      (tone === "all" || tpl.tone === tone) &&
+      (device === "all" || tpl.device === device) &&
+      words.every((w) => searchText(tpl, t).includes(w)),
   );
   if (limit) results = [...results].sort((a, b) => Number(!!b.featured) - Number(!!a.featured)).slice(0, limit);
 
@@ -34,42 +39,42 @@ export function CatalogGrid({ limit, allFilters = false, initialOccasion }: Prop
       <div className="space-y-3">
         {allFilters && (
           <label className="relative mb-5 block max-w-md">
-            <span className="sr-only">Search the cards</span>
-            <span aria-hidden className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-lg opacity-50">
+            <span className="sr-only">{c.searchLabel}</span>
+            <span aria-hidden className="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-lg opacity-50">
               🔍
             </span>
             <input
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search: proposal, dad jokes, coupons…"
-              className="w-full rounded-full border-2 border-ink bg-paper py-3 pl-12 pr-5 font-semibold shadow-[3px_3px_0_var(--color-ink)] outline-none placeholder:text-ink/40 focus:shadow-[3px_3px_0_var(--color-hot)]"
+              placeholder={c.searchPlaceholder}
+              className="w-full rounded-full border-2 border-ink bg-paper py-3 pe-5 ps-12 font-semibold shadow-[3px_3px_0_var(--color-ink)] outline-none placeholder:text-ink/40 focus:shadow-[3px_3px_0_var(--color-hot)]"
             />
           </label>
         )}
-        <ChipRow label="Occasion">
-          <Chip active={occasion === "all"} onClick={() => setOccasion("all")}>All</Chip>
+        <ChipRow label={c.occasion}>
+          <Chip active={occasion === "all"} onClick={() => setOccasion("all")}>{c.all}</Chip>
           {OCCASIONS.map((o) => (
             <Chip key={o} active={occasion === o} onClick={() => setOccasion(o)}>
-              {occasions[o].emoji} {occasions[o].label}
+              {occasions[o].emoji} {t.occasions[o].label}
             </Chip>
           ))}
         </ChipRow>
         {allFilters && (
           <>
-            <ChipRow label="Vibe">
-              <Chip active={tone === "all"} onClick={() => setTone("all")}>All</Chip>
-              {TONES.map((t) => (
-                <Chip key={t} active={tone === t} onClick={() => setTone(t)}>
-                  {toneInfo[t].emoji} {toneInfo[t].label}
+            <ChipRow label={c.vibe}>
+              <Chip active={tone === "all"} onClick={() => setTone("all")}>{c.all}</Chip>
+              {TONES.map((x) => (
+                <Chip key={x} active={tone === x} onClick={() => setTone(x)}>
+                  {toneInfo[x].emoji} {t.tones[x]}
                 </Chip>
               ))}
             </ChipRow>
-            <ChipRow label="Device">
-              <Chip active={device === "all"} onClick={() => setDevice("all")}>All</Chip>
+            <ChipRow label={c.device}>
+              <Chip active={device === "all"} onClick={() => setDevice("all")}>{c.all}</Chip>
               {DEVICES.map((d) => (
                 <Chip key={d} active={device === d} onClick={() => setDevice(d)}>
-                  {deviceInfo[d].emoji} {deviceInfo[d].label}
+                  {deviceInfo[d].emoji} {t.devices[d].label}
                 </Chip>
               ))}
             </ChipRow>
@@ -79,20 +84,20 @@ export function CatalogGrid({ limit, allFilters = false, initialOccasion }: Prop
 
       {allFilters && (
         <p className="mt-6 text-sm font-semibold text-ink/50">
-          {results.length} design{results.length === 1 ? "" : "s"}
+          {results.length === 1 ? c.countOne : fmt(c.count, { n: results.length })}
         </p>
       )}
 
       {results.length ? (
         <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-7 md:grid-cols-3 lg:grid-cols-4">
-          {results.map((t) => (
-            <ProductTile key={t.slug} template={t} />
+          {results.map((tpl) => (
+            <ProductTile key={tpl.slug} slug={tpl.slug} />
           ))}
         </div>
       ) : (
         <div className="sheet mt-10 p-10 text-center">
           <p className="text-4xl">🔍</p>
-          <p className="mt-2 font-brand text-xl font-bold">Nothing matches all of those yet</p>
+          <p className="mt-2 font-brand text-xl font-bold">{c.nothing}</p>
           <button
             onClick={() => {
               setOccasion("all");
@@ -102,7 +107,7 @@ export function CatalogGrid({ limit, allFilters = false, initialOccasion }: Prop
             }}
             className="btn btn-ink mt-4 px-5 py-2 text-sm"
           >
-            Clear filters
+            {c.clear}
           </button>
         </div>
       )}
@@ -131,14 +136,17 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
   );
 }
 
-// Everything a search can match: names, descriptions, occasion and the kinds of screens inside.
+// Everything a search can match: names, descriptions, occasion (in English and
+// the page's language) and the kinds of screens inside.
 const searchCache = new Map<string, string>();
-function searchText(t: (typeof TEMPLATES)[number]) {
-  let text = searchCache.get(t.slug);
+function searchText(tpl: (typeof TEMPLATES)[number], t: Dict) {
+  let text = searchCache.get(tpl.slug);
   if (!text) {
-    const screens = t.screens("", "").map((s) => (s.type === "game" ? `${s.type} ${s.game}` : s.type));
-    text = [t.name, t.headline, t.blurb, occasions[t.occasion].label, t.occasion, toneInfo[t.tone].label, t.device, ...screens].join(" ").toLowerCase();
-    searchCache.set(t.slug, text);
+    const screens = tpl.screens("", "").map((s) => (s.type === "game" ? `${s.type} ${s.game} ${t.labels.games[s.game]}` : `${s.type} ${t.labels.screens[s.type]}`));
+    text = [tpl.name, tpl.headline, tpl.blurb, occasions[tpl.occasion].label, t.occasions[tpl.occasion].label, tpl.occasion, toneInfo[tpl.tone].label, t.tones[tpl.tone], tpl.device, ...screens]
+      .join(" ")
+      .toLowerCase();
+    searchCache.set(tpl.slug, text);
   }
   return text;
 }

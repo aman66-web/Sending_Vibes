@@ -1,4 +1,6 @@
 import "server-only";
+import { LANGUAGES, type Locale } from "@/i18n/config";
+import { en } from "@/i18n/en";
 import { formatDay, upcoming, whenLabel } from "./calendar";
 import { OCCASIONS } from "./card";
 import { TEMPLATES, deviceInfo, toneInfo } from "./catalog";
@@ -51,13 +53,17 @@ ${TEMPLATES.map((t) => `- ${t.name} | ${occasions[t.occasion].label} | ${toneInf
 - Links must be markdown links to the site paths in this brief, such as [Diwali Blessings](/cards/diwali-blessings). Never link anywhere else.`;
 
 // The bits that change from day to day or page to page. Kept out of the cached part.
-export function chatContext(page: string | undefined, now = new Date()) {
+export function chatContext(page: string | undefined, locale: Locale = "en", now = new Date()) {
   const today = now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Europe/London" });
   const soon = upcoming(now, 4)
-    .map((d) => `${d.name}: ${formatDay(d.date, d.approx)} (${whenLabel(d.days).toLowerCase()})`)
+    .map((d) => `${d.name}: ${formatDay(d.date, "en-GB", en, d.approx)} (${whenLabel(d.days, en).toLowerCase()})`)
     .join("; ");
   const slug = page?.match(/^\/cards\/([\w-]+)/)?.[1];
   const design = slug && TEMPLATES.find((t) => t.slug === slug);
   const where = design ? `the page for the "${design.name}" design (${page})` : page ? `the page ${page}` : "an unknown page";
-  return `Today is ${today} in the UK. Coming up: ${soon}.\nThe visitor is on ${where}.`;
+  const language =
+    locale === "en"
+      ? ""
+      : `\nThe visitor is reading the site in ${LANGUAGES[locale].english}. Reply in ${LANGUAGES[locale].english} unless they write to you in another language. Card designs are named in English, so keep design names and links as they are.`;
+  return `Today is ${today} in the UK. Coming up: ${soon}.\nThe visitor is on ${where}.${language}`;
 }

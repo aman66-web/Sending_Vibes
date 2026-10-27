@@ -1,3 +1,6 @@
+"use client";
+
+import { useI18n } from "@/i18n/client";
 import type { Effect } from "@/lib/card";
 import { NEW_DESIGNS, deviceInfo, type Template } from "@/lib/catalog";
 import { themes } from "@/lib/themes";
@@ -30,6 +33,7 @@ const SPOTS = [
 // The artwork for a card design: its colours, a big emoji and its headline.
 export function ProductThumb({ template, className = "" }: { template: Template; className?: string }) {
   const theme = themes[template.theme];
+  const { t } = useI18n();
   return (
     <div className={`relative aspect-[4/5] overflow-hidden ${className}`} style={{ background: theme.background, color: theme.text }}>
       {SPOTS.map((p, i) => (
@@ -42,11 +46,11 @@ export function ProductThumb({ template, className = "" }: { template: Template;
         <p className="mt-4 font-display text-xl font-bold leading-tight">{template.headline}</p>
       </div>
       {NEW_DESIGNS.has(template.slug) && (
-        <span className="absolute right-3 top-3 rotate-6 rounded-sm border-2 border-ink bg-sun px-2 py-0.5 font-sans text-[11px] font-black uppercase tracking-wide text-ink">New</span>
+        <span className="absolute end-3 top-3 rotate-6 rounded-sm border-2 border-ink bg-sun px-2 py-0.5 font-sans text-[11px] font-black uppercase tracking-wide text-ink">{t.common.new}</span>
       )}
       {template.device !== "everywhere" && (
-        <span className="absolute left-3 top-3 rounded-full bg-ink/80 px-2.5 py-1 font-sans text-[11px] font-bold uppercase tracking-wide text-paper">
-          {deviceInfo[template.device].emoji} {deviceInfo[template.device].label}
+        <span className="absolute start-3 top-3 rounded-full bg-ink/80 px-2.5 py-1 font-sans text-[11px] font-bold uppercase tracking-wide text-paper">
+          {deviceInfo[template.device].emoji} {t.devices[template.device].label}
         </span>
       )}
     </div>
