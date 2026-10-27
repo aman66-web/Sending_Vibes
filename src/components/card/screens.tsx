@@ -395,9 +395,11 @@ export function ScratchScreen({ screen, onNext }: ScreenProps<"scratch">) {
     const ctx = el.getContext("2d");
     if (!ctx) return;
     const box = el.getBoundingClientRect();
+    // The card may be shown scaled down (a thumbnail or a phone mockup), so convert screen pixels to the canvas's own.
+    const scale = el.clientWidth / box.width || 1;
     ctx.globalCompositeOperation = "destination-out";
     ctx.beginPath();
-    ctx.arc(e.clientX - box.left, e.clientY - box.top, 24, 0, Math.PI * 2);
+    ctx.arc((e.clientX - box.left) * scale, (e.clientY - box.top) * scale, 24, 0, Math.PI * 2);
     ctx.fill();
     strokes.current += 1;
     if (strokes.current % 5 === 0) sfx("tick");

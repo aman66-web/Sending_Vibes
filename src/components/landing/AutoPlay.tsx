@@ -14,7 +14,7 @@ function shown(el: Element | null): el is HTMLElement {
 // Plays a card by itself with a pretend mouse pointer, so the hero is always
 // moving. Pauses while a visitor hovers or touches it (so they can play), when
 // it's scrolled out of view, and for people who prefer reduced motion.
-export function AutoPlay({ children, holdSignal = 0 }: { children: React.ReactNode; holdSignal?: number }) {
+export function AutoPlay({ children, holdSignal = 0, startAfter = 1200 }: { children: React.ReactNode; holdSignal?: number; startAfter?: number }) {
   const box = useRef<HTMLDivElement>(null);
   const cursor = useRef<HTMLDivElement>(null);
   const ripple = useRef<HTMLSpanElement>(null);
@@ -72,10 +72,28 @@ export function AutoPlay({ children, holdSignal = 0 }: { children: React.ReactNo
       el.click();
       await sleep(wait);
     };
-    const pointerDown = (el: HTMLElement) => {
-      const { x, y } = center(el);
-      el.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, cancelable: true, pointerType: "mouse", clientX: x, clientY: y }));
+    const pointerDown = (el: Element) => {
+      const r = el.getBoundingClientRect();
+      el.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, cancelable: true, pointerType: "mouse", clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 }));
     };
+    const key = (el: HTMLElement, k: string, type: "keydown" | "keyup" = "keydown") =>
+      el.dispatchEvent(new KeyboardEvent(type, { key: k, bubbles: true, cancelable: true }));
+    // A quick tap without travelling the pointer, for fast games.
+    const tap = async (el: HTMLElement, wait = 250) => {
+      await press();
+      el.click();
+      await sleep(wait);
+    };
+    // Typing into a React input needs the native setter, then an input event.
+    const typeInto = async (input: HTMLInputElement, text: string) => {
+      const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
+      for (let i = 1; i <= text.length && !paused(); i++) {
+        setter?.call(input, text.slice(0, i));
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        await sleep(140);
+      }
+    };
+    const noNext = () => !find("[data-primary]");
 
     // Looks at what's on screen and does the next thing a person would do.
     const step = async () => {
@@ -101,6 +119,112 @@ export function AutoPlay({ children, holdSignal = 0 }: { children: React.ReactNo
         if (!paused()) await click(yes, 1600);
         return;
       }
+
+      // ---- The other building blocks and games ----
+      const spin = find("[data-spin]");
+      if (spin) return click(spin, 5000);
+      const coupon = find("[data-redeem]");
+      if (coupon) return click(coupon, 600);
+      const jar = find("[data-jar]");
+      if (jar) return click(jar, 1300);
+      const meter = find("[data-meter]");
+      if (meter) {
+        await moveTo(meter, 500);
+        for (let i = 0; i < 12 && !paused(); i++) {
+          key(meter, "ArrowRight");
+          await sleep(160);
+        }
+        return;
+      }
+      const reveal = find("[data-reveal-next]");
+      if (reveal) return click(reveal, 1000);
+      const boxes = [...root.querySelectorAll("[data-box]")].filter(shown);
+      if (boxes.length) return click(boxes[Math.floor(boxes.length / 2)], 2000);
+      const petal = root.querySelector("[data-petal]");
+      if (petal) {
+        petal.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+        await sleep(450);
+        return;
+      }
+      if (root.querySelector('[aria-label^="Ghost garden"]') && noNext()) {
+        const ghost = find("[data-whack]");
+        if (ghost) {
+          await press();
+          pointerDown(ghost);
+        }
+        await sleep(ghost ? 350 : 120);
+        return;
+      }
+      const sky = find("[data-sky]") ?? find("[data-splat]");
+      if (sky && noNext()) {
+        await press();
+        key(sky, "Enter");
+        await sleep(sky.dataset.sky !== undefined ? 700 : 250);
+        return;
+      }
+      const lantern = find("[data-lantern]");
+      if (lantern) return click(lantern, 700);
+      const bubble = find('[aria-label="Pop this bubble"]');
+      if (bubble) return tap(bubble, 110);
+      const pinata = find("[data-pinata]");
+      if (pinata) return tap(pinata, 380);
+      const water = find("[data-water]");
+      if (water) return click(water, 700);
+      const pull = find("[data-pull]:not([disabled])");
+      if (pull) return click(pull, 1900);
+      const hold = find("[data-hold]:not([disabled])");
+      if (hold) {
+        await moveTo(hold, 500);
+        key(hold, " ");
+        await sleep(2900);
+        key(hold, " ", "keyup");
+        await sleep(400);
+        return;
+      }
+      const option = find("[data-quiz-option]:not([data-tried])");
+      if (option && noNext()) {
+        option.dataset.tried = "1";
+        return click(option, 900);
+      }
+      const scratch = find('canvas[aria-label="Scratch card"]');
+      if (scratch) {
+        const r = scratch.getBoundingClientRect();
+        for (let row = 0; row < 9 && !paused(); row++) {
+          for (let i = 0; i <= 12; i++) {
+            const x = r.left + (row % 2 ? 1 - i / 12 : i / 12) * r.width;
+            const y = r.top + ((row + 0.5) / 9) * r.height;
+            scratch.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, pointerType: "touch", clientX: x, clientY: y }));
+          }
+          await sleep(90);
+        }
+        await sleep(600);
+        return;
+      }
+      const password = find('input[aria-label="Type the secret phrase"]') as HTMLInputElement | undefined;
+      if (password) {
+        const hint = [...root.querySelectorAll("button")].find((b) => b.textContent?.trim() === "Need a hint?");
+        for (let i = 0; i < 45 && hint?.isConnected; i++) hint.click();
+        const tiles = password.parentElement?.querySelector('[aria-hidden="true"].flex-wrap');
+        const phrase = tiles ? [...tiles.children].map((c) => c.textContent || " ").join("") : "";
+        await moveTo(password, 500);
+        await typeInto(password, phrase);
+        await sleep(800);
+        return;
+      }
+      const hidden = [...root.querySelectorAll('[data-symbol][aria-label="Hidden card"]')] as HTMLElement[];
+      if (hidden.length) {
+        const first = hidden[0];
+        const pair = hidden.find((c) => c !== first && c.dataset.symbol === first.dataset.symbol);
+        await tap(first, 250);
+        if (pair) await tap(pair, 500);
+        return;
+      }
+      for (const label of ["Light this diya", "Blow out this candle", "Tear the wrapping", "Catch the heart"]) {
+        const el = find(`[aria-label="${label}"]`);
+        if (el) return click(el, 450);
+      }
+      const shake = [...root.querySelectorAll("button")].find((b) => b.textContent?.startsWith("Can") && b.textContent.includes("shake") && shown(b));
+      if (shake) return tap(shake, 180);
 
       const drop = [...root.querySelectorAll("[data-catchable]")].find((d) => {
         const area = d.parentElement?.getBoundingClientRect();
@@ -129,7 +253,7 @@ export function AutoPlay({ children, holdSignal = 0 }: { children: React.ReactNo
     };
 
     (async () => {
-      await sleep(1200);
+      await sleep(startAfter);
       while (!cancelled) {
         if (paused()) {
           show(false);
@@ -149,7 +273,7 @@ export function AutoPlay({ children, holdSignal = 0 }: { children: React.ReactNo
       cancelled = true;
       io.disconnect();
     };
-  }, []);
+  }, [startAfter]);
 
   return (
     <div
