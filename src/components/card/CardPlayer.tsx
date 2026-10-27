@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { CardData } from "@/lib/card";
 import { themes } from "@/lib/themes";
 import { Ambient } from "./effects";
@@ -117,7 +117,6 @@ export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 
       {/* A printed double border, like a real card. */}
       <div aria-hidden className="pointer-events-none absolute inset-2.5 rounded-[14px] border border-current opacity-[0.16]" />
       <div aria-hidden className="pointer-events-none absolute inset-[15px] rounded-[10px] border border-current opacity-[0.08]" />
-      {!preview && card.device && card.device !== "everywhere" && <DeviceTip device={card.device} />}
       {sound && (
         <button
           onClick={() => setMuted(!muted)}
@@ -190,34 +189,3 @@ export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 
   );
 }
 
-const COARSE = "(pointer: coarse)";
-
-function useIsTouch() {
-  return useSyncExternalStore(
-    (onChange) => {
-      const mq = window.matchMedia(COARSE);
-      mq.addEventListener("change", onChange);
-      return () => mq.removeEventListener("change", onChange);
-    },
-    () => window.matchMedia(COARSE).matches,
-    () => null,
-  );
-}
-
-// A gentle nudge when a phone-first card is opened on a computer, or the other way round.
-function DeviceTip({ device }: { device: "phone" | "desktop" }) {
-  const touch = useIsTouch();
-  const [dismissed, setDismissed] = useState(false);
-  const mismatch = touch !== null && (device === "phone" ? !touch : touch);
-  if (!mismatch || dismissed) return null;
-  return (
-    <div className="absolute inset-x-0 bottom-0 z-30 flex justify-center p-3">
-      <div className="flex items-center gap-3 rounded-full bg-black/75 py-2 pl-4 pr-2 text-sm font-semibold text-white shadow-lg backdrop-blur">
-        {device === "phone" ? "Best on a phone, but it works here too" : "Best on a computer, but it works here too"}
-        <button onClick={() => setDismissed(true)} aria-label="Dismiss" className="grid h-6 w-6 place-items-center rounded-full bg-white/20">
-          ✕
-        </button>
-      </div>
-    </div>
-  );
-}

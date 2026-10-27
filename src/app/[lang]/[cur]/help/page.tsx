@@ -5,6 +5,7 @@ import { RichText } from "@/components/RichText";
 import { fmt } from "@/i18n/config";
 import { getI18n } from "@/i18n/server";
 import { OCCASIONS } from "@/lib/card";
+import { MAX_SCHEDULE_DAYS } from "@/lib/basket";
 import { TEMPLATES } from "@/lib/catalog";
 import { price } from "@/lib/pricing";
 
@@ -22,9 +23,10 @@ export default async function HelpPage() {
     aiPrice: price("custom", currency),
     gbp: price("card", "gbp"),
     usd: price("card", "usd"),
+    days: MAX_SCHEDULE_DAYS,
   };
-  // The "send abroad" answer sits with the price questions.
-  const groups = t.help.groups.map((g, i) => (i === t.help.groups.length - 1 ? { ...g, items: [...g.items, t.common.abroad] } : g));
+  // The "send abroad" answer sits with the basics.
+  const groups = t.help.groups.map((g, i) => (i === 0 ? { ...g, items: [...g.items, t.common.abroad] } : g));
   return (
     <InfoPage title={t.help.title} intro={t.help.intro}>
       {groups.map((g) => (

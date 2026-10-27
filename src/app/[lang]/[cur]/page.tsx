@@ -11,6 +11,7 @@ import { RichText } from "@/components/RichText";
 import { Reveal } from "@/components/Reveal";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+import { TwoWays } from "@/components/TwoWays";
 import { OCCASIONS } from "@/lib/card";
 import { TEMPLATES } from "@/lib/catalog";
 import { occasions } from "@/lib/templates";
@@ -80,14 +81,18 @@ export default async function Home() {
             <p className="mx-auto mt-6 max-w-lg text-base leading-relaxed text-ink/75 sm:text-xl lg:mx-0">
               {h.intro}
             </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-3 lg:justify-start">
-              <Link href="/create" className="btn btn-red px-6 py-3.5 text-base sm:px-8 sm:text-lg">
-                {fmt(h.cta, { price })}
+            <p className="mt-8 text-sm font-bold uppercase tracking-wide text-ink/55">{h.waysLabel}</p>
+            <div className="mt-3 flex flex-wrap justify-center gap-3 lg:justify-start">
+              <Link href="/create?start=custom" className="btn btn-red px-6 py-3.5 text-base sm:text-lg">
+                ✨ {t.create.personalTitle} · {fmt(t.create.fromPrice, { price: aiPrice })}
               </Link>
-              <Link href="/cards" className="btn btn-paper px-6 py-3.5 text-base sm:px-8 sm:text-lg">
-                {fmt(h.seeAll, { n })}
+              <Link href="/create?start=premade" className="btn btn-paper px-6 py-3.5 text-base sm:text-lg">
+                🎨 {t.create.readyTitle} · {price}
               </Link>
             </div>
+            <Link href="/cards" className="mt-4 inline-block font-semibold underline decoration-hot decoration-2 underline-offset-4">
+              {fmt(h.seeAll, { n })} →
+            </Link>
             <p className="mt-6 text-sm font-semibold text-ink/55">
               {h.reassure}
               <br />
@@ -97,20 +102,104 @@ export default async function Home() {
 
           <HeroShowcase />
         </div>
+      </section>
 
-        {/* The whole process in one line. */}
-        <div className="relative mx-auto max-w-5xl px-4 pb-16 sm:px-6">
-          <ol className="sheet grid divide-y-2 divide-dashed divide-ink/15 sm:grid-cols-3 sm:divide-x-2 sm:divide-y-0">
-            {h.steps.map((step, i) => (
-              <li key={step.title} className="flex items-center gap-4 px-5 py-4">
-                <span className="font-brand text-5xl font-black leading-none text-hot">{i + 1}</span>
-                <span>
-                  <span className="block font-brand text-lg font-bold leading-tight">{step.title}</span>
-                  <span className="block text-sm text-ink/60">{fmt(step.body, { n, o })}</span>
-                </span>
+      {/* The two ways to make a card. */}
+      <section id="ways" className="mx-auto max-w-5xl px-4 pb-20 sm:px-6">
+        <Reveal className="text-center">
+          <h2 className="font-brand text-4xl font-bold leading-tight sm:text-5xl">{h.waysTitle}</h2>
+          <p className="mx-auto mt-3 max-w-xl text-lg text-ink/65">{h.waysIntro}</p>
+        </Reveal>
+        <Reveal className="mt-10">
+          <TwoWays />
+        </Reveal>
+      </section>
+
+      {/* How it works: four steps, left to right (top to bottom on a phone). */}
+      <section id="how" className="scroll-mt-20 border-y-2 border-ink bg-paper py-20">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <Reveal className="max-w-2xl">
+            <h2 className="font-brand text-5xl font-bold sm:text-6xl">{h.howTitle}</h2>
+            <p className="mt-3 text-lg text-ink/65">{h.howIntro}</p>
+          </Reveal>
+          <ol className="mt-12 flex flex-col items-stretch gap-3 lg:flex-row">
+            {[
+              {
+                ...h.how[0],
+                mock: (
+                  <div className="space-y-2 text-sm font-bold">
+                    <span className="block rounded-xl border-2 border-ink bg-hot px-3 py-2 text-white">
+                      ✨ {t.create.personalTitle}
+                      <span className="block text-xs font-semibold opacity-80">{fmt(t.create.fromPrice, { price: aiPrice })}</span>
+                    </span>
+                    <span className="block rounded-xl border-2 border-ink/20 bg-paper px-3 py-2">
+                      🎨 {t.create.readyTitle}
+                      <span className="block text-xs font-semibold text-ink/55">{price}</span>
+                    </span>
+                  </div>
+                ),
+              },
+              {
+                ...h.how[1],
+                mock: (
+                  <div className="text-left text-sm">
+                    <div className="h-1.5 overflow-hidden rounded-full bg-ink/10">
+                      <div className="h-full w-[55%] rounded-full bg-hot" />
+                    </div>
+                    <p className="mt-3 font-brand text-base font-bold leading-tight">{fmt(t.quiz.questions.memory.title, { name: "Olivia" })}</p>
+                    <p className="mt-2 rounded-lg border-2 border-ink/15 bg-paper px-2.5 py-2 text-ink/70">{h.howAnswer}</p>
+                  </div>
+                ),
+              },
+              {
+                ...h.how[2],
+                mock: (
+                  <div className="space-y-2 text-left text-sm">
+                    <div className="flex items-center gap-2 rounded-lg border-2 border-ink/15 bg-paper p-1.5 ps-2.5">
+                      <span className="min-w-0 flex-1 truncate text-ink/70">{h.howChange}</span>
+                      <span className="rounded-full bg-hot px-2.5 py-1 text-xs font-bold text-white">{t.custom.go}</span>
+                    </div>
+                    <p className="text-xs font-semibold text-ink/55">✏️ {t.custom.clickHint}</p>
+                  </div>
+                ),
+              },
+              {
+                ...h.how[3],
+                mock: (
+                  <div className="space-y-2 text-left text-sm">
+                    <p className="rounded-lg border-2 border-ink/15 bg-paper px-2.5 py-2">
+                      📧 <span className="font-semibold">{h.howEmail}</span>
+                    </p>
+                    <p className="rounded-lg border-2 border-ink/15 bg-paper px-2.5 py-2">
+                      🔗 <span className="font-semibold">{h.howLink}</span>
+                    </p>
+                  </div>
+                ),
+              },
+            ].map((step, i, all) => (
+              <li key={step.title} className="contents">
+                <Reveal delay={i * 120} className="min-w-0 flex-1">
+                  <div className="sheet relative h-full p-6">
+                    <span className="grid h-12 w-12 place-items-center rounded-full border-2 border-ink bg-hot font-brand text-2xl font-black text-white">{i + 1}</span>
+                    <h3 className="mt-4 font-brand text-2xl font-bold leading-tight">{step.title}</h3>
+                    <p className="mt-1 text-ink/65">{fmt(step.body, { n, o })}</p>
+                    <div className="mt-5 rounded-xl bg-cream p-3">{step.mock}</div>
+                  </div>
+                </Reveal>
+                {i < all.length - 1 && (
+                  <span aria-hidden className="grid shrink-0 place-items-center font-brand text-4xl font-black text-hot lg:w-6">
+                    <span className="lg:hidden">↓</span>
+                    <span className="hidden lg:inline rtl:rotate-180">→</span>
+                  </span>
+                )}
               </li>
             ))}
           </ol>
+          <div className="mt-10 text-center">
+            <Link href="/create" className="btn btn-red px-8 py-3.5 text-lg">
+              {t.nav.makeCard} →
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -272,67 +361,6 @@ export default async function Home() {
         </Reveal>
       </section>
 
-      {/* How it works */}
-      <section id="how" className="mx-auto max-w-6xl px-4 pb-24 sm:px-6">
-        <Reveal className="max-w-2xl">
-          <h2 className="font-brand text-5xl font-bold sm:text-6xl">{h.howTitle}</h2>
-          <p className="mt-3 text-lg text-ink/65">{h.howIntro}</p>
-        </Reveal>
-        <div className="relative mt-12 grid gap-6 md:grid-cols-3">
-          <div aria-hidden className="absolute left-[16%] right-[16%] top-12 hidden border-t-2 border-dashed border-ink/30 md:block" />
-          {[
-            {
-              ...h.how[0],
-              mock: (
-                <div className="flex flex-wrap justify-center gap-2">
-                  <span className="rounded-full border-2 border-ink bg-ink px-3 py-1 text-sm font-bold text-paper">💘 {t.occasions.valentine.label}</span>
-                  <span className="rounded-full border-2 border-ink/20 bg-paper px-3 py-1 text-sm font-bold">🪔 {t.occasions.diwali.label}</span>
-                  <span className="rounded-full border-2 border-ink/20 bg-paper px-3 py-1 text-sm font-bold">🎂 {t.occasions.birthday.label}</span>
-                </div>
-              ),
-            },
-            {
-              ...h.how[1],
-              mock: (
-                <div className="space-y-2 text-left text-sm">
-                  <div className="border-b-2 border-dashed border-ink/25 px-1 pb-1">
-                    <span className="font-brand text-ink/50">{h.to} </span>
-                    <span className="font-hand text-2xl leading-none">Olivia</span>
-                  </div>
-                  <div className="flex gap-2 pt-1">
-                    {["/demo/sunset.svg", "/demo/coffee.svg", "/demo/lights.svg"].map((src) => (
-                      // eslint-disable-next-line @next/next/no-img-element -- decorative
-                      <img key={src} src={src} alt="" className="h-12 w-12 bg-white object-cover p-0.5 ring-1 ring-ink/15" />
-                    ))}
-                    <span className="grid h-12 w-12 place-items-center border-2 border-dashed border-ink/25 text-ink/40">+</span>
-                  </div>
-                </div>
-              ),
-            },
-            {
-              ...h.how[2],
-              mock: (
-                <div className="ms-auto max-w-[15rem] rounded-2xl rounded-se-sm bg-[#dcf8c6] p-2 text-left text-sm shadow-sm">
-                  <div className="rounded-xl bg-white/70 p-2">
-                    <p className="font-bold">{h.whatsappTitle}</p>
-                    <p className="text-xs text-ink/50">{h.whatsappSub}</p>
-                  </div>
-                  <p className="px-1 pt-1.5">{h.whatsappMessage}</p>
-                </div>
-              ),
-            },
-          ].map((step, i) => (
-            <Reveal key={step.title} delay={i * 120}>
-              <div className="sheet relative h-full p-7">
-                <span className="relative z-10 grid h-14 w-14 place-items-center rounded-full border-2 border-ink bg-hot font-brand text-3xl font-black text-white">{i + 1}</span>
-                <h3 className="mt-5 font-brand text-2xl font-bold">{step.title}</h3>
-                <p className="mt-1 text-ink/65">{fmt(step.body, { n, o })}</p>
-                <div className="mt-6 rounded-xl bg-cream p-4">{step.mock}</div>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </section>
 
       {/* Pricing */}
       <section id="pricing" className="relative overflow-hidden border-y-2 border-ink bg-air py-24 text-paper">

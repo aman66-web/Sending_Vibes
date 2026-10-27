@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { DEVICES, OCCASIONS, type Device, type Occasion } from "@/lib/card";
-import { TEMPLATES, TONES, deviceInfo, toneInfo, type Tone } from "@/lib/catalog";
+import { OCCASIONS, type Occasion } from "@/lib/card";
+import { TEMPLATES, TONES, toneInfo, type Tone } from "@/lib/catalog";
 import { fmt } from "@/i18n/config";
 import { useI18n } from "@/i18n/client";
 import type { Dict } from "@/i18n/en";
@@ -21,7 +21,6 @@ export function CatalogGrid({ limit, allFilters = false, initialOccasion }: Prop
   const c = t.catalog;
   const [occasion, setOccasion] = useState<Occasion | "all">(initialOccasion ?? "all");
   const [tone, setTone] = useState<Tone | "all">("all");
-  const [device, setDevice] = useState<Device | "all">("all");
   const [query, setQuery] = useState("");
   const words = query.toLowerCase().split(/\s+/).filter(Boolean);
 
@@ -29,7 +28,6 @@ export function CatalogGrid({ limit, allFilters = false, initialOccasion }: Prop
     (tpl) =>
       (occasion === "all" || tpl.occasion === occasion) &&
       (tone === "all" || tpl.tone === tone) &&
-      (device === "all" || tpl.device === device) &&
       words.every((w) => searchText(tpl, t).includes(w)),
   );
   if (limit) results = [...results].sort((a, b) => Number(!!b.featured) - Number(!!a.featured)).slice(0, limit);
@@ -70,14 +68,6 @@ export function CatalogGrid({ limit, allFilters = false, initialOccasion }: Prop
                 </Chip>
               ))}
             </ChipRow>
-            <ChipRow label={c.device}>
-              <Chip active={device === "all"} onClick={() => setDevice("all")}>{c.all}</Chip>
-              {DEVICES.map((d) => (
-                <Chip key={d} active={device === d} onClick={() => setDevice(d)}>
-                  {deviceInfo[d].emoji} {t.devices[d].label}
-                </Chip>
-              ))}
-            </ChipRow>
           </>
         )}
       </div>
@@ -102,7 +92,6 @@ export function CatalogGrid({ limit, allFilters = false, initialOccasion }: Prop
             onClick={() => {
               setOccasion("all");
               setTone("all");
-              setDevice("all");
               setQuery("");
             }}
             className="btn btn-ink mt-4 px-5 py-2 text-sm"
@@ -143,7 +132,7 @@ function searchText(tpl: (typeof TEMPLATES)[number], t: Dict) {
   let text = searchCache.get(tpl.slug);
   if (!text) {
     const screens = tpl.screens("", "").map((s) => (s.type === "game" ? `${s.type} ${s.game} ${t.labels.games[s.game]}` : `${s.type} ${t.labels.screens[s.type]}`));
-    text = [tpl.name, tpl.headline, tpl.blurb, occasions[tpl.occasion].label, t.occasions[tpl.occasion].label, tpl.occasion, toneInfo[tpl.tone].label, t.tones[tpl.tone], tpl.device, ...screens]
+    text = [tpl.name, tpl.headline, tpl.blurb, occasions[tpl.occasion].label, t.occasions[tpl.occasion].label, tpl.occasion, toneInfo[tpl.tone].label, t.tones[tpl.tone], ...screens]
       .join(" ")
       .toLowerCase();
     searchCache.set(tpl.slug, text);

@@ -4,7 +4,7 @@ import { useI18n } from "@/i18n/client";
 import { Flourish } from "@/components/card/ornaments";
 import { Motif } from "@/components/card/motifs";
 import type { Occasion } from "@/lib/card";
-import { NEW_DESIGNS, deviceInfo, type Template } from "@/lib/catalog";
+import { NEW_DESIGNS, type Template } from "@/lib/catalog";
 import { themes } from "@/lib/themes";
 
 // The line printed across the top of each card front. Card artwork is in English, like the cards.
@@ -53,11 +53,6 @@ export function ProductThumb({ template, className = "" }: { template: Template;
       </div>
       {NEW_DESIGNS.has(template.slug) && (
         <span className="absolute end-3 top-3 rotate-6 rounded-sm border-2 border-ink bg-sun px-2 py-0.5 font-sans text-[11px] font-black uppercase tracking-wide text-ink">{t.common.new}</span>
-      )}
-      {template.device !== "everywhere" && (
-        <span className="absolute start-3 top-3 rounded-full bg-ink/80 px-2.5 py-1 font-sans text-[11px] font-bold uppercase tracking-wide text-paper">
-          {deviceInfo[template.device].emoji} {t.devices[template.device].label}
-        </span>
       )}
     </div>
   );

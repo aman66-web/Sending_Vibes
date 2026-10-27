@@ -1,7 +1,7 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { customAlphabet } from "nanoid";
-import { EFFECTS, GAMES, MUSIC, OCCASIONS, THEMES, cardSchema, type CardData, type Game, type ScreenType } from "./card";
+import { EFFECTS, GAMES, MUSIC, OCCASIONS, THEMES, cardSchema, type CardData, type Game, type Screen, type ScreenType } from "./card";
 import { LANGUAGES, type Locale } from "@/i18n/config";
 import { TEMPLATES, buildCard, getTemplate } from "./catalog";
 
@@ -90,6 +90,8 @@ export type GenerateInput = {
   card?: CardData;
   // A design to start a new card from.
   template?: string;
+  // Keep that design exactly as it is and only write its words.
+  keepDesign?: boolean;
   // The screen they're looking at, when the change is about that screen.
   focus?: string;
   // The language the site is shown in, for new cards.
@@ -174,7 +176,36 @@ function toCard(text: string, input: GenerateInput, urls: string[]): { card: Car
   return { card: parsed.data };
 }
 
-function request(input: GenerateInput): { message: string; urls: string[] } {
+// Puts the words that were written into the design, so only the words can change: the
+// screens, their order, games, list lengths, colours and music stay as the design has them.
+const NOT_WORDS = new Set(["id", "type", "game", "effect", "photos", "captions", "landOn"]);
+
+function copyWords(design: unknown, written: unknown): unknown {
+  if (typeof design === "string") return typeof written === "string" && written.trim() ? written : design;
+  if (Array.isArray(design)) return design.map((item, i) => copyWords(item, Array.isArray(written) ? written[i] : undefined));
+  if (design && typeof design === "object") {
+    const from = (written && typeof written === "object" ? written : {}) as Record<string, unknown>;
+    const out = Object.fromEntries(Object.entries(design).map(([k, v]) => [k, NOT_WORDS.has(k) ? v : copyWords(v, from[k])]));
+    // A quiz's right answer goes with its new options, as long as it's one of them.
+    if ("answer" in out && Array.isArray(out.options)) {
+      const answer = from.answer;
+      if (typeof answer === "number" && Number.isInteger(answer) && answer >= 0 && answer < out.options.length) out.answer = answer;
+    }
+    return out;
+  }
+  return design;
+}
+
+function fillDesign(design: CardData, written: CardData): CardData {
+  const screens = design.screens.map((screen, i) => {
+    const match = written.screens.find((s) => s.id === screen.id && s.type === screen.type) ?? (written.screens[i]?.type === screen.type ? written.screens[i] : undefined);
+    return match ? (copyWords(screen, match) as Screen) : screen;
+  });
+  const parsed = cardSchema.safeParse({ ...design, screens });
+  return parsed.success ? parsed.data : design;
+}
+
+function request(input: GenerateInput): { message: string; urls: string[]; design?: CardData } {
   const prompt = `<request>\n${input.prompt}\n</request>`;
   if (input.card) {
     const { card, urls } = hidePhotos(withoutTemplate(input.card));
@@ -185,9 +216,18 @@ function request(input: GenerateInput): { message: string; urls: string[] } {
     return { message: `Here is the card:\n${JSON.stringify(card)}${about}\n\nThe change they want:\n${prompt}`, urls };
   }
   const base = getTemplate(input.template);
-  const start = base ? `\nStart from this design and rework it to fit what they want:\n${JSON.stringify(withoutTemplate(buildCard(base, input.to, input.from)))}\n` : "";
   const language = input.locale && input.locale !== "en" ? `The site is in ${LANGUAGES[input.locale].english}.\n` : "";
-  return { message: `Their name: ${input.to}\nYour name (the sender): ${input.from}\n${language}${start}\nWhat they want:\n${prompt}`, urls: [] };
+  const names = `Their name: ${input.to}\nYour name (the sender): ${input.from}\n${language}`;
+  if (base && input.keepDesign) {
+    const design = buildCard(base, input.to, input.from);
+    return {
+      message: `${names}\nThey picked this design:\n${JSON.stringify(withoutTemplate(design))}\n\nRewrite its words to fit what they told you. Keep the design exactly as it is: the same screens in the same order with the same ids and types, the same number of items in every list, the same game on each game screen, and the same occasion, theme, ambient, music and finale effect. Only the words change, and every one of them should feel written for these two. In a quiz, set each "answer" to the index of the right option. Leave photos empty.\n\nWhat they told you:\n${prompt}`,
+      urls: [],
+      design,
+    };
+  }
+  const start = base ? `\nStart from this design and rework it to fit what they want:\n${JSON.stringify(withoutTemplate(buildCard(base, input.to, input.from)))}\n` : "";
+  return { message: `${names}${start}\nWhat they want:\n${prompt}`, urls: [] };
 }
 
 const SCREEN_TYPES = new Set<string>(cardSchema.shape.screens.element.options.map((o) => o.shape.type.value));
@@ -206,7 +246,7 @@ type Options = {
 export async function generateCard(input: GenerateInput, { onProgress, signal }: Options = {}): Promise<CardData> {
   if (!generateReady()) throw new GenerateError("off");
   client ??= new Anthropic();
-  const { message, urls } = request(input);
+  const { message, urls, design } = request(input);
   const messages: Anthropic.MessageParam[] = [{ role: "user", content: message }];
   // One retry, telling the model what was wrong with its first go.
   for (let attempt = 0; attempt < 2; attempt++) {
@@ -241,7 +281,7 @@ export async function generateCard(input: GenerateInput, { onProgress, signal }:
     if (reply.stop_reason === "refusal") throw new GenerateError("refused");
     const text = reply.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("");
     const result = toCard(text, input, urls);
-    if ("card" in result) return result.card;
+    if ("card" in result) return design ? fillDesign(design, result.card) : result.card;
     console.warn("generated card was off", result.problem);
     messages.push({ role: "assistant", content: text || "{}" }, { role: "user", content: `${result.problem}\nReply with the whole corrected card as JSON only.` });
   }
