@@ -16,7 +16,9 @@ import { formatMoney, price, tierPrice } from "@/lib/pricing";
 import { themes } from "@/lib/themes";
 import { fmt } from "@/i18n/config";
 import { useI18n } from "@/i18n/client";
+import { NO_ANSWERS, Quiz, quizPrompt, type Answers } from "./Quiz";
 import { Field, ScreenEditor, Select } from "./ScreenEditor";
+import { EditableCard, setAt, type Path } from "./WordEditing";
 
 const DRAFT_KEY = "sv-draft-v1";
 const MODE_KEY = "sv-draft-mode";
@@ -94,7 +96,7 @@ function uid() {
   return Math.random().toString(36).slice(2, 10);
 }
 
-type Step = "choose" | "describe" | "making" | "occasion" | "design" | "names" | "edit";
+type Step = "quiz" | "describe" | "making" | "occasion" | "design" | "names" | "edit";
 // Premade keeps a design's screens as they are; custom can change anything, including by typing.
 type Mode = "premade" | "custom";
 export type Start = Mode;
@@ -139,7 +141,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   const chosen = getTemplate(initialTemplate);
   const [draft] = useState(() => (initialOccasion || chosen || initialStart ? null : loadDraft()));
   const [step, setStep] = useState<Step>(
-    draft ? "edit" : chosen ? "names" : initialOccasion ? "design" : initialStart === "custom" ? "describe" : initialStart === "premade" ? "occasion" : "choose",
+    draft ? "edit" : chosen ? "names" : initialOccasion ? "design" : initialStart === "premade" ? "occasion" : "quiz",
   );
   const [mode, setMode] = useState<Mode>(() => (draft ? loadMode(draft) : initialStart === "custom" ? "custom" : "premade"));
   const [occasion, setOccasion] = useState<Occasion>(draft?.occasion ?? chosen?.occasion ?? initialOccasion ?? "valentine");
@@ -167,6 +169,11 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   const [viewing, setViewing] = useState<string | undefined>();
   const [nudge, setNudge] = useState(0);
   const [screenAsk, setScreenAsk] = useState("");
+  // The eight-question quiz.
+  const [answers, setAnswers] = useState<Answers>(NO_ANSWERS);
+  const [question, setQuestion] = useState(0);
+  // Clicking words on the preview edits them; Play lets the card react as it will for them.
+  const [wordMode, setWordMode] = useState<"edit" | "play">("edit");
   const [pickOccasion, setPickOccasion] = useState<Occasion | "all">("all");
   const ideaBox = useRef<HTMLTextAreaElement>(null);
 
@@ -196,7 +203,9 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     setFrom("");
     setUndo(null);
     setAiDone(false);
-    setStep("choose");
+    setAnswers(NO_ANSWERS);
+    setQuestion(0);
+    setStep("quiz");
   };
 
   // Asks for a new card from a description, or for a change to the current one. The
@@ -238,9 +247,22 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     throw new Error(x.errors.failed);
   };
 
-  const makeFromIdea = async () => {
+  const makeFromIdea = () => {
     if (idea.trim().length < 3) return setAiError(x.errors.describe);
     if (!to.trim() || !from.trim()) return setAiError(c.needNames);
+    makeCard(idea.trim(), { to, from }, "describe");
+  };
+
+  const makeFromQuiz = () => {
+    const prompt = quizPrompt(answers, t);
+    setTo(answers.to.trim());
+    setFrom(answers.from.trim());
+    setIdea(prompt);
+    makeCard(prompt, { to: answers.to, from: answers.from }, "quiz");
+  };
+
+  // Writes a new card, showing the loading screen; going back returns to where it was asked for.
+  const makeCard = async (prompt: string, names: { to: string; from: string }, source: "quiz" | "describe") => {
     const controller = new AbortController();
     making.current = controller;
     setBusy("make");
@@ -249,7 +271,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     setStep("making");
     window.scrollTo({ top: 0 });
     try {
-      const made = await callAi({ prompt: idea.trim() }, { to, from }, setProgress, controller.signal);
+      const made = await callAi({ prompt }, names, setProgress, controller.signal);
       setCard(made);
       setSelected(made.screens[0]?.id);
       setMode("custom");
@@ -257,10 +279,17 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       window.scrollTo({ top: 0 });
     } catch (e) {
       if (!controller.signal.aborted) setAiError(e instanceof Error ? e.message : x.errors.failed);
-      setStep("describe");
+      setStep(source);
     }
     making.current = null;
     setBusy(null);
+  };
+
+  // Words typed straight onto the preview.
+  const editWords = (path: Path, value: string) => setCard((c) => c && setAt(c, path, value));
+  const goToScreen = (id: string) => {
+    setSelected(id);
+    setNudge((n) => n + 1);
   };
 
   // A change to the whole card, or (with focus) to the screen showing in the preview.
@@ -344,47 +373,27 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
         )}
       </header>
 
-      {step === "choose" && (
-        <section className="mx-auto max-w-5xl px-4 py-12 sm:py-16">
-          <h1 className="text-center font-brand text-4xl font-bold sm:text-5xl">{x.chooseTitle}</h1>
-          <p className="mx-auto mt-3 max-w-xl text-center opacity-70">{x.chooseIntro}</p>
-          <div className="mt-10 grid gap-5 md:grid-cols-2">
-            <Choice
-              featured
-              title={x.customTitle}
-              easy={x.customEasy}
-              body={x.customBody}
-              points={x.customPoints}
-              price={fmt(x.from, { price: price("custom", currency) })}
-              perCard={x.perCard}
-              cta={x.customCta}
-              visual={<TypingDemo text={x.examples[1]} />}
-              onClick={() => {
-                setMode("custom");
-                setStep("describe");
-              }}
-            />
-            <Choice
-              title={x.premadeTitle}
-              easy={x.premadeEasy}
-              body={fmt(x.premadeBody, { n: TEMPLATES.length })}
-              points={x.premadePoints.map((p) => fmt(p, { n: TEMPLATES.length, o: OCCASIONS.length }))}
-              price={price("card", currency)}
-              perCard={x.perCard}
-              cta={x.premadeCta}
-              visual={<ThumbFan slugs={["birthday-bash", "be-my-valentine", "festival-of-lights"]} />}
-              onClick={() => {
-                setMode("premade");
-                setStep("occasion");
-              }}
-            />
-          </div>
-        </section>
+      {step === "quiz" && (
+        <>
+          <Quiz
+            answers={answers}
+            setAnswers={setAnswers}
+            index={question}
+            setIndex={setQuestion}
+            onGenerate={makeFromQuiz}
+            onDescribe={() => setStep("describe")}
+            onPremade={() => {
+              setMode("premade");
+              setStep("occasion");
+            }}
+          />
+          {aiError && <p className="mx-auto -mt-6 max-w-2xl px-4 pb-8 text-sm font-semibold text-red-600">{aiError}</p>}
+        </>
       )}
 
       {step === "describe" && (
         <section className="mx-auto max-w-6xl px-4 py-10">
-          <button onClick={() => setStep("choose")} className="text-sm font-semibold opacity-70">
+          <button onClick={() => setStep("quiz")} className="text-sm font-semibold opacity-70">
             {x.back}
           </button>
           <div className="mt-4 grid gap-10 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
@@ -527,7 +536,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
 
       {step === "occasion" && (
         <section className="mx-auto max-w-5xl px-4 py-12">
-          <button onClick={() => setStep("choose")} className="text-sm font-semibold opacity-70">
+          <button onClick={() => setStep("quiz")} className="text-sm font-semibold opacity-70">
             {x.back}
           </button>
           <h1 className="text-center font-brand text-4xl font-bold">{c.occasionTitle}</h1>
@@ -815,24 +824,26 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                 onSubmit={(id) => changeByTyping(screenAsk, id)}
               />
               <div className="relative">
-                {view === "phone" ? (
-                  <PhoneFrame className="mx-auto h-[560px] w-[280px]">
-                    <CardPlayer key="phone" card={card} preview sound focusScreenId={selected} focusNonce={nudge} onScreenChange={setViewing} />
-                  </PhoneFrame>
-                ) : (
-                  <BrowserFrame className="h-[520px]">
-                    <CardPlayer key="computer" card={card} preview sound focusScreenId={selected} focusNonce={nudge} onScreenChange={setViewing} />
-                  </BrowserFrame>
-                )}
+                <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onOther={() => setSelected(viewing)}>
+                  {view === "phone" ? (
+                    <PhoneFrame className="mx-auto h-[540px] w-[270px]">
+                      <CardPlayer key="phone" card={card} preview sound focusScreenId={selected} focusNonce={nudge} onScreenChange={setViewing} />
+                    </PhoneFrame>
+                  ) : (
+                    <BrowserFrame className="h-[500px]">
+                      <CardPlayer key="computer" card={card} preview sound focusScreenId={selected} focusNonce={nudge} onScreenChange={setViewing} />
+                    </BrowserFrame>
+                  )}
+                </EditableCard>
                 {busy === "change" && (
-                  <div className="absolute inset-0 grid place-items-center">
+                  <div className="absolute inset-0 z-50 grid place-items-center">
                     <span className="rounded-full bg-black/75 px-5 py-3 text-sm font-semibold text-white shadow-lg">
                       <Making lines={[x.changing]} />
                     </span>
                   </div>
                 )}
               </div>
-              <p className="text-center text-xs opacity-60">{c.livePreview}</p>
+              <PreviewControls card={card} viewing={viewing} onGo={goToScreen} wordMode={wordMode} setWordMode={setWordMode} />
             </div>
           </aside>
         </div>
@@ -841,7 +852,9 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       {showPreview && card && (
         <div className="fixed inset-0 z-50 flex flex-col bg-background lg:hidden">
           <div className="relative min-h-0 flex-1">
-            <CardPlayer card={card} preview sound focusScreenId={selected} focusNonce={nudge} onScreenChange={setViewing} />
+            <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onOther={() => {}} className="h-full">
+              <CardPlayer card={card} preview sound focusScreenId={selected} focusNonce={nudge} onScreenChange={setViewing} />
+            </EditableCard>
             <button onClick={() => setShowPreview(false)} className="absolute start-4 top-4 z-50 rounded-full bg-black/70 px-4 py-2 text-sm font-semibold text-white">
               {c.closePreview}
             </button>
@@ -853,7 +866,8 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
               </div>
             )}
           </div>
-          <div className="border-t border-line p-3">
+          <div className="space-y-3 border-t border-line p-3">
+            <PreviewControls card={card} viewing={viewing} onGo={goToScreen} wordMode={wordMode} setWordMode={setWordMode} />
             <ScreenAsk
               card={card}
               viewing={viewing}
@@ -891,6 +905,57 @@ function summary(s: Screen) {
     case "question":
       return s.question;
   }
+}
+
+type PreviewControlsProps = {
+  card: CardData;
+  viewing?: string;
+  onGo: (screenId: string) => void;
+  wordMode: "edit" | "play";
+  setWordMode: (mode: "edit" | "play") => void;
+};
+
+// Edit the words or play the card, and step through its screens.
+function PreviewControls({ card, viewing, onGo, wordMode, setWordMode }: PreviewControlsProps) {
+  const { t } = useI18n();
+  const x = t.custom;
+  const i = Math.max(card.screens.findIndex((s) => s.id === viewing), 0);
+  const go = (step: number) => {
+    const screen = card.screens[i + step];
+    if (screen) onGo(screen.id);
+  };
+  const arrow = "grid h-9 w-9 place-items-center rounded-full border border-line bg-panel font-bold transition hover:border-brand disabled:opacity-30";
+  return (
+    <div>
+      <div className="flex items-center justify-between gap-2">
+        <div role="tablist" className="flex gap-1 rounded-full border border-line bg-panel p-1">
+          {(["edit", "play"] as const).map((m) => (
+            <button
+              key={m}
+              role="tab"
+              aria-selected={wordMode === m}
+              onClick={() => setWordMode(m)}
+              className={`rounded-full px-3 py-1.5 text-sm font-semibold transition ${wordMode === m ? "bg-foreground text-background" : "opacity-70 hover:opacity-100"}`}
+            >
+              {m === "edit" ? x.editWords : x.play}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center gap-1.5">
+          <button onClick={() => go(-1)} disabled={i === 0} aria-label={x.prevScreen} className={arrow}>
+            <span className="rtl:rotate-180">←</span>
+          </button>
+          <span className="min-w-12 text-center text-sm font-semibold tabular-nums opacity-70">
+            {i + 1} / {card.screens.length}
+          </span>
+          <button onClick={() => go(1)} disabled={i === card.screens.length - 1} aria-label={x.nextScreen} className={arrow}>
+            <span className="rtl:rotate-180">→</span>
+          </button>
+        </div>
+      </div>
+      <p className="mt-2 text-center text-xs opacity-60">{wordMode === "edit" ? x.clickHint : t.create.livePreview}</p>
+    </div>
+  );
 }
 
 type ScreenAskProps = {
@@ -937,82 +1002,6 @@ function ScreenAsk({ card, viewing, value, onChange, busy, premade, onSubmit }: 
       </div>
       {premade && <p className="mt-2 text-xs opacity-60">{fmt(x.typingMakesCustom, { price: price("custom", currency) })}</p>}
     </form>
-  );
-}
-
-type ChoiceProps = {
-  title: string;
-  easy: string;
-  body: string;
-  points: readonly string[];
-  price: string;
-  perCard: string;
-  cta: string;
-  visual: React.ReactNode;
-  featured?: boolean;
-  onClick: () => void;
-};
-
-// One of the two ways to make a card, on the first screen.
-function Choice({ title, easy, body, points, price, perCard, cta, visual, featured, onClick }: ChoiceProps) {
-  return (
-    <button
-      onClick={onClick}
-      aria-label={`${title}. ${easy}. ${price}`}
-      className={`group flex flex-col overflow-hidden rounded-3xl border-2 bg-panel text-start shadow-sm transition hover:-translate-y-1 hover:shadow-lg ${featured ? "border-brand" : "border-line hover:border-brand"}`}
-    >
-      <div className="grid h-44 place-items-center overflow-hidden border-b border-line bg-background px-6">{visual}</div>
-      <div className="flex flex-1 flex-col p-6">
-        <h2 className="font-brand text-3xl font-bold leading-tight">{title}</h2>
-        <p className="mt-1 text-sm font-bold uppercase tracking-wide text-brand">{easy}</p>
-        <p className="mt-3 leading-relaxed opacity-75">{body}</p>
-        <ul className="mt-4 flex-1 space-y-1.5 text-sm">
-          {points.map((p) => (
-            <li key={p} className="flex gap-2">
-              <span className="font-bold text-brand">✓</span>
-              {p}
-            </li>
-          ))}
-        </ul>
-        <p className="mt-5 font-brand text-3xl font-black">
-          {price} <span className="font-sans text-sm font-semibold opacity-60">{perCard}</span>
-        </p>
-        <span className={`mt-4 block rounded-full py-3 text-center font-brand text-lg font-semibold ${featured ? "bg-brand text-white" : "border-2 border-foreground/80"}`}>{cta} →</span>
-      </div>
-    </button>
-  );
-}
-
-// A message box that types out an example, for the custom choice.
-function TypingDemo({ text }: { text: string }) {
-  const [shown, setShown] = useState(0);
-  useEffect(() => {
-    const timer = setInterval(() => setShown((n) => (n >= text.length + 40 ? 0 : n + 1)), 45);
-    return () => clearInterval(timer);
-  }, [text]);
-  return (
-    <div className="w-full max-w-sm rounded-2xl border border-line bg-panel p-3 text-start text-sm leading-snug shadow-sm" aria-hidden>
-      <span dir="auto">{text.slice(0, shown)}</span>
-      <span className="ms-0.5 inline-block h-4 w-0.5 translate-y-0.5 animate-pulse bg-brand" />
-    </div>
-  );
-}
-
-// Three design fronts fanned out, for the premade choice.
-function ThumbFan({ slugs }: { slugs: string[] }) {
-  return (
-    <div className="relative h-40 w-72" aria-hidden>
-      {slugs.map((slug, i) => {
-        const tpl = getTemplate(slug);
-        return (
-          tpl && (
-            <div key={slug} className="absolute top-1 w-28 shadow-md transition duration-300 group-hover:-translate-y-1" style={{ left: `${i * 28}%`, rotate: `${(i - 1) * 8}deg`, zIndex: i === 1 ? 2 : 1 }}>
-              <ProductThumb template={tpl} />
-            </div>
-          )
-        );
-      })}
-    </div>
   );
 }
 
