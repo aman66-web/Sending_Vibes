@@ -2,7 +2,7 @@ import type { Dict } from "./en";
 
 export const bn: Dict = {
   meta: {
-    title: "Sending Vibes: মনের মতো ইন্টারঅ্যাকটিভ কার্ড, যা ভোলার নয়",
+    title: "Envelette: মনের মতো ইন্টারঅ্যাকটিভ কার্ড, যা ভোলার নয়",
     description:
       "জন্মদিন, ভ্যালেন্টাইনস ডে, দিওয়ালি, ঈদ, বড়দিন, হ্যালোইন আর আরও অনেক উপলক্ষের জন্য মনের মতো ইন্টারঅ্যাকটিভ কার্ড। পালিয়ে যাওয়া ‘না’ বোতাম, মিনি গেম, আপনার ছবি, গান আর জমকালো সমাপ্তি। শুধু ফাঁকা জায়গাগুলো পূরণ করুন।",
   },
@@ -28,7 +28,7 @@ export const bn: Dict = {
     pricing: "দাম",
     help: "সাহায্য ও প্রশ্নোত্তর",
     privacy: "গোপনীয়তা",
-    copyright: "© {year} Sending Vibes। ‘না’ বোতামটা এখনও কাজ করে না।",
+    copyright: "© {year} Envelette। ‘না’ বোতামটা এখনও কাজ করে না।",
   },
 
   common: {
@@ -45,7 +45,7 @@ export const bn: Dict = {
     allCards: "সব কার্ড",
     seeAll: "সব দেখুন →",
     new: "নতুন",
-    demoTitle: "{label} ডেমো · Sending Vibes",
+    demoTitle: "{label} ডেমো · Envelette",
     cardsStayEnglish: "কার্ডগুলো ইংরেজিতে লেখা, তবে আপনি যেকোনো ভাষায় নিজের কথা লিখতে পারবেন।",
   },
 
@@ -446,21 +446,21 @@ export const bn: Dict = {
   },
 
   cardsPage: {
-    metaTitle: "সব কার্ড · Sending Vibes",
+    metaTitle: "সব কার্ড · Envelette",
     metaDescription: "ভ্যালেন্টাইনস ডে, জন্মদিন, দিওয়ালি, বড়দিন, ঈদ, হ্যালোইন, বিয়ে, নতুন শিশু আর আরও অনেক উপলক্ষের জন্য {n}টি মনের মতো ইন্টারঅ্যাকটিভ কার্ড ডিজাইন।",
     title: "সবগুলো কার্ড",
     intro: "{n}টি ডিজাইন। স্ক্রল করে পাশ দিয়ে গেলেই প্রতিটা নিজে নিজে চলে। একটা খুলে নিজেদের নাম দিয়ে চেষ্টা করুন, তারপর নিজের মতো করে নিন।",
   },
 
   occasionsPage: {
-    metaTitle: "সব উপলক্ষের জন্য ইন্টারঅ্যাকটিভ কার্ড · Sending Vibes",
+    metaTitle: "সব উপলক্ষের জন্য ইন্টারঅ্যাকটিভ কার্ড · Envelette",
     metaDescription: "{n}টি উপলক্ষের জন্য মনের মতো ইন্টারঅ্যাকটিভ কার্ড: ভ্যালেন্টাইনস ডে, জন্মদিন, দিওয়ালি, ঈদ, বড়দিন, হ্যালোইন, বিয়ে, নতুন শিশু আর আরও অনেক।",
     title: "উপলক্ষ",
     intro: "{o}টি উপলক্ষ আর {n}টি ডিজাইন। যেগুলো সবচেয়ে কাছে, সেগুলো আগে দেখানো হয়েছে।",
   },
 
   occasionPage: {
-    metaTitle: "ইন্টারঅ্যাকটিভ {label} কার্ড · Sending Vibes",
+    metaTitle: "ইন্টারঅ্যাকটিভ {label} কার্ড · Envelette",
     metaSuffix: "দুই মিনিটেই নিজের মতো সাজান, কোনো কোডিং লাগবে না।",
     // {label} is shown in red.
     title: "ইন্টারঅ্যাকটিভ {label} কার্ড",
@@ -476,7 +476,7 @@ export const bn: Dict = {
   },
 
   product: {
-    metaTitle: "{name} · {occasion} কার্ড · Sending Vibes",
+    metaTitle: "{name} · {occasion} কার্ড · Envelette",
     onPhone: "📱 ফোনে",
     onComputer: "💻 কম্পিউটারে",
     live: "এটা লাইভ, ট্যাপ করে দেখুন ↑",
@@ -526,7 +526,7 @@ export const bn: Dict = {
   },
 
   help: {
-    metaTitle: "সাহায্য ও প্রশ্নোত্তর · Sending Vibes",
+    metaTitle: "সাহায্য ও প্রশ্নোত্তর · Envelette",
     metaDescription: "ইন্টারঅ্যাকটিভ কার্ড কীভাবে কাজ করে, কীভাবে বানাবেন ও পাঠাবেন, আর সাধারণ প্রশ্নের উত্তর।",
     title: "সাহায্য ও প্রশ্ন",
     intro: "ইন্টারঅ্যাকটিভ কার্ড বানানো, পাঠানো আর খোলা নিয়ে যা যা জানা দরকার, সব এখানে।",
@@ -587,8 +587,8 @@ export const bn: Dict = {
   },
 
   privacy: {
-    metaTitle: "গোপনীয়তা · Sending Vibes",
-    metaDescription: "কার্ড বানালে Sending Vibes কী কী সংরক্ষণ করে, কে তা দেখতে পারে, আর ছবিগুলো কীভাবে সামলানো হয়।",
+    metaTitle: "গোপনীয়তা · Envelette",
+    metaDescription: "কার্ড বানালে Envelette কী কী সংরক্ষণ করে, কে তা দেখতে পারে, আর ছবিগুলো কীভাবে সামলানো হয়।",
     title: "আপনার কার্ড, আপনার ব্যাপার",
     intro: "সহজ ভাষায়: কার্ড বানালে আমরা কী সংরক্ষণ করি, কে তা দেখতে পারে, আর আমরা কী করি না।",
     sections: [
@@ -652,9 +652,9 @@ export const bn: Dict = {
     openAria: "আমাদের সাথে চ্যাট করুন",
     close: "বন্ধ করুন",
     closeAria: "চ্যাট বন্ধ করুন",
-    title: "Sending Vibes",
+    title: "Envelette",
     subtitle: "AI সহকারী · সাধারণত কয়েক সেকেন্ডেই উত্তর দেয়",
-    dialogAria: "Sending Vibes-এর সাথে চ্যাট",
+    dialogAria: "Envelette-এর সাথে চ্যাট",
     newChat: "নতুন চ্যাট",
     placeholder: "কার্ড নিয়ে যেকোনো কিছু জিজ্ঞেস করুন…",
     inputAria: "আপনার বার্তা",
@@ -675,7 +675,7 @@ export const bn: Dict = {
   },
 
   basket: {
-    metaTitle: "আপনার কার্ট · Sending Vibes",
+    metaTitle: "আপনার কার্ট · Envelette",
     title: "আপনার কার্ট",
     empty: "আপনার কার্টে এখনও কিছু নেই।",
     emptyCta: "একটা কার্ড খুঁজে নিন",
@@ -715,7 +715,7 @@ export const bn: Dict = {
       consent: "কার্ডগুলো এখনই পেতে চান, তা নিশ্চিত করতে বক্সে টিক দিন।",
     },
     thanks: {
-      metaTitle: "ধন্যবাদ · Sending Vibes",
+      metaTitle: "ধন্যবাদ · Envelette",
       title: "ধন্যবাদ!",
       intro: "আপনার কার্ডগুলোর পেমেন্ট হয়ে গেছে, এখন পাঠানোর জন্য তৈরি।",
       receipt: "আপনার সব লিংকসহ একটা রসিদ {email}-এ ইমেইল করে দিয়েছি।",
@@ -737,7 +737,7 @@ export const bn: Dict = {
   },
 
   email: {
-    receiptSubject: "আপনার Sending Vibes কার্ড",
+    receiptSubject: "আপনার Envelette কার্ড",
     receiptTitle: "ধন্যবাদ। আপনার কার্ডগুলো তৈরি।",
     receiptIntro: "এই রইল আপনার কার্ডগুলোর লিংক। ইমেইলটা যত্ন করে রেখে দিন: যার কাছে কোনো কার্ডের লিংক থাকবে, সে-ই সেই কার্ডটা খুলতে পারবে।",
     cardFor: "{to}-এর জন্য, {from}-এর পক্ষ থেকে",
@@ -750,11 +750,11 @@ export const bn: Dict = {
     cardTitle: "{from} আপনার জন্য একটা ইন্টারঅ্যাকটিভ কার্ড বানিয়েছে",
     cardBody: "{to}, কার্ডটা খুলতে নিচের বোতামে ট্যাপ করুন। সাউন্ড চালু রাখলে সবচেয়ে ভালো লাগবে।",
     cardButton: "আপনার কার্ড খুলুন",
-    cardFooter: "{from}-এর পক্ষ থেকে Sending Vibes পাঠিয়েছে।",
+    cardFooter: "{from}-এর পক্ষ থেকে Envelette পাঠিয়েছে।",
   },
 
   create: {
-    metaTitle: "কার্ড বানান · Sending Vibes",
+    metaTitle: "কার্ড বানান · Envelette",
     startOver: "আবার শুরু করুন",
     occasionTitle: "কী উদযাপন করছি আমরা?",
     occasionIntro: "{o}টি উপলক্ষ, {n}টি ডিজাইন। একটা বাছুন, তার ডিজাইনগুলো দেখুন।",

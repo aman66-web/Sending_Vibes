@@ -2,7 +2,7 @@ import type { Dict } from "./en";
 
 export const pa: Dict = {
   meta: {
-    title: "Sending Vibes: ਪਰਸਨਲ ਇੰਟਰੈਕਟਿਵ ਕਾਰਡ, ਜੋ ਉਨ੍ਹਾਂ ਨੂੰ ਸੱਚੀਂ ਯਾਦ ਰਹਿਣਗੇ",
+    title: "Envelette: ਪਰਸਨਲ ਇੰਟਰੈਕਟਿਵ ਕਾਰਡ, ਜੋ ਉਨ੍ਹਾਂ ਨੂੰ ਸੱਚੀਂ ਯਾਦ ਰਹਿਣਗੇ",
     description:
       "ਜਨਮਦਿਨ, ਵੈਲੇਨਟਾਈਨ, ਦੀਵਾਲੀ, ਈਦ, ਕ੍ਰਿਸਮਸ, ਹੈਲੋਵੀਨ ਅਤੇ ਹੋਰ ਬਹੁਤ ਕੁਝ ਲਈ ਪਰਸਨਲ ਇੰਟਰੈਕਟਿਵ ਕਾਰਡ। ਭੱਜ ਜਾਣ ਵਾਲੇ ‘ਨਹੀਂ’ ਬਟਨ, ਛੋਟੀਆਂ ਗੇਮਾਂ, ਤੁਹਾਡੀਆਂ ਫ਼ੋਟੋਆਂ, ਸੰਗੀਤ ਅਤੇ ਇੱਕ ਧਮਾਕੇਦਾਰ ਅੰਤ। ਬੱਸ ਖ਼ਾਲੀ ਥਾਵਾਂ ਭਰੋ।",
   },
@@ -28,7 +28,7 @@ export const pa: Dict = {
     pricing: "ਕੀਮਤ",
     help: "ਮਦਦ ਅਤੇ ਆਮ ਸਵਾਲ",
     privacy: "ਪ੍ਰਾਈਵੇਸੀ",
-    copyright: "© {year} Sending Vibes। ‘ਨਹੀਂ’ ਵਾਲਾ ਬਟਨ ਹਾਲੇ ਵੀ ਕੰਮ ਨਹੀਂ ਕਰਦਾ।",
+    copyright: "© {year} Envelette। ‘ਨਹੀਂ’ ਵਾਲਾ ਬਟਨ ਹਾਲੇ ਵੀ ਕੰਮ ਨਹੀਂ ਕਰਦਾ।",
   },
 
   common: {
@@ -45,7 +45,7 @@ export const pa: Dict = {
     allCards: "ਸਾਰੇ ਕਾਰਡ",
     seeAll: "ਸਾਰੇ ਵੇਖੋ →",
     new: "ਨਵਾਂ",
-    demoTitle: "{label} ਡੈਮੋ · Sending Vibes",
+    demoTitle: "{label} ਡੈਮੋ · Envelette",
     cardsStayEnglish: "ਕਾਰਡ ਖ਼ੁਦ ਅੰਗਰੇਜ਼ੀ ਵਿੱਚ ਲਿਖੇ ਹੋਏ ਹਨ, ਪਰ ਤੁਸੀਂ ਆਪਣੇ ਸ਼ਬਦ ਕਿਸੇ ਵੀ ਭਾਸ਼ਾ ਵਿੱਚ ਲਿਖ ਸਕਦੇ ਹੋ।",
   },
 
@@ -446,21 +446,21 @@ export const pa: Dict = {
   },
 
   cardsPage: {
-    metaTitle: "ਸਾਰੇ ਕਾਰਡ · Sending Vibes",
+    metaTitle: "ਸਾਰੇ ਕਾਰਡ · Envelette",
     metaDescription: "ਵੈਲੇਨਟਾਈਨ, ਜਨਮਦਿਨ, ਦੀਵਾਲੀ, ਕ੍ਰਿਸਮਸ, ਈਦ, ਹੈਲੋਵੀਨ, ਵਿਆਹ, ਨਵੇਂ ਬੱਚੇ ਅਤੇ ਹੋਰ ਬਹੁਤ ਕੁਝ ਲਈ {n} ਪਰਸਨਲ ਇੰਟਰੈਕਟਿਵ ਕਾਰਡ ਡਿਜ਼ਾਈਨ।",
     title: "ਸਾਰੇ ਕਾਰਡ",
     intro: "{n} ਡਿਜ਼ਾਈਨ। ਸਕਰੋਲ ਕਰਦਿਆਂ ਹਰ ਇੱਕ ਆਪ ਹੀ ਚੱਲਣ ਲੱਗਦਾ ਹੈ। ਕੋਈ ਖੋਲ੍ਹ ਕੇ ਆਪਣੇ ਨਾਂਵਾਂ ਨਾਲ ਅਜ਼ਮਾਓ, ਫਿਰ ਉਸ ਨੂੰ ਆਪਣਾ ਬਣਾਓ।",
   },
 
   occasionsPage: {
-    metaTitle: "ਹਰ ਮੌਕੇ ਲਈ ਇੰਟਰੈਕਟਿਵ ਕਾਰਡ · Sending Vibes",
+    metaTitle: "ਹਰ ਮੌਕੇ ਲਈ ਇੰਟਰੈਕਟਿਵ ਕਾਰਡ · Envelette",
     metaDescription: "{n} ਮੌਕਿਆਂ ਲਈ ਪਰਸਨਲ ਇੰਟਰੈਕਟਿਵ ਕਾਰਡ: ਵੈਲੇਨਟਾਈਨ, ਜਨਮਦਿਨ, ਦੀਵਾਲੀ, ਈਦ, ਕ੍ਰਿਸਮਸ, ਹੈਲੋਵੀਨ, ਵਿਆਹ, ਨਵੇਂ ਬੱਚੇ ਅਤੇ ਹੋਰ ਬਹੁਤ ਕੁਝ।",
     title: "ਮੌਕੇ",
     intro: "{o} ਮੌਕੇ ਅਤੇ {n} ਡਿਜ਼ਾਈਨ। ਜੋ ਸਭ ਤੋਂ ਜਲਦੀ ਆ ਰਹੇ ਹਨ, ਉਹ ਸਭ ਤੋਂ ਪਹਿਲਾਂ ਹਨ।",
   },
 
   occasionPage: {
-    metaTitle: "ਇੰਟਰੈਕਟਿਵ {label} ਕਾਰਡ · Sending Vibes",
+    metaTitle: "ਇੰਟਰੈਕਟਿਵ {label} ਕਾਰਡ · Envelette",
     metaSuffix: "ਦੋ ਮਿੰਟਾਂ ਵਿੱਚ ਆਪਣਾ ਬਣਾਓ, ਕੋਈ ਕੋਡਿੰਗ ਨਹੀਂ।",
     // {label} is shown in red.
     title: "ਇੰਟਰੈਕਟਿਵ {label} ਕਾਰਡ",
@@ -476,7 +476,7 @@ export const pa: Dict = {
   },
 
   product: {
-    metaTitle: "{name} · {occasion} ਕਾਰਡ · Sending Vibes",
+    metaTitle: "{name} · {occasion} ਕਾਰਡ · Envelette",
     onPhone: "📱 ਫ਼ੋਨ ਉੱਤੇ",
     onComputer: "💻 ਕੰਪਿਊਟਰ ਉੱਤੇ",
     live: "ਇਹ ਲਾਈਵ ਹੈ, ਟੈਪ ਕਰਕੇ ਵੇਖੋ ↑",
@@ -526,7 +526,7 @@ export const pa: Dict = {
   },
 
   help: {
-    metaTitle: "ਮਦਦ ਅਤੇ ਆਮ ਸਵਾਲ · Sending Vibes",
+    metaTitle: "ਮਦਦ ਅਤੇ ਆਮ ਸਵਾਲ · Envelette",
     metaDescription: "ਇੰਟਰੈਕਟਿਵ ਕਾਰਡ ਕਿਵੇਂ ਕੰਮ ਕਰਦੇ ਹਨ, ਇੱਕ ਕਾਰਡ ਕਿਵੇਂ ਬਣਾਉਣਾ ਅਤੇ ਭੇਜਣਾ ਹੈ, ਅਤੇ ਆਮ ਸਵਾਲਾਂ ਦੇ ਜਵਾਬ।",
     title: "ਮਦਦ ਅਤੇ ਸਵਾਲ",
     intro: "ਇੰਟਰੈਕਟਿਵ ਕਾਰਡ ਬਣਾਉਣ, ਭੇਜਣ ਅਤੇ ਖੋਲ੍ਹਣ ਬਾਰੇ ਹਰ ਉਹ ਗੱਲ ਜੋ ਤੁਹਾਨੂੰ ਪਤਾ ਹੋਣੀ ਚਾਹੀਦੀ ਹੈ।",
@@ -587,8 +587,8 @@ export const pa: Dict = {
   },
 
   privacy: {
-    metaTitle: "ਪ੍ਰਾਈਵੇਸੀ · Sending Vibes",
-    metaDescription: "ਜਦੋਂ ਤੁਸੀਂ ਕਾਰਡ ਬਣਾਉਂਦੇ ਹੋ ਤਾਂ Sending Vibes ਕੀ ਸਟੋਰ ਕਰਦਾ ਹੈ, ਉਸ ਨੂੰ ਕੌਣ ਵੇਖ ਸਕਦਾ ਹੈ, ਅਤੇ ਫ਼ੋਟੋਆਂ ਨੂੰ ਕਿਵੇਂ ਸੰਭਾਲਿਆ ਜਾਂਦਾ ਹੈ।",
+    metaTitle: "ਪ੍ਰਾਈਵੇਸੀ · Envelette",
+    metaDescription: "ਜਦੋਂ ਤੁਸੀਂ ਕਾਰਡ ਬਣਾਉਂਦੇ ਹੋ ਤਾਂ Envelette ਕੀ ਸਟੋਰ ਕਰਦਾ ਹੈ, ਉਸ ਨੂੰ ਕੌਣ ਵੇਖ ਸਕਦਾ ਹੈ, ਅਤੇ ਫ਼ੋਟੋਆਂ ਨੂੰ ਕਿਵੇਂ ਸੰਭਾਲਿਆ ਜਾਂਦਾ ਹੈ।",
     title: "ਤੁਹਾਡੇ ਕਾਰਡ, ਤੁਹਾਡਾ ਨਿੱਜੀ ਮਾਮਲਾ",
     intro: "ਸਾਦੇ ਸ਼ਬਦਾਂ ਵਿੱਚ: ਜਦੋਂ ਤੁਸੀਂ ਕਾਰਡ ਬਣਾਉਂਦੇ ਹੋ ਤਾਂ ਅਸੀਂ ਕੀ ਸਟੋਰ ਕਰਦੇ ਹਾਂ, ਉਸ ਨੂੰ ਕੌਣ ਵੇਖ ਸਕਦਾ ਹੈ ਅਤੇ ਅਸੀਂ ਕੀ ਨਹੀਂ ਕਰਦੇ।",
     sections: [
@@ -652,9 +652,9 @@ export const pa: Dict = {
     openAria: "ਸਾਡੇ ਨਾਲ ਚੈਟ ਕਰੋ",
     close: "ਬੰਦ ਕਰੋ",
     closeAria: "ਚੈਟ ਬੰਦ ਕਰੋ",
-    title: "Sending Vibes",
+    title: "Envelette",
     subtitle: "AI ਮਦਦਗਾਰ · ਆਮ ਤੌਰ ਉੱਤੇ ਕੁਝ ਸਕਿੰਟਾਂ ਵਿੱਚ ਜਵਾਬ ਦਿੰਦਾ ਹੈ",
-    dialogAria: "Sending Vibes ਨਾਲ ਚੈਟ ਕਰੋ",
+    dialogAria: "Envelette ਨਾਲ ਚੈਟ ਕਰੋ",
     newChat: "ਨਵੀਂ ਚੈਟ",
     placeholder: "ਕਾਰਡਾਂ ਬਾਰੇ ਕੁਝ ਵੀ ਪੁੱਛੋ…",
     inputAria: "ਤੁਹਾਡਾ ਸੁਨੇਹਾ",
@@ -675,7 +675,7 @@ export const pa: Dict = {
   },
 
   basket: {
-    metaTitle: "ਤੁਹਾਡਾ ਕਾਰਟ · Sending Vibes",
+    metaTitle: "ਤੁਹਾਡਾ ਕਾਰਟ · Envelette",
     title: "ਤੁਹਾਡਾ ਕਾਰਟ",
     empty: "ਤੁਹਾਡਾ ਕਾਰਟ ਖ਼ਾਲੀ ਹੈ।",
     emptyCta: "ਕੋਈ ਕਾਰਡ ਲੱਭੋ",
@@ -715,7 +715,7 @@ export const pa: Dict = {
       consent: "ਇਹ ਪੱਕਾ ਕਰਨ ਲਈ ਬਾਕਸ ਉੱਤੇ ਨਿਸ਼ਾਨ ਲਾਓ ਕਿ ਤੁਹਾਨੂੰ ਆਪਣੇ ਕਾਰਡ ਤੁਰੰਤ ਚਾਹੀਦੇ ਹਨ।",
     },
     thanks: {
-      metaTitle: "ਧੰਨਵਾਦ · Sending Vibes",
+      metaTitle: "ਧੰਨਵਾਦ · Envelette",
       title: "ਧੰਨਵਾਦ!",
       intro: "ਤੁਹਾਡੇ ਕਾਰਡਾਂ ਦਾ ਭੁਗਤਾਨ ਹੋ ਗਿਆ ਹੈ ਅਤੇ ਉਹ ਭੇਜਣ ਲਈ ਤਿਆਰ ਹਨ।",
       receipt: "ਅਸੀਂ ਤੁਹਾਡੇ ਸਾਰੇ ਲਿੰਕਾਂ ਸਮੇਤ ਰਸੀਦ {email} ਉੱਤੇ ਈਮੇਲ ਕਰ ਦਿੱਤੀ ਹੈ।",
@@ -737,7 +737,7 @@ export const pa: Dict = {
   },
 
   email: {
-    receiptSubject: "ਤੁਹਾਡੇ Sending Vibes ਕਾਰਡ",
+    receiptSubject: "ਤੁਹਾਡੇ Envelette ਕਾਰਡ",
     receiptTitle: "ਧੰਨਵਾਦ। ਤੁਹਾਡੇ ਕਾਰਡ ਤਿਆਰ ਹਨ।",
     receiptIntro: "ਇਹ ਰਹੇ ਤੁਹਾਡੇ ਕਾਰਡਾਂ ਦੇ ਲਿੰਕ। ਇਸ ਈਮੇਲ ਨੂੰ ਸਾਂਭ ਕੇ ਰੱਖੋ: ਜਿਸ ਕੋਲ ਵੀ ਕਿਸੇ ਕਾਰਡ ਦਾ ਲਿੰਕ ਹੈ, ਉਹ ਉਸ ਕਾਰਡ ਨੂੰ ਖੋਲ੍ਹ ਸਕਦਾ ਹੈ।",
     cardFor: "{to} ਲਈ, {from} ਵੱਲੋਂ",
@@ -750,11 +750,11 @@ export const pa: Dict = {
     cardTitle: "{from} ਨੇ ਤੁਹਾਡੇ ਲਈ ਇੱਕ ਇੰਟਰੈਕਟਿਵ ਕਾਰਡ ਬਣਾਇਆ ਹੈ",
     cardBody: "{to}, ਇਸ ਨੂੰ ਖੋਲ੍ਹਣ ਲਈ ਹੇਠਾਂ ਦਿੱਤੇ ਬਟਨ ਉੱਤੇ ਟੈਪ ਕਰੋ। ਆਵਾਜ਼ ਚਾਲੂ ਰੱਖ ਕੇ ਵੇਖੋ, ਹੋਰ ਵੀ ਮਜ਼ਾ ਆਵੇਗਾ।",
     cardButton: "ਆਪਣਾ ਕਾਰਡ ਖੋਲ੍ਹੋ",
-    cardFooter: "{from} ਵੱਲੋਂ Sending Vibes ਰਾਹੀਂ ਭੇਜਿਆ ਗਿਆ।",
+    cardFooter: "{from} ਵੱਲੋਂ Envelette ਰਾਹੀਂ ਭੇਜਿਆ ਗਿਆ।",
   },
 
   create: {
-    metaTitle: "ਕਾਰਡ ਬਣਾਓ · Sending Vibes",
+    metaTitle: "ਕਾਰਡ ਬਣਾਓ · Envelette",
     startOver: "ਨਵੇਂ ਸਿਰਿਓਂ ਸ਼ੁਰੂ ਕਰੋ",
     occasionTitle: "ਕਿਸ ਗੱਲ ਦਾ ਜਸ਼ਨ ਮਨਾ ਰਹੇ ਹਾਂ?",
     occasionIntro: "{o} ਮੌਕੇ, {n} ਡਿਜ਼ਾਈਨ। ਡਿਜ਼ਾਈਨ ਵੇਖਣ ਲਈ ਕੋਈ ਮੌਕਾ ਚੁਣੋ।",

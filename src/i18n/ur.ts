@@ -2,7 +2,7 @@ import type { Dict } from "./en";
 
 export const ur: Dict = {
   meta: {
-    title: "Sending Vibes: آپ کے اپنے انٹرایکٹو کارڈ، جو انہیں سچ مچ یاد رہیں گے",
+    title: "Envelette: آپ کے اپنے انٹرایکٹو کارڈ، جو انہیں سچ مچ یاد رہیں گے",
     description:
       "سالگرہ، ویلنٹائن، دیوالی، عید، کرسمس، ہیلووین اور بہت سے موقعوں کے لیے پرسنلائزڈ انٹرایکٹو کارڈ۔ بھاگنے والے نہیں کے بٹن، منی گیمز، آپ کی تصویریں، موسیقی اور زبردست اختتام۔ بس خالی جگہیں بھریں۔",
   },
@@ -28,7 +28,7 @@ export const ur: Dict = {
     pricing: "قیمت",
     help: "مدد اور عام سوالات",
     privacy: "پرائیویسی",
-    copyright: "© {year} Sending Vibes۔ نہیں والا بٹن اب بھی کام نہیں کرتا۔",
+    copyright: "© {year} Envelette۔ نہیں والا بٹن اب بھی کام نہیں کرتا۔",
   },
 
   common: {
@@ -45,7 +45,7 @@ export const ur: Dict = {
     allCards: "سارے کارڈ",
     seeAll: "سب دیکھیں →",
     new: "نیا",
-    demoTitle: "{label} ڈیمو · Sending Vibes",
+    demoTitle: "{label} ڈیمو · Envelette",
     cardsStayEnglish: "کارڈ خود انگریزی میں لکھے ہوتے ہیں، لیکن آپ اپنے الفاظ کسی بھی زبان میں لکھ سکتے ہیں۔",
   },
 
@@ -446,21 +446,21 @@ export const ur: Dict = {
   },
 
   cardsPage: {
-    metaTitle: "سارے کارڈ · Sending Vibes",
+    metaTitle: "سارے کارڈ · Envelette",
     metaDescription: "ویلنٹائن، سالگرہ، دیوالی، کرسمس، عید، ہیلووین، شادی، ننھے مہمان اور بہت سے موقعوں کے لیے {n} پرسنلائزڈ انٹرایکٹو کارڈ ڈیزائن۔",
     title: "سارے کارڈ",
     intro: "{n} ڈیزائن۔ اسکرول کرتے ہوئے ہر ایک خود چلنے لگتا ہے۔ کوئی بھی کھول کر اپنے ناموں کے ساتھ آزمائیں، پھر اسے اپنا بنائیں۔",
   },
 
   occasionsPage: {
-    metaTitle: "ہر موقع کے لیے انٹرایکٹو کارڈ · Sending Vibes",
+    metaTitle: "ہر موقع کے لیے انٹرایکٹو کارڈ · Envelette",
     metaDescription: "{n} موقعوں کے لیے پرسنلائزڈ انٹرایکٹو کارڈ: ویلنٹائن، سالگرہ، دیوالی، عید، کرسمس، ہیلووین، شادی، ننھے مہمان اور بہت کچھ۔",
     title: "مواقع",
     intro: "{o} مواقع اور {n} ڈیزائن۔ جو سب سے پہلے آ رہے ہیں وہ سب سے اوپر ہیں۔",
   },
 
   occasionPage: {
-    metaTitle: "انٹرایکٹو {label} کارڈ · Sending Vibes",
+    metaTitle: "انٹرایکٹو {label} کارڈ · Envelette",
     metaSuffix: "دو منٹ میں اپنا بنائیں، کوئی کوڈنگ نہیں۔",
     // {label} is shown in red.
     title: "انٹرایکٹو {label} کارڈ",
@@ -476,7 +476,7 @@ export const ur: Dict = {
   },
 
   product: {
-    metaTitle: "{name} · {occasion} کارڈ · Sending Vibes",
+    metaTitle: "{name} · {occasion} کارڈ · Envelette",
     onPhone: "📱 فون پر",
     onComputer: "💻 کمپیوٹر پر",
     live: "یہ لائیو ہے، ٹیپ کر کے دیکھیں ↑",
@@ -526,7 +526,7 @@ export const ur: Dict = {
   },
 
   help: {
-    metaTitle: "مدد اور عام سوالات · Sending Vibes",
+    metaTitle: "مدد اور عام سوالات · Envelette",
     metaDescription: "انٹرایکٹو کارڈ کیسے کام کرتے ہیں، انہیں کیسے بنائیں اور بھیجیں، اور عام سوالوں کے جواب۔",
     title: "مدد اور سوالات",
     intro: "انٹرایکٹو کارڈ بنانے، بھیجنے اور کھولنے کے بارے میں وہ سب کچھ جو آپ کو جاننا چاہیے۔",
@@ -587,8 +587,8 @@ export const ur: Dict = {
   },
 
   privacy: {
-    metaTitle: "پرائیویسی · Sending Vibes",
-    metaDescription: "کارڈ بناتے وقت Sending Vibes کیا محفوظ کرتا ہے، اسے کون دیکھ سکتا ہے، اور تصویروں کو کیسے سنبھالا جاتا ہے۔",
+    metaTitle: "پرائیویسی · Envelette",
+    metaDescription: "کارڈ بناتے وقت Envelette کیا محفوظ کرتا ہے، اسے کون دیکھ سکتا ہے، اور تصویروں کو کیسے سنبھالا جاتا ہے۔",
     title: "آپ کے کارڈ، آپ کا معاملہ",
     intro: "سیدھی سادی زبان میں: کارڈ بناتے وقت ہم کیا محفوظ کرتے ہیں، اسے کون دیکھ سکتا ہے، اور ہم کیا نہیں کرتے۔",
     sections: [
@@ -652,9 +652,9 @@ export const ur: Dict = {
     openAria: "ہم سے چیٹ کریں",
     close: "بند کریں",
     closeAria: "چیٹ بند کریں",
-    title: "Sending Vibes",
+    title: "Envelette",
     subtitle: "AI مددگار · عموماً چند سیکنڈ میں جواب دیتا ہے",
-    dialogAria: "Sending Vibes سے چیٹ",
+    dialogAria: "Envelette سے چیٹ",
     newChat: "نئی چیٹ",
     placeholder: "کارڈز کے بارے میں کچھ بھی پوچھیں…",
     inputAria: "آپ کا پیغام",
@@ -675,7 +675,7 @@ export const ur: Dict = {
   },
 
   basket: {
-    metaTitle: "آپ کی ٹوکری · Sending Vibes",
+    metaTitle: "آپ کی ٹوکری · Envelette",
     title: "آپ کی ٹوکری",
     empty: "آپ کی ٹوکری خالی ہے۔",
     emptyCta: "کوئی کارڈ ڈھونڈیں",
@@ -715,7 +715,7 @@ export const ur: Dict = {
       consent: "باکس پر ٹک کر کے تصدیق کریں کہ آپ اپنے کارڈ فوراً چاہتے ہیں۔",
     },
     thanks: {
-      metaTitle: "شکریہ · Sending Vibes",
+      metaTitle: "شکریہ · Envelette",
       title: "شکریہ!",
       intro: "آپ کے کارڈز کی ادائیگی ہو گئی ہے اور وہ بھیجنے کے لیے تیار ہیں۔",
       receipt: "ہم نے آپ کے سارے لنکس کے ساتھ رسید {email} پر ای میل کر دی ہے۔",
@@ -737,7 +737,7 @@ export const ur: Dict = {
   },
 
   email: {
-    receiptSubject: "آپ کے Sending Vibes کارڈ",
+    receiptSubject: "آپ کے Envelette کارڈ",
     receiptTitle: "شکریہ۔ آپ کے کارڈ تیار ہیں۔",
     receiptIntro: "یہ رہے آپ کے کارڈز کے لنکس۔ اس ای میل کو سنبھال کر رکھیں: جس کے پاس بھی کسی کارڈ کا لنک ہو، وہ اسے کھول سکتا ہے۔",
     cardFor: "{to} کے لیے، {from} کی طرف سے",
@@ -750,11 +750,11 @@ export const ur: Dict = {
     cardTitle: "{from} نے آپ کے لیے ایک انٹرایکٹو کارڈ بنایا ہے",
     cardBody: "{to}، اسے کھولنے کے لیے نیچے دیے گئے بٹن پر ٹیپ کریں۔ آواز آن رکھ کر کھولیں تو سب سے اچھا لگے گا۔",
     cardButton: "اپنا کارڈ کھولیں",
-    cardFooter: "{from} کی طرف سے Sending Vibes نے بھیجا۔",
+    cardFooter: "{from} کی طرف سے Envelette نے بھیجا۔",
   },
 
   create: {
-    metaTitle: "کارڈ بنائیں · Sending Vibes",
+    metaTitle: "کارڈ بنائیں · Envelette",
     startOver: "نئے سرے سے شروع کریں",
     occasionTitle: "کیا موقع ہے؟",
     occasionIntro: "{o} مواقع، {n} ڈیزائن۔ ڈیزائن دیکھنے کے لیے کوئی ایک چنیں۔",

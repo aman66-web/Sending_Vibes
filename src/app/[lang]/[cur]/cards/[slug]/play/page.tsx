@@ -11,7 +11,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const t = getTemplate((await params).slug);
-  return t ? { title: `${t.name} (demo) · Sending Vibes` } : {};
+  return t ? { title: `${t.name} (demo) · Envelette` } : {};
 }
 
 // Full-screen demo of a design, exactly as a recipient would see it.

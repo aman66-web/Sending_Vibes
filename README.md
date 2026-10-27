@@ -1,4 +1,4 @@
-# Sending Vibes 💌
+# Envelette 💌
 
 Interactive e-cards people actually remember. Instead of a static card, the person gets a link to a little experience: a "Will you be my Valentine?" question where the **No button runs away**, their photos as a polaroid stack, a mini game, a prize wheel, a typewriter message, music and a big finale.
 

@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { OCCASIONS } from "@/lib/card";
 import { TEMPLATES } from "@/lib/catalog";
 
-const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sending-vibes.vercel.app";
+const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://envelette.com";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [

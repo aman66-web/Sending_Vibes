@@ -6,7 +6,7 @@ import type { Order, OrderItem } from "./orders";
 import { formatMoney } from "./pricing";
 
 // Email goes out through Resend once RESEND_API_KEY and EMAIL_FROM
-// (e.g. "Sending Vibes <cards@yourdomain.com>") are set.
+// (e.g. "Envelette <cards@envelette.com>") are set.
 export function emailReady() {
   return Boolean(process.env.RESEND_API_KEY && process.env.EMAIL_FROM);
 }
@@ -30,7 +30,7 @@ function layout(order: Order, body: string) {
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3ecdf"><tr><td align="center" style="padding:32px 16px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#fbf7ef;border:2px solid #1f1b16;border-radius:18px">
 <tr><td style="height:6px;border-radius:16px 16px 0 0;background:repeating-linear-gradient(-45deg,#d8432f 0 10px,#fbf7ef 10px 20px,#2b5aa6 20px 30px,#fbf7ef 30px 40px)"></td></tr>
-<tr><td style="padding:28px 28px 8px;font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:bold">Sending Vibes</td></tr>
+<tr><td style="padding:28px 28px 8px;font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:bold">Envelette</td></tr>
 <tr><td style="padding:8px 28px 28px;font-size:16px;line-height:1.55">${body}</td></tr>
 </table></td></tr></table></body></html>`;
 }

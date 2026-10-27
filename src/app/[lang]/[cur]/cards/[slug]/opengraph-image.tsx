@@ -5,7 +5,7 @@ import { DEFAULT_CURRENCY, isCurrency, price } from "@/lib/pricing";
 import { occasions } from "@/lib/templates";
 import { themes } from "@/lib/themes";
 
-export const alt = "An interactive card from Sending Vibes";
+export const alt = "An interactive card from Envelette";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -22,13 +22,13 @@ export default async function ProductOgImage({ params }: { params: Promise<{ slu
           <div style={{ display: "flex", fontSize: 30, fontWeight: 700, color: theme.muted }}>
             {t ? `Interactive ${occasions[t.occasion].label} card` : "Interactive cards"}
           </div>
-          <div style={{ display: "flex", fontSize: 80, fontWeight: 800, lineHeight: 1.04, marginTop: 18 }}>{t?.headline ?? "Sending Vibes"}</div>
+          <div style={{ display: "flex", fontSize: 80, fontWeight: 800, lineHeight: 1.04, marginTop: 18 }}>{t?.headline ?? "Envelette"}</div>
           <div style={{ display: "flex", fontSize: 30, marginTop: 24, lineHeight: 1.3, color: theme.muted }}>{t?.blurb ?? ""}</div>
           <div style={{ display: "flex", marginTop: 36, alignItems: "center" }}>
             <div style={{ display: "flex", background: theme.accent, color: theme.accentText, fontSize: 30, fontWeight: 700, padding: "14px 32px", borderRadius: 999 }}>
               {`Personalise it · ${label}`}
             </div>
-            <div style={{ display: "flex", fontSize: 28, fontWeight: 700, marginLeft: 26, opacity: 0.75 }}>Sending Vibes</div>
+            <div style={{ display: "flex", fontSize: 28, fontWeight: 700, marginLeft: 26, opacity: 0.75 }}>Envelette</div>
           </div>
         </div>
         <div

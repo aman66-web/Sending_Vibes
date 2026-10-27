@@ -5,7 +5,7 @@ import type { Dict } from "./en";
 
 export const pl: Dict = {
   meta: {
-    title: "Sending Vibes: personalizowane interaktywne kartki, które naprawdę zapadają w pamięć",
+    title: "Envelette: personalizowane interaktywne kartki, które naprawdę zapadają w pamięć",
     description:
       "Personalizowane interaktywne kartki na urodziny, walentynki, Diwali, Id, Boże Narodzenie, Halloween i nie tylko. Uciekające przyciski „Nie”, minigry, twoje zdjęcia, muzyka i wielki finał. Wystarczy uzupełnić puste pola.",
   },
@@ -31,7 +31,7 @@ export const pl: Dict = {
     pricing: "Cennik",
     help: "Pomoc i FAQ",
     privacy: "Prywatność",
-    copyright: "© {year} Sending Vibes. Przycisk „Nie” nadal nie działa.",
+    copyright: "© {year} Envelette. Przycisk „Nie” nadal nie działa.",
   },
 
   common: {
@@ -48,7 +48,7 @@ export const pl: Dict = {
     allCards: "Wszystkie kartki",
     seeAll: "Zobacz wszystkie →",
     new: "Nowość",
-    demoTitle: "Demo: {label} · Sending Vibes",
+    demoTitle: "Demo: {label} · Envelette",
     cardsStayEnglish: "Same kartki są napisane po angielsku, ale możesz wpisać własne słowa w dowolnym języku.",
   },
 
@@ -449,21 +449,21 @@ export const pl: Dict = {
   },
 
   cardsPage: {
-    metaTitle: "Wszystkie kartki · Sending Vibes",
+    metaTitle: "Wszystkie kartki · Envelette",
     metaDescription: "Personalizowane interaktywne kartki na walentynki, urodziny, Diwali, Boże Narodzenie, Id, Halloween, śluby, narodziny dziecka i nie tylko. Projekty: {n}.",
     title: "Wszystkie kartki",
     intro: "Projekty: {n}. Każdy odtwarza się sam, gdy przewijasz. Otwórz dowolny, wypróbuj go z waszymi imionami i zrób po swojemu.",
   },
 
   occasionsPage: {
-    metaTitle: "Interaktywne kartki na każdą okazję · Sending Vibes",
+    metaTitle: "Interaktywne kartki na każdą okazję · Envelette",
     metaDescription: "Personalizowane interaktywne kartki na różne okazje, łącznie {n}: walentynki, urodziny, Diwali, Id, Boże Narodzenie, Halloween, śluby, narodziny dziecka i nie tylko.",
     title: "Okazje",
     intro: "Okazje: {o}, projekty: {n}. Najbliższe są na początku.",
   },
 
   occasionPage: {
-    metaTitle: "{label}: interaktywne kartki · Sending Vibes",
+    metaTitle: "{label}: interaktywne kartki · Envelette",
     metaSuffix: "Spersonalizuj kartkę w dwie minuty, bez programowania.",
     // {label} is shown in red.
     title: "{label}: interaktywne kartki",
@@ -479,7 +479,7 @@ export const pl: Dict = {
   },
 
   product: {
-    metaTitle: "{name} · Kartka: {occasion} · Sending Vibes",
+    metaTitle: "{name} · Kartka: {occasion} · Envelette",
     onPhone: "📱 Na telefonie",
     onComputer: "💻 Na komputerze",
     live: "działa na żywo, stukaj i przeglądaj ↑",
@@ -529,7 +529,7 @@ export const pl: Dict = {
   },
 
   help: {
-    metaTitle: "Pomoc i FAQ · Sending Vibes",
+    metaTitle: "Pomoc i FAQ · Envelette",
     metaDescription: "Jak działają interaktywne kartki, jak je zrobić i wysłać oraz odpowiedzi na najczęstsze pytania.",
     title: "Pomoc i pytania",
     intro: "Wszystko, co warto wiedzieć o tworzeniu, wysyłaniu i otwieraniu interaktywnej kartki.",
@@ -590,8 +590,8 @@ export const pl: Dict = {
   },
 
   privacy: {
-    metaTitle: "Prywatność · Sending Vibes",
-    metaDescription: "Co Sending Vibes przechowuje, gdy tworzysz kartkę, kto może ją zobaczyć i co dzieje się ze zdjęciami.",
+    metaTitle: "Prywatność · Envelette",
+    metaDescription: "Co Envelette przechowuje, gdy tworzysz kartkę, kto może ją zobaczyć i co dzieje się ze zdjęciami.",
     title: "Twoje kartki, twoja sprawa",
     intro: "Prosto i po ludzku: co przechowujemy, gdy tworzysz kartkę, kto może ją zobaczyć i czego nie robimy.",
     sections: [
@@ -655,9 +655,9 @@ export const pl: Dict = {
     openAria: "Porozmawiaj z nami na czacie",
     close: "Zamknij",
     closeAria: "Zamknij czat",
-    title: "Sending Vibes",
+    title: "Envelette",
     subtitle: "Pomocnik AI · zwykle odpowiada w kilka sekund",
-    dialogAria: "Czat z Sending Vibes",
+    dialogAria: "Czat z Envelette",
     newChat: "Nowy czat",
     placeholder: "Zapytaj o cokolwiek w sprawie kartek…",
     inputAria: "Twoja wiadomość",
@@ -678,7 +678,7 @@ export const pl: Dict = {
   },
 
   basket: {
-    metaTitle: "Twój koszyk · Sending Vibes",
+    metaTitle: "Twój koszyk · Envelette",
     title: "Twój koszyk",
     empty: "Twój koszyk jest pusty.",
     emptyCta: "Znajdź kartkę",
@@ -718,7 +718,7 @@ export const pl: Dict = {
       consent: "Zaznacz pole, żeby potwierdzić, że chcesz otrzymać kartki od razu.",
     },
     thanks: {
-      metaTitle: "Dziękujemy · Sending Vibes",
+      metaTitle: "Dziękujemy · Envelette",
       title: "Dziękujemy!",
       intro: "Twoje kartki są opłacone i gotowe do wysłania.",
       receipt: "Potwierdzenie zakupu ze wszystkimi linkami wysłaliśmy na adres {email}.",
@@ -740,7 +740,7 @@ export const pl: Dict = {
   },
 
   email: {
-    receiptSubject: "Twoje kartki z Sending Vibes",
+    receiptSubject: "Twoje kartki z Envelette",
     receiptTitle: "Dziękujemy. Twoje kartki są gotowe.",
     receiptIntro: "Oto linki do twoich kartek. Zachowaj tę wiadomość w bezpiecznym miejscu: każdy, kto ma link, może otworzyć daną kartkę.",
     cardFor: "Do: {to} · Od: {from}",
@@ -753,11 +753,11 @@ export const pl: Dict = {
     cardTitle: "{from} wysyła ci interaktywną kartkę",
     cardBody: "{to}, kliknij przycisk poniżej, żeby otworzyć kartkę. Najlepiej z włączonym dźwiękiem.",
     cardButton: "Otwórz kartkę",
-    cardFooter: "Wiadomość wysłana przez Sending Vibes w imieniu nadawcy: {from}.",
+    cardFooter: "Wiadomość wysłana przez Envelette w imieniu nadawcy: {from}.",
   },
 
   create: {
-    metaTitle: "Zrób kartkę · Sending Vibes",
+    metaTitle: "Zrób kartkę · Envelette",
     startOver: "Zacznij od nowa",
     occasionTitle: "Co świętujemy?",
     occasionIntro: "Okazje: {o}, projekty: {n}. Wybierz okazję, żeby zobaczyć jej projekty.",

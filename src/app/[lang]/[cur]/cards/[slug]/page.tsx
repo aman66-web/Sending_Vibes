@@ -38,7 +38,7 @@ export default async function ProductPage({ params }: Props) {
     "@type": "Product",
     name: `${t.name}: interactive ${occasions[t.occasion].label} card`,
     description: t.blurb,
-    brand: { "@type": "Brand", name: "Sending Vibes" },
+    brand: { "@type": "Brand", name: "Envelette" },
     offers: { "@type": "Offer", price: (PRICES.card / 100).toFixed(2), priceCurrency: currency.toUpperCase(), availability: "https://schema.org/InStock" },
   };
 

@@ -17,8 +17,13 @@ function preferred(header: string | null): Locale | undefined {
   return ranked.map((r) => r.lang).find(isLocale);
 }
 
+// The site's old address. Pages there move to envelette.com; the API (which this
+// proxy never sees) stays put, because Stripe's webhook still points at it.
+const OLD_HOST = "sending-vibes.vercel.app";
+
 export function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const { pathname, search } = request.nextUrl;
+  if (request.headers.get("host") === OLD_HOST) return NextResponse.redirect(`https://envelette.com${pathname}${search}`, 308);
   const [, first, second] = pathname.split("/");
   // Already has both (e.g. /hi/gbp/cards): serve it as it is.
   if (isLocale(first) && isCurrency(second)) return NextResponse.next();

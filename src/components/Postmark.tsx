@@ -17,7 +17,7 @@ export function Postmark({ id, middle, bottom, className = "" }: { id: string; m
       <g fill="currentColor" fontFamily="var(--font-ui-face), sans-serif" fontWeight="800" letterSpacing="1.4">
         <text fontSize="7.5" textAnchor="middle">
           <textPath href={`#${id}-top`} startOffset="50%">
-            SENDING VIBES
+            ENVELETTE
           </textPath>
         </text>
         <text fontSize="7.5" textAnchor="middle">

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sending-vibes.vercel.app";
+const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://envelette.com";
 
 export default function robots(): MetadataRoute.Robots {
   // Sent cards are private, so keep them (and the API) out of search results.

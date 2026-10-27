@@ -2,7 +2,7 @@ import type { Dict } from "./en";
 
 export const ar: Dict = {
   meta: {
-    title: "Sending Vibes: بطاقات تفاعلية مخصّصة سيتذكّرونها فعلًا",
+    title: "Envelette: بطاقات تفاعلية مخصّصة سيتذكّرونها فعلًا",
     description:
       "بطاقات تفاعلية مخصّصة لأعياد الميلاد وعيد الحب وديوالي والعيد والكريسماس والهالوين وغيرها. زر «لا» يهرب، وألعاب صغيرة، وصورك، وموسيقى، وخاتمة مبهرة. فقط املأ الفراغات.",
   },
@@ -28,7 +28,7 @@ export const ar: Dict = {
     pricing: "الأسعار",
     help: "المساعدة والأسئلة الشائعة",
     privacy: "الخصوصية",
-    copyright: "© {year} Sending Vibes. زر «لا» ما زال لا يعمل.",
+    copyright: "© {year} Envelette. زر «لا» ما زال لا يعمل.",
   },
 
   common: {
@@ -45,7 +45,7 @@ export const ar: Dict = {
     allCards: "كل البطاقات",
     seeAll: "عرض الكل →",
     new: "جديد",
-    demoTitle: "عرض تجريبي: {label} · Sending Vibes",
+    demoTitle: "عرض تجريبي: {label} · Envelette",
     cardsStayEnglish: "البطاقات نفسها مكتوبة بالإنجليزية، لكن يمكنك كتابة كلماتك بأي لغة تريدها.",
   },
 
@@ -446,21 +446,21 @@ export const ar: Dict = {
   },
 
   cardsPage: {
-    metaTitle: "كل البطاقات · Sending Vibes",
+    metaTitle: "كل البطاقات · Envelette",
     metaDescription: "{n} تصميم لبطاقات تفاعلية مخصّصة لعيد الحب وأعياد الميلاد وديوالي والكريسماس والعيد والهالوين والأعراس والمواليد الجدد وغيرها.",
     title: "كل البطاقات",
     intro: "{n} تصميم. كل واحد يعمل وحده وأنت تمرّر الصفحة. افتح أي تصميم لتجرّبه بأسمائكم، ثم اجعله بلمستك.",
   },
 
   occasionsPage: {
-    metaTitle: "بطاقات تفاعلية لكل مناسبة · Sending Vibes",
+    metaTitle: "بطاقات تفاعلية لكل مناسبة · Envelette",
     metaDescription: "بطاقات تفاعلية مخصّصة لـ{n} مناسبة: عيد الحب وأعياد الميلاد وديوالي والعيد والكريسماس والهالوين والأعراس والمواليد الجدد وغيرها.",
     title: "المناسبات",
     intro: "{o} مناسبة و{n} تصميم. الأقرب موعدًا تظهر أولًا.",
   },
 
   occasionPage: {
-    metaTitle: "بطاقات {label} التفاعلية · Sending Vibes",
+    metaTitle: "بطاقات {label} التفاعلية · Envelette",
     metaSuffix: "خصّص واحدة في دقيقتين، بلا برمجة.",
     // {label} is shown in red.
     title: "بطاقات {label} التفاعلية",
@@ -476,7 +476,7 @@ export const ar: Dict = {
   },
 
   product: {
-    metaTitle: "{name} · بطاقة {occasion} · Sending Vibes",
+    metaTitle: "{name} · بطاقة {occasion} · Envelette",
     onPhone: "📱 على الهاتف",
     onComputer: "💻 على الكمبيوتر",
     live: "إنها تعمل، تصفّحها ↑",
@@ -526,7 +526,7 @@ export const ar: Dict = {
   },
 
   help: {
-    metaTitle: "المساعدة والأسئلة الشائعة · Sending Vibes",
+    metaTitle: "المساعدة والأسئلة الشائعة · Envelette",
     metaDescription: "كيف تعمل البطاقات التفاعلية، وكيف تصنع واحدة وترسلها، وإجابات عن الأسئلة الشائعة.",
     title: "المساعدة والأسئلة",
     intro: "كل ما تحتاج إلى معرفته عن صنع البطاقة التفاعلية وإرسالها وفتحها.",
@@ -587,8 +587,8 @@ export const ar: Dict = {
   },
 
   privacy: {
-    metaTitle: "الخصوصية · Sending Vibes",
-    metaDescription: "ما الذي يحفظه Sending Vibes عندما تصنع بطاقة، ومن يمكنه رؤيتها، وكيف نتعامل مع الصور.",
+    metaTitle: "الخصوصية · Envelette",
+    metaDescription: "ما الذي يحفظه Envelette عندما تصنع بطاقة، ومن يمكنه رؤيتها، وكيف نتعامل مع الصور.",
     title: "بطاقاتك، شأنك الخاص",
     intro: "بكلام بسيط: ما نحفظه عندما تصنع بطاقة، ومن يمكنه رؤيتها، وما لا نفعله.",
     sections: [
@@ -652,9 +652,9 @@ export const ar: Dict = {
     openAria: "تحدّث معنا",
     close: "إغلاق",
     closeAria: "إغلاق الدردشة",
-    title: "Sending Vibes",
+    title: "Envelette",
     subtitle: "مساعد بالذكاء الاصطناعي · يردّ عادةً خلال ثوانٍ",
-    dialogAria: "الدردشة مع Sending Vibes",
+    dialogAria: "الدردشة مع Envelette",
     newChat: "دردشة جديدة",
     placeholder: "اسأل أي شيء عن البطاقات…",
     inputAria: "رسالتك",
@@ -675,7 +675,7 @@ export const ar: Dict = {
   },
 
   basket: {
-    metaTitle: "سلّتك · Sending Vibes",
+    metaTitle: "سلّتك · Envelette",
     title: "سلّتك",
     empty: "سلّتك فارغة.",
     emptyCta: "ابحث عن بطاقة",
@@ -715,7 +715,7 @@ export const ar: Dict = {
       consent: "ضع علامة في المربّع لتأكيد أنك تريد استلام بطاقاتك فورًا.",
     },
     thanks: {
-      metaTitle: "شكرًا لك · Sending Vibes",
+      metaTitle: "شكرًا لك · Envelette",
       title: "شكرًا لك!",
       intro: "تم الدفع، وبطاقاتك جاهزة للإرسال.",
       receipt: "أرسلنا إلى {email} إيصالًا فيه كل روابطك.",
@@ -737,7 +737,7 @@ export const ar: Dict = {
   },
 
   email: {
-    receiptSubject: "بطاقاتك من Sending Vibes",
+    receiptSubject: "بطاقاتك من Envelette",
     receiptTitle: "شكرًا لك. بطاقاتك جاهزة.",
     receiptIntro: "إليك روابط بطاقاتك. احتفظ بهذه الرسالة في مكان آمن: فكل من لديه رابط بطاقة يستطيع فتحها.",
     cardFor: "إلى {to}، من {from}",
@@ -750,11 +750,11 @@ export const ar: Dict = {
     cardTitle: "صنع لك {from} بطاقة تفاعلية",
     cardBody: "اضغط على الزر أدناه لفتحها يا {to}. وستكون أجمل مع تشغيل الصوت.",
     cardButton: "افتح بطاقتك",
-    cardFooter: "أرسلها Sending Vibes نيابةً عن {from}.",
+    cardFooter: "أرسلها Envelette نيابةً عن {from}.",
   },
 
   create: {
-    metaTitle: "اصنع بطاقة · Sending Vibes",
+    metaTitle: "اصنع بطاقة · Envelette",
     startOver: "ابدأ من جديد",
     occasionTitle: "بماذا نحتفل؟",
     occasionIntro: "{o} مناسبة، و{n} تصميم. اختر واحدة لترى تصاميمها.",

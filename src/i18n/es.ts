@@ -6,7 +6,7 @@ import type { Dict } from "./en";
 
 export const es: Dict = {
   meta: {
-    title: "Sending Vibes: tarjetas interactivas personalizadas que no van a olvidar",
+    title: "Envelette: tarjetas interactivas personalizadas que no van a olvidar",
     description:
       "Tarjetas interactivas personalizadas para cumpleaños, San Valentín, Diwali, Eid, Navidad, Halloween y mucho más. Botones de No que se escapan, minijuegos, tus fotos, música y un gran final. Solo tienes que rellenar los huecos.",
   },
@@ -32,7 +32,7 @@ export const es: Dict = {
     pricing: "Precios",
     help: "Ayuda y preguntas frecuentes",
     privacy: "Privacidad",
-    copyright: "© {year} Sending Vibes. El botón de No sigue sin funcionar.",
+    copyright: "© {year} Envelette. El botón de No sigue sin funcionar.",
   },
 
   common: {
@@ -49,7 +49,7 @@ export const es: Dict = {
     allCards: "Todas las tarjetas",
     seeAll: "Ver todas →",
     new: "Novedad",
-    demoTitle: "Demo de {label} · Sending Vibes",
+    demoTitle: "Demo de {label} · Envelette",
     cardsStayEnglish: "Las tarjetas en sí están escritas en inglés, pero puedes poner tus propias palabras en cualquier idioma.",
   },
 
@@ -450,21 +450,21 @@ export const es: Dict = {
   },
 
   cardsPage: {
-    metaTitle: "Todas las tarjetas · Sending Vibes",
+    metaTitle: "Todas las tarjetas · Envelette",
     metaDescription: "{n} diseños de tarjetas interactivas personalizadas para San Valentín, cumpleaños, Diwali, Navidad, Eid, Halloween, bodas, bebés y mucho más.",
     title: "Todas las tarjetas",
     intro: "{n} diseños. Cada uno se reproduce solo al pasar por delante. Abre uno para probarlo con vuestros nombres y luego hazlo tuyo.",
   },
 
   occasionsPage: {
-    metaTitle: "Tarjetas interactivas para cada ocasión · Sending Vibes",
+    metaTitle: "Tarjetas interactivas para cada ocasión · Envelette",
     metaDescription: "Tarjetas interactivas personalizadas para {n} ocasiones: San Valentín, cumpleaños, Diwali, Eid, Navidad, Halloween, bodas, bebés y mucho más.",
     title: "Ocasiones",
     intro: "{o} ocasiones y {n} diseños. Las más próximas aparecen primero.",
   },
 
   occasionPage: {
-    metaTitle: "Tarjetas interactivas de {label} · Sending Vibes",
+    metaTitle: "Tarjetas interactivas de {label} · Envelette",
     metaSuffix: "Personaliza una en dos minutos, sin programar nada.",
     // {label} is shown in red.
     title: "Tarjetas interactivas de {label}",
@@ -480,7 +480,7 @@ export const es: Dict = {
   },
 
   product: {
-    metaTitle: "{name} · Tarjeta de {occasion} · Sending Vibes",
+    metaTitle: "{name} · Tarjeta de {occasion} · Envelette",
     onPhone: "📱 En un móvil",
     onComputer: "💻 En un ordenador",
     live: "funciona de verdad, ve tocando para avanzar ↑",
@@ -530,7 +530,7 @@ export const es: Dict = {
   },
 
   help: {
-    metaTitle: "Ayuda y preguntas frecuentes · Sending Vibes",
+    metaTitle: "Ayuda y preguntas frecuentes · Envelette",
     metaDescription: "Cómo funcionan las tarjetas interactivas, cómo crear y enviar una, y respuestas a las preguntas más habituales.",
     title: "Ayuda y preguntas",
     intro: "Todo lo que necesitas saber para crear, enviar y abrir una tarjeta interactiva.",
@@ -591,8 +591,8 @@ export const es: Dict = {
   },
 
   privacy: {
-    metaTitle: "Privacidad · Sending Vibes",
-    metaDescription: "Qué guarda Sending Vibes cuando creas una tarjeta, quién puede verla y cómo se tratan las fotos.",
+    metaTitle: "Privacidad · Envelette",
+    metaDescription: "Qué guarda Envelette cuando creas una tarjeta, quién puede verla y cómo se tratan las fotos.",
     title: "Tus tarjetas son cosa tuya",
     intro: "Hablando claro: qué guardamos cuando creas una tarjeta, quién puede verla y qué no hacemos.",
     sections: [
@@ -656,9 +656,9 @@ export const es: Dict = {
     openAria: "Chatea con nosotros",
     close: "Cerrar",
     closeAria: "Cerrar el chat",
-    title: "Sending Vibes",
+    title: "Envelette",
     subtitle: "Asistente con IA · suele responder en segundos",
-    dialogAria: "Chat con Sending Vibes",
+    dialogAria: "Chat con Envelette",
     newChat: "Nuevo chat",
     placeholder: "Pregunta lo que quieras sobre las tarjetas…",
     inputAria: "Tu mensaje",
@@ -679,7 +679,7 @@ export const es: Dict = {
   },
 
   basket: {
-    metaTitle: "Tu cesta · Sending Vibes",
+    metaTitle: "Tu cesta · Envelette",
     title: "Tu cesta",
     empty: "Tu cesta está vacía.",
     emptyCta: "Encuentra una tarjeta",
@@ -719,7 +719,7 @@ export const es: Dict = {
       consent: "Marca la casilla para confirmar que quieres recibir tus tarjetas de inmediato.",
     },
     thanks: {
-      metaTitle: "Gracias · Sending Vibes",
+      metaTitle: "Gracias · Envelette",
       title: "¡Gracias!",
       intro: "Tus tarjetas están pagadas y listas para enviar.",
       receipt: "Hemos enviado a {email} un recibo con todos tus enlaces.",
@@ -741,7 +741,7 @@ export const es: Dict = {
   },
 
   email: {
-    receiptSubject: "Tus tarjetas de Sending Vibes",
+    receiptSubject: "Tus tarjetas de Envelette",
     receiptTitle: "Gracias. Tus tarjetas están listas.",
     receiptIntro: "Aquí tienes los enlaces a tus tarjetas. Guarda bien este correo: cualquiera que tenga un enlace puede abrir esa tarjeta.",
     cardFor: "Para {to}, de {from}",
@@ -754,11 +754,11 @@ export const es: Dict = {
     cardTitle: "{from} te ha hecho una tarjeta interactiva",
     cardBody: "Toca el botón de abajo para abrirla, {to}. Se disfruta más con el sonido activado.",
     cardButton: "Abrir tu tarjeta",
-    cardFooter: "Enviado por Sending Vibes en nombre de {from}.",
+    cardFooter: "Enviado por Envelette en nombre de {from}.",
   },
 
   create: {
-    metaTitle: "Crea una tarjeta · Sending Vibes",
+    metaTitle: "Crea una tarjeta · Envelette",
     startOver: "Empezar de nuevo",
     occasionTitle: "¿Qué celebramos?",
     occasionIntro: "{o} ocasiones, {n} diseños. Elige una para ver sus diseños.",
