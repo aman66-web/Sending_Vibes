@@ -33,6 +33,13 @@ export const en = {
   },
 
   common: {
+    worldwide: "Delivered instantly by link, anywhere in the world.",
+    worldwideShort: "Delivered instantly, anywhere in the world",
+    currency: "Currency",
+    abroad: {
+      q: "Can I send a card to someone abroad?",
+      a: "Yes. Cards are delivered instantly as a link, so they reach anyone, anywhere in the world, with no postage and no waiting. A card costs {gbp} in the UK and {usd} everywhere else.",
+    },
     perCard: "per card",
     designs: "{n} designs",
     oneDesign: "1 design",

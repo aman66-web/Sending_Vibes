@@ -1,12 +1,14 @@
 import { ImageResponse } from "next/og";
 import { OgEnvelope } from "@/components/OgEnvelope";
-import { PRICES } from "@/lib/pricing";
+import { DEFAULT_CURRENCY, isCurrency, price } from "@/lib/pricing";
 
 export const alt = "Sending Vibes: interactive cards they'll actually remember";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export default function OgImage() {
+export default async function OgImage({ params }: { params: Promise<{ cur: string }> }) {
+  const { cur } = await params;
+  const label = price("card", isCurrency(cur) ? cur : DEFAULT_CURRENCY);
   return new ImageResponse(
     (
       <div
@@ -35,7 +37,7 @@ export default function OgImage() {
               <span style={{ color: "#d8432f" }}>Personalised</span>
               <span>interactive cards.</span>
             </div>
-            <div style={{ fontSize: 30, marginTop: 28, color: "#5b534a" }}>{`Runaway No buttons, mini games, your photos and a big finale. ${PRICES.card.label} a card.`}</div>
+            <div style={{ fontSize: 30, marginTop: 28, color: "#5b534a" }}>{`Runaway No buttons, mini games, your photos and a big finale. ${label} a card.`}</div>
           </div>
           <div style={{ display: "flex", transform: "rotate(-8deg)" }}>
             <OgEnvelope size={330} />

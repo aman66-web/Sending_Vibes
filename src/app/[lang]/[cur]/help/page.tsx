@@ -6,7 +6,7 @@ import { fmt } from "@/i18n/config";
 import { getI18n } from "@/i18n/server";
 import { OCCASIONS } from "@/lib/card";
 import { TEMPLATES } from "@/lib/catalog";
-import { PRICES } from "@/lib/pricing";
+import { price } from "@/lib/pricing";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getI18n();
@@ -14,11 +14,20 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HelpPage() {
-  const { t } = await getI18n();
-  const values = { n: TEMPLATES.length, o: OCCASIONS.length, price: PRICES.card.label, aiPrice: PRICES.aiCustom.label };
+  const { t, currency } = await getI18n();
+  const values = {
+    n: TEMPLATES.length,
+    o: OCCASIONS.length,
+    price: price("card", currency),
+    aiPrice: price("aiCustom", currency),
+    gbp: price("card", "gbp"),
+    usd: price("card", "usd"),
+  };
+  // The "send abroad" answer sits with the price questions.
+  const groups = t.help.groups.map((g, i) => (i === t.help.groups.length - 1 ? { ...g, items: [...g.items, t.common.abroad] } : g));
   return (
     <InfoPage title={t.help.title} intro={t.help.intro}>
-      {t.help.groups.map((g) => (
+      {groups.map((g) => (
         <section key={g.title}>
           <h2 className="font-brand text-2xl font-bold">{g.title}</h2>
           <div className="mt-4 space-y-3">

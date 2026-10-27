@@ -10,7 +10,7 @@ import type { Dict } from "@/i18n/en";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { THEMES, type Screen, type ThemeName } from "@/lib/card";
 import { buildTemplateDemo, deviceInfo, templatesBySlug, toneInfo } from "@/lib/catalog";
-import { PRICES } from "@/lib/pricing";
+import { price } from "@/lib/pricing";
 import { occasions } from "@/lib/templates";
 import { themes } from "@/lib/themes";
 
@@ -70,7 +70,7 @@ function describe(s: Screen, t: Dict): string {
 
 export function ProductView({ slug }: { slug: string }) {
   const template = templatesBySlug[slug];
-  const { t } = useI18n();
+  const { t, currency } = useI18n();
   const p = t.product;
   const [frame, setFrame] = useState<"phone" | "desktop">(template.device === "desktop" ? "desktop" : "phone");
   const [to, setTo] = useState("");
@@ -139,8 +139,9 @@ export function ProductView({ slug }: { slug: string }) {
         <h1 dir="auto" className="mt-4 font-brand text-4xl font-bold leading-tight sm:text-5xl">{template.name}</h1>
         <p dir="auto" className="mt-3 text-lg text-ink/70">{template.blurb}</p>
         <p className="mt-4 font-brand text-3xl font-black text-hot">
-          {PRICES.card.label} <span className="text-base font-semibold text-ink/50">{p.perCard}</span>
+          <bdi dir="ltr">{price("card", currency)}</bdi> <span className="text-base font-semibold text-ink/50">{p.perCard}</span>
         </p>
+        <p className="mt-1 text-sm font-semibold text-ink/60">🌍 {t.common.worldwide}</p>
 
         <div className="sheet mt-6 p-5">
           <p className="font-brand text-lg font-bold">{p.tryNames}</p>
