@@ -70,6 +70,7 @@ ${gameNotes()}
 # Writing it
 - Use everything they told you: names, nicknames, inside jokes, places, hobbies. Specific beats generic every time.
 - Never invent shared memories or facts about the two of them. If they didn't give you details, write questions and lines that are playful rather than factual ("Who's the better cook?" with the answer being the sender).
+- Don't guess anyone's gender. Use their name or "you" unless the relationship or what they told you makes it clear (mum, sister, "she").
 - Include what they ask for. Otherwise pick a good mix: at least two playful screens (a question, game, quiz, wheel, scratch card and so on), a photos screen (they can add their own photos or remove it), and a heartfelt message near the end.
 - Sound like a person, not a greeting card factory: warm, a bit funny where it fits, no clichés. Use emoji sparingly or not at all.
 - Write in the language their description is written in. If it's only names and choices, use the language you're told the site is in. For English, use British spelling.
@@ -245,4 +246,27 @@ export async function generateCard(input: GenerateInput, { onProgress, signal }:
     messages.push({ role: "assistant", content: text || "{}" }, { role: "user", content: `${result.problem}\nReply with the whole corrected card as JSON only.` });
   }
   throw new GenerateError("failed", "The card didn't come out right twice");
+}
+
+const FOLLOWUP_MODEL = "claude-haiku-5-5";
+
+// One or two questions about what they've already said, to draw out the specific
+// details (a moment, a habit, a phrase) that make a card feel personal. Quick, so a
+// smaller model. Any trouble and there are simply no follow-ups.
+export async function followUpQuestions(summary: string, locale: Locale): Promise<string[]> {
+  if (!generateReady()) return [];
+  client ??= new Anthropic();
+  const reply = await client.messages.create({
+    model: FOLLOWUP_MODEL,
+    max_tokens: 2000,
+    system: `Someone is making a personalised interactive card and has answered a few questions about who it's for. Ask exactly two short follow-up questions that would bring out the specific details that make a card feel personal: a moment, a habit, a phrase, a place, a name. Each question must build on something they wrote, and must not ask for anything they've already told you. Keep each under 120 characters, warm and casual, speaking to the sender as "you". Don't guess anyone's gender. Write in ${LANGUAGES[locale].english}. Reply with JSON only: {"questions": ["...", "..."]}`,
+    messages: [{ role: "user", content: `<answers>\n${summary}\n</answers>` }],
+  });
+  const text = reply.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("");
+  try {
+    const { questions } = JSON.parse(text.slice(text.indexOf("{"), text.lastIndexOf("}") + 1));
+    return Array.isArray(questions) ? questions.filter((x): x is string => typeof x === "string" && x.trim().length > 0).map((x) => x.trim().slice(0, 200)).slice(0, 2) : [];
+  } catch {
+    return [];
+  }
 }

@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { DEFAULT_LOCALE, LOCALES, isLocale } from "@/i18n/config";
+import { DEFAULT_LOCALE, LOCALES, isLive } from "@/i18n/config";
 import { DICTS } from "@/i18n/dictionaries";
 import { CHAT_SYSTEM, chatContext } from "@/lib/chat-prompt";
 
@@ -55,7 +55,7 @@ let client: Anthropic | undefined;
 export async function POST(req: Request) {
   // Errors are shown in the visitor's language, read from the language cookie.
   const saved = req.headers.get("cookie")?.match(/(?:^|;\s*)lang=([a-z]{2})/)?.[1];
-  const errors = DICTS[isLocale(saved) ? saved : DEFAULT_LOCALE].chat.errors;
+  const errors = DICTS[isLive(saved) ? saved : DEFAULT_LOCALE].chat.errors;
   if (!process.env.ANTHROPIC_API_KEY) return fail(errors.off, 503);
 
   // Only our own pages can use the chat.

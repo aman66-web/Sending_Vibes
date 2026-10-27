@@ -92,6 +92,21 @@ const NEW_SCREENS: Record<Addable, { emoji: string; make: () => Screen }> = {
   },
 };
 
+type Album = { photos: string[]; captions: string[] };
+
+// Puts photos added before the card was written into its photos screen, adding one
+// before the message (or finale) if the writer didn't include one.
+function withPhotos(card: CardData, album: Album | undefined, title: string): CardData {
+  if (!album?.photos.length) return card;
+  const { photos, captions } = album;
+  const at = card.screens.findIndex((s) => s.type === "photos");
+  if (at >= 0) return { ...card, screens: card.screens.map((s, i) => (i === at && s.type === "photos" ? { ...s, photos, captions } : s)) };
+  const before = card.screens.findIndex((s) => s.type === "message" || s.type === "finale");
+  const screens = [...card.screens];
+  screens.splice(before > 0 ? before : screens.length, 0, { id: uid(), type: "photos", title, photos, captions });
+  return { ...card, screens };
+}
+
 function uid() {
   return Math.random().toString(36).slice(2, 10);
 }
@@ -258,11 +273,11 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     setTo(answers.to.trim());
     setFrom(answers.from.trim());
     setIdea(prompt);
-    makeCard(prompt, { to: answers.to, from: answers.from }, "quiz");
+    makeCard(prompt, { to: answers.to, from: answers.from }, "quiz", { photos: answers.photos, captions: answers.captions });
   };
 
   // Writes a new card, showing the loading screen; going back returns to where it was asked for.
-  const makeCard = async (prompt: string, names: { to: string; from: string }, source: "quiz" | "describe") => {
+  const makeCard = async (prompt: string, names: { to: string; from: string }, source: "quiz" | "describe", album?: Album) => {
     const controller = new AbortController();
     making.current = controller;
     setBusy("make");
@@ -271,7 +286,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     setStep("making");
     window.scrollTo({ top: 0 });
     try {
-      const made = await callAi({ prompt }, names, setProgress, controller.signal);
+      const made = withPhotos(await callAi({ prompt }, names, setProgress, controller.signal), album, t.labels.screens.photos);
       setCard(made);
       setSelected(made.screens[0]?.id);
       setMode("custom");
