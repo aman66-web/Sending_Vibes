@@ -31,7 +31,7 @@
   --font-sans: var(--font-ui-face), var(--font-devanagari), var(--font-gurmukhi), var(--font-gujarati), var(--font-bengali), var(--font-arabic), system-ui, sans-serif;
   --font-brand: var(--font-brand-face), var(--font-devanagari), var(--font-gurmukhi), var(--font-gujarati), var(--font-bengali), var(--font-arabic), serif;
   /* Inside the cards. */
-  --font-card: var(--font-body);
+  --font-card: var(--font-ui-face);
   --font-display: var(--font-display-face);
   --font-hand: var(--font-hand-face);
 

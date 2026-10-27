@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { Motif } from "@/components/card/motifs";
 import { getTemplate } from "@/lib/catalog";
 import { DEFAULT_CURRENCY, isCurrency, price } from "@/lib/pricing";
 import { occasions } from "@/lib/templates";
@@ -35,15 +36,17 @@ export default async function ProductOgImage({ params }: { params: Promise<{ slu
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            width: 360,
-            height: 360,
-            borderRadius: 60,
+            width: 340,
+            height: 420,
+            border: `3px solid ${theme.muted}`,
+            outline: `1px solid ${theme.muted}`,
+            outlineOffset: -14,
             background: theme.surface,
-            fontSize: 200,
-            transform: "rotate(6deg)",
+            color: theme.accent,
+            transform: "rotate(4deg)",
           }}
         >
-          {t?.emoji ?? "💌"}
+          {t ? <Motif occasion={t.occasion} style={{ width: 180, height: 180 }} /> : null}
         </div>
       </div>
     ),

@@ -3,9 +3,8 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import type { CardData } from "@/lib/card";
-import { occasions } from "@/lib/templates";
 import { themes } from "@/lib/themes";
-import { EmojiRain } from "./effects";
+import { Ambient } from "./effects";
 import { BoxesScreen, CouponsScreen, ReasonsScreen, SliderScreen, TimelineScreen, WheelScreen } from "./more-screens";
 import {
   FinaleScreen,
@@ -19,6 +18,10 @@ import {
   TypeItScreen,
 } from "./screens";
 import { playMusic, setMuted, SoundEnabled, unlockAudio, useMuted } from "./sound";
+
+// A faint paper texture under every card.
+const PAPER_GRAIN =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.08'/%3E%3C/svg%3E\")";
 
 type Props = {
   card: CardData;
@@ -81,7 +84,7 @@ export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 
   };
 
   const style = {
-    background: theme.background,
+    background: `${PAPER_GRAIN}, ${theme.background}`,
     color: theme.text,
     "--c-text": theme.text,
     "--c-muted": theme.muted,
@@ -104,7 +107,10 @@ export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 
       lang="en"
       className={`@container relative flex w-full flex-col overflow-hidden font-card ${preview ? "h-full" : "min-h-dvh"}`}
     >
-      <EmojiRain effect={card.ambient} />
+      <Ambient effect={card.ambient} />
+      {/* A printed double border, like a real card. */}
+      <div aria-hidden className="pointer-events-none absolute inset-2.5 rounded-[14px] border border-current opacity-[0.16]" />
+      <div aria-hidden className="pointer-events-none absolute inset-[15px] rounded-[10px] border border-current opacity-[0.08]" />
       {!preview && card.device && card.device !== "everywhere" && <DeviceTip device={card.device} />}
       {sound && (
         <button
@@ -113,7 +119,10 @@ export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 
           aria-pressed={!muted}
           className={`absolute right-3 z-30 grid h-10 w-10 place-items-center rounded-full bg-[var(--c-surface)] text-lg shadow-sm ring-1 ring-black/10 backdrop-blur ${preview ? "top-10" : "top-3"}`}
         >
-          {muted ? "🔇" : "🔊"}
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor" stroke="none" />
+            {muted ? <path d="M16 9.5l5 5M21 9.5l-5 5" /> : <path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" />}
+          </svg>
         </button>
       )}
 
@@ -132,7 +141,7 @@ export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 
       {/* Auto margins centre short screens; long ones (lots of coupons, say) scroll inside previews. */}
       <main className={`flex flex-1 flex-col px-5 py-8 ${preview ? "min-h-0 overflow-y-auto [scrollbar-width:none]" : ""}`}>
         <div key={`${run}-${current.id}`} className={`m-auto w-full animate-screen-in ${wide ? "max-w-4xl" : "max-w-md"}`}>
-          {current.type === "intro" && <IntroScreen screen={current} onNext={next} emoji={occasions[card.occasion].emoji} />}
+          {current.type === "intro" && <IntroScreen screen={current} onNext={next} to={card.to} from={card.from} />}
           {current.type === "question" && <QuestionScreen screen={current} onNext={next} />}
           {current.type === "photos" && <PhotosScreen screen={current} onNext={next} wide={wide} />}
           {current.type === "message" && <MessageScreen screen={current} onNext={next} />}
@@ -156,7 +165,7 @@ export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 
                     href={card.template ? `/create?template=${card.template}` : "/create"}
                     className="mt-4 rounded-full bg-[var(--c-surface)] px-5 py-2.5 text-sm font-semibold shadow-sm ring-1 ring-black/10 backdrop-blur"
                   >
-                    ✨ Make your own on Sending Vibes
+                    Make your own on Sending Vibes
                   </Link>
                 )
               }
