@@ -538,7 +538,7 @@ export const en = {
         items: [
           {
             q: "How do I make a card?",
-            a: "Go to [Make a card](/create), pick an occasion and a design, type their name and yours, then change anything you like. You'll see a live preview as you go. When you're happy, press **Create my card** and you'll get a link to send.",
+            a: "Go to [Make a card](/create), pick an occasion and a design, type their name and yours, then change anything you like. You'll see a live preview as you go. When you're happy, press **Add to basket** and pay. You'll get a link to send, or we can email it to them for you.",
           },
           { q: "Do I need any design or coding skills?", a: "None at all. Every design is already built. You just fill in the blanks: names, photos and words." },
           {
