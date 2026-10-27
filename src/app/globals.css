@@ -52,7 +52,7 @@
   --animate-wiggle: wiggle 2.4s ease-in-out infinite;
   --animate-screen-in: screen-in 0.45s ease-out both;
   --animate-blob: blob 18s ease-in-out infinite;
-  --animate-marquee: marquee 40s linear infinite;
+  --animate-marquee: marquee 75s linear infinite;
   --animate-bob: bob 5s ease-in-out infinite;
   --animate-shimmer: shimmer 6s linear infinite;
   --animate-glow: glow 2.4s ease-in-out infinite;
@@ -115,8 +115,8 @@
     66% { transform: translate(-6%, 6%) scale(0.92); }
   }
   @keyframes marquee {
-    from { transform: translateX(0); }
-    to { transform: translateX(-50%); }
+    from { transform: translate3d(0, 0, 0); }
+    to { transform: translate3d(-50%, 0, 0); }
   }
   @keyframes bob {
     0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); }
