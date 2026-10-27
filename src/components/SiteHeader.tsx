@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AccountLink } from "@/components/AccountLink";
 import { BasketLink } from "@/components/BasketLink";
 import { LanguagePicker } from "@/components/LanguagePicker";
 import { Logo } from "@/components/Logo";
@@ -27,6 +28,7 @@ export async function SiteHeader() {
         </div>
         <div className="flex items-center gap-2">
           <LanguagePicker />
+          <AccountLink />
           <BasketLink />
           <Link href="/create" className="btn btn-red whitespace-nowrap px-3.5 py-2 text-sm max-sm:hidden sm:px-5">
             {t.nav.makeCard}

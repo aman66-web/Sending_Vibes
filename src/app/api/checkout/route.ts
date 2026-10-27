@@ -3,10 +3,12 @@ import type Stripe from "stripe";
 import { z } from "zod";
 import { DEFAULT_LOCALE, LOCALE_COOKIE, fmt, isLocale, type Locale } from "@/i18n/config";
 import { DICTS } from "@/i18n/dictionaries";
+import { currentAccount } from "@/lib/auth";
 import { MAX_BASKET, MAX_SCHEDULE_DAYS } from "@/lib/basket";
 import { emailReady } from "@/lib/email";
 import { createOrder, ordersReady, setOrderSession, type OrderItem } from "@/lib/orders";
-import { CURRENCY_COOKIE, DEFAULT_CURRENCY, isCurrency } from "@/lib/pricing";
+import { cardTier } from "@/lib/catalog";
+import { CURRENCY_COOKIE, DEFAULT_CURRENCY, isCurrency, type Tier } from "@/lib/pricing";
 import { getCard } from "@/lib/storage";
 import { cardLineItem, stripe } from "@/lib/stripe";
 
@@ -75,8 +77,8 @@ export async function POST(req: NextRequest) {
         gone.push(wanted.id);
         continue;
       }
-      // Names come from the saved card, not the browser.
-      const item: OrderItem = { cardId: wanted.id, to: card.to, from: card.from, delivery: wanted.delivery };
+      // Names and price come from the saved card, not the browser.
+      const item: OrderItem = { cardId: wanted.id, to: card.to, from: card.from, tier: cardTier(card), occasion: card.occasion, theme: card.theme, delivery: wanted.delivery };
       if (wanted.delivery === "email") {
         if (!emailReady()) return fail(errors.noEmail, 400, { id: wanted.id });
         if (!wanted.email) return fail(fmt(errors.needEmail, { name: card.to }), 400, { id: wanted.id });
@@ -92,15 +94,23 @@ export async function POST(req: NextRequest) {
     if (gone.length) return fail(errors.gone, 409, { gone });
 
     const site = req.nextUrl.origin;
-    const order = await createOrder({ currency, locale, site, items });
+    // Signed in? Then the order shows up in their account and Stripe already knows their email.
+    const account = await currentAccount().catch(() => null);
+    const order = await createOrder({ currency, locale, site, items, userId: account?.id });
     const session = await s.checkout.sessions.create({
       mode: "payment",
-      line_items: [await cardLineItem(s, currency, items.length)],
+      line_items: await Promise.all(
+        (["premade", "custom"] as Tier[])
+          .map((tier) => ({ tier, count: items.filter((i) => i.tier === tier).length }))
+          .filter((g) => g.count > 0)
+          .map((g) => cardLineItem(s, currency, g.tier, g.count)),
+      ),
       client_reference_id: order.id,
       metadata: { order_id: order.id },
       payment_intent_data: { metadata: { order_id: order.id } },
       success_url: `${site}/basket/thanks?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${site}/basket`,
+      customer_email: account?.email ?? undefined,
       allow_promotion_codes: true,
       submit_type: "pay",
       locale: STRIPE_LOCALES[locale] ?? "auto",

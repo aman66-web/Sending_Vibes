@@ -62,9 +62,14 @@ export default async function ThanksPage({ searchParams }: Props) {
             </li>
           ))}
         </ul>
-        <Link href="/create" className="btn btn-red mt-8 inline-flex px-6 py-3">
-          {th.more}
-        </Link>
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Link href="/create" className="btn btn-red inline-flex px-6 py-3">
+            {th.more}
+          </Link>
+          <Link href="/account" className="btn btn-paper inline-flex px-6 py-3">
+            {th.allCards}
+          </Link>
+        </div>
       </>
     );
   } else {

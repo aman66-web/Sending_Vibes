@@ -1,6 +1,6 @@
 import "server-only";
 import Stripe from "stripe";
-import { PRICES, type Currency } from "./pricing";
+import { tierPrice, type Currency, type Tier } from "./pricing";
 
 let client: Stripe | null | undefined;
 
@@ -18,20 +18,26 @@ export function stripe(): Stripe | null {
   return client;
 }
 
-const priceIds = new Map<Currency, string | null>();
+const priceIds = new Map<string, string | null>();
 
-// The card price as a line item. Uses the catalogue price with lookup key card_gbp / card_usd
-// when it exists, so sales report against one product; otherwise the same amount inline.
-export async function cardLineItem(s: Stripe, currency: Currency, quantity: number): Promise<Stripe.Checkout.SessionCreateParams.LineItem> {
-  if (!priceIds.has(currency)) {
-    const found = await s.prices.list({ lookup_keys: [`card_${currency}`], active: true, limit: 1 }).catch(() => null);
+const PRODUCTS: Record<Tier, { lookup: string; name: string; description: string }> = {
+  premade: { lookup: "card", name: "Interactive card", description: "A personalised interactive e-card, delivered by link" },
+  custom: { lookup: "custom_card", name: "Custom interactive card", description: "An interactive e-card made to your description, delivered by link" },
+};
+
+// A card's price as a line item. Uses the catalogue price with lookup key card_gbp,
+// custom_card_usd and so on when it exists, so sales report against one product;
+// otherwise the same amount inline.
+export async function cardLineItem(s: Stripe, currency: Currency, tier: Tier, quantity: number): Promise<Stripe.Checkout.SessionCreateParams.LineItem> {
+  const product = PRODUCTS[tier];
+  const key = `${product.lookup}_${currency}`;
+  const amount = tierPrice(tier);
+  if (!priceIds.has(key)) {
+    const found = await s.prices.list({ lookup_keys: [key], active: true, limit: 1 }).catch(() => null);
     const match = found?.data[0];
-    priceIds.set(currency, match && match.unit_amount === PRICES.card && match.currency === currency ? match.id : null);
+    priceIds.set(key, match && match.unit_amount === amount && match.currency === currency ? match.id : null);
   }
-  const id = priceIds.get(currency);
+  const id = priceIds.get(key);
   if (id) return { price: id, quantity };
-  return {
-    price_data: { currency, unit_amount: PRICES.card, product_data: { name: "Interactive card", description: "A personalised interactive e-card, delivered by link" } },
-    quantity,
-  };
+  return { price_data: { currency, unit_amount: amount, product_data: { name: product.name, description: product.description } }, quantity };
 }

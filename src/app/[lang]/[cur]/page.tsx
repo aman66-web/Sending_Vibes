@@ -33,10 +33,10 @@ export default async function Home() {
   const n = TEMPLATES.length;
   const o = OCCASIONS.length;
   const price = priceOf("card", currency);
-  const aiPrice = priceOf("aiCustom", currency);
+  const aiPrice = priceOf("custom", currency);
   const TIERS = [
-    { name: h.tierCard, price, points: [...h.tierCardPoints.map((p) => fmt(p, { n })), t.common.worldwideShort], live: true, featured: false },
-    { name: h.tierAi, price: aiPrice, points: h.tierAiPoints.map((p) => fmt(p, { price })), live: false, featured: true },
+    { name: h.tierCard, price, points: [...h.tierCardPoints.map((p) => fmt(p, { n })), t.common.worldwideShort], href: "/create?start=premade", featured: false },
+    { name: h.tierAi, price: aiPrice, points: h.tierAiPoints.map((p) => fmt(p, { price })), href: "/create?start=custom", featured: true },
   ];
   return (
     <div className="grain overflow-x-clip bg-cream text-ink">
@@ -230,9 +230,12 @@ export default async function Home() {
             <div className="sheet relative grid items-center gap-8 overflow-hidden bg-ink p-7 pt-10 text-paper shadow-[5px_5px_0_var(--color-hot)] sm:p-10 sm:pt-12 md:grid-cols-2">
               <div aria-hidden className="airmail absolute inset-x-0 top-0 h-2.5" />
               <div>
-                <span className="inline-block -rotate-6 rounded-md border-[3px] border-sun px-3 py-0.5 font-brand text-lg font-black uppercase tracking-wider text-sun">{h.comingSoon}</span>
+                <span className="inline-block -rotate-6 rounded-md border-[3px] border-sun px-3 py-0.5 font-brand text-lg font-black uppercase tracking-wider text-sun">{t.common.new}</span>
                 <h3 className="mt-5 font-brand text-4xl font-bold">{h.aiTitle}</h3>
                 <p className="mt-3 max-w-md text-lg text-paper/75">{h.aiBody}</p>
+                <Link href="/create?start=custom" className="btn btn-red mt-6 inline-flex px-6 py-3">
+                  {fmt(h.aiCta, { price: aiPrice })}
+                </Link>
               </div>
               <AiPromptDemo />
             </div>
@@ -344,7 +347,7 @@ export default async function Home() {
                 <div className={`sheet relative flex h-full flex-col p-8 text-ink ${tier.featured ? "bg-sun" : ""}`}>
                   {tier.featured && (
                     <span className="absolute end-5 top-5 rotate-6 rounded-md border-[3px] border-hot px-2.5 py-0.5 font-brand text-sm font-black uppercase tracking-wider text-hot">
-                      {h.comingSoon}
+                      {t.common.new}
                     </span>
                   )}
                   <h3 className="font-brand text-2xl font-bold">{tier.name}</h3>
@@ -360,13 +363,9 @@ export default async function Home() {
                       </li>
                     ))}
                   </ul>
-                  {tier.live ? (
-                    <Link href="/create" className="btn btn-red mt-8">
-                      {t.nav.makeCard}
-                    </Link>
-                  ) : (
-                    <span className="mt-8 rounded-full border-2 border-dashed border-ink/40 py-3 text-center font-brand font-semibold text-ink/60">{h.notReady}</span>
-                  )}
+                  <Link href={tier.href} className="btn btn-red mt-8">
+                    {t.nav.makeCard}
+                  </Link>
                 </div>
               </Reveal>
             ))}
