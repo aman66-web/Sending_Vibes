@@ -1,9 +1,11 @@
 import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { emailReady } from "./email";
 
-// Signing in is Supabase Auth with Google, done entirely on the server: the session
-// lives in cookies that our API routes read, so every page can stay static.
+// Signing in is Supabase Auth, with Google or a code emailed to them, done entirely on
+// the server: the session lives in cookies that our API routes read, so every page can
+// stay static.
 
 export type Account = { id: string; email: string | null; name: string | null };
 
@@ -52,6 +54,17 @@ export async function googleEnabled() {
     google = { on: false, checked: Date.now() };
   }
   return google.on;
+}
+
+// Signing in with an emailed code. Supabase makes the code (and the account, the first
+// time) and we email it ourselves, so Supabase's own email sending isn't needed.
+export function emailSignInReady() {
+  return authReady() && Boolean(process.env.SUPABASE_SECRET_KEY) && emailReady();
+}
+
+// Whether there's any way to sign in right now.
+export async function signInAvailable() {
+  return authReady() && (emailSignInReady() || (await googleEnabled()));
 }
 
 // Only ever send people back to a page on this site.

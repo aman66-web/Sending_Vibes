@@ -9,13 +9,14 @@ import { TONES, type Template, type Tone } from "@/lib/catalog";
 import { price } from "@/lib/pricing";
 import { occasions } from "@/lib/templates";
 import { ProductThumb } from "@/components/catalog/ProductThumb";
+import { SignIn, type SignedIn } from "@/components/SignIn";
 import { PhotoField } from "./ScreenEditor";
 
 // The questions a card is written from: a personalised one from scratch, or a
 // ready-made design with their words written into it. The eight core ones must all be
 // answered (the written ones at some length, since specific details are what make a
 // card feel personal); then up to two follow-ups written about their answers, which
-// can be skipped, and an optional step to add photos.
+// can be skipped, an optional step to add photos, and signing up before it's made.
 
 export type Answers = {
   to: string;
@@ -106,30 +107,33 @@ type Props = {
   // The ready-made design their words go into, and a way to pick another.
   design?: Template;
   onChangeDesign?: () => void;
+  // Signing up before the card is made, when they aren't signed in already.
+  signUp?: { google: boolean; email: boolean; account: SignedIn | null; onSignedIn: (account: SignedIn) => void; onGoogle: () => void };
 };
 
-export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack, onDescribe, design, onChangeDesign }: Props) {
+export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack, onDescribe, design, onChangeDesign, signUp }: Props) {
   const { t, currency } = useI18n();
   const q = t.quiz;
   const name = answers.to.trim() || q.them;
   // Photos have somewhere to go unless the design has no photos screen.
   const photoStep = !design || design.screens("", "").some((s) => s.type === "photos");
   // The core questions, then a follow-up step for each follow-up (or one "thinking"
-  // step while they're being written), then photos.
+  // step while they're being written), then photos, then signing up.
   const followups = answers.followups;
-  const steps: (Question | "thinking" | `f${number}` | "photos")[] = [
+  const steps: (Question | "thinking" | `f${number}` | "photos" | "signup")[] = [
     ...QUESTIONS,
     ...(followups ? followups.map((_, i) => `f${i}` as const) : (["thinking"] as const)),
     ...(photoStep ? (["photos"] as const) : []),
+    ...(signUp ? (["signup"] as const) : []),
   ];
   const at = Math.min(index, steps.length - 1);
   const step = steps[at];
   // The last step makes the card.
   const last = at === steps.length - 1 && step !== "thinking";
-  const total = QUESTIONS.length + (followups ? followups.length : FOLLOWUPS) + (photoStep ? 1 : 0);
+  const total = QUESTIONS.length + (followups ? followups.length : FOLLOWUPS) + (photoStep ? 1 : 0) + (signUp ? 1 : 0);
   const core = (QUESTIONS as readonly string[]).includes(step) ? (step as Question) : null;
   const followIndex = step.startsWith("f") && step !== "from" ? Number(step.slice(1)) : -1;
-  const ready = core ? answered(core, answers, q.relations) : step !== "thinking";
+  const ready = core ? answered(core, answers, q.relations) : step === "signup" ? Boolean(signUp?.account) : step !== "thinking";
   const input = useRef<HTMLInputElement & HTMLTextAreaElement>(null);
   // Which questions have their "Other" box open.
   const [other, setOther] = useState<Partial<Record<Question, boolean>>>({});
@@ -179,9 +183,26 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
     `${shape} border-2 px-4 py-2.5 text-start font-semibold transition ${selected ? "border-brand bg-brand text-white" : "border-line bg-panel hover:-translate-y-0.5 hover:border-brand"}`;
   const field = "w-full rounded-2xl border-2 border-line bg-panel px-5 py-4 text-lg outline-none focus:border-brand focus:ring-4 focus:ring-brand/15";
 
-  const title =
-    core ? fmt(q.questions[core].title, { name }) : step === "photos" ? fmt(q.photosTitle, { name }) : step === "thinking" ? fmt(q.followLoading, { name }) : (followups?.[followIndex]?.q ?? "");
-  const hint = core ? q.questions[core].hint : step === "photos" ? q.photosHint : step === "thinking" ? "" : q.followHint;
+  const title = core
+    ? fmt(q.questions[core].title, { name })
+    : step === "photos"
+      ? fmt(q.photosTitle, { name })
+      : step === "signup"
+        ? q.signupTitle
+        : step === "thinking"
+          ? fmt(q.followLoading, { name })
+          : (followups?.[followIndex]?.q ?? "");
+  const hint = core
+    ? q.questions[core].hint
+    : step === "photos"
+      ? q.photosHint
+      : step === "signup"
+        ? signUp?.account
+          ? fmt(q.signedIn, { email: signUp.account.email ?? signUp.account.name ?? "" })
+          : q.signupHint
+        : step === "thinking"
+          ? ""
+          : q.followHint;
 
   return (
     <section className="mx-auto flex min-h-[calc(100dvh-4.5rem)] max-w-2xl flex-col px-4 py-8 sm:py-12">
@@ -333,6 +354,11 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
               aria-label={title}
               className={`${field} resize-y leading-relaxed`}
             />
+          )}
+          {step === "signup" && signUp && !signUp.account && (
+            <div className="max-w-md">
+              <SignIn google={signUp.google} email={signUp.email} next="/create?resume=1" onSignedIn={signUp.onSignedIn} onGoogle={signUp.onGoogle} />
+            </div>
           )}
           {step === "photos" && (
             <PhotoField

@@ -1,14 +1,17 @@
 import { NextResponse } from "next/server";
-import { authReady, currentAccount, googleEnabled } from "@/lib/auth";
+import { authReady, currentAccount, emailSignInReady, googleEnabled } from "@/lib/auth";
 import { ordersFor } from "@/lib/orders";
 import { getCard } from "@/lib/storage";
 
-// The signed-in buyer and every card they've paid for.
+// The signed-in buyer and every card they've paid for, and which ways of signing in are on.
 export async function GET() {
   const headers = { "Cache-Control": "no-store" };
-  const enabled = authReady() && (await googleEnabled());
+  const google = authReady() && (await googleEnabled());
+  const email = emailSignInReady();
+  const enabled = google || email;
+  const ways = { enabled, google, email };
   const account = enabled ? await currentAccount().catch(() => null) : null;
-  if (!account) return NextResponse.json({ enabled, account: null, cards: [] }, { headers });
+  if (!account) return NextResponse.json({ ...ways, account: null, cards: [] }, { headers });
   try {
     const orders = await ordersFor(account);
     const items = orders.flatMap((o) => o.items.map((item) => ({ ...item, paidAt: o.paidAt ?? o.createdAt })));
@@ -28,9 +31,9 @@ export async function GET() {
         };
       }),
     );
-    return NextResponse.json({ enabled, account: { email: account.email, name: account.name }, cards }, { headers });
+    return NextResponse.json({ ...ways, account: { email: account.email, name: account.name }, cards }, { headers });
   } catch (e) {
     console.error("Could not load account", e);
-    return NextResponse.json({ enabled, account: { email: account.email, name: account.name }, cards: [], error: true }, { headers });
+    return NextResponse.json({ ...ways, account: { email: account.email, name: account.name }, cards: [], error: true }, { headers });
   }
 }

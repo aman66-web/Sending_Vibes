@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { DEFAULT_LOCALE, LOCALE_COOKIE, isLive } from "@/i18n/config";
 import { DICTS } from "@/i18n/dictionaries";
+import { currentAccount, signInAvailable } from "@/lib/auth";
 import { cardSchema } from "@/lib/card";
 import { GenerateError, generateCard, generateReady } from "@/lib/generate";
 
@@ -38,6 +39,16 @@ function allowed(ip: string) {
   return true;
 }
 
+// New cards are made after signing up (the last step of the questions). If the check
+// itself fails, let them through rather than stop anyone making a card.
+async function mustSignIn() {
+  try {
+    return (await signInAvailable()) && !(await currentAccount());
+  } catch {
+    return false;
+  }
+}
+
 export async function POST(req: NextRequest) {
   const lang = req.cookies.get(LOCALE_COOKIE)?.value;
   const locale = isLive(lang) ? lang : DEFAULT_LOCALE;
@@ -52,6 +63,7 @@ export async function POST(req: NextRequest) {
 
   const parsed = bodySchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return fail(errors.describe, 400);
+  if (!parsed.data.card && (await mustSignIn())) return fail(errors.signIn, 401);
 
   // Streams one JSON event per line: {type:"progress",screens} as each screen is written,
   // then {type:"card",card} or {type:"error",error}.

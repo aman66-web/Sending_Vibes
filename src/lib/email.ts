@@ -1,6 +1,6 @@
 import "server-only";
 import { Resend } from "resend";
-import { LANGUAGES, fmt } from "@/i18n/config";
+import { LANGUAGES, fmt, type Locale } from "@/i18n/config";
 import { DICTS } from "@/i18n/dictionaries";
 import type { Order, OrderItem } from "./orders";
 import { formatMoney } from "./pricing";
@@ -24,9 +24,9 @@ function sendDay(order: Order, item: OrderItem) {
 // Later than a couple of minutes from now counts as scheduled.
 const scheduled = (item: OrderItem) => Boolean(item.sendAt && Date.parse(item.sendAt) > Date.now() + 2 * 60_000);
 
-function layout(order: Order, body: string) {
-  const dir = LANGUAGES[order.locale].dir;
-  return `<!doctype html><html lang="${LANGUAGES[order.locale].tag}" dir="${dir}"><body style="margin:0;background:#f3ecdf;font-family:Helvetica,Arial,sans-serif;color:#1f1b16">
+function layout(locale: Locale, body: string) {
+  const dir = LANGUAGES[locale].dir;
+  return `<!doctype html><html lang="${LANGUAGES[locale].tag}" dir="${dir}"><body style="margin:0;background:#f3ecdf;font-family:Helvetica,Arial,sans-serif;color:#1f1b16">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3ecdf"><tr><td align="center" style="padding:32px 16px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#fbf7ef;border:2px solid #1f1b16;border-radius:18px">
 <tr><td style="height:6px;border-radius:16px 16px 0 0;background:repeating-linear-gradient(-45deg,#d8432f 0 10px,#fbf7ef 10px 20px,#2b5aa6 20px 30px,#fbf7ef 30px 40px)"></td></tr>
@@ -57,7 +57,7 @@ function receipt(order: Order) {
     .join("");
   const total = order.amountTotal !== undefined ? `<p style="margin:16px 0 0;font-weight:bold">${esc(fmt(t.total, { amount: formatMoney(order.amountTotal, order.currency) }))}</p>` : "";
   const html = layout(
-    order,
+    order.locale,
     `<h1 style="margin:0 0 8px;font-family:Georgia,'Times New Roman',serif;font-size:26px;line-height:1.2">${esc(t.receiptTitle)}</h1>
 <p style="margin:0 0 16px">${esc(t.receiptIntro)}</p>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${rows}</table>${total}
@@ -76,7 +76,7 @@ function receipt(order: Order) {
 function cardEmail(order: Order, item: OrderItem) {
   const t = DICTS[order.locale].email;
   const html = layout(
-    order,
+    order.locale,
     `<h1 style="margin:0 0 8px;font-family:Georgia,'Times New Roman',serif;font-size:28px;line-height:1.2">${esc(fmt(t.cardTitle, { from: item.from }))}</h1>
 <p style="margin:0 0 22px">${esc(fmt(t.cardBody, { to: item.to }))}</p>
 <p style="margin:0 0 26px">${button(cardUrl(order, item), t.cardButton)}</p>
@@ -99,4 +99,19 @@ export async function sendOrderEmails(order: Order) {
     if (item.delivery === "email" && item.email) await send(`card-${item.cardId}`, item.email, cardEmail(order, item), scheduled(item) ? item.sendAt : undefined);
   }
   if (order.buyerEmail) await send("receipt", order.buyerEmail, receipt(order));
+}
+
+// The code someone types to sign in with their email address.
+export async function sendSignInCode(to: string, code: string, locale: Locale) {
+  const t = DICTS[locale].email;
+  const html = layout(
+    locale,
+    `<h1 style="margin:0 0 8px;font-family:Georgia,'Times New Roman',serif;font-size:26px;line-height:1.2">${esc(t.codeTitle)}</h1>
+<p style="margin:0 0 18px">${esc(t.codeIntro)}</p>
+<p style="margin:0 0 22px;font-family:Georgia,'Times New Roman',serif;font-size:38px;font-weight:bold;letter-spacing:8px">${esc(code)}</p>
+<p style="margin:0;font-size:13px;color:#5b5247">${esc(t.codeFooter)}</p>`,
+  );
+  const text = `${t.codeIntro}\n\n${code}\n\n${t.codeFooter}`;
+  const { error } = await new Resend(process.env.RESEND_API_KEY).emails.send({ from: process.env.EMAIL_FROM!, to, subject: fmt(t.codeSubject, { code }), html, text });
+  if (error) throw new Error(`Sign-in code email failed: ${error.message}`);
 }
