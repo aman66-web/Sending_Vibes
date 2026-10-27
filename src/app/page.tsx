@@ -19,8 +19,6 @@ import { PRICES } from "@/lib/pricing";
 // Re-rendered hourly so the "coming up" dates stay current.
 export const revalidate = 3600;
 
-const MARQUEE = OCCASIONS.map((o) => occasions[o]);
-
 const TIERS = [
   {
     name: "Card",
@@ -60,12 +58,32 @@ export default function Home() {
     <div className="overflow-x-clip bg-cream text-ink">
       <SiteHeader />
 
+      {/* Every occasion, scrolling past under the header. Hover to pause; each one links to its page. */}
+      <div className="group relative overflow-hidden bg-ink py-3 text-white [contain:paint]">
+        <div className="flex w-max animate-marquee gap-8 whitespace-nowrap font-display text-lg font-semibold will-change-transform [backface-visibility:hidden] group-hover:[animation-play-state:paused] motion-reduce:animate-none sm:text-xl">
+          {[...OCCASIONS, ...OCCASIONS].map((o, i) => (
+            <Link
+              key={i}
+              href={`/occasions/${o}`}
+              tabIndex={i < OCCASIONS.length ? 0 : -1}
+              aria-hidden={i >= OCCASIONS.length}
+              className="flex items-center gap-2.5 transition hover:text-sun"
+            >
+              <span>{occasions[o].emoji}</span>
+              {occasions[o].label}
+              <span className="ml-5 text-hot">✦</span>
+            </Link>
+          ))}
+        </div>
+      </div>
+
       {/* Hero: says what we do in one glance, then shows it. */}
       <section className="relative">
         <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -left-40 -top-40 h-[30rem] w-[30rem] animate-blob rounded-full bg-hot/25 blur-3xl" />
-          <div className="absolute -right-40 top-10 h-[34rem] w-[34rem] animate-blob rounded-full bg-tangerine/25 blur-3xl [animation-delay:-6s]" />
-          <div className="absolute -bottom-48 left-1/3 h-[30rem] w-[30rem] animate-blob rounded-full bg-grape/20 blur-3xl [animation-delay:-12s]" />
+          {/* Soft glows drawn as gradients: blurring big shapes every frame makes the page stutter. */}
+          <div className="absolute -left-56 -top-56 h-[44rem] w-[44rem] animate-blob rounded-full bg-[radial-gradient(circle,rgba(255,46,126,0.25)_0%,transparent_65%)] will-change-transform" />
+          <div className="absolute -right-56 -top-6 h-[48rem] w-[48rem] animate-blob rounded-full bg-[radial-gradient(circle,rgba(255,138,61,0.25)_0%,transparent_65%)] will-change-transform [animation-delay:-6s]" />
+          <div className="absolute -bottom-64 left-1/4 h-[44rem] w-[44rem] animate-blob rounded-full bg-[radial-gradient(circle,rgba(124,58,237,0.2)_0%,transparent_65%)] will-change-transform [animation-delay:-12s]" />
           <div className="absolute inset-0 bg-[radial-gradient(#1d0b17_1px,transparent_1px)] [background-size:22px_22px] opacity-[0.05]" />
         </div>
 
@@ -127,19 +145,6 @@ export default function Home() {
           </ol>
         </div>
       </section>
-
-      {/* Marquee */}
-      <div className="relative -rotate-1 overflow-hidden bg-ink py-5 text-white shadow-2xl">
-        <div className="flex w-max animate-marquee gap-10 whitespace-nowrap font-display text-2xl font-semibold [animation-duration:110s] motion-reduce:animate-none">
-          {[...MARQUEE, ...MARQUEE].map((m, i) => (
-            <span key={i} className="flex items-center gap-3">
-              <span>{m.emoji}</span>
-              {m.label}
-              <span className="ml-7 text-hot">✦</span>
-            </span>
-          ))}
-        </div>
-      </div>
 
       {/* Coming up */}
       <section className="mx-auto max-w-6xl px-4 pt-24 sm:px-6">

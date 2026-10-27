@@ -154,7 +154,21 @@ export function Particles({ mode, loop = false }: { mode: "confetti" | "firework
     let last = performance.now();
     let sinceSpawn = 0;
     let raf = 0;
+    // Looping effects stop drawing while scrolled out of view, so they don't slow the rest of the page.
+    let visible = true;
+    const io = new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      if (visible && !raf) {
+        last = performance.now();
+        raf = requestAnimationFrame(tick);
+      }
+    });
+    if (loop) io.observe(canvas);
     const tick = (now: number) => {
+      if (!visible) {
+        raf = 0;
+        return;
+      }
       const dt = Math.min((now - last) / 16.7, 3);
       last = now;
       sinceSpawn += dt;
@@ -200,17 +214,27 @@ export function Particles({ mode, loop = false }: { mode: "confetti" | "firework
           ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
           ctx.restore();
         } else {
-          // Glowing streaks read as sparks rather than dots.
-          ctx.shadowBlur = 10;
-          ctx.shadowColor = p.color;
+          // Glowing streaks read as sparks rather than dots. The glow is a faint wide
+          // stroke, the spark a coloured one with a white-hot centre, all added together
+          // like light. Far cheaper than a canvas shadow, which made pages stutter.
+          const life = Math.max(p.life, 0);
+          ctx.globalCompositeOperation = "lighter";
           ctx.strokeStyle = p.color;
-          ctx.lineWidth = p.size;
           ctx.lineCap = "round";
           ctx.beginPath();
           ctx.moveTo(p.x - p.vx * 4, p.y - p.vy * 4);
           ctx.lineTo(p.x, p.y);
+          ctx.globalAlpha = life * 0.18;
+          ctx.lineWidth = p.size * 3;
           ctx.stroke();
-          ctx.shadowBlur = 0;
+          ctx.globalAlpha = life;
+          ctx.lineWidth = p.size;
+          ctx.stroke();
+          ctx.strokeStyle = "#ffffff";
+          ctx.globalAlpha = life * 0.7;
+          ctx.lineWidth = p.size * 0.4;
+          ctx.stroke();
+          ctx.globalCompositeOperation = "source-over";
         }
         ctx.globalAlpha = 1;
       }
@@ -219,6 +243,7 @@ export function Particles({ mode, loop = false }: { mode: "confetti" | "firework
     raf = requestAnimationFrame(tick);
     return () => {
       cancelAnimationFrame(raf);
+      io.disconnect();
       window.removeEventListener("resize", resize);
     };
   }, [mode, loop]);
