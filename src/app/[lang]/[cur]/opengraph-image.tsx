@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 import { OgEnvelope } from "@/components/OgEnvelope";
 import { DEFAULT_CURRENCY, isCurrency, price } from "@/lib/pricing";
 
-export const alt = "Sending Vibes: interactive cards they'll actually remember";
+export const alt = "Envelette: interactive cards they'll actually remember";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -32,7 +32,7 @@ export default async function OgImage({ params }: { params: Promise<{ cur: strin
           }}
         >
           <div style={{ display: "flex", flexDirection: "column", maxWidth: 660 }}>
-            <div style={{ fontSize: 34, fontWeight: 700, color: "#d8432f" }}>Sending Vibes</div>
+            <div style={{ fontSize: 34, fontWeight: 700, color: "#d8432f" }}>Envelette</div>
             <div style={{ display: "flex", flexDirection: "column", fontSize: 92, fontWeight: 800, lineHeight: 1, marginTop: 22, letterSpacing: -2 }}>
               <span style={{ color: "#d8432f" }}>Personalised</span>
               <span>interactive cards.</span>

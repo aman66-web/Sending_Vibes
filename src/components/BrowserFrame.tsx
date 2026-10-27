@@ -1,4 +1,4 @@
-export function BrowserFrame({ children, url = "sending-vibes.vercel.app/c/…", className = "h-[480px]" }: { children: React.ReactNode; url?: string; className?: string }) {
+export function BrowserFrame({ children, url = "envelette.com/c/…", className = "h-[480px]" }: { children: React.ReactNode; url?: string; className?: string }) {
   return (
     <div className="w-full overflow-hidden rounded-2xl bg-white shadow-[0_40px_80px_-24px_rgba(60,10,40,0.45)] ring-1 ring-ink/10">
       <div className="flex items-center gap-3 border-b border-ink/10 bg-[#f6f1ee] px-4 py-2.5">

@@ -4,7 +4,7 @@
 
 export const en = {
   meta: {
-    title: "Sending Vibes: personalised interactive cards they'll actually remember",
+    title: "Envelette: personalised interactive cards they'll actually remember",
     description:
       "Personalised interactive cards for birthdays, Valentine's, Diwali, Eid, Christmas, Halloween and more. Runaway No buttons, mini games, your photos, music and a big finale. Just fill in the blanks.",
   },
@@ -30,7 +30,7 @@ export const en = {
     pricing: "Pricing",
     help: "Help & FAQ",
     privacy: "Privacy",
-    copyright: "© {year} Sending Vibes. The No button still doesn't work.",
+    copyright: "© {year} Envelette. The No button still doesn't work.",
   },
 
   common: {
@@ -47,7 +47,7 @@ export const en = {
     allCards: "All cards",
     seeAll: "See all →",
     new: "New",
-    demoTitle: "{label} demo · Sending Vibes",
+    demoTitle: "{label} demo · Envelette",
     cardsStayEnglish: "The cards themselves are written in English, but you can type your own words in any language.",
   },
 
@@ -448,21 +448,21 @@ export const en = {
   },
 
   cardsPage: {
-    metaTitle: "All cards · Sending Vibes",
+    metaTitle: "All cards · Envelette",
     metaDescription: "{n} personalised interactive card designs for Valentine's, birthdays, Diwali, Christmas, Eid, Halloween, weddings, new babies and more.",
     title: "All the cards",
     intro: "{n} designs. Each one plays itself as you scroll past. Open one to try it with your names, then make it yours.",
   },
 
   occasionsPage: {
-    metaTitle: "Interactive cards for every occasion · Sending Vibes",
+    metaTitle: "Interactive cards for every occasion · Envelette",
     metaDescription: "Personalised interactive cards for {n} occasions: Valentine's, birthdays, Diwali, Eid, Christmas, Halloween, weddings, new babies and more.",
     title: "Occasions",
     intro: "{o} occasions and {n} designs. The ones coming up soonest are first.",
   },
 
   occasionPage: {
-    metaTitle: "Interactive {label} cards · Sending Vibes",
+    metaTitle: "Interactive {label} cards · Envelette",
     metaSuffix: "Personalise one in two minutes, no coding.",
     // {label} is shown in red.
     title: "Interactive {label} cards",
@@ -478,7 +478,7 @@ export const en = {
   },
 
   product: {
-    metaTitle: "{name} · {occasion} card · Sending Vibes",
+    metaTitle: "{name} · {occasion} card · Envelette",
     onPhone: "📱 On a phone",
     onComputer: "💻 On a computer",
     live: "it's live, tap through it ↑",
@@ -528,7 +528,7 @@ export const en = {
   },
 
   help: {
-    metaTitle: "Help & FAQ · Sending Vibes",
+    metaTitle: "Help & FAQ · Envelette",
     metaDescription: "How interactive cards work, how to make and send one, and answers to common questions.",
     title: "Help and questions",
     intro: "Everything you need to know about making, sending and opening an interactive card.",
@@ -589,8 +589,8 @@ export const en = {
   },
 
   privacy: {
-    metaTitle: "Privacy · Sending Vibes",
-    metaDescription: "What Sending Vibes stores when you make a card, who can see it, and how photos are handled.",
+    metaTitle: "Privacy · Envelette",
+    metaDescription: "What Envelette stores when you make a card, who can see it, and how photos are handled.",
     title: "Your cards, your business",
     intro: "In plain English: what we store when you make a card, who can see it and what we don't do.",
     sections: [
@@ -654,9 +654,9 @@ export const en = {
     openAria: "Chat with us",
     close: "Close",
     closeAria: "Close chat",
-    title: "Sending Vibes",
+    title: "Envelette",
     subtitle: "AI helper · usually replies in seconds",
-    dialogAria: "Chat with Sending Vibes",
+    dialogAria: "Chat with Envelette",
     newChat: "New chat",
     placeholder: "Ask anything about cards…",
     inputAria: "Your message",
@@ -677,7 +677,7 @@ export const en = {
   },
 
   basket: {
-    metaTitle: "Your basket · Sending Vibes",
+    metaTitle: "Your basket · Envelette",
     title: "Your basket",
     empty: "Your basket is empty.",
     emptyCta: "Find a card",
@@ -717,7 +717,7 @@ export const en = {
       consent: "Tick the box to confirm you'd like your cards straight away.",
     },
     thanks: {
-      metaTitle: "Thank you · Sending Vibes",
+      metaTitle: "Thank you · Envelette",
       title: "Thank you!",
       intro: "Your cards are paid for and ready to go.",
       receipt: "We've emailed a receipt with all your links to {email}.",
@@ -739,7 +739,7 @@ export const en = {
   },
 
   email: {
-    receiptSubject: "Your Sending Vibes cards",
+    receiptSubject: "Your Envelette cards",
     receiptTitle: "Thank you. Your cards are ready.",
     receiptIntro: "Here are the links to your cards. Keep this email safe: anyone with a link can open that card.",
     cardFor: "For {to}, from {from}",
@@ -752,11 +752,11 @@ export const en = {
     cardTitle: "{from} made you an interactive card",
     cardBody: "Tap the button below to open it, {to}. It's best with the sound on.",
     cardButton: "Open your card",
-    cardFooter: "Sent by Sending Vibes on behalf of {from}.",
+    cardFooter: "Sent by Envelette on behalf of {from}.",
   },
 
   create: {
-    metaTitle: "Make a card · Sending Vibes",
+    metaTitle: "Make a card · Envelette",
     startOver: "Start over",
     occasionTitle: "What are we celebrating?",
     occasionIntro: "{o} occasions, {n} designs. Pick one to see its designs.",

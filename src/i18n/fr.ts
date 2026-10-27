@@ -2,7 +2,7 @@ import type { Dict } from "./en";
 
 export const fr: Dict = {
   meta: {
-    title: "Sending Vibes : des cartes interactives personnalisées dont on se souvient vraiment",
+    title: "Envelette : des cartes interactives personnalisées dont on se souvient vraiment",
     description:
       "Des cartes interactives personnalisées pour les anniversaires, la Saint-Valentin, Diwali, l'Aïd, Noël, Halloween et plus encore. Des boutons Non qui s'enfuient, des mini-jeux, tes photos, de la musique et un grand final. Tu n'as qu'à remplir les cases.",
   },
@@ -28,7 +28,7 @@ export const fr: Dict = {
     pricing: "Tarifs",
     help: "Aide et FAQ",
     privacy: "Confidentialité",
-    copyright: "© {year} Sending Vibes. Le bouton Non ne marche toujours pas.",
+    copyright: "© {year} Envelette. Le bouton Non ne marche toujours pas.",
   },
 
   common: {
@@ -45,7 +45,7 @@ export const fr: Dict = {
     allCards: "Toutes les cartes",
     seeAll: "Tout voir →",
     new: "Nouveau",
-    demoTitle: "Démo {label} · Sending Vibes",
+    demoTitle: "Démo {label} · Envelette",
     cardsStayEnglish: "Les cartes elles-mêmes sont rédigées en anglais, mais tu peux écrire tes propres mots dans n'importe quelle langue.",
   },
 
@@ -446,21 +446,21 @@ export const fr: Dict = {
   },
 
   cardsPage: {
-    metaTitle: "Toutes les cartes · Sending Vibes",
+    metaTitle: "Toutes les cartes · Envelette",
     metaDescription: "{n} modèles de cartes interactives personnalisées pour la Saint-Valentin, les anniversaires, Diwali, Noël, l'Aïd, Halloween, les mariages, les naissances et plus encore.",
     title: "Toutes les cartes",
     intro: "{n} modèles. Chacun se lance tout seul quand tu fais défiler. Ouvres-en un pour l'essayer avec vos prénoms, puis personnalise-le.",
   },
 
   occasionsPage: {
-    metaTitle: "Des cartes interactives pour toutes les occasions · Sending Vibes",
+    metaTitle: "Des cartes interactives pour toutes les occasions · Envelette",
     metaDescription: "Des cartes interactives personnalisées pour {n} occasions : Saint-Valentin, anniversaires, Diwali, Aïd, Noël, Halloween, mariages, naissances et plus encore.",
     title: "Occasions",
     intro: "{o} occasions et {n} modèles. Les plus proches sont en premier.",
   },
 
   occasionPage: {
-    metaTitle: "Cartes interactives {label} · Sending Vibes",
+    metaTitle: "Cartes interactives {label} · Envelette",
     metaSuffix: "Personnalises-en une en deux minutes, sans coder.",
     // {label} is shown in red.
     title: "Cartes interactives {label}",
@@ -476,7 +476,7 @@ export const fr: Dict = {
   },
 
   product: {
-    metaTitle: "{name} · Carte {occasion} · Sending Vibes",
+    metaTitle: "{name} · Carte {occasion} · Envelette",
     onPhone: "📱 Sur téléphone",
     onComputer: "💻 Sur ordinateur",
     live: "c'est en direct, essaie-la ↑",
@@ -526,7 +526,7 @@ export const fr: Dict = {
   },
 
   help: {
-    metaTitle: "Aide et FAQ · Sending Vibes",
+    metaTitle: "Aide et FAQ · Envelette",
     metaDescription: "Comment fonctionnent les cartes interactives, comment en créer et en envoyer une, et les réponses aux questions courantes.",
     title: "Aide et questions",
     intro: "Tout ce qu'il faut savoir pour créer, envoyer et ouvrir une carte interactive.",
@@ -587,8 +587,8 @@ export const fr: Dict = {
   },
 
   privacy: {
-    metaTitle: "Confidentialité · Sending Vibes",
-    metaDescription: "Ce que Sending Vibes enregistre quand tu crées une carte, qui peut la voir et comment les photos sont traitées.",
+    metaTitle: "Confidentialité · Envelette",
+    metaDescription: "Ce qu'Envelette enregistre quand tu crées une carte, qui peut la voir et comment les photos sont traitées.",
     title: "Tes cartes, tes affaires",
     intro: "En clair : ce qu'on enregistre quand tu crées une carte, qui peut la voir et ce qu'on ne fait pas.",
     sections: [
@@ -652,9 +652,9 @@ export const fr: Dict = {
     openAria: "Discuter avec nous",
     close: "Fermer",
     closeAria: "Fermer le chat",
-    title: "Sending Vibes",
+    title: "Envelette",
     subtitle: "Assistant IA · répond en général en quelques secondes",
-    dialogAria: "Discuter avec Sending Vibes",
+    dialogAria: "Discuter avec Envelette",
     newChat: "Nouvelle discussion",
     placeholder: "Pose ta question sur les cartes…",
     inputAria: "Ton message",
@@ -675,7 +675,7 @@ export const fr: Dict = {
   },
 
   basket: {
-    metaTitle: "Ton panier · Sending Vibes",
+    metaTitle: "Ton panier · Envelette",
     title: "Ton panier",
     empty: "Ton panier est vide.",
     emptyCta: "Trouver une carte",
@@ -715,7 +715,7 @@ export const fr: Dict = {
       consent: "Coche la case pour confirmer que tu veux recevoir tes cartes tout de suite.",
     },
     thanks: {
-      metaTitle: "Merci · Sending Vibes",
+      metaTitle: "Merci · Envelette",
       title: "Merci !",
       intro: "Tes cartes sont payées et prêtes à partir.",
       receipt: "On a envoyé un reçu avec tous tes liens à {email}.",
@@ -737,7 +737,7 @@ export const fr: Dict = {
   },
 
   email: {
-    receiptSubject: "Tes cartes Sending Vibes",
+    receiptSubject: "Tes cartes Envelette",
     receiptTitle: "Merci. Tes cartes sont prêtes.",
     receiptIntro: "Voici les liens vers tes cartes. Garde bien cet e-mail : toute personne qui a un lien peut ouvrir la carte correspondante.",
     cardFor: "Pour {to}, de la part de {from}",
@@ -750,11 +750,11 @@ export const fr: Dict = {
     cardTitle: "{from} t'a préparé une carte interactive",
     cardBody: "Appuie sur le bouton ci-dessous pour l'ouvrir, {to}. C'est encore mieux avec le son activé.",
     cardButton: "Ouvrir ta carte",
-    cardFooter: "Envoyé par Sending Vibes de la part de {from}.",
+    cardFooter: "Envoyé par Envelette de la part de {from}.",
   },
 
   create: {
-    metaTitle: "Créer une carte · Sending Vibes",
+    metaTitle: "Créer une carte · Envelette",
     startOver: "Recommencer",
     occasionTitle: "Qu'est-ce qu'on fête ?",
     occasionIntro: "{o} occasions, {n} modèles. Choisis-en une pour voir ses modèles.",

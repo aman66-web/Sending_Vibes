@@ -165,7 +165,7 @@ export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 
                     href={card.template ? `/create?template=${card.template}` : "/create"}
                     className="mt-4 rounded-full bg-[var(--c-surface)] px-5 py-2.5 text-sm font-semibold shadow-sm ring-1 ring-black/10 backdrop-blur"
                   >
-                    Make your own on Sending Vibes
+                    Make your own on Envelette
                   </Link>
                 )
               }
@@ -176,7 +176,7 @@ export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 
 
       {!preview && (
         <p className="relative z-10 pb-4 text-center text-xs opacity-60">
-          From {card.from} to {card.to} · made with Sending Vibes
+          From {card.from} to {card.to} · made with Envelette
         </p>
       )}
     </div>

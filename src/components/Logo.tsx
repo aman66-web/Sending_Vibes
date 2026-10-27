@@ -45,7 +45,7 @@ export function Logo({ textClass = "text-ink" }: { textClass?: string }) {
   return (
     <Link href="/" className="flex shrink-0 items-center gap-2 sm:gap-2.5">
       <LogoMark className="h-8 w-8 sm:h-9 sm:w-9" />
-      <span className={`whitespace-nowrap font-brand text-[1.2rem] font-extrabold leading-none tracking-tight sm:text-[1.4rem] ${textClass}`}>Sending Vibes</span>
+      <span className={`whitespace-nowrap font-brand text-[1.2rem] font-extrabold leading-none tracking-tight sm:text-[1.4rem] ${textClass}`}>Envelette</span>
     </Link>
   );
 }

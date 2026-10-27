@@ -33,7 +33,7 @@ export function generateStaticParams() {
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getI18n();
   return {
-    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://sending-vibes.vercel.app"),
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://envelette.com"),
     title: t.meta.title,
     description: t.meta.description,
   };
