@@ -536,7 +536,7 @@ export const fr: Dict = {
         items: [
           {
             q: "Comment je crée une carte ?",
-            a: "Va sur [Créer une carte](/create), choisis une occasion et un modèle, tape son prénom et le tien, puis modifie tout ce que tu veux. Tu vois un aperçu en direct au fur et à mesure. Quand tout te plaît, appuie sur **Créer ma carte** et tu obtiens un lien à envoyer.",
+            a: "Va sur [Créer une carte](/create), choisis une occasion et un modèle, tape son prénom et le tien, puis modifie tout ce que tu veux. Tu vois un aperçu en direct au fur et à mesure. Quand tout te plaît, appuie sur **Ajouter au panier** et paie. Tu obtiens un lien à envoyer, ou on peut l'envoyer par e-mail pour toi.",
           },
           { q: "Faut-il des compétences en design ou en code ?", a: "Aucune. Chaque modèle est déjà prêt. Tu n'as qu'à remplir les cases : prénoms, photos et mots." },
           {

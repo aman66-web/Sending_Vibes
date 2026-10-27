@@ -539,7 +539,7 @@ export const pl: Dict = {
         items: [
           {
             q: "Jak zrobić kartkę?",
-            a: "Wejdź na [Zrób kartkę](/create), wybierz okazję i projekt, wpisz imię odbiorcy i swoje, a potem zmień, co tylko chcesz. Na bieżąco widzisz podgląd. Gdy wszystko ci się podoba, naciśnij **Utwórz moją kartkę** i dostaniesz link do wysłania.",
+            a: "Wejdź na [Zrób kartkę](/create), wybierz okazję i projekt, wpisz imię odbiorcy i swoje, a potem zmień, co tylko chcesz. Na bieżąco widzisz podgląd. Gdy wszystko ci się podoba, naciśnij **Dodaj do koszyka** i zapłać. Dostaniesz link do wysłania albo możemy wysłać kartkę e-mailem za ciebie.",
           },
           { q: "Czy muszę umieć projektować albo programować?", a: "Wcale nie. Każdy projekt jest już gotowy. Uzupełniasz tylko puste pola: imiona, zdjęcia i słowa." },
           {

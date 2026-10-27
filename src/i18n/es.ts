@@ -540,7 +540,7 @@ export const es: Dict = {
         items: [
           {
             q: "¿Cómo hago una tarjeta?",
-            a: "Ve a [Crea una tarjeta](/create), elige una ocasión y un diseño, escribe su nombre y el tuyo, y luego cambia lo que quieras. Irás viendo una vista previa en directo. Cuando te guste, pulsa **Crear mi tarjeta** y tendrás un enlace para enviar.",
+            a: "Ve a [Crea una tarjeta](/create), elige una ocasión y un diseño, escribe su nombre y el tuyo, y luego cambia lo que quieras. Irás viendo una vista previa en directo. Cuando te guste, pulsa **Añadir a la cesta** y paga. Tendrás un enlace para enviar, o podemos mandarla por correo electrónico por ti.",
           },
           { q: "¿Necesito saber de diseño o de programación?", a: "Para nada. Todos los diseños ya están hechos. Solo tienes que rellenar los huecos: nombres, fotos y palabras." },
           {
