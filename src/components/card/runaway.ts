@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 
-export const NO_LINES = ["Are you sure?", "Really sure?", "Think again 🥺", "Pleeease", "Nice try 😏", "You can't escape", "Just press yes!", "Wrong button 🙈"];
+export const NO_LINES = ["Are you sure?", "Really sure?", "Think again", "Please?", "Nice try", "You can't escape", "Just press yes", "Wrong button"];
 
 // A No button that can never be pressed: any attempt moves it somewhere random
 // inside `area`, away from the Yes button. Used by the card and the homepage demo.

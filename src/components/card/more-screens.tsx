@@ -101,7 +101,7 @@ export function WheelScreen({ screen, onNext }: ScreenProps<"wheel">) {
       </div>
       {result !== null ? (
         <>
-          <p className="animate-pop rounded-2xl bg-[var(--c-surface)] px-6 py-3 font-display text-2xl font-bold shadow-sm ring-1 ring-black/5">🎉 {options[result]}</p>
+          <p className="animate-pop rounded-2xl bg-[var(--c-surface)] px-6 py-3 font-display text-2xl font-semibold italic shadow-sm ring-1 ring-black/5">{options[result]}</p>
           <PrimaryButton onClick={onNext}>Next</PrimaryButton>
           <button onClick={spin} className="text-sm font-semibold underline underline-offset-4 opacity-75">
             Spin again
@@ -114,7 +114,7 @@ export function WheelScreen({ screen, onNext }: ScreenProps<"wheel">) {
           disabled={spinning}
           className="rounded-full bg-[var(--c-accent)] px-8 py-3.5 font-display text-lg font-semibold text-[var(--c-accent-text)] shadow-lg transition active:scale-95 disabled:opacity-60"
         >
-          {spinning ? "Spinning…" : "🎡 Spin"}
+          {spinning ? "Spinning…" : "Spin the wheel"}
         </button>
       )}
     </div>
@@ -141,7 +141,7 @@ export function CouponsScreen({ screen, onNext }: ScreenProps<"coupons">) {
   return (
     <div className="flex w-full flex-col items-center gap-4 text-center">
       <h2 className="font-display text-3xl font-bold leading-tight">{screen.title}</h2>
-      <p className="text-[var(--c-muted)]">{any ? "Screenshot this to claim it 📸" : screen.instructions}</p>
+      <p className="text-[var(--c-muted)]">{any ? "Screenshot this to claim it" : screen.instructions}</p>
       <div className="grid w-full grid-cols-2 gap-3 @2xl:grid-cols-3">
         {screen.coupons.map((c, i) => (
           <button
@@ -204,7 +204,7 @@ export function ReasonsScreen({ screen, onNext }: ScreenProps<"reasons">) {
             <p className="mt-1 font-hand text-2xl leading-snug">{screen.reasons[pulled - 1]}</p>
           </div>
         ) : (
-          <p className="font-display text-lg font-semibold opacity-80">👇 Tap the jar</p>
+          <p className="font-display text-lg font-semibold opacity-80">Tap the jar</p>
         )}
       </div>
       <button data-jar={done ? undefined : true} onClick={pull} aria-label={done ? "The jar is empty" : "Take a note from the jar"} className="relative h-44 w-36">
@@ -241,8 +241,8 @@ export function ReasonsScreen({ screen, onNext }: ScreenProps<"reasons">) {
 
 const SLIDER_LINES: [number, string][] = [
   [30, "Hmm. Be honest…"],
-  [55, "Getting warmer 🔥"],
-  [80, "That's more like it 😌"],
+  [55, "Getting warmer…"],
+  [80, "That's more like it."],
   [100, "Nearly there…"],
 ];
 
@@ -276,7 +276,7 @@ export function SliderScreen({ screen, onNext }: ScreenProps<"slider">) {
     <div className="flex w-full flex-col items-center gap-5 text-center">
       {done && <Particles mode="confetti" />}
       <h2 className="font-display text-3xl font-bold leading-tight">{screen.title}</h2>
-      <p className={`font-display text-6xl font-black tabular-nums ${done ? "animate-pop text-[var(--c-accent)]" : ""}`}>{done ? "💯" : `${Math.round(value)}%`}</p>
+      <p className={`font-display text-6xl font-black tabular-nums ${done ? "animate-pop text-[var(--c-accent)]" : ""}`}>{done ? "100%" : `${Math.round(value)}%`}</p>
       <p key={line} className="h-7 animate-screen-in font-display text-lg font-semibold">
         {line}
       </p>
@@ -306,10 +306,12 @@ export function SliderScreen({ screen, onNext }: ScreenProps<"slider">) {
         >
           <div className="absolute inset-y-0 left-0 rounded-full bg-[var(--c-accent)] transition-[width] duration-150" style={{ width: `${Math.max(value, 12)}%` }} />
           <span
-            className="absolute top-1/2 grid h-16 w-16 -translate-x-1/2 -translate-y-1/2 place-items-center text-5xl drop-shadow-md transition-[left] duration-150"
+            className="absolute top-1/2 grid h-14 w-14 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-[var(--c-secondary)] text-[var(--c-accent)] shadow-md ring-1 ring-black/10 transition-[left] duration-150"
             style={{ left: `${Math.min(Math.max(value, 8), 92)}%` }}
           >
-            {done ? "😍" : "❤️"}
+            <svg viewBox="0 0 24 24" className={`h-7 w-7 ${done ? "animate-pop" : ""}`} aria-hidden fill="currentColor">
+              <path d="M12 20.5s-7.2-4.5-9.4-9.1C1.2 8.4 3.2 4.9 6.8 4.9c2.1 0 3.7 1.1 5.2 3 1.5-1.9 3.1-3 5.2-3 3.6 0 5.6 3.5 4.2 6.5-2.2 4.6-9.4 9.1-9.4 9.1z" />
+            </svg>
           </span>
         </div>
         <div className="mt-2 flex justify-between text-sm font-semibold text-[var(--c-muted)]">

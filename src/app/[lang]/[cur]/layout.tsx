@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Caveat, Figtree, Fraunces, Fredoka, Noto_Sans_Arabic, Noto_Sans_Bengali, Noto_Sans_Devanagari, Noto_Sans_Gujarati, Noto_Sans_Gurmukhi, Nunito } from "next/font/google";
+import { Caveat, Figtree, Fraunces, Noto_Sans_Arabic, Noto_Sans_Bengali, Noto_Sans_Devanagari, Noto_Sans_Gujarati, Noto_Sans_Gurmukhi, Playfair_Display } from "next/font/google";
 import { ChatWidget } from "@/components/ChatWidget";
 import { I18nProvider } from "@/i18n/client";
 import { LANGUAGES } from "@/i18n/config";
@@ -9,9 +9,8 @@ import "../../globals.css";
 // The site itself: a soft serif for headings and a plain sans for everything else.
 const brand = Fraunces({ subsets: ["latin"], variable: "--font-brand-face", axes: ["SOFT", "WONK", "opsz"] });
 const ui = Figtree({ subsets: ["latin"], variable: "--font-ui-face" });
-// Inside the cards: rounded and playful.
-const display = Fredoka({ subsets: ["latin"], variable: "--font-display-face", weight: ["500", "600", "700"] });
-const body = Nunito({ subsets: ["latin"], variable: "--font-body" });
+// Inside the cards: a classic high-contrast serif, like good printed stationery.
+const display = Playfair_Display({ subsets: ["latin"], variable: "--font-display-face", style: ["normal", "italic"] });
 const hand = Caveat({ subsets: ["latin"], variable: "--font-hand-face" });
 // Other scripts, used only where a page has those letters. Browsers download a
 // font only when it has characters on screen, so English pages don't pay for them.
@@ -21,7 +20,7 @@ const gujarati = Noto_Sans_Gujarati({ subsets: ["gujarati"], variable: "--font-g
 const bengali = Noto_Sans_Bengali({ subsets: ["bengali"], variable: "--font-bengali", preload: false });
 const arabic = Noto_Sans_Arabic({ subsets: ["arabic"], variable: "--font-arabic", preload: false });
 
-const fonts = [brand, ui, display, body, hand, devanagari, gurmukhi, gujarati, bengali, arabic].map((f) => f.variable).join(" ");
+const fonts = [brand, ui, display, hand, devanagari, gurmukhi, gujarati, bengali, arabic].map((f) => f.variable).join(" ");
 
 // English pages are built ahead of time in both currencies; other languages are built on first visit and then kept.
 export function generateStaticParams() {

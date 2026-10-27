@@ -21,10 +21,10 @@ type Addable = Exclude<Screen["type"], "intro" | "finale">;
 // What "Add a screen" offers, with a starting point for each.
 const NEW_SCREENS: Record<Addable, { emoji: string; make: () => Screen }> = {
   message: { emoji: "💌", make: () => ({ id: uid(), type: "message", title: "A little note", body: "" }) },
-  photos: { emoji: "📸", make: () => ({ id: uid(), type: "photos", title: "Us ❤️", photos: [], captions: [] }) },
+  photos: { emoji: "📸", make: () => ({ id: uid(), type: "photos", title: "Us", photos: [], captions: [] }) },
   question: {
     emoji: "🙅",
-    make: () => ({ id: uid(), type: "question", question: "Do you love me?", yes: "Yes", no: "No", afterYes: "Good answer 😌" }),
+    make: () => ({ id: uid(), type: "question", question: "Do you love me?", yes: "Yes", no: "No", afterYes: "Good answer" }),
   },
   game: {
     emoji: "🎮",
@@ -62,7 +62,7 @@ const NEW_SCREENS: Record<Addable, { emoji: string; make: () => Screen }> = {
   },
   slider: {
     emoji: "📈",
-    make: () => ({ id: uid(), type: "slider", title: "How much do you love me?", low: "A little", high: "SO much", winText: "Correct answer 😌" }),
+    make: () => ({ id: uid(), type: "slider", title: "How much do you love me?", low: "A little", high: "SO much", winText: "Correct answer" }),
   },
   timeline: {
     emoji: "🗓️",
@@ -74,7 +74,7 @@ const NEW_SCREENS: Record<Addable, { emoji: string; make: () => Screen }> = {
   },
   scratch: {
     emoji: "🪙",
-    make: () => ({ id: uid(), type: "scratch", title: "Scratch for a surprise", instructions: "Scratch the silver panel", hidden: "Surprise! 🎉" }),
+    make: () => ({ id: uid(), type: "scratch", title: "Scratch for a surprise", instructions: "Scratch the silver panel", hidden: "Surprise!" }),
   },
   typeit: {
     emoji: "⌨️",

@@ -3,18 +3,46 @@
 import { useEffect, useMemo, useRef, useSyncExternalStore } from "react";
 import type { Effect } from "@/lib/card";
 
-const EMOJI: Partial<Record<Effect, string[]>> = {
-  hearts: ["💖", "💕", "❤️", "💗", "💘"],
-  sparkles: ["✨", "🌟", "✨", "💫"],
-  confetti: ["🎉", "🎊", "🥳", "🎈"],
-  snow: ["❄️", "❅", "❆", "❄️"],
-  stars: ["⭐", "🌟", "✨", "🌙"],
-  petals: ["🌸", "🌷", "💮", "🌺"],
-  spooky: ["🦇", "👻", "🎃", "🕸️"],
-  colours: ["🩷", "💛", "💚", "💙", "💜", "🧡"],
-  lanterns: ["🏮", "✨", "🏮", "🌟"],
-  bubbles: ["🫧", "🫧", "✨", "🫧"],
-  balloons: ["🎈", "🎈", "🎉", "🎈"],
+// Drawn shapes rather than emoji, in the card's own colours, so the background
+// looks like printed stationery rather than a chat app.
+const SHAPES = {
+  heart: <path d="M12 20.5s-7.2-4.5-9.4-9.1C1.2 8.4 3.2 4.9 6.8 4.9c2.1 0 3.7 1.1 5.2 3 1.5-1.9 3.1-3 5.2-3 3.6 0 5.6 3.5 4.2 6.5-2.2 4.6-9.4 9.1-9.4 9.1z" />,
+  sparkle: <path d="M12 1.5c.6 4.9 2.6 8.3 8.5 10.5-5.9 2.2-7.9 5.6-8.5 10.5-.6-4.9-2.6-8.3-8.5-10.5 5.9-2.2 7.9-5.6 8.5-10.5z" />,
+  dot: <circle cx="12" cy="12" r="5" />,
+  sliver: <rect x="10.2" y="2" width="3.6" height="20" rx="1.8" />,
+  petal: <path d="M12 2.5c4.6 3.6 5.8 10 0 19-5.8-9-4.6-15.4 0-19z" />,
+  snow: (
+    <g fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
+      <path d="M12 2v20M3.4 7l17.2 10M3.4 17L20.6 7" />
+      <path d="M9.6 3.8 12 6.2l2.4-2.4M9.6 20.2 12 17.8l2.4 2.4M3.6 10.3l3.3-.9-.9-3.3M20.4 13.7l-3.3.9.9 3.3M3.6 13.7l3.3.9-.9 3.3M20.4 10.3l-3.3-.9.9-3.3" />
+    </g>
+  ),
+  bat: <path d="M12 9.5c.8-1.6 1.9-2.4 3-2.4-.3.9-.2 1.7.4 2.4 1.6-1.4 4-1.6 6.6-.5-1.6.7-2.6 1.9-2.8 3.6-1.3-.9-2.7-.9-3.9.2-1.4-.9-2.6-.6-3.3.9-.7-1.5-1.9-1.8-3.3-.9-1.2-1.1-2.6-1.1-3.9-.2C4.6 10.9 3.6 9.7 2 9c2.6-1.1 5-.9 6.6.5.6-.7.7-1.5.4-2.4 1.1 0 2.2.8 3 2.4z" />,
+  ring: <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" strokeWidth="1.4" />,
+  orb: <circle cx="12" cy="12" r="7" />,
+  balloon: (
+    <>
+      <ellipse cx="12" cy="9.5" rx="6.2" ry="7.6" />
+      <path d="M12 17.1l-1.2 1.6h2.4z" />
+      <path d="M12 18.7c-.8 1.4.8 2.2 0 3.8" fill="none" stroke="currentColor" strokeWidth="0.9" />
+    </>
+  ),
+};
+type Shape = keyof typeof SHAPES;
+
+// Which shapes each effect uses, and in which of the card's colours.
+const LOOKS: Partial<Record<Effect, { shapes: Shape[]; colors: string[]; glow?: boolean }>> = {
+  hearts: { shapes: ["heart"], colors: ["var(--c-accent)", "var(--c-muted)"] },
+  sparkles: { shapes: ["sparkle", "dot"], colors: ["var(--c-muted)"] },
+  confetti: { shapes: ["sliver", "dot", "sparkle"], colors: ["var(--c-muted)", "var(--c-accent)"] },
+  snow: { shapes: ["snow", "dot"], colors: ["var(--c-text)"] },
+  stars: { shapes: ["sparkle", "dot"], colors: ["var(--c-muted)", "var(--c-text)"] },
+  petals: { shapes: ["petal"], colors: ["var(--c-accent)", "var(--c-muted)"] },
+  spooky: { shapes: ["bat"], colors: ["var(--c-muted)", "var(--c-text)"] },
+  colours: { shapes: ["dot"], colors: ["#d9507f", "#e3a92f", "#3f9c7d", "#5677c9", "#9b5fc0"] },
+  lanterns: { shapes: ["orb"], colors: ["var(--c-muted)", "var(--c-accent)"], glow: true },
+  bubbles: { shapes: ["ring"], colors: ["var(--c-muted)", "var(--c-text)"] },
+  balloons: { shapes: ["balloon"], colors: ["var(--c-accent)", "var(--c-muted)"] },
 };
 
 // Snow and petals drift down; everything else floats up.
@@ -38,7 +66,7 @@ export function useReducedMotion() {
   );
 }
 
-// Seeded so the server and browser render identical emoji positions.
+// Seeded so the server and browser render identical positions.
 function seededRandom(seed: number) {
   return () => {
     seed = (seed + 0x6d2b79f5) | 0;
@@ -48,43 +76,52 @@ function seededRandom(seed: number) {
   };
 }
 
-type Drop = { id: number; left: number; size: number; duration: number; delay: number; emoji: string };
+type Drop = { id: number; left: number; size: number; duration: number; delay: number; shape: Shape; color: string; turn: number };
 
-// Emoji drifting across the background.
-export function EmojiRain({ effect, count = 14, intense = false }: { effect: Effect; count?: number; intense?: boolean }) {
+// Shapes drifting across the background.
+export function Ambient({ effect, count = 14, intense = false }: { effect: Effect; count?: number; intense?: boolean }) {
   const reduced = useReducedMotion();
   const drops = useMemo<Drop[]>(() => {
-    const set = EMOJI[effect];
-    if (!set) return [];
+    const look = LOOKS[effect];
+    if (!look) return [];
     const rand = seededRandom(effect.length * 97 + count + (intense ? 1 : 0));
     return Array.from({ length: intense ? count * 2 : count }, (_, i) => ({
       id: i,
       left: rand() * 100,
-      size: 16 + rand() * (intense ? 26 : 16),
-      duration: (intense ? 5 : 9) + rand() * 6,
-      delay: -rand() * 12,
-      emoji: set[i % set.length],
+      size: 9 + rand() * (intense ? 18 : 12),
+      duration: (intense ? 6 : 11) + rand() * 7,
+      delay: -rand() * 14,
+      shape: look.shapes[i % look.shapes.length],
+      color: look.colors[Math.floor(rand() * look.colors.length)],
+      turn: Math.round(rand() * 360),
     }));
   }, [effect, count, intense]);
 
   if (!drops.length || reduced) return null;
   const falls = FALLS.includes(effect);
+  const glow = LOOKS[effect]?.glow;
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
       {drops.map((d) => (
-        <span
+        <svg
           key={d.id}
+          viewBox="0 0 24 24"
+          fill="currentColor"
           className={`absolute ${falls ? "top-[-10%] animate-float-down" : "bottom-[-10%] animate-float-up"}`}
           style={{
             left: `${d.left}%`,
-            fontSize: d.size,
+            width: d.size,
+            height: d.size,
+            color: d.color,
+            rotate: `${d.turn}deg`,
             animationDuration: `${d.duration}s`,
             animationDelay: `${d.delay}s`,
-            opacity: intense ? 0.7 : 0.45,
+            opacity: intense ? 0.75 : 0.4,
+            filter: glow ? "blur(0.5px) drop-shadow(0 0 6px currentColor)" : undefined,
           }}
         >
-          {d.emoji}
-        </span>
+          {SHAPES[d.shape]}
+        </svg>
       ))}
     </div>
   );
@@ -93,7 +130,8 @@ export function EmojiRain({ effect, count = 14, intense = false }: { effect: Eff
 type Particle = { x: number; y: number; vx: number; vy: number; life: number; color: string; size: number; spin: number; rot: number };
 type Rocket = { x: number; y: number; vy: number; targetY: number; color: string };
 
-const COLORS = ["#ff4d8d", "#ffd166", "#06d6a0", "#4cc9f0", "#f72585", "#ff9f1c", "#b388ff"];
+// Gold, champagne, blush, ivory and pearl: confetti that looks like foil.
+const COLORS = ["#d8b25c", "#f1dfb3", "#e7b3b6", "#fffaf0", "#c79a43", "#c5cfdc", "#ead2a1"];
 const pick = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
 
 // Canvas confetti / fireworks. `loop` keeps it going; otherwise it is a single burst.
@@ -255,5 +293,5 @@ export function FinaleEffect({ effect }: { effect: Effect }) {
   if (effect === "fireworks") return <Particles mode="fireworks" loop />;
   if (effect === "confetti") return <Particles mode="confetti" loop />;
   if (effect === "none") return null;
-  return <EmojiRain effect={effect} intense />;
+  return <Ambient effect={effect} intense />;
 }

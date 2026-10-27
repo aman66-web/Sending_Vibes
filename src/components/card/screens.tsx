@@ -5,30 +5,38 @@ import type { Game, Occasion, Screen } from "@/lib/card";
 import { FinaleEffect, Particles, useReducedMotion } from "./effects";
 import { GameView } from "./games";
 import { useRunaway } from "./runaway";
+import { Flourish, HeartMark, Laurel } from "./ornaments";
 import { useSfx } from "./sound";
 
 type Of<T extends Screen["type"]> = Extract<Screen, { type: T }>;
 type ScreenProps<T extends Screen["type"]> = { screen: Of<T>; onNext: () => void };
 
+// Small capitals with generous spacing, like the button on a printed invitation.
+export const BUTTON =
+  "rounded-full bg-[var(--c-accent)] px-8 py-3.5 text-[0.8rem] font-semibold uppercase tracking-[0.2em] text-[var(--c-accent-text)] shadow-[0_12px_28px_-14px_rgba(0,0,0,0.7)] transition hover:brightness-110 active:scale-95";
+
 export function PrimaryButton({ children, onClick, className = "" }: { children: React.ReactNode; onClick?: () => void; className?: string }) {
   return (
-    <button
-      data-primary
-      onClick={onClick}
-      className={`rounded-full bg-[var(--c-accent)] px-8 py-3.5 font-display text-lg font-semibold text-[var(--c-accent-text)] shadow-lg shadow-black/10 transition hover:brightness-110 active:scale-95 ${className}`}
-    >
+    <button data-primary onClick={onClick} className={`${BUTTON} ${className}`}>
       {children}
     </button>
   );
 }
 
-export function IntroScreen({ screen, onNext, emoji }: ScreenProps<"intro"> & { emoji: string }) {
+const ENVELOPE = "#f6efe0";
+const ENVELOPE_SHADE = "#ebe1cb";
+
+export function IntroScreen({ screen, onNext, to, from }: ScreenProps<"intro"> & { to: string; from: string }) {
   const sfx = useSfx();
   const [open, setOpen] = useState(false);
+  const initial = (from.trim()[0] ?? "").toUpperCase() || "\u2665";
   return (
     <div className="flex flex-col items-center gap-6 text-center">
-      <p className="font-display text-2xl font-bold">{open ? "\u00a0" : "You've got mail 💌"}</p>
-      {/* An envelope that unseals and slides its letter up when tapped. */}
+      <div className={`transition-opacity duration-500 ${open ? "opacity-0" : ""}`}>
+        <p className="text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-[var(--c-muted)]">You&apos;ve got mail</p>
+        <Flourish className="mx-auto mt-3 text-[var(--c-muted)]" />
+      </div>
+      {/* A cream envelope, hand-addressed, closed with a wax seal. It opens and the letter slides up. */}
       <button
         aria-label={open ? screen.title : "Open the envelope"}
         onClick={() => {
@@ -37,29 +45,43 @@ export function IntroScreen({ screen, onNext, emoji }: ScreenProps<"intro"> & { 
           setTimeout(() => sfx("sparkle"), 450);
         }}
         disabled={open}
-        className="group relative mt-24 h-44 w-64 [perspective:900px]"
+        className="group relative mt-16 h-48 w-72 [perspective:900px]"
       >
-        <span className="absolute inset-0 rounded-xl bg-[var(--c-accent)] brightness-75" />
         <span
-          className={`absolute inset-x-3 bottom-2 top-2 flex flex-col items-center rounded-lg bg-white px-4 pt-5 text-[#3b0a1f] shadow-md transition-transform duration-700 ease-out ${open ? "-translate-y-28 delay-300" : ""}`}
+          className="absolute inset-0 rounded-md shadow-[0_22px_44px_-20px_rgba(0,0,0,0.6)]"
+          style={{ background: `repeating-linear-gradient(135deg, var(--c-accent) 0 7px, color-mix(in srgb, var(--c-accent) 78%, white) 7px 14px)` }}
+        />
+        <span
+          className={`absolute inset-x-4 bottom-3 top-3 flex flex-col items-center rounded-sm bg-[#fffdf8] px-5 pt-6 text-[#2b2318] shadow transition-transform duration-700 ease-out ${open ? "-translate-y-28 delay-300" : ""}`}
           style={{ zIndex: 2 }}
         >
-          <span className="font-display text-xl font-bold leading-tight">{screen.title}</span>
-          <span className="mt-2 h-1 w-10 rounded-full bg-[var(--c-accent)]" />
+          <span className="font-display text-xl font-semibold italic leading-tight">{screen.title}</span>
+          <Flourish className="mt-2 w-24 text-[#a8894f]" />
         </span>
         <span
-          className="absolute inset-0 rounded-xl bg-[var(--c-accent)] shadow-lg [clip-path:polygon(0_0,50%_54%,100%_0,100%_100%,0_100%)]"
-          style={{ zIndex: 3 }}
-        />
-        <span
-          className={`absolute inset-x-0 top-0 h-[60%] origin-top rounded-t-xl bg-[var(--c-accent)] brightness-90 [clip-path:polygon(0_0,100%_0,50%_100%)] ${open ? "[transform:rotateX(180deg)]" : ""}`}
-          style={{ zIndex: open ? 1 : 4, transition: "transform 0.5s ease-in-out, z-index 0s linear 0.25s" }}
-        />
-        <span
-          className={`absolute left-1/2 top-[60%] grid h-14 w-14 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-[#b3123f] text-2xl shadow-lg ring-4 ring-white/30 transition duration-300 ${open ? "scale-0 opacity-0" : "group-hover:scale-110"}`}
-          style={{ zIndex: 5 }}
+          className="absolute inset-0 rounded-md [clip-path:polygon(0_0,50%_54%,100%_0,100%_100%,0_100%)]"
+          style={{ zIndex: 3, background: `linear-gradient(180deg, ${ENVELOPE} 0%, ${ENVELOPE_SHADE} 100%)` }}
         >
-          {emoji}
+          {to && <span className="absolute inset-x-0 bottom-2 truncate px-6 font-hand text-2xl text-[#3a3127]">{to}</span>}
+        </span>
+        <span
+          className={`absolute inset-x-0 top-0 h-[60%] origin-top rounded-t-md [clip-path:polygon(0_0,100%_0,50%_100%)] ${open ? "[transform:rotateX(180deg)]" : ""}`}
+          style={{
+            zIndex: open ? 1 : 4,
+            background: open ? "color-mix(in srgb, var(--c-accent) 85%, black)" : ENVELOPE_SHADE,
+            filter: "drop-shadow(0 2px 2px rgba(0,0,0,0.12))",
+            transition: "transform 0.5s ease-in-out, z-index 0s linear 0.25s, background 0s linear 0.25s",
+          }}
+        />
+        <span
+          className={`absolute left-1/2 top-[56%] grid h-14 w-14 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full font-display text-xl font-semibold italic text-white/90 transition duration-300 ${open ? "scale-0 opacity-0" : "group-hover:scale-105"}`}
+          style={{
+            zIndex: 5,
+            background: "radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--c-accent) 65%, white) 0%, var(--c-accent) 45%, color-mix(in srgb, var(--c-accent) 55%, black) 100%)",
+            boxShadow: "0 4px 10px rgba(0,0,0,0.35), inset 0 -3px 6px rgba(0,0,0,0.3), inset 0 2px 3px rgba(255,255,255,0.25)",
+          }}
+        >
+          <span className="grid h-10 w-10 place-items-center rounded-full ring-1 ring-white/35">{initial}</span>
         </span>
       </button>
       {open ? (
@@ -68,7 +90,7 @@ export function IntroScreen({ screen, onNext, emoji }: ScreenProps<"intro"> & { 
           <PrimaryButton onClick={onNext}>{screen.button}</PrimaryButton>
         </div>
       ) : (
-        <p className="animate-pulse text-sm font-semibold opacity-80">Tap the envelope to open it</p>
+        <p className="animate-pulse text-xs font-semibold uppercase tracking-[0.25em] opacity-70">Tap the envelope to open it</p>
       )}
     </div>
   );
@@ -83,8 +105,8 @@ export function QuestionScreen({ screen, onNext }: ScreenProps<"question">) {
     return (
       <div className="flex flex-col items-center gap-6 text-center">
         <Particles mode="confetti" />
-        <div className="animate-pop text-8xl">🥰</div>
-        <h2 className="font-display text-3xl font-bold">{screen.afterYes}</h2>
+        <HeartMark className="h-24 w-24 animate-pop text-[var(--c-accent)]" />
+        <h2 className="font-display text-3xl font-semibold italic">{screen.afterYes}</h2>
         <PrimaryButton onClick={onNext}>Next</PrimaryButton>
       </div>
     );
@@ -96,7 +118,7 @@ export function QuestionScreen({ screen, onNext }: ScreenProps<"question">) {
     <button
       {...noProps}
       data-no
-      className={`${moved ? "absolute transition-[left,top] duration-200 ease-out" : ""} whitespace-nowrap rounded-full bg-[var(--c-secondary)] px-6 py-3 font-display text-base font-semibold text-[var(--c-text)] shadow ring-1 ring-black/10`}
+      className={`${moved ? "absolute transition-[left,top] duration-200 ease-out" : ""} whitespace-nowrap rounded-full bg-[var(--c-secondary)] px-6 py-3 text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-[var(--c-text)] shadow-sm ring-1 ring-current/20`}
     >
       {label(screen.no)}
     </button>
@@ -104,8 +126,8 @@ export function QuestionScreen({ screen, onNext }: ScreenProps<"question">) {
 
   return (
     <div className="flex w-full flex-col items-center gap-4 text-center">
-      <div className="text-6xl">🥺</div>
-      <h2 className="font-display text-3xl font-bold leading-tight">{screen.question}</h2>
+      <HeartMark className="h-12 w-12 text-[var(--c-accent)]" />
+      <h2 className="font-display text-3xl font-semibold leading-tight">{screen.question}</h2>
       <div ref={area} className="relative h-64 w-full">
         <div className="absolute inset-x-0 top-6 flex items-center justify-center gap-4">
           <button
@@ -116,7 +138,7 @@ export function QuestionScreen({ screen, onNext }: ScreenProps<"question">) {
               sfx("win");
             }}
             style={{ transform: `scale(${yesScale})` }}
-            className="rounded-full bg-[var(--c-accent)] px-8 py-3.5 font-display text-lg font-semibold text-[var(--c-accent-text)] shadow-lg transition-transform duration-300"
+            className={`${BUTTON} duration-300`}
           >
             {screen.yes}
           </button>
@@ -138,7 +160,7 @@ export function PhotosScreen({ screen, onNext, wide = false }: ScreenProps<"phot
   if (wide && total > 0) {
     return (
       <div className="flex w-full flex-col items-center gap-8 text-center">
-        <h2 className="font-display text-3xl font-bold leading-tight @2xl:text-4xl">{screen.title}</h2>
+        <h2 className="font-display text-3xl font-semibold leading-tight @2xl:text-4xl">{screen.title}</h2>
         <div className="mx-auto grid w-full max-w-3xl grid-cols-2 gap-4 @2xl:grid-cols-3 @2xl:gap-6">
           {photos.map((src, i) => (
             <figure
@@ -162,7 +184,7 @@ export function PhotosScreen({ screen, onNext, wide = false }: ScreenProps<"phot
 
   return (
     <div className="flex w-full flex-col items-center gap-5 text-center">
-      <h2 className="font-display text-3xl font-bold leading-tight">{screen.title}</h2>
+      <h2 className="font-display text-3xl font-semibold leading-tight">{screen.title}</h2>
       {total === 0 ? (
         <div className="flex h-72 w-60 rotate-[-3deg] items-center justify-center rounded-md bg-white p-3 pb-12 text-sm text-neutral-400 shadow-xl">
           Your photos will appear here
@@ -224,10 +246,13 @@ export function MessageScreen({ screen, onNext }: ScreenProps<"message">) {
 
   return (
     <div className="flex w-full flex-col items-center gap-6 text-center">
-      <h2 className="font-display text-3xl font-bold leading-tight">{screen.title}</h2>
+      <div>
+        <h2 className="font-display text-3xl font-semibold italic leading-tight">{screen.title}</h2>
+        <Flourish className="mx-auto mt-3 text-[var(--c-muted)]" />
+      </div>
       <button
         onClick={() => setTyped(screen.body.length)}
-        className="min-h-40 w-full whitespace-pre-line rounded-3xl bg-[var(--c-surface)] p-6 text-left text-lg leading-relaxed shadow-sm ring-1 ring-black/5 backdrop-blur"
+        className="min-h-40 w-full whitespace-pre-line rounded-sm bg-[var(--c-surface)] p-7 text-left text-lg leading-relaxed shadow-[0_14px_30px_-20px_rgba(0,0,0,0.6)] ring-1 ring-current/10"
       >
         {screen.body.slice(0, shown)}
         {!done && <span className="ml-0.5 inline-block h-5 w-0.5 animate-pulse bg-current align-middle" />}
@@ -251,7 +276,7 @@ export function GameScreen({ screen, onNext, occasion }: ScreenProps<"game"> & {
   return (
     <div className="flex w-full flex-col items-center gap-3 text-center">
       {won && <Particles mode={FIREWORK_GAMES.includes(screen.game) || (screen.game === "shake-it" && occasion === "diwali") ? "fireworks" : "confetti"} />}
-      <h2 className="font-display text-3xl font-bold leading-tight">{screen.title}</h2>
+      <h2 className="font-display text-3xl font-semibold leading-tight">{screen.title}</h2>
       <p className="text-[var(--c-muted)]">{won ? screen.winText : screen.instructions}</p>
       <GameView game={screen.game} occasion={occasion} won={won} onWin={win} />
       <PrimaryButton onClick={onNext} className={won ? "animate-pop" : "invisible"}>
@@ -273,7 +298,8 @@ export function FinaleScreen({ screen, onReplay, footer }: { screen: Of<"finale"
       <FinaleEffect effect={screen.effect} />
       {/* Stacked above the effect so the words stay readable. */}
       <div className="relative z-10 flex flex-col items-center gap-6 text-center">
-        <h1 className="animate-pop font-display text-5xl font-bold leading-tight">{screen.title}</h1>
+        <Flourish className="text-[var(--c-muted)]" />
+        <h1 className="animate-pop font-display text-5xl font-semibold italic leading-tight">{screen.title}</h1>
         <p className="text-lg text-[var(--c-muted)]">{screen.body}</p>
         <button onClick={onReplay} className="text-sm font-semibold underline underline-offset-4 opacity-80 hover:opacity-100">
           Play it again
@@ -284,7 +310,7 @@ export function FinaleScreen({ screen, onReplay, footer }: { screen: Of<"finale"
   );
 }
 
-const WRONG_LINES = ["Wrong! 😤", "Excuse me?? 🙄", "Try again 👀", "Hmm, no. 🙅", "I'm offended 😭"];
+const WRONG_LINES = ["Wrong!", "Excuse me?", "Try again.", "Hmm, no.", "I'm offended."];
 
 export function QuizScreen({ screen, onNext }: ScreenProps<"quiz">) {
   const sfx = useSfx();
@@ -316,8 +342,8 @@ export function QuizScreen({ screen, onNext }: ScreenProps<"quiz">) {
     return (
       <div className="flex flex-col items-center gap-5 text-center">
         <Particles mode="confetti" />
-        <div className="animate-pop text-7xl">{misses === 0 ? "🏆" : "😅"}</div>
-        <h2 className="font-display text-3xl font-bold">{screen.winText}</h2>
+        <Laurel className={`h-20 w-28 animate-pop ${misses === 0 ? "text-[var(--c-accent)]" : "text-[var(--c-muted)]"}`} />
+        <h2 className="font-display text-3xl font-semibold">{screen.winText}</h2>
         <p className="text-[var(--c-muted)]">{misses === 0 ? "Full marks. Obviously." : `Only ${misses} wrong answer${misses === 1 ? "" : "s"}. We'll talk about that later.`}</p>
         <PrimaryButton onClick={onNext}>Next</PrimaryButton>
       </div>
@@ -329,7 +355,7 @@ export function QuizScreen({ screen, onNext }: ScreenProps<"quiz">) {
       <p className="text-sm font-bold uppercase tracking-widest text-[var(--c-muted)]">
         {screen.title} · {index + 1} of {screen.questions.length}
       </p>
-      <h2 key={index} className="animate-screen-in font-display text-3xl font-bold leading-tight">
+      <h2 key={index} className="animate-screen-in font-display text-3xl font-semibold leading-tight">
         {q.question}
       </h2>
       <div className="grid w-full gap-3 @xl:grid-cols-2">
@@ -384,7 +410,7 @@ export function ScratchScreen({ screen, onNext }: ScreenProps<"scratch">) {
     ctx.fillStyle = "#52525b";
     ctx.font = "600 20px system-ui, sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("✨ Scratch here ✨", w / 2, h / 2 + 7);
+    ctx.fillText("Scratch here", w / 2, h / 2 + 7);
   }, []);
 
   const scratch = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -421,11 +447,11 @@ export function ScratchScreen({ screen, onNext }: ScreenProps<"scratch">) {
   return (
     <div className="flex w-full flex-col items-center gap-5 text-center">
       {revealed && <Particles mode="confetti" />}
-      <h2 className="font-display text-3xl font-bold leading-tight">{screen.title}</h2>
+      <h2 className="font-display text-3xl font-semibold leading-tight">{screen.title}</h2>
       <p className="text-[var(--c-muted)]">{revealed ? "There it is!" : screen.instructions}</p>
       <div className="relative h-56 w-full max-w-sm overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-black/10">
         <div className="absolute inset-0 grid place-items-center p-6">
-          <p className="font-display text-3xl font-bold leading-tight text-[#3b0a1f]">{screen.hidden}</p>
+          <p className="font-display text-3xl font-semibold leading-tight text-[#3b0a1f]">{screen.hidden}</p>
         </div>
         <canvas
           ref={canvas}
@@ -465,7 +491,7 @@ export function TypeItScreen({ screen, onNext }: ScreenProps<"typeit">) {
   return (
     <div className="flex w-full flex-col items-center gap-5 text-center">
       {solved && <Particles mode="confetti" />}
-      <h2 className="font-display text-3xl font-bold leading-tight">{screen.title}</h2>
+      <h2 className="font-display text-3xl font-semibold leading-tight">{screen.title}</h2>
       <p className="text-[var(--c-muted)]">{solved ? screen.winText : screen.instructions}</p>
       <div className={`flex flex-wrap justify-center gap-1.5 ${wrongNow ? "animate-shake" : ""}`} aria-hidden>
         {target.split("").map((ch, i) =>
