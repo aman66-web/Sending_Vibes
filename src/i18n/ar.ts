@@ -682,7 +682,7 @@ export const ar: Dict = {
     namesTitle: "لمن هذه البطاقة؟",
     theirName: "اسم المستلم",
     yourName: "اسمك",
-    theirExample: "مثلًا: بريا",
+    theirExample: "مثلًا: أوليفيا",
     yourExample: "مثلًا: سام",
     next: "التالي: اجعلها بلمستك →",
     editTitle: "اجعلها بلمستك",

@@ -82,7 +82,7 @@ export function HeroShowcase() {
               }}
               onFocus={startTyping}
               maxLength={40}
-              placeholder="Priya"
+              placeholder="Olivia"
               aria-label={h.theirName}
               className="w-full border-b-2 border-dashed border-ink/30 bg-transparent px-1 py-1 font-hand text-2xl leading-none outline-none placeholder:text-ink/25 focus:border-solid focus:border-hot"
             />

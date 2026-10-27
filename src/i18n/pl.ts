@@ -685,7 +685,7 @@ export const pl: Dict = {
     namesTitle: "Dla kogo?",
     theirName: "Imię odbiorcy",
     yourName: "Twoje imię",
-    theirExample: "np. Kasia",
+    theirExample: "np. Oliwia",
     yourExample: "np. Tomek",
     next: "Dalej: zrób ją po swojemu →",
     editTitle: "Zrób ją po swojemu",

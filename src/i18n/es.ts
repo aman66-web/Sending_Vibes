@@ -686,7 +686,7 @@ export const es: Dict = {
     namesTitle: "¿Para quién es?",
     theirName: "Su nombre",
     yourName: "Tu nombre",
-    theirExample: "p. ej. Priya",
+    theirExample: "p. ej. Olivia",
     yourExample: "p. ej. Sam",
     next: "Siguiente: hazla tuya →",
     editTitle: "Hazla tuya",

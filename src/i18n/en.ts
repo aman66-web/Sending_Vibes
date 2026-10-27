@@ -684,7 +684,7 @@ export const en = {
     namesTitle: "Who's it for?",
     theirName: "Their name",
     yourName: "Your name",
-    theirExample: "e.g. Priya",
+    theirExample: "e.g. Olivia",
     yourExample: "e.g. Sam",
     next: "Next: make it yours →",
     editTitle: "Make it yours",

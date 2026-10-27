@@ -682,7 +682,7 @@ export const pa: Dict = {
     namesTitle: "ਇਹ ਕਿਸ ਲਈ ਹੈ?",
     theirName: "ਉਨ੍ਹਾਂ ਦਾ ਨਾਂ",
     yourName: "ਤੁਹਾਡਾ ਨਾਂ",
-    theirExample: "ਜਿਵੇਂ ਪ੍ਰਿਆ",
+    theirExample: "ਜਿਵੇਂ ਓਲੀਵੀਆ",
     yourExample: "ਜਿਵੇਂ ਸੈਮ",
     next: "ਅੱਗੇ: ਇਸ ਨੂੰ ਆਪਣਾ ਬਣਾਓ →",
     editTitle: "ਇਸ ਨੂੰ ਆਪਣਾ ਬਣਾਓ",
