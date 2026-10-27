@@ -207,7 +207,7 @@ function DeviceTip({ device }: { device: "phone" | "desktop" }) {
   return (
     <div className="absolute inset-x-0 bottom-0 z-30 flex justify-center p-3">
       <div className="flex items-center gap-3 rounded-full bg-black/75 py-2 pl-4 pr-2 text-sm font-semibold text-white shadow-lg backdrop-blur">
-        {device === "phone" ? "📱 Best on a phone, but it works here too" : "💻 Best on a computer, but it works here too"}
+        {device === "phone" ? "Best on a phone, but it works here too" : "Best on a computer, but it works here too"}
         <button onClick={() => setDismissed(true)} aria-label="Dismiss" className="grid h-6 w-6 place-items-center rounded-full bg-white/20">
           ✕
         </button>
