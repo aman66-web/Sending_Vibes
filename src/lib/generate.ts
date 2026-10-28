@@ -4,6 +4,7 @@ import { customAlphabet } from "nanoid";
 import { EFFECTS, FONTS, GAMES, MOTIONS, MUSIC, OCCASIONS, PATTERNS, THEMES, cardSchema, screenStyle, type CardData, type Game, type Screen, type ScreenType } from "./card";
 import { LANGUAGES, type Locale } from "@/i18n/config";
 import { TEMPLATES, buildCard, getTemplate } from "./catalog";
+import { GAME_LABELS, LABELS_ON, LISTS, TEXTS, isList, type LabelKey } from "./labels";
 
 // Writes a whole card from a description, or changes an existing one, with Claude.
 // The model replies with card JSON in the same shape the creator saves, so whatever
@@ -22,6 +23,12 @@ function gameNotes() {
 }
 
 const list = (values: readonly string[]) => values.map((v) => `"${v}"`).join(", ");
+
+function labelGuide() {
+  const say = (keys: LabelKey[]) => keys.map((k) => `${k} ${JSON.stringify(isList(k) ? LISTS[k] : TEXTS[k])}`).join(", ");
+  const games = Object.entries(GAME_LABELS).map(([game, keys]) => `  - ${game}: ${say(keys ?? [])}`);
+  return [...Object.entries(LABELS_ON).map(([type, keys]) => `- ${type}: ${say(keys)}`), "  And on a game screen, by game:", ...games].join("\n");
+}
 
 // Two of the shop's own designs, so the model sees the voice and the shape.
 const EXAMPLES = ["be-my-valentine", "birthday-bash"]
@@ -84,6 +91,10 @@ Every screen can have a "style" that sets its look on top of the theme. Design e
 - Every part is optional. Colours are always six-digit hex.
 - The fonts: classic is an elegant serif, modern a clean sans-serif, handwritten casual handwriting, storybook a soft old-style serif, script a flowing wedding script, rounded bubbly and friendly, bold a chunky modern headline, typewriter an old typewriter, marker a thick felt-tip pen and spooky a dripping horror font. For the body, use one that's easy to read in a long letter: modern, classic, storybook, rounded or typewriter.
 - Put stickers near the edges and corners (x under 15 or over 85, or y under 14 or over 86) so they don't cover the words, 2 to 6 on a screen. Keep the top right corner clear for the sound button.
+
+# The words built into the screens
+Screens also say a few things of their own: the envelope's "You've got mail", the Next buttons, the excuses the runaway No button makes, a game's "Keep shaking…". Left out, they say the usual thing. To change them on a screen, give it "labels" with just the ones to change, e.g. "labels": {"next": "Onwards", "noLines": ["Nope", "Try again"]}. Do this when they ask for particular wording, or when a line would clearly suit the card better. Each screen's labels and what they usually say ({i}, {n} and {moves} become numbers; lists are said in turn):
+${labelGuide()}
 
 # Writing it
 - Use everything they told you: names, nicknames, inside jokes, places, hobbies. Specific beats generic every time.
@@ -182,6 +193,20 @@ function tidyStyle(style: unknown) {
   return Object.keys(out).length ? out : undefined;
 }
 
+// A screen's own wording for its built-in words, keeping the ones that fit: known
+// labels only, a list where a list goes, and nothing too long.
+function tidyLabels(labels: unknown) {
+  if (!labels || typeof labels !== "object" || Array.isArray(labels)) return undefined;
+  const out: Record<string, string | string[]> = {};
+  for (const [key, value] of Object.entries(labels)) {
+    if (isList(key)) {
+      const lines = Array.isArray(value) ? value.filter((v): v is string => typeof v === "string" && v.trim().length > 0).map((v) => v.trim().slice(0, 80)) : [];
+      if (lines.length) out[key] = lines.slice(0, 12);
+    } else if (key in TEXTS && typeof value === "string" && value.trim()) out[key] = value.trim().slice(0, 160);
+  }
+  return Object.keys(out).length ? out : undefined;
+}
+
 // Pulls the JSON out of the reply and makes it a valid card, or says what's wrong.
 function toCard(text: string, input: GenerateInput, urls: string[]): { card: CardData } | { problem: string } {
   const start = text.indexOf("{");
@@ -200,7 +225,7 @@ function toCard(text: string, input: GenerateInput, urls: string[]): { card: Car
     let id = typeof s?.id === "string" && s.id.trim() ? s.id.trim().slice(0, 40) : newId();
     if (seen.has(id)) id = newId();
     seen.add(id);
-    return restorePhotos({ ...s, id, style: tidyStyle(s.style) }, urls);
+    return restorePhotos({ ...s, id, style: tidyStyle(s.style), labels: tidyLabels(s.labels) }, urls);
   });
   if (typeof draft.to !== "string" || !draft.to.trim()) draft.to = input.to;
   if (typeof draft.from !== "string" || !draft.from.trim()) draft.from = input.from;
