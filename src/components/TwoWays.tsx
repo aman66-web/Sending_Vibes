@@ -26,7 +26,7 @@ export function TwoWays({ onPick }: { onPick?: (way: Way) => void }) {
       easy: c.personalEasy,
       body: c.personalBody,
       steps: c.personalSteps,
-      price: fmt(c.fromPrice, { price: price("custom", currency) }),
+      price: price("custom", currency),
       cta: c.personalCta,
       visual: <QuestionDemo question={describe.title} answer={describe.placeholder.replace(/^e\.g\.\s*/, "")} />,
     },
@@ -44,10 +44,16 @@ export function TwoWays({ onPick }: { onPick?: (way: Way) => void }) {
   ];
   return (
     <div className="grid gap-6 md:grid-cols-2">
-      {ways.map((w) => {
+      {ways.map((w, i) => {
         const inside = (
           <>
-            <div className="grid h-44 place-items-center overflow-hidden border-b-2 border-ink bg-cream px-6">{w.visual}</div>
+            <div className="relative grid h-44 place-items-center overflow-hidden border-b-2 border-ink bg-cream px-6">
+              {/* "Option 1" and "Option 2", so it's clear there are two to choose from. */}
+              <span className="absolute start-3 top-3 z-10 rounded-full border-2 border-ink bg-paper px-3 py-1 font-brand text-sm font-black uppercase tracking-wide">
+                {fmt(c.option, { n: i + 1 })}
+              </span>
+              {w.visual}
+            </div>
             <div className="flex flex-1 flex-col p-6">
               <h3 className="font-brand text-3xl font-bold leading-tight">{w.title}</h3>
               <p className="mt-1 text-sm font-bold uppercase tracking-wide text-hot">{w.easy}</p>
