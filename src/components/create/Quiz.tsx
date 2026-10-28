@@ -13,10 +13,11 @@ import { SignIn, type SignedIn } from "@/components/SignIn";
 import { PhotoField } from "./ScreenEditor";
 
 // The questions a card is written from: a personalised one from scratch, or a
-// ready-made design with their words written into it. The eight core ones must all be
-// answered (the written ones at some length, since specific details are what make a
-// card feel personal); then up to two follow-ups written about their answers, which
-// can be skipped, an optional step to add photos, and signing up before it's made.
+// ready-made design with their words written into it. The main one is describing the
+// card they want, in their own words; the personal ones (a memory, what they most want
+// to say) are optional, since not everyone wants to share them. Then up to two
+// follow-ups written about their answers, which can be skipped, an optional step to
+// add photos, and signing up before it's made.
 
 export type Answers = {
   to: string;
@@ -25,8 +26,8 @@ export type Answers = {
   occasionOther: string;
   vibes: Tone[];
   vibeOther: string;
-  memory: string;
-  about: string;
+  describe: string;
+  personal: string;
   message: string;
   from: string;
   // Null until they've been asked for.
@@ -42,8 +43,8 @@ export const NO_ANSWERS: Answers = {
   occasionOther: "",
   vibes: [],
   vibeOther: "",
-  memory: "",
-  about: "",
+  describe: "",
+  personal: "",
   message: "",
   from: "",
   followups: null,
@@ -51,10 +52,12 @@ export const NO_ANSWERS: Answers = {
   captions: [],
 };
 
-const QUESTIONS = ["to", "relation", "occasion", "vibe", "memory", "about", "message", "from"] as const;
+const QUESTIONS = ["to", "relation", "occasion", "vibe", "describe", "personal", "message", "from"] as const;
 type Question = (typeof QUESTIONS)[number];
-// The fewest characters a written answer needs before moving on.
-export const MIN_CHARS: Partial<Record<Question, number>> = { memory: 40, about: 30, message: 20 };
+// The fewest characters the description needs before moving on: it's what the card is made from.
+export const MIN_CHARS: Partial<Record<Question, number>> = { describe: 30 };
+// Questions that can be skipped.
+const OPTIONAL = new Set<Question>(["personal", "message"]);
 const FOLLOWUPS = 2;
 
 // The answers written out for the card writer. Labels are in the visitor's language.
@@ -66,10 +69,10 @@ export function quizPrompt(a: Answers, t: Dict, { askForPhotos = true } = {}) {
     `Occasion: ${a.occasion ? t.occasions[a.occasion].label : a.occasionOther.trim()}`,
     `It's for ${to} (${a.relation.trim()}), from ${a.from.trim()}.`,
     `How it should feel: ${feel.join(", ")}`,
-    `A memory we share: ${a.memory.trim()}`,
-    `What ${to} is like: ${a.about.trim()}`,
-    `What I most want them to know: ${a.message.trim()}`,
+    `The card I'd like: ${a.describe.trim()}`,
   ];
+  if (a.personal.trim()) lines.push(`Something personal to include: ${a.personal.trim()}`);
+  if (a.message.trim()) lines.push(`What I most want them to know: ${a.message.trim()}`);
   for (const f of a.followups ?? []) if (f.a.trim()) lines.push(`${f.q}\n${f.a.trim()}`);
   if (askForPhotos && a.photos.length) lines.push(`I've added ${a.photos.length} photo${a.photos.length > 1 ? "s" : ""}, so include a photos screen.`);
   return lines.join("\n");
@@ -78,6 +81,7 @@ export function quizPrompt(a: Answers, t: Dict, { askForPhotos = true } = {}) {
 // Whether a core question has been answered well enough to move on.
 function answered(key: Question, a: Answers, relations: string[]) {
   const long = (text: string, min = 1) => text.trim().length >= min;
+  if (OPTIONAL.has(key)) return true;
   switch (key) {
     case "to":
       return long(a.to);
@@ -174,7 +178,7 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
   };
   const toggle = <T,>(list: T[], item: T) => (list.includes(item) ? list.filter((x) => x !== item) : [...list, item]);
   // Starts a written answer off with a phrase they tapped.
-  const start = (field: "memory" | "about", phrase: string) => {
+  const start = (field: "describe" | "personal", phrase: string) => {
     setAnswers((a) => ({ ...a, [field]: a[field].trim() ? `${a[field].trimEnd()} ${phrase}` : phrase }));
     input.current?.focus();
   };
@@ -313,11 +317,11 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
               )}
             </div>
           )}
-          {(step === "memory" || step === "about" || step === "message") && (
+          {(step === "describe" || step === "personal" || step === "message") && (
             <>
-              {(step === "memory" || step === "about") && (
+              {(step === "describe" || step === "personal") && (
                 <div className="mb-3 flex flex-wrap gap-2">
-                  {(step === "memory" ? q.memoryStarters : q.aboutStarters).map((phrase) => (
+                  {(step === "describe" ? q.describeStarters : q.personalStarters).map((phrase) => (
                     <button key={phrase} type="button" onClick={() => start(step, phrase)} className="rounded-full border border-line bg-panel px-3 py-1.5 text-sm font-semibold transition hover:border-brand hover:text-brand">
                       + {phrase}
                     </button>
@@ -327,15 +331,15 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
               <textarea
                 ref={input}
                 value={answers[step]}
-                maxLength={500}
-                rows={4}
+                maxLength={step === "describe" ? 1000 : 500}
+                rows={step === "describe" ? 5 : 4}
                 dir="auto"
                 onChange={(e) => set(step, e.target.value)}
                 placeholder={q.questions[step].placeholder}
                 aria-label={title}
                 className={`${field} resize-y leading-relaxed`}
               />
-              <CharsLeft value={answers[step]} min={MIN_CHARS[step] ?? 0} more={q.moreChars} enough={q.enough} />
+              {MIN_CHARS[step] && <CharsLeft value={answers[step]} min={MIN_CHARS[step]} more={q.moreChars} enough={q.enough} />}
             </>
           )}
           {step === "thinking" && (
@@ -379,7 +383,7 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
               ← {q.back}
             </button>
           )}
-          {followIndex >= 0 && (
+          {(followIndex >= 0 || (core && OPTIONAL.has(core))) && (
             <button type="button" onClick={() => (last ? onGenerate() : setIndex(at + 1))} className="px-3 py-3 text-sm font-semibold opacity-60 hover:opacity-100">
               {q.skip}
             </button>

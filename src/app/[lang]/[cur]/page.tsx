@@ -146,7 +146,7 @@ export default async function Home() {
                     <div className="h-1.5 overflow-hidden rounded-full bg-ink/10">
                       <div className="h-full w-[55%] rounded-full bg-hot" />
                     </div>
-                    <p className="mt-3 font-brand text-base font-bold leading-tight">{fmt(t.quiz.questions.memory.title, { name: "Olivia" })}</p>
+                    <p className="mt-3 font-brand text-base font-bold leading-tight">{t.quiz.questions.describe.title}</p>
                     <p className="mt-2 rounded-lg border-2 border-ink/15 bg-paper px-2.5 py-2 text-ink/70">{h.howAnswer}</p>
                   </div>
                 ),
