@@ -120,6 +120,8 @@ export const screenStyle = z.object({
   body: z.enum(FONTS).optional(),
   // Floating in the background of this screen instead of the card's own.
   effect: z.enum(EFFECTS).optional(),
+  // What bursts out at the screen's big moment (the envelope opening, "yes", a win).
+  burst: z.enum(EFFECTS).optional(),
   stickers: z.array(sticker).max(10).optional(),
 });
 

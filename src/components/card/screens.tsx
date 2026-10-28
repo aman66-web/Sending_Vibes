@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Game, Occasion, Screen } from "@/lib/card";
-import { FinaleEffect, Particles, useReducedMotion } from "./effects";
+import { Burst, FinaleEffect, useReducedMotion } from "./effects";
 import { GameView } from "./games";
 import { useRunaway } from "./runaway";
 import { Flourish, HeartMark, Laurel } from "./ornaments";
@@ -83,6 +83,8 @@ export function IntroScreen({
 
   return (
     <div className="flex flex-col items-center gap-6 text-center">
+      {/* Nothing usually, unless the card has chosen something to burst out as it opens. */}
+      {open && <Burst usual={null} />}
       <div className={`transition-opacity duration-500 ${open ? "opacity-0" : ""}`}>
         <p className="text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-[var(--c-muted)]">{text("gotMail")}</p>
         <Flourish className="mx-auto mt-3 text-[var(--c-muted)]" />
@@ -164,7 +166,7 @@ export function QuestionScreen({ screen, onNext, stage = 0 }: ScreenProps<"quest
   if (saidYes) {
     return (
       <div className="flex flex-col items-center gap-6 text-center">
-        <Particles mode="confetti" />
+        <Burst />
         <HeartMark className="h-24 w-24 animate-pop text-[var(--c-accent)]" />
         <h2 className="font-display text-3xl font-semibold italic">{screen.afterYes}</h2>
         <NextButton onClick={onNext} />
@@ -336,7 +338,7 @@ export function GameScreen({ screen, onNext, stage = 0, occasion }: ScreenProps<
   };
   return (
     <div className="flex w-full flex-col items-center gap-3 text-center">
-      {won && <Particles mode={FIREWORK_GAMES.includes(screen.game) || (screen.game === "shake-it" && occasion === "diwali") ? "fireworks" : "confetti"} />}
+      {won && <Burst usual={FIREWORK_GAMES.includes(screen.game) || (screen.game === "shake-it" && occasion === "diwali") ? "fireworks" : "confetti"} />}
       <h2 className="font-display text-3xl font-semibold leading-tight">{screen.title}</h2>
       <p className="text-[var(--c-muted)]">{won ? screen.winText : screen.instructions}</p>
       <GameView game={screen.game} occasion={occasion} won={won} onWin={win} />
@@ -401,7 +403,7 @@ export function QuizScreen({ screen, onNext, stage = 0 }: ScreenProps<"quiz">) {
   if (done) {
     return (
       <div className="flex flex-col items-center gap-5 text-center">
-        <Particles mode="confetti" />
+        <Burst />
         <Laurel className={`h-20 w-28 animate-pop ${misses === 0 ? "text-[var(--c-accent)]" : "text-[var(--c-muted)]"}`} />
         <h2 className="font-display text-3xl font-semibold">{screen.winText}</h2>
         <p className="text-[var(--c-muted)]">{misses === 0 ? text("quizPerfect") : misses === 1 ? text("quizMissedOne") : text("quizMissed", { n: misses })}</p>
@@ -508,7 +510,7 @@ export function ScratchScreen({ screen, onNext, stage = 0 }: ScreenProps<"scratc
 
   return (
     <div className="flex w-full flex-col items-center gap-5 text-center">
-      {revealed && <Particles mode="confetti" />}
+      {revealed && <Burst />}
       <h2 className="font-display text-3xl font-semibold leading-tight">{screen.title}</h2>
       <p className="text-[var(--c-muted)]">{revealed ? text("scratchDone") : screen.instructions}</p>
       <div className="relative h-56 w-full max-w-sm overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-black/10">
@@ -553,7 +555,7 @@ export function TypeItScreen({ screen, onNext, stage = 0 }: ScreenProps<"typeit"
 
   return (
     <div className="flex w-full flex-col items-center gap-5 text-center">
-      {solved && <Particles mode="confetti" />}
+      {solved && <Burst />}
       <h2 className="font-display text-3xl font-semibold leading-tight">{screen.title}</h2>
       <p className="text-[var(--c-muted)]">{solved ? screen.winText : screen.instructions}</p>
       <div className={`flex flex-wrap justify-center gap-1.5 ${wrongNow ? "animate-shake" : ""}`} aria-hidden>

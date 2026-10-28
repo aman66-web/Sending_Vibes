@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useSyncExternalStore } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useSyncExternalStore } from "react";
 import type { Effect } from "@/lib/card";
 
 // Drawn shapes rather than emoji, in the card's own colours, so the background
@@ -293,5 +293,24 @@ export function FinaleEffect({ effect }: { effect: Effect }) {
   if (effect === "fireworks") return <Particles mode="fireworks" loop />;
   if (effect === "confetti") return <Particles mode="confetti" loop />;
   if (effect === "none") return null;
+  return <Ambient effect={effect} intense />;
+}
+
+// What's floating behind a screen. Fireworks keep going off in the sky.
+export function Backdrop({ effect }: { effect: Effect }) {
+  if (effect === "fireworks") return <Particles mode="fireworks" loop />;
+  return <Ambient effect={effect} />;
+}
+
+// The burst a screen has chosen for its big moment, if it's chosen one (see CardPlayer).
+export const BurstContext = createContext<Effect | undefined>(undefined);
+
+// Plays at a screen's big moment: the envelope opening, "yes", a game won. The screen's
+// own choice, or what that moment usually does (`usual`, which may be nothing).
+export function Burst({ usual = "confetti" }: { usual?: Effect | null }) {
+  const own = useContext(BurstContext);
+  const effect = own ?? usual;
+  if (!effect || effect === "none") return null;
+  if (effect === "fireworks" || effect === "confetti") return <Particles mode={effect} />;
   return <Ambient effect={effect} intense />;
 }

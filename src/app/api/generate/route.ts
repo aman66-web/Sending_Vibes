@@ -78,8 +78,8 @@ export async function POST(req: NextRequest) {
         } catch {}
       };
       try {
-        const card = await generateCard({ ...parsed.data, locale }, { signal: req.signal, onProgress: (screens) => send({ type: "progress", screens }) });
-        send({ type: "card", card });
+        const { card, note } = await generateCard({ ...parsed.data, locale }, { signal: req.signal, onProgress: (screens) => send({ type: "progress", screens }) });
+        send({ type: "card", card, note });
       } catch (e) {
         if (!req.signal.aborted) console.error("generate failed", e);
         send({ type: "error", error: errors[e instanceof GenerateError ? e.reason : "failed"] });

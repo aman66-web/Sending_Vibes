@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Screen } from "@/lib/card";
 import { SLIDER_STAGES } from "@/lib/stages";
-import { Particles } from "./effects";
+import { Burst } from "./effects";
 import { NextButton, usePressAt } from "./screens";
 import { useSfx } from "./sound";
 import { useWords } from "./words";
@@ -64,7 +64,7 @@ export function WheelScreen({ screen, onNext, stage = 0 }: ScreenProps<"wheel">)
   const fills = options.map((_, i) => (n % 2 === 1 && i === n - 1 ? "color-mix(in srgb, var(--c-accent) 45%, white)" : i % 2 === 0 ? "var(--c-accent)" : "#ffffff"));
   return (
     <div className="flex w-full flex-col items-center gap-4 text-center">
-      {result !== null && <Particles mode="confetti" />}
+      {result !== null && <Burst />}
       <h2 className="font-display text-3xl font-bold leading-tight">{screen.title}</h2>
       <p className="text-[var(--c-muted)]">{result !== null ? screen.winText : screen.instructions}</p>
       <div className="relative h-72 w-72 @2xl:h-80 @2xl:w-80">
@@ -195,7 +195,7 @@ export function ReasonsScreen({ screen, onNext, stage = 0 }: ScreenProps<"reason
 
   return (
     <div className="flex w-full flex-col items-center gap-4 text-center">
-      {done && <Particles mode="confetti" />}
+      {done && <Burst />}
       <h2 className="font-display text-3xl font-bold leading-tight">{screen.title}</h2>
       <p className="text-[var(--c-muted)]">{done ? text("jarEmpty") : screen.instructions}</p>
       <div className="flex min-h-32 w-full items-center justify-center">
@@ -279,7 +279,7 @@ export function SliderScreen({ screen, onNext, stage = 0 }: ScreenProps<"slider"
   const line = done ? screen.winText : step >= 0 ? (lines[Math.min(step, lines.length - 1)] ?? "") : "";
   return (
     <div className="flex w-full flex-col items-center gap-5 text-center">
-      {done && <Particles mode="confetti" />}
+      {done && <Burst />}
       <h2 className="font-display text-3xl font-bold leading-tight">{screen.title}</h2>
       <p className={`font-display text-6xl font-black tabular-nums ${done ? "animate-pop text-[var(--c-accent)]" : ""}`}>{done ? "100%" : `${Math.round(value)}%`}</p>
       <p key={line} className="h-7 animate-screen-in font-display text-lg font-semibold">
@@ -399,7 +399,7 @@ export function BoxesScreen({ screen, onNext, stage = 0 }: ScreenProps<"boxes">)
 
   return (
     <div className="flex w-full flex-col items-center gap-5 text-center">
-      {picked !== null && <Particles mode="confetti" />}
+      {picked !== null && <Burst />}
       <h2 className="font-display text-3xl font-bold leading-tight">{screen.title}</h2>
       <p className="text-[var(--c-muted)]">{picked !== null ? text("boxesPicked") : screen.instructions}</p>
       <div ref={row} className="flex w-full items-end justify-center gap-4 pt-10">

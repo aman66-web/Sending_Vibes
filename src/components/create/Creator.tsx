@@ -144,6 +144,8 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   const [busy, setBusy] = useState<"make" | "change" | null>(null);
   const [aiError, setAiError] = useState<string | null>(signInFailed ? t.account.signInFailed : null);
   const [aiDone, setAiDone] = useState(false);
+  // What the AI says it changed (or couldn't), shown after a typed change.
+  const [aiNote, setAiNote] = useState<string | null>(null);
   const [undo, setUndo] = useState<CardData | null>(null);
   // The screens written so far while a card is being made, and a way to stop it.
   const [progress, setProgress] = useState<ScreenType[]>([]);
@@ -246,7 +248,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     names: { to: string; from: string },
     onProgress?: (screens: ScreenType[]) => void,
     signal?: AbortSignal,
-  ): Promise<CardData> => {
+  ): Promise<{ card: CardData; note?: string }> => {
     const res = await fetch("/api/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -271,7 +273,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
         if (!line) continue;
         const event = JSON.parse(line);
         if (event.type === "progress") onProgress?.(event.screens);
-        else if (event.type === "card") return event.card as CardData;
+        else if (event.type === "card") return { card: event.card as CardData, note: typeof event.note === "string" ? event.note : undefined };
         else if (event.type === "error") throw new Error(event.error ?? x.errors.failed);
       }
     }
@@ -305,7 +307,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     setStep("making");
     window.scrollTo({ top: 0 });
     try {
-      const written = await callAi(template ? { prompt, template, keepDesign: true } : { prompt }, names, setProgress, controller.signal);
+      const { card: written } = await callAi(template ? { prompt, template, keepDesign: true } : { prompt }, names, setProgress, controller.signal);
       // A colour picked on the product page carries over, but only for that design.
       const coloured = template && initialTheme && template === initialTemplate ? { ...written, theme: initialTheme } : written;
       const made = withPhotos(coloured, album, t.labels.screens.photos, !template);
@@ -346,7 +348,8 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     // Typing changes are a custom-card thing.
     setMode("custom");
     try {
-      const changed = await callAi({ prompt: prompt.trim(), card, focus }, { to: card.to, from: card.from });
+      const { card: changed, note } = await callAi({ prompt: prompt.trim(), card, focus }, { to: card.to, from: card.from });
+      setAiNote(note ?? null);
       setUndo(card);
       setCard(changed);
       if (!focus || prompt === ask) setAsk("");
@@ -609,6 +612,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
 
             <section className="space-y-3 rounded-2xl border-2 border-brand/40 bg-panel p-4">
                 <h2 className="font-brand text-xl font-bold">✨ {x.changeTitle}</h2>
+                <p className="text-sm leading-relaxed opacity-80">{x.changeHow}</p>
                 <form
                   className="space-y-3"
                   onSubmit={(e) => {
@@ -648,8 +652,12 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                         {x.undo}
                       </button>
                     )}
-                    {aiDone && <span className="text-sm opacity-70">{x.changed}</span>}
                   </div>
+                  {aiDone && (
+                    <p role="status" className="rounded-xl bg-emerald-50 px-3 py-2.5 text-sm font-semibold text-emerald-900 ring-1 ring-emerald-200">
+                      ✓ {aiNote || x.changed}
+                    </p>
+                  )}
                   {aiError && <p className="text-sm font-semibold text-red-600">{aiError}</p>}
                 </form>
                 <div className="flex flex-wrap items-center gap-2">
