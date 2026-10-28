@@ -7,6 +7,8 @@ import { GameView } from "./games";
 import { useRunaway } from "./runaway";
 import { Flourish, HeartMark, Laurel } from "./ornaments";
 import { useSfx } from "./sound";
+import { useTune } from "./tune";
+import { cropStyle } from "@/lib/screen-style";
 import { useWords } from "./words";
 
 type Of<T extends Screen["type"]> = Extract<Screen, { type: T }>;
@@ -234,8 +236,10 @@ export function PhotosScreen({ screen, onNext, stage = 0, wide = false }: Screen
               style={{ transform: `rotate(${[-4, 3, -2, 5, -3, 2][i % 6]}deg)`, animationDelay: `${i * 120}ms` }}
             >
               <span className="absolute -top-2 left-1/2 h-4 w-4 -translate-x-1/2 rounded-full bg-[var(--c-accent)] shadow ring-2 ring-white" />
-              {/* eslint-disable-next-line @next/next/no-img-element -- user photos from our storage, already resized on upload */}
-              <img data-photo={i} src={src} alt="" className="aspect-square w-full rounded-sm object-cover" draggable={false} />
+              <div className="aspect-square w-full overflow-hidden rounded-sm">
+                {/* eslint-disable-next-line @next/next/no-img-element -- user photos from our storage, already resized on upload */}
+                <img data-photo={i} src={src} alt="" className="h-full w-full object-cover" style={cropStyle(screen.crops?.[i])} draggable={false} />
+              </div>
               <figcaption className="absolute inset-x-2 bottom-1.5 truncate font-hand text-lg text-neutral-700 @2xl:bottom-3 @2xl:text-xl">
                 {screen.captions[i] ?? ""}
               </figcaption>
@@ -277,8 +281,10 @@ export function PhotosScreen({ screen, onNext, stage = 0, wide = false }: Screen
                   opacity: offset > 2 ? 0 : 1,
                 }}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element -- user photos from our storage, already resized on upload */}
-                <img data-photo={i} src={src} alt="" className="h-full w-full rounded-sm object-cover" draggable={false} />
+                <div className="h-full w-full overflow-hidden rounded-sm">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- user photos from our storage, already resized on upload */}
+                  <img data-photo={i} src={src} alt="" className="h-full w-full object-cover" style={cropStyle(screen.crops?.[i])} draggable={false} />
+                </div>
                 <figcaption className="absolute inset-x-3 bottom-3 truncate font-hand text-xl text-neutral-700">
                   {screen.captions[i] ?? ""}
                 </figcaption>
@@ -305,10 +311,12 @@ export function MessageScreen({ screen, onNext }: ScreenProps<"message">) {
   const shown = reduced ? screen.body.length : typed;
   const done = shown >= screen.body.length;
 
+  // Typed out letter by letter; faster or slower with style.tune.speed.
+  const { speed } = useTune();
   useEffect(() => {
-    const t = setInterval(() => setTyped((s) => (s >= screen.body.length ? s : s + 1)), 28);
+    const t = setInterval(() => setTyped((s) => (s >= screen.body.length ? s : s + 1)), 28 / speed);
     return () => clearInterval(t);
-  }, [screen.body]);
+  }, [screen.body, speed]);
 
   return (
     <div className="flex w-full flex-col items-center gap-6 text-center">

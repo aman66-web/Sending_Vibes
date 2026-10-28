@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "./effects";
 import { HeartMark } from "./ornaments";
 import { useSfx } from "./sound";
+import { USUAL_GOAL, useTune } from "./tune";
 import { useWords } from "./words";
 import { DropSprite, GameIcon, GhostSprite, HeadstoneSprite, HeartSprite, type IconName, PinataSprite, StarSprite } from "./sprites";
 
@@ -29,12 +30,14 @@ const isPress = (e: React.KeyboardEvent) => e.key === "Enter" || e.key === " ";
 // ---------- Loves me, loves me not ----------
 
 // An odd number of petals, so the last one is always "loves me".
-const PETALS = 9;
+const PETALS = USUAL_GOAL["loves-me-not"];
 
 export function LovesMeNot({ onWin, won }: GameProps) {
+  const tune = useTune();
+  const total = tune.goal(PETALS, 15);
   const sfx = useSfx();
   const { text } = useWords();
-  const [plucked, setPlucked] = useState<boolean[]>(() => Array(PETALS).fill(false));
+  const [plucked, setPlucked] = useState<boolean[]>(() => Array(total).fill(false));
   const count = plucked.filter(Boolean).length;
 
   const pluck = (i: number) => {
@@ -55,7 +58,7 @@ export function LovesMeNot({ onWin, won }: GameProps) {
         <path d="M0 20 C 6 70, -8 100, 2 150" stroke="#5f8a4e" strokeWidth="6" fill="none" strokeLinecap="round" />
         <path d="M2 95 C 30 80, 45 92, 52 100 C 30 108, 14 104, 2 95Z" fill="#6f9a5a" />
         {plucked.map((gone, i) => (
-          <g key={i} transform={`rotate(${(360 / PETALS) * i})`}>
+          <g key={i} transform={`rotate(${(360 / total) * i})`}>
             <ellipse
               data-petal={gone ? undefined : i}
               role="button"
@@ -83,17 +86,19 @@ export function LovesMeNot({ onWin, won }: GameProps) {
           </pattern>
         </defs>
       </svg>
-      <p className="text-sm font-semibold opacity-70">{won ? text("petalsDone") : text("petalsLeft", { n: PETALS - count })}</p>
+      <p className="text-sm font-semibold opacity-70">{won ? text("petalsDone") : text("petalsLeft", { n: total - count })}</p>
     </div>
   );
 }
 
 // ---------- Whack the ghosts ----------
 
-const GHOST_TARGET = 8;
+const GHOST_TARGET = USUAL_GOAL["whack-ghosts"];
 type Ghost = { id: number; cell: number };
 
 export function WhackGhosts({ onWin, won }: GameProps) {
+  const tune = useTune();
+  const total = tune.goal(GHOST_TARGET, 30);
   const sfx = useSfx();
   const { text } = useWords();
   const reduced = useReducedMotion();
@@ -116,16 +121,16 @@ export function WhackGhosts({ onWin, won }: GameProps) {
       const t = setTimeout(() => {
         setGhosts((g) => g.filter((x) => x.id !== id));
         timers.delete(t);
-      }, 1150);
+      }, 1150 / tune.speed);
       timers.add(t);
     };
     spawn();
-    const interval = setInterval(spawn, 700);
+    const interval = setInterval(spawn, 700 / tune.speed);
     return () => {
       clearInterval(interval);
       timers.forEach(clearTimeout);
     };
-  }, [won]);
+  }, [won, tune.speed]);
 
   const whack = (ghost: Ghost) => {
     if (won) return;
@@ -135,13 +140,13 @@ export function WhackGhosts({ onWin, won }: GameProps) {
     sfx("pop");
     hits.current += 1;
     setScore(hits.current);
-    if (hits.current === GHOST_TARGET) onWin();
+    if (hits.current === total) onWin();
   };
 
   return (
     <div className="w-full">
       <div className="mb-2 flex items-center justify-center gap-2 font-display text-lg font-semibold">
-        {Math.min(score, GHOST_TARGET)} / {GHOST_TARGET} <GhostSprite className="h-6 w-5" />
+        {Math.min(score, total)} / {total} <GhostSprite className="h-6 w-5" />
       </div>
       {/* Keyboard players press Enter or Space to whack whichever ghost is up. */}
       <div
@@ -165,6 +170,7 @@ export function WhackGhosts({ onWin, won }: GameProps) {
                   aria-label="Whack the ghost"
                   onPointerDown={() => whack(ghost)}
                   className={`absolute inset-x-0 bottom-3 mx-auto w-fit leading-none ${reduced ? "" : "animate-ghost"}`}
+                  style={{ animationDuration: `${1.1 / tune.speed}s`, scale: tune.size }}
                 >
                   <GhostSprite className="h-14 w-12 drop-shadow-[0_0_10px_rgba(255,255,255,0.25)]" />
                 </button>
@@ -182,7 +188,7 @@ export function WhackGhosts({ onWin, won }: GameProps) {
 
 // ---------- Launch fireworks ----------
 
-const FIREWORK_TARGET = 6;
+const FIREWORK_TARGET = USUAL_GOAL["launch-fireworks"];
 type Firework = { id: number; x: number; y: number; from: number; tone: number };
 const TONES = [
   { spark: "#f2cf7e", glow: "#d4a537" },
@@ -192,6 +198,8 @@ const TONES = [
 ];
 
 export function LaunchFireworks({ onWin, won }: GameProps) {
+  const tune = useTune();
+  const total = tune.goal(FIREWORK_TARGET, 20);
   const sfx = useSfx();
   const { text } = useWords();
   const [fireworks, setFireworks] = useState<Firework[]>([]);
@@ -212,13 +220,13 @@ export function LaunchFireworks({ onWin, won }: GameProps) {
     if (won) return;
     launched.current += 1;
     setCount(launched.current);
-    if (launched.current === FIREWORK_TARGET) setTimeout(onWin, 500);
+    if (launched.current === total) setTimeout(onWin, 500);
   };
 
   return (
     <div className="w-full">
       <div className="mb-2 flex items-center justify-center gap-2 font-display text-lg font-semibold">
-        {Math.min(count, FIREWORK_TARGET)} / {FIREWORK_TARGET} <StarSprite className="h-5 w-5" />
+        {Math.min(count, total)} / {total} <StarSprite className="h-5 w-5" />
       </div>
       <div
         data-sky
@@ -281,7 +289,7 @@ export function LaunchFireworks({ onWin, won }: GameProps) {
 
 // ---------- Release the lanterns ----------
 
-const LANTERNS = 5;
+const LANTERNS = USUAL_GOAL["release-lanterns"];
 
 function LanternShape({ lit }: { lit: boolean }) {
   return (
@@ -302,9 +310,11 @@ function LanternShape({ lit }: { lit: boolean }) {
 }
 
 export function ReleaseLanterns({ onWin, won }: GameProps) {
+  const tune = useTune();
+  const total = tune.goal(LANTERNS, 10);
   const sfx = useSfx();
   const { text } = useWords();
-  const [released, setReleased] = useState<boolean[]>(() => Array(LANTERNS).fill(false));
+  const [released, setReleased] = useState<boolean[]>(() => Array(total).fill(false));
 
   const release = (i: number) => {
     if (released[i] || won) return;
@@ -343,12 +353,14 @@ export function ReleaseLanterns({ onWin, won }: GameProps) {
 
 // ---------- Bubble wrap ----------
 
-const BUBBLES = 20;
+const BUBBLES = USUAL_GOAL["bubble-wrap"];
 
 export function BubbleWrap({ onWin, won }: GameProps) {
+  const tune = useTune();
+  const total = tune.goal(BUBBLES, 40);
   const sfx = useSfx();
   const { text } = useWords();
-  const [popped, setPopped] = useState<boolean[]>(() => Array(BUBBLES).fill(false));
+  const [popped, setPopped] = useState<boolean[]>(() => Array(total).fill(false));
   const state = useRef(popped);
   const pressing = useRef(false);
 
@@ -371,7 +383,7 @@ export function BubbleWrap({ onWin, won }: GameProps) {
   return (
     <div className="w-full">
       <div className="mb-2 text-center font-display text-lg font-semibold">
-        {text("bubblesScore", { i: popped.filter(Boolean).length, n: BUBBLES })}
+        {text("bubblesScore", { i: popped.filter(Boolean).length, n: total })}
       </div>
       <div
         onPointerDown={(e) => {
@@ -403,7 +415,7 @@ export function BubbleWrap({ onWin, won }: GameProps) {
 
 // ---------- Piñata ----------
 
-const PINATA_HITS = 8;
+const PINATA_HITS = USUAL_GOAL.pinata;
 // Foil pieces that burst out when it breaks.
 const FOIL = Array.from({ length: 16 }, (_, i) => ({
   color: ["var(--c-accent)", "var(--c-muted)", "#e9d8b4", "#f3efe6"][i % 4],
@@ -412,6 +424,8 @@ const FOIL = Array.from({ length: 16 }, (_, i) => ({
 }));
 
 export function Pinata({ onWin, won }: GameProps) {
+  const tune = useTune();
+  const total = tune.goal(PINATA_HITS, 30);
   const sfx = useSfx();
   const [hits, setHits] = useState(0);
 
@@ -419,8 +433,8 @@ export function Pinata({ onWin, won }: GameProps) {
     if (won) return;
     const next = hits + 1;
     setHits(next);
-    sfx(next === PINATA_HITS ? "boom" : "stamp");
-    if (next === PINATA_HITS) onWin();
+    sfx(next === total ? "boom" : "stamp");
+    if (next === total) onWin();
   };
 
   return (
@@ -462,7 +476,7 @@ export function Pinata({ onWin, won }: GameProps) {
         )}
       </div>
       <div className="flex gap-1.5">
-        {Array.from({ length: PINATA_HITS }, (_, i) => (
+        {Array.from({ length: total }, (_, i) => (
           <span key={i} className={`h-2.5 w-5 rounded-full transition ${i < hits ? "bg-[var(--c-accent)]" : "bg-current opacity-20"}`} />
         ))}
       </div>
@@ -558,12 +572,14 @@ export function GrowFlower({ onWin, won }: GameProps) {
 
 // ---------- Throw colours (Holi) ----------
 
-const SPLAT_TARGET = 12;
+const SPLAT_TARGET = USUAL_GOAL["throw-colours"];
 // Gulal shades: deep pinks, saffron, turmeric, leaf, indigo, violet, teal.
 const SPLAT_COLORS = ["#c2185b", "#e8891c", "#e2b31f", "#2e8b57", "#3949ab", "#7b3f9e", "#138a8a"];
 type Splat = { id: number; x: number; y: number; color: string; size: number; shape: string; rot: number };
 
 export function ThrowColours({ onWin, won }: GameProps) {
+  const tune = useTune();
+  const total = tune.goal(SPLAT_TARGET, 30);
   const sfx = useSfx();
   const { text } = useWords();
   const [splats, setSplats] = useState<Splat[]>([]);
@@ -587,13 +603,13 @@ export function ThrowColours({ onWin, won }: GameProps) {
     sfx("pop");
     if (won) return;
     count.current += 1;
-    if (count.current === SPLAT_TARGET) onWin();
+    if (count.current === total) onWin();
   };
 
   return (
     <div className="w-full">
       <div className="mb-2 text-center font-display text-lg font-semibold">
-        {Math.min(splats.length, SPLAT_TARGET)} / {SPLAT_TARGET}
+        {Math.min(splats.length, total)} / {total}
       </div>
       <div
         data-splat
@@ -721,6 +737,8 @@ const HUG_MS = 2600;
 
 export function HoldHug({ onWin, won }: GameProps) {
   const sfx = useSfx();
+  // Faster fills the hug quicker (style.tune.speed).
+  const { speed } = useTune();
   const { text } = useWords();
   const [holding, setHolding] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -738,7 +756,7 @@ export function HoldHug({ onWin, won }: GameProps) {
       const dt = now - last;
       last = now;
       const before = value.current;
-      value.current = holding ? Math.min(1, before + dt / HUG_MS) : Math.max(0, before - dt / 4000);
+      value.current = holding ? Math.min(1, before + (dt * speed) / HUG_MS) : Math.max(0, before - dt / 4000);
       if (value.current !== before) setProgress(value.current);
       if (value.current >= 1) {
         winRef.current();
@@ -748,7 +766,7 @@ export function HoldHug({ onWin, won }: GameProps) {
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [holding, won]);
+  }, [holding, won, speed]);
 
   useEffect(() => {
     if (!holding || won) return;

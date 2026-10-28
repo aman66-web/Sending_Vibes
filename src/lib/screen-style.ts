@@ -1,4 +1,4 @@
-import type { Font, Pattern, ScreenStyle } from "./card";
+import type { Crop, Font, Pattern, ScreenStyle } from "./card";
 import type { Theme } from "./themes";
 
 // Turns a screen's own look (colours, fonts, pattern) into the colours and CSS the card
@@ -142,4 +142,12 @@ export function screenLook(base: Theme, style: ScreenStyle | undefined): ScreenL
 // The first hex colour in a CSS background, for checking contrast against a theme.
 function hexIn(background: string) {
   return /#[0-9a-fA-F]{6}/.exec(background)?.[0];
+}
+
+// Shows the part of a photo chosen for its frame (see Crop in lib/card.ts). The photo's
+// frame clips it, so zooming in fills the frame with that part.
+export function cropStyle(crop?: Crop | null): React.CSSProperties | undefined {
+  if (!crop) return undefined;
+  const at = `${crop.x}% ${crop.y}%`;
+  return { objectPosition: at, transformOrigin: at, transform: crop.zoom > 1 ? `scale(${crop.zoom})` : undefined };
 }

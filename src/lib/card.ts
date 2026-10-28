@@ -121,6 +121,26 @@ const textBox = z.object({
 
 // One of their photos placed anywhere on a screen.
 export const FRAMES = ["polaroid", "round", "plain"] as const;
+// How a screen comes in when it's reached.
+export const TRANSITIONS = ["fade", "rise", "slide", "zoom", "flip", "spin", "bounce", "drop", "blur"] as const;
+// Where a game's pieces come from: falling from the top, rising from the bottom, across, or popping up anywhere.
+export const DIRECTIONS = ["top", "bottom", "left", "right", "everywhere"] as const;
+
+// How a screen plays: how fast, how many to win, how big its pieces are, where they come from.
+const tune = z.object({
+  speed: z.number().min(0.25).max(3).optional(),
+  goal: z.number().int().min(1).max(40).optional(),
+  size: z.number().min(0.5).max(2.5).optional(),
+  from: z.enum(DIRECTIONS).optional(),
+});
+// Which part of a photo shows in its frame: zoomed in (1 is the whole photo) towards x, y
+// (% across and down the photo; 50, 50 is the middle).
+const crop = z.object({
+  x: z.number().min(0).max(100),
+  y: z.number().min(0).max(100),
+  zoom: z.number().min(1).max(4),
+});
+
 const imageBox = z.object({
   src: photoUrl,
   x: z.number().min(0).max(100),
@@ -129,6 +149,7 @@ const imageBox = z.object({
   size: z.number().min(10).max(90),
   rotate: z.number().min(-180).max(180).optional(),
   frame: z.enum(FRAMES).optional(),
+  crop: crop.optional(),
 });
 
 export const screenStyle = z.object({
@@ -149,12 +170,17 @@ export const screenStyle = z.object({
   stickers: z.array(sticker).max(10).optional(),
   texts: z.array(textBox).max(8).optional(),
   images: z.array(imageBox).max(6).optional(),
+  transition: z.enum(TRANSITIONS).optional(),
+  tune: tune.optional(),
 });
 
 export type ScreenStyle = z.infer<typeof screenStyle>;
 export type Sticker = z.infer<typeof sticker>;
 export type TextBox = z.infer<typeof textBox>;
 export type ImageBox = z.infer<typeof imageBox>;
+export type Tune = z.infer<typeof tune>;
+export type Crop = z.infer<typeof crop>;
+export type Transition = (typeof TRANSITIONS)[number];
 
 // A screen's own wording for the words built into it (see lib/labels.ts).
 const labels = z.partialRecord(z.enum(LABEL_KEYS), z.union([text(160), z.array(text(80)).min(1).max(12)]));
@@ -193,6 +219,8 @@ export const screenSchema = z.discriminatedUnion("type", [
     title: text(120),
     captions: z.array(text(120)).max(6),
     photos: z.array(photoUrl).max(6),
+    // How each photo sits in its frame, in the same order as the photos.
+    crops: z.array(crop.nullable()).max(6).optional(),
   }),
   z.object({
     ...screenBase,

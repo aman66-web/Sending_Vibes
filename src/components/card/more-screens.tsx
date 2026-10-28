@@ -6,6 +6,7 @@ import { SLIDER_STAGES } from "@/lib/stages";
 import { Burst } from "./effects";
 import { NextButton, usePressAt } from "./screens";
 import { useSfx } from "./sound";
+import { useTune } from "./tune";
 import { useWords } from "./words";
 
 type Of<T extends Screen["type"]> = Extract<Screen, { type: T }>;
@@ -24,6 +25,8 @@ function point(deg: number, r: number) {
 export function WheelScreen({ screen, onNext, stage = 0 }: ScreenProps<"wheel">) {
   const sfx = useSfx();
   const { text } = useWords();
+  // Faster spins for less time (style.tune.speed).
+  const spinMs = SPIN_MS / useTune().speed;
   const options = screen.options;
   const n = options.length;
   const slice = 360 / n;
@@ -48,7 +51,7 @@ export function WheelScreen({ screen, onNext, stage = 0 }: ScreenProps<"wheel">)
     // Clicks that slow down with the wheel (it eases out like a cubic curve).
     const ticks = Math.min(Math.round((final - rotation) / slice), 48);
     for (let k = 1; k <= ticks; k++) {
-      const t = SPIN_MS * (1 - Math.cbrt(1 - k / ticks));
+      const t = spinMs * (1 - Math.cbrt(1 - k / ticks));
       timers.current.push(setTimeout(() => sfx("tick"), t));
     }
     timers.current.push(
@@ -56,7 +59,7 @@ export function WheelScreen({ screen, onNext, stage = 0 }: ScreenProps<"wheel">)
         setSpinning(false);
         setResult(target);
         sfx("win");
-      }, SPIN_MS + 100),
+      }, spinMs + 100),
     );
   };
 
@@ -72,7 +75,7 @@ export function WheelScreen({ screen, onNext, stage = 0 }: ScreenProps<"wheel">)
           <g
             style={{
               transform: `rotate(${rotation}deg)`,
-              transition: spinning ? `transform ${SPIN_MS}ms cubic-bezier(0.33, 1, 0.68, 1)` : "none",
+              transition: spinning ? `transform ${spinMs}ms cubic-bezier(0.33, 1, 0.68, 1)` : "none",
             }}
           >
             <circle r="102" fill="white" />

@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import type { CardData, ScreenStyle } from "@/lib/card";
-import { FONT_VARS, screenLook } from "@/lib/screen-style";
+import type { CardData, ScreenStyle, Transition } from "@/lib/card";
+import { FONT_VARS, cropStyle, screenLook } from "@/lib/screen-style";
 import { themes } from "@/lib/themes";
 import { Backdrop, BurstContext } from "./effects";
 import { BoxesScreen, CouponsScreen, ReasonsScreen, SliderScreen, TimelineScreen, WheelScreen } from "./more-screens";
@@ -19,11 +19,25 @@ import {
   TypeItScreen,
 } from "./screens";
 import { playMusic, setMuted, SoundEnabled, unlockAudio, useMuted } from "./sound";
+import { NO_TUNE, TuneContext } from "./tune";
 import { LabelsContext } from "./words";
 
 // A faint paper texture under every card.
 const PAPER_GRAIN =
   "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.08'/%3E%3C/svg%3E\")";
+
+// How each screen comes in (style.transition); "rise" is the usual.
+const ENTRANCE: Record<Transition, string> = {
+  rise: "animate-screen-in",
+  fade: "animate-screen-fade",
+  slide: "animate-screen-slide",
+  zoom: "animate-screen-zoom",
+  flip: "animate-screen-flip",
+  spin: "animate-screen-spin",
+  bounce: "animate-screen-bounce",
+  drop: "animate-screen-drop",
+  blur: "animate-screen-blur",
+};
 
 type Props = {
   card: CardData;
@@ -176,7 +190,8 @@ export function CardPlayer({
       <main className={`flex flex-1 flex-col px-5 py-8 ${preview ? "min-h-0 overflow-y-auto [scrollbar-width:none]" : ""}`}>
         <LabelsContext.Provider value={current.labels}>
         <BurstContext.Provider value={current.style?.burst}>
-        <div key={`${run}-${current.id}-${stage}-${editing}`} className={`m-auto w-full animate-screen-in ${wide ? "max-w-4xl" : "max-w-md"}`}>
+        <TuneContext.Provider value={current.style?.tune ?? NO_TUNE}>
+        <div key={`${run}-${current.id}-${stage}-${editing}-${JSON.stringify(current.style?.tune ?? "")}`} className={`m-auto w-full ${ENTRANCE[current.style?.transition ?? "rise"]} ${wide ? "max-w-4xl" : "max-w-md"}`}>
           {current.type === "intro" && <IntroScreen screen={current} onNext={next} stage={stage} to={card.to} from={card.from} envelope={look.envelope} />}
           {current.type === "question" && <QuestionScreen screen={current} onNext={next} stage={stage} />}
           {current.type === "photos" && <PhotosScreen screen={current} onNext={next} stage={stage} wide={wide} />}
@@ -208,6 +223,7 @@ export function CardPlayer({
             />
           )}
         </div>
+        </TuneContext.Provider>
         </BurstContext.Provider>
         </LabelsContext.Provider>
       </main>
@@ -238,19 +254,14 @@ function Decorations({ style, editing }: { style: ScreenStyle; editing: boolean 
     <div aria-hidden data-deco-layer className="pointer-events-none absolute inset-0 z-20 overflow-hidden">
       {images.map((img, i) => (
         <span key={`i${i}`} data-deco={`image:${i}`} className={`${item} animate-pop`} style={{ ...place(img.x, img.y, img.rotate), width: `${img.size}cqmin` }}>
-          {/* eslint-disable-next-line @next/next/no-img-element -- their own photos, already resized on upload */}
-          <img
-            src={img.src}
-            alt=""
-            draggable={false}
-            className={
-              img.frame === "round"
-                ? "aspect-square w-full rounded-full object-cover shadow-lg ring-4 ring-white"
-                : img.frame === "plain"
-                  ? "w-full rounded-lg shadow-lg"
-                  : "w-full bg-white p-[5%] pb-[16%] shadow-xl"
-            }
-          />
+          <span className={img.frame === "round" || img.frame === "plain" ? "block" : "block bg-white p-[5%] pb-[16%] shadow-xl"}>
+            <span
+              className={`block overflow-hidden ${img.frame === "round" ? "aspect-square rounded-full shadow-lg ring-4 ring-white" : img.frame === "plain" ? "rounded-lg shadow-lg" : ""}`}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element -- their own photos, already resized on upload */}
+              <img src={img.src} alt="" draggable={false} className={`block w-full ${img.frame === "round" ? "h-full object-cover" : ""}`} style={cropStyle(img.crop)} />
+            </span>
+          </span>
         </span>
       ))}
       {stickers.map((s, i) => (

@@ -20,6 +20,7 @@ import {
 import { Motif } from "./motifs";
 import { HeartMark, Laurel } from "./ornaments";
 import { useSfx } from "./sound";
+import { USUAL_GOAL, useTune } from "./tune";
 import { BalloonSprite, GameIcon, GiftSprite, HeartSprite, OCCASION_ICONS, SnowflakeSprite, StarSprite, SweetSprite } from "./sprites";
 
 export function GameView({ game, occasion, ...props }: GameProps & { game: Game; occasion: Occasion }) {
@@ -61,7 +62,7 @@ export function GameView({ game, occasion, ...props }: GameProps & { game: Game;
   }
 }
 
-const TARGET = 10;
+const TARGET = USUAL_GOAL["catch-hearts"];
 
 // Balloons and sweets take turns between the card's colours.
 const TINTS = ["var(--c-accent)", "var(--c-muted)", "color-mix(in srgb, var(--c-accent) 55%, white)"];
@@ -78,11 +79,24 @@ const CATCHERS: Record<string, { piece: (id: number) => React.ReactNode; icon: R
   "catch-candy": { piece: (id) => <SweetSprite className="h-8 w-12" tint={TINTS[id % TINTS.length]} />, icon: <SweetSprite className="h-4 w-6" /> },
 };
 
-type Drop = { id: number; left: number; duration: number };
+type Drop = { id: number; left: number; top: number; duration: number };
+
+// How a piece moves for each direction it can come from (style.tune.from).
+const MOVES = {
+  top: "top-[-15%] animate-fall",
+  bottom: "bottom-[-15%] animate-rise",
+  left: "left-[-15%] animate-cross-right",
+  right: "left-full animate-cross-left",
+  everywhere: "animate-bloom",
+} as const;
 
 function Catcher({ onWin, won, kind }: GameProps & { kind: string }) {
   const config = CATCHERS[kind] ?? CATCHERS["catch-hearts"];
   const sfx = useSfx();
+  const tune = useTune();
+  const target = tune.goal(TARGET);
+  const from = tune.from ?? (config.rise ? "bottom" : "top");
+  const across = from === "left" || from === "right";
   // With animations switched off, things sit still for a moment instead of falling.
   const still = useReducedMotion();
   const [drops, setDrops] = useState<Drop[]>([]);
@@ -96,12 +110,12 @@ function Catcher({ onWin, won, kind }: GameProps & { kind: string }) {
     if (won) return;
     const spawn = () => {
       const id = nextId.current++;
-      setDrops((d) => [...d, { id, left: 6 + Math.random() * 80, duration: 3.2 + Math.random() * 1.8 }]);
+      setDrops((d) => [...d, { id, left: 6 + Math.random() * 80, top: 6 + Math.random() * 74, duration: (3.2 + Math.random() * 1.8) / tune.speed }]);
     };
     spawn();
-    const t = setInterval(spawn, 650);
+    const t = setInterval(spawn, 650 / tune.speed);
     return () => clearInterval(t);
-  }, [won]);
+  }, [won, tune.speed]);
 
   useEffect(() => {
     if (!still) return;
@@ -118,13 +132,13 @@ function Catcher({ onWin, won, kind }: GameProps & { kind: string }) {
     sfx("pop");
     caught.current += 1;
     setScore(caught.current);
-    if (caught.current === TARGET) onWin();
+    if (caught.current === target) onWin();
   };
 
   return (
     <div className="w-full">
       <div className="mb-2 flex items-center justify-center gap-2 font-display text-lg font-semibold">
-        {Math.min(score, TARGET)} / {TARGET} {config.icon}
+        {Math.min(score, target)} / {target} {config.icon}
       </div>
       <div className="relative h-72 w-full touch-none select-none overflow-hidden rounded-3xl bg-[var(--c-secondary)]/40 ring-1 ring-black/5">
         {drops.map((d) => (
@@ -134,14 +148,16 @@ function Catcher({ onWin, won, kind }: GameProps & { kind: string }) {
             aria-label="Catch it"
             onPointerDown={(e) => grab(d, e)}
             onAnimationEnd={() => !still && setDrops((all) => all.filter((x) => x.id !== d.id))}
-            className={`absolute p-2 leading-none drop-shadow-sm ${still ? "" : config.rise ? "bottom-[-15%] animate-rise" : "top-[-15%] animate-fall"}`}
+            className={`absolute p-2 leading-none drop-shadow-sm ${still ? "" : MOVES[from]}`}
             style={{
-              left: `${d.left}%`,
-              top: still ? `${10 + ((d.id * 37) % 70)}%` : undefined,
+              left: across && !still ? undefined : `${d.left}%`,
+              top: still ? `${10 + ((d.id * 37) % 70)}%` : across || from === "everywhere" ? `${d.top}%` : undefined,
               animationDuration: `${d.duration}s`,
             }}
           >
-            {config.piece(d.id)}
+            <span className="inline-block" style={{ scale: tune.size }}>
+              {config.piece(d.id)}
+            </span>
           </button>
         ))}
         {pops.map((p) => (
@@ -158,12 +174,14 @@ function Catcher({ onWin, won, kind }: GameProps & { kind: string }) {
   );
 }
 
-const DIYAS = 5;
+const DIYAS = USUAL_GOAL["light-diyas"];
 
 function LightDiyas({ onWin, won }: GameProps) {
+  const tune = useTune();
+  const total = tune.goal(DIYAS, 12);
   const sfx = useSfx();
   const { text } = useWords();
-  const [lit, setLit] = useState<boolean[]>(() => Array(DIYAS).fill(false));
+  const [lit, setLit] = useState<boolean[]>(() => Array(total).fill(false));
 
   const light = (i: number) => {
     if (lit[i] || won) return;
@@ -205,14 +223,16 @@ function LightDiyas({ onWin, won }: GameProps) {
   );
 }
 
-const CANDLES = 5;
+const CANDLES = USUAL_GOAL["blow-candles"];
 // Ivory wax with a fine gold twist.
 const WAX =
   "repeating-linear-gradient(-35deg, transparent 0 5px, color-mix(in srgb, var(--c-muted) 55%, transparent) 5px 6.5px), linear-gradient(90deg, #e9dfcb 0%, #fbf7ef 45%, #e2d5bc 100%)";
 
 function BlowCandles({ onWin, won }: GameProps) {
+  const tune = useTune();
+  const total = tune.goal(CANDLES, 12);
   const sfx = useSfx();
-  const [out, setOut] = useState<boolean[]>(() => Array(CANDLES).fill(false));
+  const [out, setOut] = useState<boolean[]>(() => Array(total).fill(false));
 
   const blow = (i: number) => {
     if (out[i] || won) return;
@@ -277,7 +297,9 @@ function shuffled<T>(items: T[]): T[] {
 function MemoryMatch({ onWin, won, occasion }: GameProps & { occasion: Occasion }) {
   const sfx = useSfx();
   const { text } = useWords();
-  const [deck] = useState(() => shuffled([...OCCASION_ICONS[occasion], ...OCCASION_ICONS[occasion]]));
+  // As many pairs as asked for (style.tune.goal), up to the occasion's set of pictures.
+  const pairs = useTune().goal(OCCASION_ICONS[occasion].length, OCCASION_ICONS[occasion].length);
+  const [deck] = useState(() => shuffled([...OCCASION_ICONS[occasion].slice(0, pairs), ...OCCASION_ICONS[occasion].slice(0, pairs)]));
   const [open, setOpen] = useState<number[]>([]);
   const [matched, setMatched] = useState<number[]>([]);
   const [moves, setMoves] = useState(0);
@@ -336,17 +358,19 @@ function MemoryMatch({ onWin, won, occasion }: GameProps & { occasion: Occasion 
   );
 }
 
-const UNWRAP_TAPS = 6;
+const UNWRAP_TAPS = USUAL_GOAL["unwrap-gift"];
 
 function UnwrapGift({ onWin, won }: GameProps) {
+  const tune = useTune();
+  const total = tune.goal(UNWRAP_TAPS, 30);
   const sfx = useSfx();
   const [taps, setTaps] = useState(0);
   const tap = () => {
     if (won) return;
     const next = taps + 1;
     setTaps(next);
-    sfx(next === UNWRAP_TAPS ? "pop" : "whoosh");
-    if (next === UNWRAP_TAPS) onWin();
+    sfx(next === total ? "pop" : "whoosh");
+    if (next === total) onWin();
   };
   return (
     <div className="flex flex-col items-center gap-4 py-4">
@@ -364,7 +388,7 @@ function UnwrapGift({ onWin, won }: GameProps) {
         )}
       </button>
       <div className="flex gap-1.5">
-        {Array.from({ length: UNWRAP_TAPS }, (_, i) => (
+        {Array.from({ length: total }, (_, i) => (
           <span key={i} className={`h-2.5 w-6 rounded-full transition ${i < taps ? "bg-[var(--c-accent)]" : "bg-current opacity-20"}`} />
         ))}
       </div>
@@ -450,10 +474,12 @@ function ShakeIt({ onWin, won, occasion }: GameProps & { occasion: Occasion }) {
   );
 }
 
-const CHASE_TARGET = 5;
+const CHASE_TARGET = USUAL_GOAL["cursor-chase"];
 
 // Built for a mouse: the heart runs from the cursor. Corner it to catch it.
 function CursorChase({ onWin, won }: GameProps) {
+  const tune = useTune();
+  const total = tune.goal(CHASE_TARGET, 20);
   const sfx = useSfx();
   const { text } = useWords();
   const area = useRef<HTMLDivElement>(null);
@@ -471,8 +497,8 @@ function CursorChase({ onWin, won }: GameProps) {
     if (dist > 110 || dist === 0) return;
     const clamp = (v: number) => Math.min(92, Math.max(8, v));
     setPos({
-      x: clamp(((hx + (dx / dist) * 70 - box.left) / box.width) * 100),
-      y: clamp(((hy + (dy / dist) * 70 - box.top) / box.height) * 100),
+      x: clamp(((hx + (dx / dist) * 70 * tune.speed - box.left) / box.width) * 100),
+      y: clamp(((hy + (dy / dist) * 70 * tune.speed - box.top) / box.height) * 100),
     });
   };
 
@@ -482,13 +508,13 @@ function CursorChase({ onWin, won }: GameProps) {
     setCaught(next);
     sfx("pop");
     setPos({ x: 15 + Math.random() * 70, y: 15 + Math.random() * 70 });
-    if (next === CHASE_TARGET) onWin();
+    if (next === total) onWin();
   };
 
   return (
     <div className="w-full">
       <div className="mb-2 flex items-center justify-center gap-2 font-display text-lg font-semibold">
-        {text("chaseScore", { i: caught, n: CHASE_TARGET })} <HeartSprite className="h-5 w-5" />
+        {text("chaseScore", { i: caught, n: total })} <HeartSprite className="h-5 w-5" />
       </div>
       <div
         ref={area}
