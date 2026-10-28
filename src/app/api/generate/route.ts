@@ -12,7 +12,7 @@ import { GenerateError, generateCard, generateReady } from "@/lib/generate";
 export const maxDuration = 120;
 
 const bodySchema = z.object({
-  // All the answers to the questions, follow-ups included, can run to a few thousand characters.
+  // All the answers to the questions can run to a few thousand characters.
   prompt: z.string().trim().min(3).max(5000),
   to: z.string().trim().min(1).max(40),
   from: z.string().trim().min(1).max(40),

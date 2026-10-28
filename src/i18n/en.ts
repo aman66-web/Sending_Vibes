@@ -559,7 +559,7 @@ export const en = {
           },
           {
             q: "What are the 6 questions?",
-            a: "Who it's for, who they are to you, the occasion, how it should feel, exactly how your card should look (screen by screen), and who it's from. After that we may ask one or two optional follow-up questions, and you can add photos.",
+            a: "Who it's for, who they are to you, the occasion, how it should feel, exactly how your card should look (screen by screen), and who it's from. After that you can add photos if you'd like.",
           },
           {
             q: "What should I write when describing my card?",
@@ -675,7 +675,7 @@ export const en = {
         title: "The chat helper and how cards are written",
         paragraphs: [
           "If you use the chat, what you type is sent to Anthropic, the company that makes the Claude AI, so it can write a reply. Please don't type personal details such as addresses, phone numbers or payment details into the chat.",
-          "When you make a card from our questions, or make or change one by typing, your answers or description, the names and the card's words are sent to Anthropic in the same way, so it can write the card and any follow-up questions. Your photos are not sent.",
+          "When you make a card from our questions, or make or change one by typing, your answers or description, the names and the card's words are sent to Anthropic in the same way, so it can write the card. Your photos are not sent.",
         ],
       },
       {
@@ -919,7 +919,6 @@ export const en = {
     intro: "Answer a few quick questions and we'll make a card just for them. You can change anything afterwards.",
     next: "Next",
     back: "Back",
-    skip: "Skip",
     generate: "Generate my card",
     them: "them",
     price: "Personalised card · {price}",
@@ -939,8 +938,6 @@ export const en = {
     surpriseSay: "Surprise me! Write it however you think they'd love it most.",
     moreChars: "Write a little more: {n} more letters to go",
     enough: "That's perfect",
-    followLoading: "Thinking of a couple more questions about {name}…",
-    followHint: "Optional, but it makes the card even more personal.",
     photosTitle: "Got any photos of you and {name}?",
     photosHint: "Optional. Add up to 6 and they'll go straight into the card. You can change them later.",
     relations: [

@@ -15,8 +15,7 @@ import { PhotoField } from "./ScreenEditor";
 // The questions a card is written from: a personalised one from scratch, or a
 // ready-made design with their words written into it. The main one is describing how
 // the card should look, screen by screen (or, for a design, what it should say). Then
-// up to two follow-ups written about their answers, which can be skipped, an optional
-// step to add photos, and signing up before it's made.
+// an optional step to add photos, and signing up before it's made.
 
 export type Answers = {
   to: string;
@@ -27,8 +26,6 @@ export type Answers = {
   vibeOther: string;
   describe: string;
   from: string;
-  // Null until they've been asked for.
-  followups: { q: string; a: string }[] | null;
   photos: string[];
   captions: string[];
 };
@@ -42,7 +39,6 @@ export const NO_ANSWERS: Answers = {
   vibeOther: "",
   describe: "",
   from: "",
-  followups: null,
   photos: [],
   captions: [],
 };
@@ -52,7 +48,6 @@ type Question = (typeof QUESTIONS)[number];
 // The fewest characters the description needs before moving on: it's what the card is made
 // from. Describing a card screen by screen takes more words than saying what a design should say.
 const minChars = (key: Question, design: boolean) => (key === "describe" ? (design ? 30 : 60) : 0);
-const FOLLOWUPS = 2;
 
 // The answers written out for the card writer. Labels are in the visitor's language.
 // With a ready-made design the description is what it should say, and the design keeps its
@@ -66,7 +61,6 @@ export function quizPrompt(a: Answers, t: Dict, { design = false } = {}) {
     `How it should feel: ${feel.join(", ")}`,
     design ? `What the card should say: ${a.describe.trim()}` : `How the card should look, screen by screen (build it in exactly this order): ${a.describe.trim()}`,
   ];
-  for (const f of a.followups ?? []) if (f.a.trim()) lines.push(`${f.q}\n${f.a.trim()}`);
   if (!design && a.photos.length)
     lines.push(`I've added ${a.photos.length} photo${a.photos.length > 1 ? "s" : ""}. If I haven't said where they go, add a photos screen where it fits.`);
   return lines.join("\n");
@@ -114,23 +108,19 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
   const name = answers.to.trim() || q.them;
   // Photos have somewhere to go unless the design has no photos screen.
   const photoStep = !design || design.screens("", "").some((s) => s.type === "photos");
-  // The core questions, then a follow-up step for each follow-up (or one "thinking"
-  // step while they're being written), then photos, then signing up.
-  const followups = answers.followups;
-  const steps: (Question | "thinking" | `f${number}` | "photos" | "signup")[] = [
+  // The core questions, then photos, then signing up.
+  const steps: (Question | "photos" | "signup")[] = [
     ...QUESTIONS,
-    ...(followups ? followups.map((_, i) => `f${i}` as const) : (["thinking"] as const)),
     ...(photoStep ? (["photos"] as const) : []),
     ...(signUp ? (["signup"] as const) : []),
   ];
   const at = Math.min(index, steps.length - 1);
   const step = steps[at];
   // The last step makes the card.
-  const last = at === steps.length - 1 && step !== "thinking";
-  const total = QUESTIONS.length + (followups ? followups.length : FOLLOWUPS) + (photoStep ? 1 : 0) + (signUp ? 1 : 0);
+  const last = at === steps.length - 1;
+  const total = steps.length;
   const core = (QUESTIONS as readonly string[]).includes(step) ? (step as Question) : null;
-  const followIndex = step.startsWith("f") && step !== "from" ? Number(step.slice(1)) : -1;
-  const ready = core ? answered(core, answers, q.relations, Boolean(design)) : step === "signup" ? Boolean(signUp?.account) : step !== "thinking";
+  const ready = core ? answered(core, answers, q.relations, Boolean(design)) : step === "signup" ? Boolean(signUp?.account) : true;
   const input = useRef<HTMLInputElement & HTMLTextAreaElement>(null);
   // Which questions have their "Other" box open.
   const [other, setOther] = useState<Partial<Record<Question, boolean>>>({});
@@ -143,25 +133,9 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
 
   const set = <K extends keyof Answers>(field: K, value: Answers[K]) => setAnswers((a) => ({ ...a, [field]: value }));
 
-  // Asks for follow-up questions about what they've written. Without any (or if it
-  // fails) it goes straight on to photos.
-  const askFollowups = async () => {
-    let questions: string[] = [];
-    try {
-      const res = await fetch("/api/followups", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ summary: quizPrompt(answers, t, { design: Boolean(design) }) }),
-      });
-      if (res.ok) questions = ((await res.json()).questions ?? []).slice(0, FOLLOWUPS);
-    } catch {}
-    setAnswers((a) => ({ ...a, followups: questions.map((text) => ({ q: text, a: "" })) }));
-  };
-
   const next = () => {
     if (!ready) return;
     if (last) return onGenerate();
-    if (step === "from" && !followups) askFollowups();
     setIndex(at + 1);
   };
   // Single choices move on by themselves, after a beat so the tap registers.
@@ -186,22 +160,14 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
     ? fmt(words.title, { name })
     : step === "photos"
       ? fmt(q.photosTitle, { name })
-      : step === "signup"
-        ? q.signupTitle
-        : step === "thinking"
-          ? fmt(q.followLoading, { name })
-          : (followups?.[followIndex]?.q ?? "");
+      : q.signupTitle;
   const hint = words
     ? words.hint
     : step === "photos"
       ? q.photosHint
-      : step === "signup"
-        ? signUp?.account
-          ? fmt(q.signedIn, { email: signUp.account.email ?? signUp.account.name ?? "" })
-          : q.signupHint
-        : step === "thinking"
-          ? ""
-          : q.followHint;
+      : signUp?.account
+        ? fmt(q.signedIn, { email: signUp.account.email ?? signUp.account.name ?? "" })
+        : q.signupHint;
 
   return (
     <section className="mx-auto flex min-h-[calc(100dvh-4.5rem)] max-w-2xl flex-col px-4 py-8 sm:py-12">
@@ -343,23 +309,6 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
               {minChars(step, Boolean(design)) > 0 && <CharsLeft value={answers[step]} min={minChars(step, Boolean(design))} more={q.moreChars} enough={q.enough} />}
             </>
           )}
-          {step === "thinking" && (
-            <div className="flex items-center gap-3 opacity-70" aria-live="polite">
-              <span aria-hidden className="h-6 w-6 animate-spin rounded-full border-[3px] border-brand/25 border-t-brand" />
-            </div>
-          )}
-          {followIndex >= 0 && followups?.[followIndex] && (
-            <textarea
-              ref={input}
-              value={followups[followIndex].a}
-              maxLength={500}
-              rows={3}
-              dir="auto"
-              onChange={(e) => setAnswers((a) => ({ ...a, followups: (a.followups ?? []).map((f, i) => (i === followIndex ? { ...f, a: e.target.value } : f)) }))}
-              aria-label={title}
-              className={`${field} resize-y leading-relaxed`}
-            />
-          )}
           {step === "signup" && signUp && !signUp.account && (
             <div className="max-w-md">
               <SignIn google={signUp.google} email={signUp.email} next="/create?resume=1" onSignedIn={signUp.onSignedIn} onGoogle={signUp.onGoogle} />
@@ -379,21 +328,12 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
         </div>
 
         <div className="mt-auto flex items-center gap-3 pt-10">
-          {step !== "thinking" && (
-            <button type="button" onClick={() => (at > 0 ? setIndex(at - 1) : onBack())} className="rounded-full border-2 border-line px-5 py-3 font-semibold hover:border-foreground/40">
-              ← {q.back}
-            </button>
-          )}
-          {followIndex >= 0 && (
-            <button type="button" onClick={() => (last ? onGenerate() : setIndex(at + 1))} className="rounded-full border-2 border-line px-5 py-3 font-semibold hover:border-foreground/40">
-              {q.skip}
-            </button>
-          )}
-          {step !== "thinking" && (
-            <button disabled={!ready} className="ms-auto rounded-full bg-brand px-7 py-3.5 font-brand text-lg font-semibold text-white shadow-lg disabled:opacity-40">
-              {last ? `${q.generate} ✨` : `${q.next} →`}
-            </button>
-          )}
+          <button type="button" onClick={() => (at > 0 ? setIndex(at - 1) : onBack())} className="rounded-full border-2 border-line px-5 py-3 font-semibold hover:border-foreground/40">
+            ← {q.back}
+          </button>
+          <button disabled={!ready} className="ms-auto rounded-full bg-brand px-7 py-3.5 font-brand text-lg font-semibold text-white shadow-lg disabled:opacity-40">
+            {last ? `${q.generate} ✨` : `${q.next} →`}
+          </button>
         </div>
         {last && (
           <p className="mt-3 text-end text-sm opacity-60">{design ? fmt(q.readyPrice, { price: price("card", currency) }) : fmt(q.price, { price: price("custom", currency) })}</p>

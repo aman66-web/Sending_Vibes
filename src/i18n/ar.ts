@@ -917,7 +917,6 @@ export const ar: Dict = {
     intro: "Answer a few quick questions and we'll make a card just for them. You can change anything afterwards.",
     next: "Next",
     back: "Back",
-    skip: "Skip",
     generate: "Generate my card",
     them: "them",
     price: "Personalised card · {price}",
@@ -937,8 +936,6 @@ export const ar: Dict = {
     surpriseSay: "Surprise me! Write it however you think they'd love it most.",
     moreChars: "Write a little more: {n} more letters to go",
     enough: "That's perfect",
-    followLoading: "Thinking of a couple more questions about {name}…",
-    followHint: "Optional, but it makes the card even more personal.",
     photosTitle: "Got any photos of you and {name}?",
     photosHint: "Optional. Add up to 6 and they'll go straight into the card. You can change them later.",
     relations: [

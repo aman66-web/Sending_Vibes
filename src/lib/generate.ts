@@ -355,26 +355,3 @@ export async function generateCard(input: GenerateInput, { onProgress, signal }:
   }
   throw new GenerateError("failed", "The card didn't come out right twice");
 }
-
-const FOLLOWUP_MODEL = "claude-haiku-5-5";
-
-// One or two questions about what they've already said, to draw out the specific
-// details (a moment, a habit, a phrase) that make a card feel personal. Quick, so a
-// smaller model. Any trouble and there are simply no follow-ups.
-export async function followUpQuestions(summary: string, locale: Locale): Promise<string[]> {
-  if (!generateReady()) return [];
-  client ??= new Anthropic();
-  const reply = await client.messages.create({
-    model: FOLLOWUP_MODEL,
-    max_tokens: 2000,
-    system: `Someone is making a personalised interactive card and has answered a few questions about who it's for. Ask exactly two short follow-up questions that would bring out the specific details that make a card feel personal: a moment, a habit, a phrase, a place, a name. Each question must build on something they wrote, and must not ask for anything they've already told you. Keep each under 120 characters, warm and casual, speaking to the sender as "you". Don't guess anyone's gender. Write in ${LANGUAGES[locale].english}. Reply with JSON only: {"questions": ["...", "..."]}`,
-    messages: [{ role: "user", content: `<answers>\n${summary}\n</answers>` }],
-  });
-  const text = reply.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("");
-  try {
-    const { questions } = JSON.parse(text.slice(text.indexOf("{"), text.lastIndexOf("}") + 1));
-    return Array.isArray(questions) ? questions.filter((x): x is string => typeof x === "string" && x.trim().length > 0).map((x) => x.trim().slice(0, 200)).slice(0, 2) : [];
-  } catch {
-    return [];
-  }
-}
