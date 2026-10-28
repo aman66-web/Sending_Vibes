@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/i18n/client";
 import { fmt } from "@/i18n/config";
 import type { CardData, Screen } from "@/lib/card";
@@ -143,13 +143,11 @@ type Props = {
   onChange: (path: Path, value: string) => void;
   // Photos added, swapped or taken out on a photos screen.
   onScreen: (index: number, update: (screen: Screen) => Screen) => void;
-  // A click on something that isn't text or a photo (a game, say).
-  onOther: () => void;
   className?: string;
   children: React.ReactNode;
 };
 
-export function EditableCard({ card, screenId, enabled, onChange, onScreen, onOther, className = "", children }: Props) {
+export function EditableCard({ card, screenId, enabled, onChange, onScreen, className = "", children }: Props) {
   const { t } = useI18n();
   const x = t.custom;
   const root = useRef<HTMLDivElement>(null);
@@ -161,6 +159,10 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onOt
   const [replacing, setReplacing] = useState<number | null>(null);
   const [uploading, setUploading] = useState(0);
   const [photoError, setPhotoError] = useState<string | null>(null);
+  // Tapping something that isn't words or a photo (the envelope, a game) explains what to do.
+  const [tip, setTip] = useState(false);
+  const tipTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(() => () => clearTimeout(tipTimer.current), []);
   const screenIndex = card.screens.findIndex((s) => s.id === screenId);
   const screen = card.screens[screenIndex];
 
@@ -259,7 +261,9 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onOt
             if (hit) setOpen({ kind: "words", path: hit.field.path, box: boxOf(hit.el), area });
             else {
               setOpen(null);
-              onOther();
+              setTip(true);
+              clearTimeout(tipTimer.current);
+              tipTimer.current = setTimeout(() => setTip(false), 3500);
             }
           }}
           onWheel={(e) => {
@@ -276,6 +280,11 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onOt
           className="pointer-events-none absolute z-[46] rounded-md ring-2 ring-brand ring-offset-2 ring-offset-transparent"
           style={{ left: hover.left - 4, top: hover.top - 3, width: hover.width + 8, height: hover.height + 6 }}
         />
+      )}
+      {enabled && tip && !open && uploading === 0 && !photoError && (
+        <p role="status" className="pointer-events-none absolute inset-x-0 bottom-4 z-50 mx-auto w-fit max-w-[90%] rounded-2xl bg-black/80 px-4 py-2.5 text-center text-sm font-semibold text-white shadow-lg">
+          {x.tapWordsTip}
+        </p>
       )}
       {(uploading > 0 || photoError) && (
         <p role="status" className="absolute inset-x-0 top-3 z-50 mx-auto w-fit max-w-[90%] rounded-full bg-black/80 px-4 py-2 text-center text-sm font-semibold text-white shadow-lg">

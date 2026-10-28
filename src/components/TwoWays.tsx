@@ -28,7 +28,7 @@ export function TwoWays({ onPick }: { onPick?: (way: Way) => void }) {
       steps: c.personalSteps,
       price: price("custom", currency),
       cta: c.personalCta,
-      visual: <QuestionDemo question={describe.title} answer={c.personalDemo} />,
+      visual: <QuestionDemo label={c.example} question={describe.title} answer={c.personalDemo} />,
     },
     {
       way: "premade" as const,
@@ -47,7 +47,7 @@ export function TwoWays({ onPick }: { onPick?: (way: Way) => void }) {
       {ways.map((w, i) => {
         const inside = (
           <>
-            <div className="relative grid h-44 place-items-center overflow-hidden border-b-2 border-ink bg-cream px-6">
+            <div className="relative grid h-56 place-items-center overflow-hidden border-b-2 border-ink bg-cream px-6 pt-10">
               {/* "Option 1" and "Option 2", so it's clear there are two to choose from. */}
               <span className="absolute start-3 top-3 z-10 rounded-full border-2 border-ink bg-paper px-3 py-1 font-brand text-sm font-black uppercase tracking-wide">
                 {fmt(c.option, { n: i + 1 })}
@@ -89,7 +89,8 @@ export function TwoWays({ onPick }: { onPick?: (way: Way) => void }) {
 }
 
 // A question from the quiz with an answer typing itself out, for the personalised way.
-function QuestionDemo({ question, answer }: { question: string; answer: string }) {
+// Marked as an example, and not drawn like a box to type in, so nobody tries to.
+function QuestionDemo({ label, question, answer }: { label: string; question: string; answer: string }) {
   const [shown, setShown] = useState(0);
   useEffect(() => {
     const timer = setInterval(() => setShown((n) => (n >= answer.length + 40 ? 0 : n + 1)), 45);
@@ -97,8 +98,9 @@ function QuestionDemo({ question, answer }: { question: string; answer: string }
   }, [answer]);
   return (
     <div className="w-full max-w-sm text-start" aria-hidden>
-      <p className="font-brand text-lg font-bold leading-tight">{question}</p>
-      <div className="mt-2 rounded-2xl border-2 border-ink/15 bg-paper p-3 text-sm leading-snug">
+      <p className="text-xs font-bold uppercase tracking-wide text-ink/50">{label}</p>
+      <p className="mt-1 font-brand text-lg font-bold leading-tight">{question}</p>
+      <div className="mt-2 rounded-2xl rounded-tl-sm bg-ink/[0.06] p-3 text-sm italic leading-snug">
         <span dir="auto">{answer.slice(0, shown)}</span>
         <span className="ms-0.5 inline-block h-4 w-0.5 translate-y-0.5 animate-pulse bg-hot" />
       </div>

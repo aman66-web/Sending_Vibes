@@ -320,6 +320,14 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
                     + {phrase}
                   </button>
                 ))}
+                {/* For anyone who'd rather not write it themselves. */}
+                <button
+                  type="button"
+                  onClick={() => set(step, design ? q.surpriseSay : q.surpriseDescribe)}
+                  className="rounded-full border-2 border-brand bg-brand-soft px-3 py-1.5 text-sm font-bold text-brand transition hover:bg-brand hover:text-white"
+                >
+                  🎲 {q.surprise}
+                </button>
               </div>
               <textarea
                 ref={input}
@@ -377,7 +385,7 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
             </button>
           )}
           {followIndex >= 0 && (
-            <button type="button" onClick={() => (last ? onGenerate() : setIndex(at + 1))} className="px-3 py-3 text-sm font-semibold opacity-60 hover:opacity-100">
+            <button type="button" onClick={() => (last ? onGenerate() : setIndex(at + 1))} className="rounded-full border-2 border-line px-5 py-3 font-semibold hover:border-foreground/40">
               {q.skip}
             </button>
           )}

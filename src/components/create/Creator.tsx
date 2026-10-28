@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { CardPlayer } from "@/components/card/CardPlayer";
 import { Motif } from "@/components/card/motifs";
@@ -21,6 +21,7 @@ import { SignIn, type SignedIn } from "@/components/SignIn";
 import { TwoWays } from "@/components/TwoWays";
 import { NO_ANSWERS, Quiz, quizPrompt, type Answers } from "./Quiz";
 import { Field } from "./ScreenEditor";
+import { openChat } from "@/components/open-chat";
 import { AtPhoneSize } from "./AtPhoneSize";
 import { AllWords, EditableCard, setAt, type Path } from "./WordEditing";
 
@@ -160,7 +161,9 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   // Signing up comes before a new card is made, for anyone not signed in when they start.
   const [auth, setAuth] = useState<{ google: boolean; email: boolean; account: SignedIn | null; needed: boolean } | null>(null);
   // Clicking words on the preview edits them; Play lets the card react as it will for them.
-  const [wordMode, setWordMode] = useState<"edit" | "play">("edit");
+  // The card starts out playing as it will for them; Edit mode is for changing words.
+  const [wordMode, setWordMode] = useState<"edit" | "play">("play");
+  const wide = useWide();
   const [pickOccasion, setPickOccasion] = useState<Occasion | "all">(initialOccasion ?? "all");
   const design = mode === "premade" ? getTemplate(templateSlug) : undefined;
   const ideaBox = useRef<HTMLTextAreaElement>(null);
@@ -384,11 +387,17 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       <div aria-hidden className="airmail h-1.5" />
       <header className="flex items-center justify-between border-b border-line px-4 py-3 sm:px-6">
         <Logo textClass="text-foreground" />
-        {step === "edit" && (
-          <button onClick={startOver} className="text-sm font-semibold opacity-70 hover:opacity-100">
-            {c.startOver}
+        <div className="flex items-center gap-4">
+          {step === "edit" && (
+            <button onClick={startOver} className="text-sm font-semibold opacity-70 hover:opacity-100">
+              {c.startOver}
+            </button>
+          )}
+          {/* On phones the help chat opens from here rather than floating over the page. */}
+          <button onClick={openChat} className="flex items-center gap-1.5 rounded-full border-2 border-foreground/80 px-3 py-1.5 text-sm font-bold lg:hidden">
+            <span aria-hidden>💬</span> {t.chat.help}
           </button>
-        )}
+        </div>
       </header>
 
       {step === "quiz" && (
@@ -663,8 +672,8 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
               </section>
 
             <div className="fixed inset-x-0 bottom-0 z-20 flex gap-3 border-t border-line bg-background/95 p-4 backdrop-blur lg:static lg:border-0 lg:bg-transparent lg:p-0">
-              <button onClick={() => setShowPreview(true)} className="flex-1 rounded-full border border-line py-3.5 font-semibold lg:hidden">
-                {c.preview}
+              <button onClick={() => setShowPreview(true)} className="flex-1 rounded-full border-2 border-line py-3.5 font-semibold lg:hidden">
+                {c.fullScreen}
               </button>
               <button onClick={publish} disabled={saving} className="flex-[2] rounded-full bg-brand py-3.5 font-brand text-lg font-semibold text-white shadow-lg disabled:opacity-50 lg:w-full">
                 {saving ? c.adding : fmt(c.addToBasket, { price: formatMoney(tierPrice(cardTier(card)), currency) })}
@@ -673,11 +682,13 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
             {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
           </div>
 
-          <aside className="hidden lg:block">
-            <div className="sticky top-4 space-y-3">
-              <div className="flex flex-wrap items-center justify-between gap-2">
+          {/* The card itself. On a phone it's first on the page, before the typing box. */}
+          <aside className="order-first lg:order-none">
+            {/* On a phone the card comes straight after the mode switch, with the arrows under it. */}
+            <div className="flex flex-col gap-3 lg:sticky lg:top-4">
+              <div className="order-1 flex flex-wrap items-center justify-between gap-2 lg:order-none">
                 <ModeSwitch wordMode={wordMode} setWordMode={setWordMode} />
-                <div role="tablist" aria-label={c.preview} className="flex w-fit gap-1 rounded-full border border-line bg-panel p-1">
+                <div role="tablist" aria-label={c.preview} className="hidden w-fit gap-1 rounded-full border border-line bg-panel p-1 lg:flex">
                 {(["computer", "phone"] as const).map((v) => (
                   <button
                     key={v}
@@ -691,11 +702,20 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                 ))}
                 </div>
               </div>
-              <PreviewControls card={card} viewing={viewing} stage={stageShown} onGo={goToScreen} wordMode={wordMode} />
-              {wordMode === "edit" && <AllWords card={card} screenId={viewing} onChange={editWords} />}
-              <div className="relative">
-                <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onScreen={editScreen} onOther={() => setSelected(viewing)}>
-                  {view === "phone" ? (
+              <div className="order-3 space-y-3 lg:order-none">
+                <PreviewControls card={card} viewing={viewing} stage={stageShown} onGo={goToScreen} wordMode={wordMode} />
+                {wordMode === "edit" && <AllWords card={card} screenId={viewing} onChange={editWords} />}
+              </div>
+              <div className="relative order-2 lg:order-none">
+                <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onScreen={editScreen}>
+                  {!wide ? (
+                    // On a phone, the card as it'll look on their phone, without a frame around it.
+                    <div className="h-[min(68dvh,620px)] overflow-hidden rounded-3xl border-2 border-line">
+                      {!showPreview && (
+                        <CardPlayer key="here" card={card} preview sound editing={wordMode === "edit"} focusScreenId={selected} focusNonce={nudge} focusStage={focusStage} onScreenChange={setViewing} />
+                      )}
+                    </div>
+                  ) : view === "phone" ? (
                     <PhoneFrame className="mx-auto h-[600px] w-[290px]" notch="h-5 w-20">
                       <AtPhoneSize>
                         <CardPlayer key="phone" card={card} preview sound editing={wordMode === "edit"} focusScreenId={selected} focusNonce={nudge} focusStage={focusStage} onScreenChange={setViewing} />
@@ -723,7 +743,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       {showPreview && card && (
         <div className="fixed inset-0 z-50 flex flex-col bg-background lg:hidden">
           <div className="relative min-h-0 flex-1">
-            <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onScreen={editScreen} onOther={() => {}} className="h-full">
+            <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onScreen={editScreen} className="h-full">
               <CardPlayer card={card} preview sound editing={wordMode === "edit"} focusScreenId={selected} focusNonce={nudge} focusStage={focusStage} onScreenChange={setViewing} />
             </EditableCard>
             <button onClick={() => setShowPreview(false)} className="absolute start-4 top-4 z-50 rounded-full bg-black/70 px-4 py-2 text-sm font-semibold text-white">
@@ -754,6 +774,21 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       )}
 
     </div>
+  );
+}
+
+// Whether the page is wide enough for the card beside the typing box (a computer),
+// rather than above it (a phone). Pages are first drawn as for a computer.
+const WIDE = "(min-width: 1024px)";
+function useWide() {
+  return useSyncExternalStore(
+    (changed) => {
+      const query = window.matchMedia(WIDE);
+      query.addEventListener("change", changed);
+      return () => query.removeEventListener("change", changed);
+    },
+    () => window.matchMedia(WIDE).matches,
+    () => true,
   );
 }
 
