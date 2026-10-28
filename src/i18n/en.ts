@@ -559,7 +559,7 @@ export const en = {
           },
           {
             q: "What are the 6 questions?",
-            a: "Who it's for, who they are to you, the occasion, how it should feel, exactly how your card should look (screen by screen), and who it's from. After that we may ask one or two optional follow-up questions, and you can add photos.",
+            a: "Who it's for, who they are to you, the occasion, how it should feel, exactly how your card should look (screen by screen), and who it's from. After that you can add photos if you'd like.",
           },
           {
             q: "What should I write when describing my card?",
@@ -675,7 +675,7 @@ export const en = {
         title: "The chat helper and how cards are written",
         paragraphs: [
           "If you use the chat, what you type is sent to Anthropic, the company that makes the Claude AI, so it can write a reply. Please don't type personal details such as addresses, phone numbers or payment details into the chat.",
-          "When you make a card from our questions, or make or change one by typing, your answers or description, the names and the card's words are sent to Anthropic in the same way, so it can write the card and any follow-up questions. Your photos are not sent.",
+          "When you make a card from our questions, or make or change one by typing, your answers or description, the names and the card's words are sent to Anthropic in the same way, so it can write the card. Your photos are not sent.",
         ],
       },
       {
@@ -919,7 +919,6 @@ export const en = {
     intro: "Answer a few quick questions and we'll make a card just for them. You can change anything afterwards.",
     next: "Next",
     back: "Back",
-    skip: "Skip",
     generate: "Generate my card",
     them: "them",
     price: "Personalised card · {price}",
@@ -939,8 +938,6 @@ export const en = {
     surpriseSay: "Surprise me! Write it however you think they'd love it most.",
     moreChars: "Write a little more: {n} more letters to go",
     enough: "That's perfect",
-    followLoading: "Thinking of a couple more questions about {name}…",
-    followHint: "Optional, but it makes the card even more personal.",
     photosTitle: "Got any photos of you and {name}?",
     photosHint: "Optional. Add up to 6 and they'll go straight into the card. You can change them later.",
     relations: [
@@ -1008,7 +1005,8 @@ export const en = {
     orTemplateIntro: "Pick a design, then change it however you like.",
     allOccasions: "All occasions",
     changeTitle: "Change anything by typing",
-    changePlaceholder: "e.g. Make this screen dark blue with gold stars, add a scratch card, make the quiz about our trip to Rome",
+    changeHow: "Type anything you'd like different, in your own words, and press “Make the change”. Words, colours, stickers, animations, games, music, adding or removing screens: whatever you type, it changes.",
+    changePlaceholder: "e.g. When the envelope opens, I want fireworks to burst out of it",
     lookingAt: "You're looking at screen {n}: {name}. Changes go on this screen unless they're for the whole card.",
     quickTitle: "Or tap one:",
     quick: ["Make it funnier", "Make it more romantic", "Add a quiz about us", "Add a mini game", "Make it shorter", "Try different colours"],
@@ -1063,7 +1061,8 @@ export const en = {
     thisScreenPlaceholder: "e.g. make this funnier, add his nickname, say it's from all of us",
     go: "Change",
     changing: "Making the change…",
-    changed: "Done. Have a look at the preview.",
+    changed: "Done. Have a look at the card.",
+    changesLeft: "{n} typed changes left",
     undo: "Undo",
     premadeNote: "This is a ready-made design, so its screens stay as they are. You can still change every word, photo, colour and tune.",
     unlock: "Want to add, remove or reorder screens, or change it by typing? Unlock everything, at no extra cost",
@@ -1075,6 +1074,10 @@ export const en = {
       failed: "That didn't work. Please try again.",
       tooMany: "That's a lot of cards in a short time. Please try again in a little while.",
       signIn: "Please sign up first, then press the button again.",
+      limitCards: "You've made all {n} of your cards. Each card you buy lets you make {more} more.",
+      limitChanges: "You've used all {n} of your typed changes. Each card you buy adds {more} more. You can still change anything by hand, as much as you like: tap any words, or add text, images and elements.",
+      limitDayCards: "That's the most cards for one day. Come back tomorrow to make more.",
+      limitDayChanges: "That's the most typed changes for one day. Come back tomorrow, or change things by hand: tap any words, or add text, images and elements.",
     },
   },
 

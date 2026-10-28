@@ -1,3 +1,4 @@
+import { allowanceLeft } from "@/lib/allowance";
 import { NextResponse } from "next/server";
 import { authReady, currentAccount, emailSignInReady, googleEnabled } from "@/lib/auth";
 import { ordersFor } from "@/lib/orders";
@@ -31,7 +32,10 @@ export async function GET() {
         };
       }),
     );
-    return NextResponse.json({ ...ways, account: { email: account.email, name: account.name }, cards }, { headers });
+    // How many typed changes and new cards they have left today.
+    const [change, card] = await Promise.all([allowanceLeft(account, "change"), allowanceLeft(account, "card")]).catch(() => [null, null]);
+    const left = change && card ? { change: change.left, card: card.left } : undefined;
+    return NextResponse.json({ ...ways, account: { email: account.email, name: account.name }, cards, left }, { headers });
   } catch (e) {
     console.error("Could not load account", e);
     return NextResponse.json({ ...ways, account: { email: account.email, name: account.name }, cards: [], error: true }, { headers });

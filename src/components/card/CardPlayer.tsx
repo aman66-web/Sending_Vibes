@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { CardData, Sticker } from "@/lib/card";
 import { screenLook } from "@/lib/screen-style";
 import { themes } from "@/lib/themes";
-import { Ambient } from "./effects";
+import { Backdrop, BurstContext } from "./effects";
 import { BoxesScreen, CouponsScreen, ReasonsScreen, SliderScreen, TimelineScreen, WheelScreen } from "./more-screens";
 import {
   FinaleScreen,
@@ -142,7 +142,7 @@ export function CardPlayer({
       {look.pattern && (
         <div aria-hidden className="pointer-events-none absolute inset-0" style={{ backgroundImage: look.pattern.image, backgroundSize: look.pattern.size }} />
       )}
-      <Ambient effect={current?.style?.effect ?? card.ambient} />
+      <Backdrop effect={current?.style?.effect ?? card.ambient} />
       {current?.style?.stickers && <Stickers key={`${run}-${current.id}`} stickers={current.style.stickers} />}
       {/* A printed double border, like a real card. */}
       <div aria-hidden className="pointer-events-none absolute inset-2.5 rounded-[14px] border border-current opacity-[0.16]" />
@@ -176,6 +176,7 @@ export function CardPlayer({
       {/* Auto margins centre short screens; long ones (lots of coupons, say) scroll inside previews. */}
       <main className={`flex flex-1 flex-col px-5 py-8 ${preview ? "min-h-0 overflow-y-auto [scrollbar-width:none]" : ""}`}>
         <LabelsContext.Provider value={current.labels}>
+        <BurstContext.Provider value={current.style?.burst}>
         <div key={`${run}-${current.id}-${stage}-${editing}`} className={`m-auto w-full animate-screen-in ${wide ? "max-w-4xl" : "max-w-md"}`}>
           {current.type === "intro" && <IntroScreen screen={current} onNext={next} stage={stage} to={card.to} from={card.from} envelope={look.envelope} />}
           {current.type === "question" && <QuestionScreen screen={current} onNext={next} stage={stage} />}
@@ -208,6 +209,7 @@ export function CardPlayer({
             />
           )}
         </div>
+        </BurstContext.Provider>
         </LabelsContext.Provider>
       </main>
 

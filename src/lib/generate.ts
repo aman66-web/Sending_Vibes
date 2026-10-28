@@ -85,7 +85,8 @@ Every screen can have a "style" that sets its look on top of the theme. Design e
   "envelope": the colour of the envelope (the intro only),
   "heading": the font of the titles, one of ${list(FONTS)},
   "body": the font of everything else, one of the same,
-  "effect": what floats in the background of this screen, instead of the card's ambient, one of ${list(EFFECTS)},
+  "effect": what's going on in the background of this screen, instead of the card's ambient, one of ${list(EFFECTS)} ("fireworks" keeps going off in the sky),
+  "burst": what bursts out at this screen's big moment, one of ${list(EFFECTS)}: when the envelope opens on the intro, when they say yes, win a game, finish the quiz, scratch it off, solve the phrase, the wheel lands, open a box, reach 100% or empty the jar. Without one, these moments throw confetti (the intro does nothing),
   "stickers": up to 10 emoji placed around the screen: [{"emoji": one emoji, "x": 0 to 100 (% from the left), "y": 0 to 100 (% from the top), "size": 4 to 40 (% of the card's shorter side; 8 to 16 suits most), "rotate": -180 to 180, "motion": one of ${list(MOTIONS)}}]
 }
 - Every part is optional. Colours are always six-digit hex.
@@ -108,6 +109,8 @@ ${labelGuide()}
 
 # Changing a card
 If you're given an existing card and a change, return the whole card with that change made. Keep everything they didn't ask to change exactly as it is, including screen ids. Photos appear as "photo-1", "photo-2" and so on: keep, move or drop those as asked, but never make new ones.
+- Do whatever they ask that these screens, styles, labels, bursts and effects can do; that's almost everything. "Fireworks when the envelope opens" is a fireworks burst on the intro; "change Next to Let's go" is the next label; "add a game after this" is a new game screen after it.
+- Also add "note" to the card: one or two short, friendly sentences telling them what you changed, in plain words, like "Fireworks now burst out of the envelope when it opens." If something they asked for can't be done, say so plainly in the note and what you did instead.
 
 # Two of our designs, for the voice and the JSON format (not a structure to copy)
 ${EXAMPLES}`;
@@ -208,7 +211,7 @@ function tidyLabels(labels: unknown) {
 }
 
 // Pulls the JSON out of the reply and makes it a valid card, or says what's wrong.
-function toCard(text: string, input: GenerateInput, urls: string[]): { card: CardData } | { problem: string } {
+function toCard(text: string, input: GenerateInput, urls: string[]): { card: CardData; note?: string } | { problem: string } {
   const start = text.indexOf("{");
   const end = text.lastIndexOf("}");
   let raw: unknown;
@@ -230,6 +233,9 @@ function toCard(text: string, input: GenerateInput, urls: string[]): { card: Car
   if (typeof draft.to !== "string" || !draft.to.trim()) draft.to = input.to;
   if (typeof draft.from !== "string" || !draft.from.trim()) draft.from = input.from;
   if (draft.ambient === "fireworks") draft.ambient = "sparkles";
+  // What the model says it changed, for them to read; not part of the card.
+  const note = typeof draft.note === "string" ? draft.note.trim().slice(0, 400) : undefined;
+  delete draft.note;
   delete draft.template;
   // Size and layout aren't the model's to choose; keep the card's own.
   draft.device = input.card?.device ?? "everywhere";
@@ -241,7 +247,7 @@ function toCard(text: string, input: GenerateInput, urls: string[]): { card: Car
   }
   const { screens } = parsed.data;
   if (screens[0]?.type !== "intro" || screens.at(-1)?.type !== "finale") return { problem: "The first screen must be the intro and the last the finale." };
-  return { card: parsed.data };
+  return { card: parsed.data, note: note || undefined };
 }
 
 // Puts the words that were written into the design, so only the words can change: the
@@ -311,7 +317,8 @@ type Options = {
   signal?: AbortSignal;
 };
 
-export async function generateCard(input: GenerateInput, { onProgress, signal }: Options = {}): Promise<CardData> {
+// The card, and for a change, a line saying what was changed (or what couldn't be).
+export async function generateCard(input: GenerateInput, { onProgress, signal }: Options = {}): Promise<{ card: CardData; note?: string }> {
   if (!generateReady()) throw new GenerateError("off");
   client ??= new Anthropic();
   const { message, urls, design } = request(input);
@@ -349,32 +356,9 @@ export async function generateCard(input: GenerateInput, { onProgress, signal }:
     if (reply.stop_reason === "refusal") throw new GenerateError("refused");
     const text = reply.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("");
     const result = toCard(text, input, urls);
-    if ("card" in result) return design ? fillDesign(design, result.card) : result.card;
+    if ("card" in result) return { card: design ? fillDesign(design, result.card) : result.card, note: input.card ? result.note : undefined };
     console.warn("generated card was off", result.problem);
     messages.push({ role: "assistant", content: text || "{}" }, { role: "user", content: `${result.problem}\nReply with the whole corrected card as JSON only.` });
   }
   throw new GenerateError("failed", "The card didn't come out right twice");
-}
-
-const FOLLOWUP_MODEL = "claude-haiku-5-5";
-
-// One or two questions about what they've already said, to draw out the specific
-// details (a moment, a habit, a phrase) that make a card feel personal. Quick, so a
-// smaller model. Any trouble and there are simply no follow-ups.
-export async function followUpQuestions(summary: string, locale: Locale): Promise<string[]> {
-  if (!generateReady()) return [];
-  client ??= new Anthropic();
-  const reply = await client.messages.create({
-    model: FOLLOWUP_MODEL,
-    max_tokens: 2000,
-    system: `Someone is making a personalised interactive card and has answered a few questions about who it's for. Ask exactly two short follow-up questions that would bring out the specific details that make a card feel personal: a moment, a habit, a phrase, a place, a name. Each question must build on something they wrote, and must not ask for anything they've already told you. Keep each under 120 characters, warm and casual, speaking to the sender as "you". Don't guess anyone's gender. Write in ${LANGUAGES[locale].english}. Reply with JSON only: {"questions": ["...", "..."]}`,
-    messages: [{ role: "user", content: `<answers>\n${summary}\n</answers>` }],
-  });
-  const text = reply.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("");
-  try {
-    const { questions } = JSON.parse(text.slice(text.indexOf("{"), text.lastIndexOf("}") + 1));
-    return Array.isArray(questions) ? questions.filter((x): x is string => typeof x === "string" && x.trim().length > 0).map((x) => x.trim().slice(0, 200)).slice(0, 2) : [];
-  } catch {
-    return [];
-  }
 }

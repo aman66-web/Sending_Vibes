@@ -11,7 +11,9 @@ import { CHAT_SYSTEM, chatContext } from "@/lib/chat-prompt";
 
 export const maxDuration = 60;
 
-const MODEL = "claude-opus-5-5";
+// Anyone can ask the help chat without signing in, so it uses the small, quick model:
+// answering questions about the shop doesn't need the big one, and it costs far less.
+const MODEL = "claude-haiku-5-5";
 // Older messages are dropped so a long chat doesn't get slower and dearer.
 const KEEP_MESSAGES = 16;
 
@@ -75,9 +77,10 @@ export async function POST(req: Request) {
   }
 
   client ??= new Anthropic();
-  const stream = client.beta.messages.stream({
+  const stream = client.messages.stream({
     model: MODEL,
-    max_tokens: 2000,
+    // Replies are a few short paragraphs at most.
+    max_tokens: 1000,
     // Short, friendly answers don't need deep thought, and low effort keeps replies quick.
     output_config: { effort: "low" },
     system: [
@@ -85,9 +88,6 @@ export async function POST(req: Request) {
       { type: "text", text: chatContext(parsed.data.page, parsed.data.locale) },
     ],
     messages,
-    // If the model declines, the API retries on its recommended fallback model.
-    betas: ["server-side-fallback-2026-07-01"],
-    fallbacks: "default",
   });
 
   const encoder = new TextEncoder();
@@ -96,7 +96,6 @@ export async function POST(req: Request) {
       const send = (event: object) => controller.enqueue(encoder.encode(JSON.stringify(event) + "\n"));
       try {
         for await (const event of stream) {
-          if (event.type === "content_block_start" && event.content_block.type === "fallback") send({ type: "reset" });
           if (event.type === "content_block_delta" && event.delta.type === "text_delta") send({ type: "text", text: event.delta.text });
         }
         const final = await stream.finalMessage();
