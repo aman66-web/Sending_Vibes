@@ -1060,6 +1060,7 @@ export const pa: Dict = {
     go: "ਬਦਲੋ",
     changing: "ਬਦਲਾਅ ਹੋ ਰਿਹਾ ਹੈ…",
     changed: "Done. Have a look at the card.",
+    changesLeft: "{n} typed changes left",
     undo: "ਅਨਡੂ ਕਰੋ",
     premadeNote: "ਇਹ ਇੱਕ ਰੈਡੀਮੇਡ ਡਿਜ਼ਾਈਨ ਹੈ, ਇਸ ਲਈ ਇਸ ਦੀਆਂ ਸਕਰੀਨਾਂ ਜਿਵੇਂ ਹਨ ਉਵੇਂ ਹੀ ਰਹਿਣਗੀਆਂ। ਫਿਰ ਵੀ ਤੁਸੀਂ ਹਰ ਸ਼ਬਦ, ਫ਼ੋਟੋ, ਰੰਗ ਅਤੇ ਧੁਨ ਬਦਲ ਸਕਦੇ ਹੋ।",
     unlock: "Want to add, remove or reorder screens, or change it by typing? Unlock everything, at no extra cost",
@@ -1071,6 +1072,10 @@ export const pa: Dict = {
       failed: "ਇਹ ਨਹੀਂ ਹੋ ਸਕਿਆ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
       tooMany: "ਥੋੜ੍ਹੇ ਜਿਹੇ ਸਮੇਂ ਵਿੱਚ ਬਹੁਤ ਸਾਰੇ ਕਾਰਡ ਬਣ ਗਏ ਹਨ। ਕਿਰਪਾ ਕਰਕੇ ਥੋੜ੍ਹੀ ਦੇਰ ਬਾਅਦ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
       signIn: "Please sign up first, then press the button again.",
+      limitCards: "You've made all {n} of your cards. Each card you buy lets you make {more} more.",
+      limitChanges: "You've used all {n} of your typed changes. Each card you buy adds {more} more. You can still change anything by hand, as much as you like: tap any words, or add text, images and elements.",
+      limitDayCards: "That's the most cards for one day. Come back tomorrow to make more.",
+      limitDayChanges: "That's the most typed changes for one day. Come back tomorrow, or change things by hand: tap any words, or add text, images and elements.",
     },
   },
 

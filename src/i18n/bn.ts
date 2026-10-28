@@ -1060,6 +1060,7 @@ export const bn: Dict = {
     go: "বদলান",
     changing: "বদলানো হচ্ছে…",
     changed: "Done. Have a look at the card.",
+    changesLeft: "{n} typed changes left",
     undo: "আগের মতো করুন",
     premadeNote: "এটা একটা রেডিমেড ডিজাইন, তাই এর স্ক্রিনগুলো যেমন আছে তেমনই থাকবে। তবে প্রতিটা শব্দ, ছবি, রং আর সুর এখনও বদলাতে পারবেন।",
     unlock: "Want to add, remove or reorder screens, or change it by typing? Unlock everything, at no extra cost",
@@ -1071,6 +1072,10 @@ export const bn: Dict = {
       failed: "কাজটা হলো না। আবার চেষ্টা করুন।",
       tooMany: "অল্প সময়ে অনেকগুলো কার্ড হয়ে গেল। দয়া করে একটু পরে আবার চেষ্টা করুন।",
       signIn: "Please sign up first, then press the button again.",
+      limitCards: "You've made all {n} of your cards. Each card you buy lets you make {more} more.",
+      limitChanges: "You've used all {n} of your typed changes. Each card you buy adds {more} more. You can still change anything by hand, as much as you like: tap any words, or add text, images and elements.",
+      limitDayCards: "That's the most cards for one day. Come back tomorrow to make more.",
+      limitDayChanges: "That's the most typed changes for one day. Come back tomorrow, or change things by hand: tap any words, or add text, images and elements.",
     },
   },
 

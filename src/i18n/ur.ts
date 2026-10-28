@@ -1060,6 +1060,7 @@ export const ur: Dict = {
     go: "بدلیں",
     changing: "تبدیلی کی جا رہی ہے…",
     changed: "Done. Have a look at the card.",
+    changesLeft: "{n} typed changes left",
     undo: "واپس لیں",
     premadeNote: "یہ ریڈی میڈ ڈیزائن ہے، اس لیے اس کی اسکرینیں ویسی ہی رہیں گی۔ لیکن آپ اب بھی ہر لفظ، تصویر، رنگ اور دھن بدل سکتے ہیں۔",
     unlock: "Want to add, remove or reorder screens, or change it by typing? Unlock everything, at no extra cost",
@@ -1071,6 +1072,10 @@ export const ur: Dict = {
       failed: "یہ نہیں ہو سکا۔ براہ کرم دوبارہ کوشش کریں۔",
       tooMany: "اتنے کم وقت میں یہ بہت سارے کارڈ ہو گئے۔ براہ کرم تھوڑی دیر بعد دوبارہ کوشش کریں۔",
       signIn: "Please sign up first, then press the button again.",
+      limitCards: "You've made all {n} of your cards. Each card you buy lets you make {more} more.",
+      limitChanges: "You've used all {n} of your typed changes. Each card you buy adds {more} more. You can still change anything by hand, as much as you like: tap any words, or add text, images and elements.",
+      limitDayCards: "That's the most cards for one day. Come back tomorrow to make more.",
+      limitDayChanges: "That's the most typed changes for one day. Come back tomorrow, or change things by hand: tap any words, or add text, images and elements.",
     },
   },
 

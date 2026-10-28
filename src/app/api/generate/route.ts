@@ -1,8 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
-import { DEFAULT_LOCALE, LOCALE_COOKIE, isLive } from "@/i18n/config";
+import { DEFAULT_LOCALE, LOCALE_COOKIE, fmt, isLive } from "@/i18n/config";
 import { DICTS } from "@/i18n/dictionaries";
-import { currentAccount, signInAvailable } from "@/lib/auth";
+import { ALLOWANCE, allowanceLeft, spend, type Kind } from "@/lib/allowance";
+import { currentAccount, signInAvailable, type Account } from "@/lib/auth";
 import { cardSchema } from "@/lib/card";
 import { GenerateError, generateCard, generateReady } from "@/lib/generate";
 
@@ -40,13 +41,15 @@ function allowed(ip: string) {
   return true;
 }
 
-// New cards are made after signing up (the last step of the questions). If the check
+// Who's asking: every use of the AI needs an account once signing in is switched on
+// (new cards are made after signing up, the last step of the questions). If the check
 // itself fails, let them through rather than stop anyone making a card.
-async function mustSignIn() {
+async function whoIsAsking(): Promise<{ account: Account | null; needed: boolean }> {
   try {
-    return (await signInAvailable()) && !(await currentAccount());
+    if (!(await signInAvailable())) return { account: null, needed: false };
+    return { account: await currentAccount(), needed: true };
   } catch {
-    return false;
+    return { account: null, needed: false };
   }
 }
 
@@ -64,7 +67,27 @@ export async function POST(req: NextRequest) {
 
   const parsed = bodySchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return fail(errors.describe, 400);
-  if (!parsed.data.card && (await mustSignIn())) return fail(errors.signIn, 401);
+
+  // Each account has a daily allowance (lib/allowance.ts), so nobody can run up the bill
+  // without buying. One use is counted before the AI starts and given back if it fails.
+  const kind: Kind = parsed.data.card ? "change" : "card";
+  const { account, needed } = await whoIsAsking();
+  if (needed && !account) return fail(errors.signIn, 401);
+  let refund: (() => Promise<void>) | undefined;
+  let left: number | undefined;
+  if (account) {
+    try {
+      const allowance = await allowanceLeft(account, kind);
+      if (allowance.left <= 0) {
+        const message = allowance.reason === "day" ? (kind === "card" ? errors.limitDayCards : errors.limitDayChanges) : kind === "card" ? errors.limitCards : errors.limitChanges;
+        return NextResponse.json({ error: fmt(message, { n: allowance.total, more: ALLOWANCE.perCardBought[kind] }), left: 0 }, { status: 429 });
+      }
+      refund = await spend(account, kind);
+      left = allowance.left - 1;
+    } catch (e) {
+      console.error("allowance check failed", e);
+    }
+  }
 
   // Streams one JSON event per line: {type:"progress",screens} as each screen is written,
   // then {type:"card",card} or {type:"error",error}.
@@ -79,8 +102,9 @@ export async function POST(req: NextRequest) {
       };
       try {
         const { card, note } = await generateCard({ ...parsed.data, locale }, { signal: req.signal, onProgress: (screens) => send({ type: "progress", screens }) });
-        send({ type: "card", card, note });
+        send({ type: "card", card, note, left });
       } catch (e) {
+        await refund?.().catch(() => {});
         if (!req.signal.aborted) console.error("generate failed", e);
         send({ type: "error", error: errors[e instanceof GenerateError ? e.reason : "failed"] });
       }

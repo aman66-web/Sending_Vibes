@@ -1062,6 +1062,7 @@ export const en = {
     go: "Change",
     changing: "Making the change…",
     changed: "Done. Have a look at the card.",
+    changesLeft: "{n} typed changes left",
     undo: "Undo",
     premadeNote: "This is a ready-made design, so its screens stay as they are. You can still change every word, photo, colour and tune.",
     unlock: "Want to add, remove or reorder screens, or change it by typing? Unlock everything, at no extra cost",
@@ -1073,6 +1074,10 @@ export const en = {
       failed: "That didn't work. Please try again.",
       tooMany: "That's a lot of cards in a short time. Please try again in a little while.",
       signIn: "Please sign up first, then press the button again.",
+      limitCards: "You've made all {n} of your cards. Each card you buy lets you make {more} more.",
+      limitChanges: "You've used all {n} of your typed changes. Each card you buy adds {more} more. You can still change anything by hand, as much as you like: tap any words, or add text, images and elements.",
+      limitDayCards: "That's the most cards for one day. Come back tomorrow to make more.",
+      limitDayChanges: "That's the most typed changes for one day. Come back tomorrow, or change things by hand: tap any words, or add text, images and elements.",
     },
   },
 

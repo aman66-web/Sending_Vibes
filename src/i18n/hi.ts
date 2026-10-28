@@ -1054,6 +1054,7 @@ export const hi: Dict = {
     go: "बदलें",
     changing: "बदलाव हो रहा है…",
     changed: "Done. Have a look at the card.",
+    changesLeft: "{n} typed changes left",
     undo: "अनडू करें",
     premadeNote: "यह एक रेडीमेड डिज़ाइन है, इसलिए इसकी स्क्रीन जैसी हैं वैसी ही रहेंगी। फिर भी आप हर शब्द, फ़ोटो, रंग और धुन बदल सकते हैं।",
     unlock: "Want to add, remove or reorder screens, or change it by typing? Unlock everything, at no extra cost",
@@ -1065,6 +1066,10 @@ export const hi: Dict = {
       failed: "यह नहीं हो पाया। कृपया फिर से कोशिश करें।",
       tooMany: "आपने थोड़े ही समय में काफ़ी सारे कार्ड बना लिए हैं। कृपया थोड़ी देर बाद फिर कोशिश करें।",
       signIn: "Please sign up first, then press the button again.",
+      limitCards: "You've made all {n} of your cards. Each card you buy lets you make {more} more.",
+      limitChanges: "You've used all {n} of your typed changes. Each card you buy adds {more} more. You can still change anything by hand, as much as you like: tap any words, or add text, images and elements.",
+      limitDayCards: "That's the most cards for one day. Come back tomorrow to make more.",
+      limitDayChanges: "That's the most typed changes for one day. Come back tomorrow, or change things by hand: tap any words, or add text, images and elements.",
     },
   },
 

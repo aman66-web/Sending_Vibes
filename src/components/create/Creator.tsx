@@ -146,6 +146,8 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   const [aiDone, setAiDone] = useState(false);
   // What the AI says it changed (or couldn't), shown after a typed change.
   const [aiNote, setAiNote] = useState<string | null>(null);
+  // How many typed changes their account has left (see lib/allowance.ts), once known.
+  const [changesLeft, setChangesLeft] = useState<number | null>(null);
   const [undo, setUndo] = useState<CardData | null>(null);
   // The screens written so far while a card is being made, and a way to stop it.
   const [progress, setProgress] = useState<ScreenType[]>([]);
@@ -173,9 +175,10 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   useEffect(() => {
     fetch("/api/account", { cache: "no-store" })
       .then((r) => r.json())
-      .then((s: { enabled: boolean; google: boolean; email: boolean; account: SignedIn | null }) =>
-        setAuth({ google: s.google, email: s.email, account: s.account, needed: s.enabled && !s.account }),
-      )
+      .then((s: { enabled: boolean; google: boolean; email: boolean; account: SignedIn | null; left?: { change: number } }) => {
+        setAuth({ google: s.google, email: s.email, account: s.account, needed: s.enabled && !s.account });
+        if (s.left) setChangesLeft(s.left.change);
+      })
       .catch(() => {});
   }, []);
 
@@ -248,7 +251,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     names: { to: string; from: string },
     onProgress?: (screens: ScreenType[]) => void,
     signal?: AbortSignal,
-  ): Promise<{ card: CardData; note?: string }> => {
+  ): Promise<{ card: CardData; note?: string; left?: number }> => {
     const res = await fetch("/api/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -273,7 +276,8 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
         if (!line) continue;
         const event = JSON.parse(line);
         if (event.type === "progress") onProgress?.(event.screens);
-        else if (event.type === "card") return { card: event.card as CardData, note: typeof event.note === "string" ? event.note : undefined };
+        else if (event.type === "card")
+          return { card: event.card as CardData, note: typeof event.note === "string" ? event.note : undefined, left: typeof event.left === "number" ? event.left : undefined };
         else if (event.type === "error") throw new Error(event.error ?? x.errors.failed);
       }
     }
@@ -348,8 +352,9 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     // Typing changes are a custom-card thing.
     setMode("custom");
     try {
-      const { card: changed, note } = await callAi({ prompt: prompt.trim(), card, focus }, { to: card.to, from: card.from });
+      const { card: changed, note, left } = await callAi({ prompt: prompt.trim(), card, focus }, { to: card.to, from: card.from });
       setAiNote(note ?? null);
+      if (left !== undefined) setChangesLeft(left);
       setUndo(card);
       setCard(changed);
       if (!focus || prompt === ask) setAsk("");
@@ -653,6 +658,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                       </button>
                     )}
                   </div>
+                  {changesLeft !== null && <p className="text-xs font-semibold opacity-60">{fmt(x.changesLeft, { n: changesLeft })}</p>}
                   {aiDone && (
                     <p role="status" className="rounded-xl bg-emerald-50 px-3 py-2.5 text-sm font-semibold text-emerald-900 ring-1 ring-emerald-200">
                       ✓ {aiNote || x.changed}

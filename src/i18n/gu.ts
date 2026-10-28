@@ -1060,6 +1060,7 @@ export const gu: Dict = {
     go: "બદલો",
     changing: "ફેરફાર થઈ રહ્યો છે…",
     changed: "Done. Have a look at the card.",
+    changesLeft: "{n} typed changes left",
     undo: "અનડૂ કરો",
     premadeNote: "આ રેડીમેડ ડિઝાઇન છે, એટલે એની સ્ક્રીન જેમ છે એમ જ રહેશે. છતાં તમે દરેક શબ્દ, ફોટો, રંગ અને ધૂન બદલી શકો છો.",
     unlock: "Want to add, remove or reorder screens, or change it by typing? Unlock everything, at no extra cost",
@@ -1071,6 +1072,10 @@ export const gu: Dict = {
       failed: "એ થઈ શક્યું નહીં. કૃપા કરીને ફરી પ્રયત્ન કરો.",
       tooMany: "થોડા જ સમયમાં ઘણાં બધાં કાર્ડ બની ગયાં. કૃપા કરીને થોડી વાર પછી ફરી પ્રયત્ન કરો.",
       signIn: "Please sign up first, then press the button again.",
+      limitCards: "You've made all {n} of your cards. Each card you buy lets you make {more} more.",
+      limitChanges: "You've used all {n} of your typed changes. Each card you buy adds {more} more. You can still change anything by hand, as much as you like: tap any words, or add text, images and elements.",
+      limitDayCards: "That's the most cards for one day. Come back tomorrow to make more.",
+      limitDayChanges: "That's the most typed changes for one day. Come back tomorrow, or change things by hand: tap any words, or add text, images and elements.",
     },
   },
 

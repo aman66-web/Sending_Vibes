@@ -1063,6 +1063,7 @@ export const pl: Dict = {
     go: "Zmień",
     changing: "Wprowadzamy zmianę…",
     changed: "Done. Have a look at the card.",
+    changesLeft: "{n} typed changes left",
     undo: "Cofnij",
     premadeNote: "To gotowy projekt, więc jego ekrany zostają bez zmian. Nadal możesz zmienić każde słowo, zdjęcie, kolor i melodię.",
     unlock: "Want to add, remove or reorder screens, or change it by typing? Unlock everything, at no extra cost",
@@ -1074,6 +1075,10 @@ export const pl: Dict = {
       failed: "Nie udało się. Spróbuj ponownie.",
       tooMany: "To sporo kartek w krótkim czasie. Spróbuj ponownie za jakiś czas.",
       signIn: "Please sign up first, then press the button again.",
+      limitCards: "You've made all {n} of your cards. Each card you buy lets you make {more} more.",
+      limitChanges: "You've used all {n} of your typed changes. Each card you buy adds {more} more. You can still change anything by hand, as much as you like: tap any words, or add text, images and elements.",
+      limitDayCards: "That's the most cards for one day. Come back tomorrow to make more.",
+      limitDayChanges: "That's the most typed changes for one day. Come back tomorrow, or change things by hand: tap any words, or add text, images and elements.",
     },
   },
 
