@@ -1,7 +1,7 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { customAlphabet } from "nanoid";
-import { EFFECTS, FONTS, GAMES, MOTIONS, MUSIC, OCCASIONS, PATTERNS, THEMES, cardSchema, screenStyle, type CardData, type Game, type Screen, type ScreenType } from "./card";
+import { EFFECTS, FONTS, FRAMES, GAMES, MOTIONS, MUSIC, OCCASIONS, PATTERNS, THEMES, cardSchema, screenStyle, type CardData, type Game, type Screen, type ScreenType } from "./card";
 import { LANGUAGES, type Locale } from "@/i18n/config";
 import { TEMPLATES, buildCard, getTemplate } from "./catalog";
 import { GAME_LABELS, LABELS_ON, LISTS, TEXTS, isList, type LabelKey } from "./labels";
@@ -87,7 +87,9 @@ Every screen can have a "style" that sets its look on top of the theme. Design e
   "body": the font of everything else, one of the same,
   "effect": what's going on in the background of this screen, instead of the card's ambient, one of ${list(EFFECTS)} ("fireworks" keeps going off in the sky),
   "burst": what bursts out at this screen's big moment, one of ${list(EFFECTS)}: when the envelope opens on the intro, when they say yes, win a game, finish the quiz, scratch it off, solve the phrase, the wheel lands, open a box, reach 100% or empty the jar. Without one, these moments throw confetti (the intro does nothing),
-  "stickers": up to 10 emoji placed around the screen: [{"emoji": one emoji, "x": 0 to 100 (% from the left), "y": 0 to 100 (% from the top), "size": 4 to 40 (% of the card's shorter side; 8 to 16 suits most), "rotate": -180 to 180, "motion": one of ${list(MOTIONS)}}]
+  "stickers": up to 10 emoji placed around the screen: [{"emoji": one emoji, "x": 0 to 100 (% from the left), "y": 0 to 100 (% from the top), "size": 4 to 40 (% of the card's shorter side; 8 to 16 suits most), "rotate": -180 to 180, "motion": one of ${list(MOTIONS)}}],
+  "texts": up to 8 text boxes placed anywhere: [{"text" 120, "x", "y", "size": 2 to 20 (letter height, % of the shorter side; 5 is ordinary, 10 is big), "color", "font", "rotate"}],
+  "images": their own photos placed on the screen: [{"src", "x", "y", "size": 10 to 90 (width), "rotate", "frame": one of ${list(FRAMES)}}]. They add these themselves; keep, move, resize or remove them as asked, but never make new ones.
 }
 - Every part is optional. Colours are always six-digit hex.
 - The fonts: classic is an elegant serif, modern a clean sans-serif, handwritten casual handwriting, storybook a soft old-style serif, script a flowing wedding script, rounded bubbly and friendly, bold a chunky modern headline, typewriter an old typewriter, marker a thick felt-tip pen and spooky a dripping horror font. For the body, use one that's easy to read in a long letter: modern, classic, storybook, rounded or typewriter.
@@ -150,25 +152,30 @@ export function generateReady() {
 // so the model can move photos around but can't make up new links.
 function hidePhotos(card: CardData) {
   const urls: string[] = [];
-  const screens = card.screens.map((s) =>
-    s.type === "photos"
-      ? {
-          ...s,
-          photos: s.photos.map((url) => {
-            urls.push(url);
-            return `photo-${urls.length}`;
-          }),
-        }
-      : s,
-  );
+  const hide = (url: string) => {
+    urls.push(url);
+    return `photo-${urls.length}`;
+  };
+  const screens = card.screens.map((s) => {
+    // Photos placed on any screen, as well as a photos screen's own.
+    const images = s.style?.images?.map((img) => ({ ...img, src: hide(img.src) }));
+    const screen = images ? { ...s, style: { ...s.style, images } } : s;
+    return screen.type === "photos" ? { ...screen, photos: screen.photos.map(hide) } : screen;
+  });
   return { card: { ...card, screens }, urls };
 }
 
 function restorePhotos(screen: Record<string, unknown>, urls: string[]) {
+  const url = (p: unknown) => urls[Number(/^photo-(\d+)$/.exec(String(p))?.[1]) - 1];
+  const style = screen.style as { images?: unknown } | undefined;
+  if (style && typeof style === "object" && Array.isArray(style.images)) {
+    const images = style.images.map((img) => (img && typeof img === "object" ? { ...img, src: url((img as { src?: unknown }).src) } : img)).filter((img) => img?.src);
+    screen = { ...screen, style: { ...style, images } };
+  }
   if (screen.type !== "photos") return screen;
   const photos = Array.isArray(screen.photos) ? screen.photos : [];
   const captions = Array.isArray(screen.captions) ? screen.captions : [];
-  const kept = photos.map((p) => urls[Number(/^photo-(\d+)$/.exec(String(p))?.[1]) - 1]);
+  const kept = photos.map(url);
   return { ...screen, photos: kept.filter(Boolean), captions: captions.filter((_, i) => i >= photos.length || kept[i]) };
 }
 
@@ -183,13 +190,16 @@ function tidyStyle(style: unknown) {
   const out: Record<string, unknown> = {};
   for (const [key, raw] of Object.entries(style)) {
     let value = Array.isArray(raw) && key === "background" ? raw.map(longHex) : longHex(raw);
-    if (key === "stickers" && Array.isArray(raw)) {
-      value = raw
-        .filter((s) => s && typeof s === "object")
-        .map((s) => ({ ...s, x: clamp(s.x, 0, 100), y: clamp(s.y, 0, 100), size: clamp(s.size, 4, 40), rotate: clamp(s.rotate, -180, 180) }))
-        .filter((s) => fields.stickers.safeParse([s]).success)
-        .slice(0, 10);
-    }
+    // Lists keep the items that are right, with numbers brought into range.
+    const items = (max: number, size: [number, number]) =>
+      (raw as unknown[])
+        .filter((s): s is Record<string, unknown> => Boolean(s) && typeof s === "object")
+        .map((s) => ({ ...s, x: clamp(s.x, 0, 100), y: clamp(s.y, 0, 100), size: clamp(s.size, ...size), rotate: clamp(s.rotate, -180, 180) }))
+        .filter((s) => fields[key].safeParse([s]).success)
+        .slice(0, max);
+    if (Array.isArray(raw) && key === "stickers") value = items(10, [4, 40]);
+    if (Array.isArray(raw) && key === "texts") value = items(8, [2, 20]);
+    if (Array.isArray(raw) && key === "images") value = items(6, [10, 90]);
     const parsed = fields[key]?.safeParse(value);
     if (parsed?.success) out[key] = parsed.data;
   }
@@ -228,7 +238,9 @@ function toCard(text: string, input: GenerateInput, urls: string[]): { card: Car
     let id = typeof s?.id === "string" && s.id.trim() ? s.id.trim().slice(0, 40) : newId();
     if (seen.has(id)) id = newId();
     seen.add(id);
-    return restorePhotos({ ...s, id, style: tidyStyle(s.style), labels: tidyLabels(s.labels) }, urls);
+    // Photo links back first, so the look is checked with the real ones.
+    const restored = restorePhotos({ ...s, id }, urls);
+    return { ...restored, style: tidyStyle(restored.style), labels: tidyLabels(restored.labels) };
   });
   if (typeof draft.to !== "string" || !draft.to.trim()) draft.to = input.to;
   if (typeof draft.from !== "string" || !draft.from.trim()) draft.from = input.from;

@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useI18n } from "@/i18n/client";
 import { fmt } from "@/i18n/config";
-import type { CardData, Screen } from "@/lib/card";
+import { FONTS, FRAMES, type CardData, type Font, type Screen, type ScreenStyle } from "@/lib/card";
+import { FONT_VARS } from "@/lib/screen-style";
 import { LISTS, TEXTS, isList, labelList, labelsOn, type LabelKey, type ListKey } from "@/lib/labels";
 import { uploadPhoto } from "./image";
+import { useWide } from "./use-wide";
 
 // Click the words on the live preview to change them, like editing a design.
 // While editing, a see-through layer sits over the card so its games and buttons
@@ -57,6 +60,9 @@ const norm = (s: string) => s.replace(/\s+/g, " ").trim().toLowerCase();
 // start of its text; text with a quote mark or emoji around it still counts.
 function findField(target: Element | null, root: HTMLElement, fields: Field[]): { field: Field; el: Element } | null {
   for (let el = target; el && el !== root; el = el.parentElement) {
+    // Only where words are written (or a button's label), not something that merely holds
+    // them like the envelope, which has its own colour to change.
+    if (!readable(el)) continue;
     // Words drawn on a canvas, or a box's placeholder, are given as data-text.
     const text = norm(el.getAttribute("data-text") ?? el.textContent ?? "");
     if (!text || text.length > 1600) continue;
@@ -78,6 +84,10 @@ function findField(target: Element | null, root: HTMLElement, fields: Field[]): 
   }
   return null;
 }
+
+const readable = (el: Element) =>
+  !el.hasAttribute("data-envelope") &&
+  (el.hasAttribute("data-text") || el.matches("button, figcaption, text") || [...el.childNodes].some((n) => n.nodeType === Node.TEXT_NODE && n.textContent?.trim()));
 
 // A label with numbers in it ("{i} of {n}") matches the words as shown ("2 of 5").
 function numbered(value: string) {
@@ -130,86 +140,352 @@ function limitFor(card: CardData, path: Path) {
 }
 
 type Box = { left: number; top: number; width: number; height: number };
-type Hit = { kind: "words"; field: Field; el: Element } | { kind: "photo"; index: number | "new"; el: Element };
-type Open = { box: Box; area: { width: number; height: number } } & ({ kind: "words"; path: Path } | { kind: "photo"; index: number });
+type Deco = "sticker" | "text" | "image";
+type Hit =
+  | { kind: "words"; field: Field; el: Element }
+  | { kind: "photo"; index: number | "new"; el: Element }
+  | { kind: "deco"; deco: Deco; index: number; el: Element }
+  | { kind: "envelope"; el: Element }
+  | { kind: "background"; el: Element };
+// What's selected, and where it is on the preview (for drawing around it and placing its controls).
+// Where the preview is: its size, how far down the window it starts, and the window's height.
+type Area = { width: number; height: number; top: number; view: number };
+type Selected = { box: Box; area: Area } & (
+  | { kind: "words"; path: Path; heading: boolean; button: boolean }
+  | { kind: "photo"; index: number }
+  | { kind: "deco"; deco: Deco; index: number }
+  | { kind: "envelope" }
+  | { kind: "background" }
+);
+type Gesture = {
+  mode: "move" | "resize";
+  deco: Deco;
+  index: number;
+  x: number;
+  y: number;
+  // Where the item was, its size, and the card's own box, when the gesture began.
+  start: { x: number; y: number; size: number };
+  card: DOMRect;
+  box: Box;
+  centre?: { x: number; y: number };
+  moved: boolean;
+};
+
+type DistributiveOmit<T, K extends keyof T> = T extends unknown ? Omit<T, K> : never;
 
 // The most photos a photos screen holds (see lib/card.ts).
 const MAX_PHOTOS = 6;
+
+// Colours to pick from, and two-colour blends for backgrounds.
+const PALETTE = ["#1f1b16", "#ffffff", "#f6efe0", "#e23d3d", "#ff6fae", "#c026d3", "#8b5cf6", "#2563eb", "#38bdf8", "#16a34a", "#facc15", "#f97316", "#d4af37", "#14213d"];
+const BLENDS = [
+  ["#ff9a9e", "#fecfef"],
+  ["#a18cd1", "#fbc2eb"],
+  ["#84fab0", "#8fd3f4"],
+  ["#fccb90", "#d57eeb"],
+  ["#f6d365", "#fda085"],
+  ["#0f2027", "#2c5364"],
+];
+const SWAPS = ["❤️", "💖", "⭐", "✨", "🎈", "🎉", "🌸", "🌈", "🦋", "🐶", "🍰", "👑"];
+const SIZE: Record<Deco, [number, number]> = { sticker: [4, 40], text: [2, 20], image: [10, 90] };
 
 type Props = {
   card: CardData;
   screenId?: string;
   enabled: boolean;
   onChange: (path: Path, value: string) => void;
-  // Photos added, swapped or taken out on a photos screen.
+  // Anything else on a screen: its look, its stickers, text and photos, a photos screen's photos.
   onScreen: (index: number, update: (screen: Screen) => Screen) => void;
+  // About to change something, so Undo can bring it back.
+  onBegin?: () => void;
+  // Selects something just added from the panel, like "text:2".
+  pick?: { key: string; nonce: number };
   className?: string;
   children: React.ReactNode;
 };
 
-export function EditableCard({ card, screenId, enabled, onChange, onScreen, className = "", children }: Props) {
+export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBegin, pick, className = "", children }: Props) {
   const { t } = useI18n();
   const x = t.custom;
+  const s = t.studio;
   const root = useRef<HTMLDivElement>(null);
   const layer = useRef<HTMLDivElement>(null);
   const files = useRef<HTMLInputElement>(null);
   const [hover, setHover] = useState<Box | null>(null);
-  const [open, setOpen] = useState<Open | null>(null);
-  // Which photo the chosen file replaces, or null to add them.
-  const [replacing, setReplacing] = useState<number | null>(null);
+  const [open, setOpen] = useState<Selected | null>(null);
+  const gesture = useRef<Gesture | null>(null);
+  // Each selection is one step for Undo, however many changes are made while it's open.
+  const begun = useRef(false);
+  // Which photo the chosen file replaces (a photos screen's, or a placed one), or null to add them.
+  const [replacing, setReplacing] = useState<{ deco: boolean; index: number } | null>(null);
   const [uploading, setUploading] = useState(0);
   const [photoError, setPhotoError] = useState<string | null>(null);
-  // Tapping something that isn't words or a photo (the envelope, a game) explains what to do.
-  const [tip, setTip] = useState(false);
-  const tipTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  useEffect(() => () => clearTimeout(tipTimer.current), []);
-  const screenIndex = card.screens.findIndex((s) => s.id === screenId);
+  const screenIndex = card.screens.findIndex((sc) => sc.id === screenId);
   const screen = card.screens[screenIndex];
+  const style = screen?.style ?? {};
+  // On a phone the controls come up from the bottom of the screen, so the card stays in view above them.
+  const sheet = !useWide();
 
-  // What's under the pointer, looking through the editing layer: a photo, or some words.
+  const begin = () => {
+    if (begun.current) return;
+    begun.current = true;
+    onBegin?.();
+  };
+  // The preview's size, for placing the controls; measured when something is selected.
+  const areaNow = (): Area => ({
+    width: root.current?.offsetWidth ?? 600,
+    height: root.current?.offsetHeight ?? 600,
+    top: root.current?.getBoundingClientRect().top ?? 0,
+    view: window.innerHeight,
+  });
+  const select = (next: DistributiveOmit<Selected, "area"> | null) => {
+    begun.current = false;
+    setOpen(next && ({ ...next, area: areaNow() } as Selected));
+  };
+  // Something tapped or just added. On a phone, scroll so it sits above the controls.
+  const choose = (next: DistributiveOmit<Selected, "area">) => {
+    select(next);
+    const el = root.current;
+    if (!sheet || !el || next.kind === "background") return;
+    const top = el.getBoundingClientRect().top + next.box.top;
+    const middle = top + next.box.height / 2;
+    if (top < 8 || middle > window.innerHeight * 0.4) window.scrollBy({ top: middle - window.innerHeight * 0.25, behavior: "smooth" });
+  };
+  const edit = (path: Path, value: string) => {
+    begin();
+    onChange(path, value);
+  };
+  const restyle = (update: (st: ScreenStyle) => ScreenStyle) => {
+    begin();
+    onScreen(screenIndex, (sc) => ({ ...sc, style: update(sc.style ?? {}) }));
+  };
+  const listOf = (deco: Deco) => (deco === "sticker" ? "stickers" : deco === "text" ? "texts" : "images") as "stickers" | "texts" | "images";
+  const changeItem = (deco: Deco, index: number, update: (item: Record<string, unknown>) => Record<string, unknown> | null) =>
+    restyle((st) => {
+      const key = listOf(deco);
+      const list = [...((st[key] as Record<string, unknown>[] | undefined) ?? [])];
+      const next = list[index] ? update(list[index]) : null;
+      if (next) list[index] = next;
+      else list.splice(index, 1);
+      return { ...st, [key]: list };
+    });
+
+  // What's under the pointer, looking through the editing layer: the topmost thing that
+  // can be changed (a sticker, text box or photo, some words, the envelope), or else the
+  // screen's background.
   const under = (clientX: number, clientY: number): Hit | null => {
     const el = root.current;
     if (!el) return null;
-    const below = document.elementsFromPoint(clientX, clientY).find((e) => e !== layer.current && el.contains(e) && !e.closest("[data-word-editor]"));
-    if (!below) return null;
-    const photo = below.closest("[data-photo]");
-    if (photo && el.contains(photo)) {
-      const index = photo.getAttribute("data-photo");
-      return { kind: "photo", index: index === "new" ? "new" : Number(index), el: photo };
+    const below = document.elementsFromPoint(clientX, clientY).filter((e) => e !== layer.current && el.contains(e) && !e.closest("[data-edit-ui]"));
+    const fields = textFields(card, screenId);
+    for (const e of below) {
+      const deco = e.closest("[data-deco]");
+      if (deco) {
+        const [kind, index] = deco.getAttribute("data-deco")!.split(":");
+        return { kind: "deco", deco: kind as Deco, index: Number(index), el: deco };
+      }
+      const photo = e.closest("[data-photo]");
+      if (photo) {
+        const index = photo.getAttribute("data-photo");
+        return { kind: "photo", index: index === "new" ? "new" : Number(index), el: photo };
+      }
+      const found = findField(e, el, fields);
+      if (found) return { kind: "words", ...found };
+      const envelope = e.closest("[data-envelope]");
+      if (envelope) return { kind: "envelope", el: envelope };
     }
-    const found = findField(below, el, textFields(card, screenId));
-    return found && { kind: "words", ...found };
+    const cardEl = below.find((e) => e.closest(".font-card"))?.closest(".font-card");
+    return cardEl ? { kind: "background", el: cardEl } : null;
   };
   const boxOf = (target: Element): Box => {
     const outer = root.current!.getBoundingClientRect();
     const r = target.getBoundingClientRect();
     return { left: r.left - outer.left, top: r.top - outer.top, width: r.width, height: r.height };
   };
+  const decoEl = (deco: Deco, index: number) => root.current?.querySelector(`[data-deco="${deco}:${index}"]`);
+  // After a change that moves or resizes it, draw around it where it is now.
+  const remeasure = (deco: Deco, index: number) =>
+    requestAnimationFrame(() => {
+      const el = decoEl(deco, index);
+      if (el) setOpen((o) => (o?.kind === "deco" && o.deco === deco && o.index === index ? { ...o, box: boxOf(el) } : o));
+    });
 
-  const pickPhotos = (replace: number | null) => {
+  const selectHit = (hit: Hit | null) => {
+    if (!hit) return select(null);
+    if (hit.kind === "photo") {
+      if (hit.index === "new") {
+        select(null);
+        return pickPhotos(null);
+      }
+      return choose({ kind: "photo", index: hit.index, box: boxOf(hit.el) });
+    }
+    if (hit.kind === "words")
+      return choose({
+        kind: "words",
+        path: hit.field.path,
+        box: boxOf(hit.el),
+        heading: Boolean(hit.el.closest(".font-display")),
+        button: Boolean(hit.el.closest("[data-primary], [data-yes], [data-spin]")),
+      });
+    if (hit.kind === "deco") return choose({ kind: "deco", deco: hit.deco, index: hit.index, box: boxOf(hit.el) });
+    choose({ kind: hit.kind, box: boxOf(hit.el) });
+  };
+
+  // Something just added from the panel: select it once it's on the card.
+  const [picked, setPicked] = useState(pick?.nonce);
+  if (pick && pick.nonce !== picked) setPicked(pick.nonce);
+  useEffect(() => {
+    if (!pick) return;
+    const deco = pick.key.split(":")[0] as Deco;
+    const index = Number(pick.key.split(":")[1]);
+    const frame = requestAnimationFrame(() => {
+      const el = decoEl(deco, index);
+      if (el) choose({ kind: "deco", deco, index, box: boxOf(el) });
+    });
+    // And again once it has finished popping in, at its full size.
+    const later = setTimeout(() => remeasure(deco, index), 700);
+    return () => {
+      cancelAnimationFrame(frame);
+      clearTimeout(later);
+    };
+    // Only when something new is picked.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [picked]);
+
+  // Delete removes the selected sticker, text or photo; Escape lets go of it.
+  useEffect(() => {
+    if (!enabled || open?.kind !== "deco") return;
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.target as HTMLElement)?.closest("input, textarea")) return;
+      if (e.key === "Delete" || e.key === "Backspace") {
+        e.preventDefault();
+        changeItem(open.deco, open.index, () => null);
+        select(null);
+      } else if (e.key === "Escape") select(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
+
+  // Dragging a sticker, text box or photo moves it; dragging the corner handle resizes it.
+  const startGesture = (mode: Gesture["mode"], deco: Deco, index: number, e: React.PointerEvent, el: Element) => {
+    const item = (style[listOf(deco)] as { x: number; y: number; size: number }[] | undefined)?.[index];
+    const cardBox = el.closest("[data-deco-layer]")?.getBoundingClientRect();
+    if (!item || !cardBox) return false;
+    const r = el.getBoundingClientRect();
+    gesture.current = {
+      mode,
+      deco,
+      index,
+      x: e.clientX,
+      y: e.clientY,
+      start: { x: item.x, y: item.y, size: item.size },
+      card: cardBox,
+      box: boxOf(el),
+      centre: { x: r.left + r.width / 2, y: r.top + r.height / 2 },
+      moved: false,
+    };
+    (e.currentTarget as Element).setPointerCapture(e.pointerId);
+    return true;
+  };
+  const moveGesture = (e: React.PointerEvent) => {
+    const g = gesture.current;
+    if (!g) return false;
+    const dx = e.clientX - g.x;
+    const dy = e.clientY - g.y;
+    if (!g.moved && Math.hypot(dx, dy) < 4) return true;
+    if (!g.moved) {
+      g.moved = true;
+      setHover(null);
+      // Selected while it moves, so its box follows it.
+      select({ kind: "deco", deco: g.deco, index: g.index, box: g.box });
+      begin();
+    }
+    const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
+    if (g.mode === "move") {
+      const nx = clamp(g.start.x + (dx / g.card.width) * 100, 0, 100);
+      const ny = clamp(g.start.y + (dy / g.card.height) * 100, 0, 100);
+      onScreen(screenIndex, (sc) => {
+        const st = sc.style ?? {};
+        const key = listOf(g.deco);
+        const list = [...((st[key] as { x: number; y: number }[] | undefined) ?? [])];
+        if (list[g.index]) list[g.index] = { ...list[g.index], x: Math.round(nx * 10) / 10, y: Math.round(ny * 10) / 10 };
+        return { ...sc, style: { ...st, [key]: list } };
+      });
+      setOpen((o) => o && { kind: "deco", deco: g.deco, index: g.index, area: o.area, box: { ...g.box, left: g.box.left + dx, top: g.box.top + dy } });
+    } else {
+      const c = g.centre!;
+      const factor = Math.hypot(e.clientX - c.x, e.clientY - c.y) / Math.max(Math.hypot(g.x - c.x, g.y - c.y), 1);
+      const [min, max] = SIZE[g.deco];
+      const size = clamp(Math.round(g.start.size * factor * 10) / 10, min, max);
+      const scale = size / g.start.size;
+      onScreen(screenIndex, (sc) => {
+        const st = sc.style ?? {};
+        const key = listOf(g.deco);
+        const list = [...((st[key] as { size: number }[] | undefined) ?? [])];
+        if (list[g.index]) list[g.index] = { ...list[g.index], size };
+        return { ...sc, style: { ...st, [key]: list } };
+      });
+      const width = g.box.width * scale;
+      const height = g.box.height * scale;
+      setOpen((o) => o && { kind: "deco", deco: g.deco, index: g.index, area: o.area, box: { left: g.box.left + (g.box.width - width) / 2, top: g.box.top + (g.box.height - height) / 2, width, height } });
+    }
+    return true;
+  };
+  const endGesture = () => {
+    const g = gesture.current;
+    gesture.current = null;
+    if (!g) return false;
+    if (g.moved) remeasure(g.deco, g.index);
+    else {
+      const el = decoEl(g.deco, g.index);
+      if (el) choose({ kind: "deco", deco: g.deco, index: g.index, box: boxOf(el) });
+    }
+    return true;
+  };
+
+  const pickPhotos = (replace: { deco: boolean; index: number } | null) => {
     setReplacing(replace);
     setPhotoError(null);
     files.current?.click();
   };
 
-  const addPhotos = async (chosen: FileList | null) => {
-    if (!chosen?.length || screen?.type !== "photos") return;
+  const addPhotos = async (list: FileList | null) => {
+    // Copied first: clearing the input (so the same photo can be picked again) empties its list.
+    const chosen = Array.from(list ?? []);
+    if (!chosen.length || !screen) return;
     const index = screenIndex;
     const replace = replacing;
-    const room = replace !== null ? 1 : MAX_PHOTOS - screen.photos.length;
-    const picked = Array.from(chosen).slice(0, Math.max(room, 0));
-    if (replace === null && chosen.length > room) setPhotoError(fmt(t.editor.tooManyPhotos, { n: MAX_PHOTOS }));
-    setOpen(null);
     if (files.current) files.current.value = "";
+    // Replacing a photo placed on the screen.
+    if (replace?.deco) {
+      setUploading((n) => n + 1);
+      try {
+        const url = await uploadPhoto(chosen[0]);
+        begin();
+        onScreen(index, (sc) => ({ ...sc, style: { ...sc.style, images: (sc.style?.images ?? []).map((img, j) => (j === replace.index ? { ...img, src: url } : img)) } }));
+      } catch {
+        setPhotoError(t.editor.uploadFailed);
+      } finally {
+        setUploading((n) => n - 1);
+      }
+      return;
+    }
+    if (screen.type !== "photos") return;
+    const room = replace ? 1 : MAX_PHOTOS - screen.photos.length;
+    const picked = chosen.slice(0, Math.max(room, 0));
+    if (!replace && chosen.length > room) setPhotoError(fmt(t.editor.tooManyPhotos, { n: MAX_PHOTOS }));
+    select(null);
     for (const file of picked) {
       setUploading((n) => n + 1);
       try {
         const url = await uploadPhoto(file);
-        onScreen(index, (s) => {
-          if (s.type !== "photos") return s;
-          if (replace !== null && replace < s.photos.length) return { ...s, photos: s.photos.map((p, j) => (j === replace ? url : p)) };
-          if (s.photos.length >= MAX_PHOTOS) return s;
-          return { ...s, photos: [...s.photos, url], captions: [...s.photos.map((_, j) => s.captions[j] ?? ""), ""] };
+        onBegin?.();
+        onScreen(index, (sc) => {
+          if (sc.type !== "photos") return sc;
+          if (replace && replace.index < sc.photos.length) return { ...sc, photos: sc.photos.map((p, j) => (j === replace.index ? url : p)) };
+          if (sc.photos.length >= MAX_PHOTOS) return sc;
+          return { ...sc, photos: [...sc.photos, url], captions: [...sc.photos.map((_, j) => sc.captions[j] ?? ""), ""] };
         });
       } catch {
         setPhotoError(t.editor.uploadFailed);
@@ -220,8 +496,9 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, clas
   };
 
   const removePhoto = (i: number) => {
-    onScreen(screenIndex, (s) => (s.type === "photos" ? { ...s, photos: s.photos.filter((_, j) => j !== i), captions: s.captions.filter((_, j) => j !== i) } : s));
-    setOpen(null);
+    onBegin?.();
+    onScreen(screenIndex, (sc) => (sc.type === "photos" ? { ...sc, photos: sc.photos.filter((_, j) => j !== i), captions: sc.captions.filter((_, j) => j !== i) } : sc));
+    select(null);
   };
 
   const words = open?.kind === "words" ? open.path : null;
@@ -230,10 +507,40 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, clas
   // One line of a list (the No button's excuses, say): show them all, in the order they're said.
   const list = words && labelOf(words) && typeof words.at(-1) === "number" ? words : null;
   const lines = list ? labelList(card.screens[Number(list[1])]?.labels, list[3] as ListKey) : [];
-  const popup = (box: Box, area: { width: number; height: number }, tall: boolean) => ({
-    left: Math.max(8, Math.min(box.left + box.width / 2 - 140, area.width - 288)),
-    top: Math.max(8, Math.min(box.top + box.height + 10, area.height - (tall ? 260 : 130))),
-  });
+  const area = open?.area ?? { width: 600, height: 600, top: 0, view: 900 };
+  // The controls go under what's selected or above it, wherever they fit in the window
+  // without covering it (they may hang over the edge of the preview); else beside it.
+  const place = (box: Box, tall: number) => {
+    const left = Math.max(8, Math.min(box.left + box.width / 2 - 150, area.width - 308));
+    const below = box.top + box.height + 14;
+    if (area.top + below + tall <= area.view) return { left, top: below };
+    if (area.top + box.top - tall - 14 >= 0) return { left, top: box.top - tall - 14 };
+    const top = Math.max(8, Math.min(box.top + box.height / 2 - tall / 2, area.height - tall - 8));
+    if (box.left + box.width + 314 < area.width) return { left: box.left + box.width + 14, top };
+    if (box.left - 314 >= 0) return { left: box.left - 314, top };
+    return { left, top: below };
+  };
+  const item = open?.kind === "deco" ? (style[listOf(open.deco)] as Record<string, unknown>[] | undefined)?.[open.index] : undefined;
+  // The controls for what's selected: beside it on a computer, a sheet at the bottom on a phone.
+  const controls = (at: { left: number; top: number }, body: React.ReactNode) =>
+    sheet ? (
+      createPortal(
+        <div
+          data-edit-ui
+          data-word-editor
+          className="fixed inset-x-0 bottom-0 z-[60] max-h-[55dvh] overflow-y-auto rounded-t-3xl border-t-2 border-line bg-panel p-4 pb-[max(1rem,env(safe-area-inset-bottom))] text-foreground shadow-[0_-12px_40px_rgba(0,0,0,0.25)]"
+        >
+          <div className="mx-auto max-w-lg space-y-3">{body}</div>
+        </div>,
+        document.body,
+      )
+    ) : (
+      <div data-edit-ui data-word-editor className="absolute z-50 w-[300px] max-w-[calc(100%-16px)] space-y-3 rounded-2xl border border-line bg-panel p-3 text-foreground shadow-2xl" style={at}>
+        {body}
+      </div>
+    );
+  const label = "text-xs font-bold uppercase tracking-wide opacity-60";
+  const close = () => select(null);
 
   return (
     <div ref={root} className={`relative ${className}`}>
@@ -242,30 +549,22 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, clas
       {enabled && (
         <div
           ref={layer}
-          className="absolute inset-0 z-[45] cursor-text"
-          onPointerMove={(e) => {
+          className="absolute inset-0 z-[45] cursor-pointer touch-none"
+          onPointerDown={(e) => {
             const hit = under(e.clientX, e.clientY);
-            setHover(hit ? boxOf(hit.el) : null);
+            if (hit?.kind === "deco" && startGesture("move", hit.deco, hit.index, e, hit.el)) return;
+            gesture.current = null;
+          }}
+          onPointerMove={(e) => {
+            if (moveGesture(e)) return;
+            const hit = under(e.clientX, e.clientY);
+            setHover(hit && hit.kind !== "background" ? boxOf(hit.el) : null);
+          }}
+          onPointerUp={(e) => {
+            if (endGesture()) return;
+            selectHit(under(e.clientX, e.clientY));
           }}
           onPointerLeave={() => setHover(null)}
-          onClick={(e) => {
-            const hit = under(e.clientX, e.clientY);
-            const area = { width: root.current!.offsetWidth, height: root.current!.offsetHeight };
-            if (hit?.kind === "photo") {
-              if (hit.index === "new") {
-                setOpen(null);
-                return pickPhotos(null);
-              }
-              return setOpen({ kind: "photo", index: hit.index, box: boxOf(hit.el), area });
-            }
-            if (hit) setOpen({ kind: "words", path: hit.field.path, box: boxOf(hit.el), area });
-            else {
-              setOpen(null);
-              setTip(true);
-              clearTimeout(tipTimer.current);
-              tipTimer.current = setTimeout(() => setTip(false), 3500);
-            }
-          }}
           onWheel={(e) => {
             // Let long screens still scroll underneath.
             let el = document.elementsFromPoint(e.clientX, e.clientY).find((n) => n !== layer.current) as HTMLElement | undefined;
@@ -274,28 +573,149 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, clas
           }}
         />
       )}
-      {enabled && hover && !open && (
+      {enabled && hover && (
         <div
           aria-hidden
-          className="pointer-events-none absolute z-[46] rounded-md ring-2 ring-brand ring-offset-2 ring-offset-transparent"
+          className="pointer-events-none absolute z-[46] rounded-md ring-2 ring-brand/60 ring-offset-2 ring-offset-transparent"
           style={{ left: hover.left - 4, top: hover.top - 3, width: hover.width + 8, height: hover.height + 6 }}
         />
       )}
-      {enabled && tip && !open && uploading === 0 && !photoError && (
-        <p role="status" className="pointer-events-none absolute inset-x-0 bottom-4 z-50 mx-auto w-fit max-w-[90%] rounded-2xl bg-black/80 px-4 py-2.5 text-center text-sm font-semibold text-white shadow-lg">
-          {x.tapWordsTip}
-        </p>
+      {/* What's selected: a box around it, and for stickers, text and photos a handle to resize. */}
+      {enabled && open && open.kind !== "background" && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute z-[47] rounded-md ring-2 ring-brand ring-offset-2 ring-offset-transparent"
+          style={{ left: open.box.left - 4, top: open.box.top - 3, width: open.box.width + 8, height: open.box.height + 6 }}
+        />
+      )}
+      {enabled && open?.kind === "deco" && (
+        <span
+          data-edit-ui
+          role="slider"
+          aria-label={s.bigger}
+          aria-valuenow={Number(item?.size ?? 0)}
+          className="absolute z-[48] h-6 w-6 cursor-nwse-resize touch-none rounded-full border-[3px] border-white bg-brand shadow-lg"
+          style={{ left: open.box.left + open.box.width - 8, top: open.box.top + open.box.height - 8 }}
+          onPointerDown={(e) => {
+            e.stopPropagation();
+            const el = decoEl(open.deco, open.index);
+            if (el) startGesture("resize", open.deco, open.index, e, el);
+          }}
+          onPointerMove={(e) => moveGesture(e)}
+          onPointerUp={() => endGesture()}
+        />
       )}
       {(uploading > 0 || photoError) && (
         <p role="status" className="absolute inset-x-0 top-3 z-50 mx-auto w-fit max-w-[90%] rounded-full bg-black/80 px-4 py-2 text-center text-sm font-semibold text-white shadow-lg">
           {uploading > 0 ? t.editor.uploading : photoError}
         </p>
       )}
-      {enabled && open?.kind === "photo" && screen?.type === "photos" && (
-        <div data-word-editor className="absolute z-50 w-[280px] max-w-[calc(100%-16px)] rounded-2xl border border-line bg-panel p-3 text-foreground shadow-2xl" style={popup(open.box, open.area, false)}>
-          <p className="text-xs font-bold uppercase tracking-wide opacity-60">{x.photoTitle}</p>
-          <div className="mt-2 grid gap-2">
-            <button type="button" onClick={() => pickPhotos(open.index)} className="rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white">
+
+      {enabled &&
+        open?.kind === "deco" &&
+        item &&
+        controls(
+          place(open.box, open.deco === "text" ? 330 : 190),
+          <>
+          <p className={label}>{open.deco === "text" ? s.text : open.deco === "image" ? s.photo : s.element}</p>
+          <p className="text-xs opacity-60">{s.dragHint}</p>
+          {open.deco === "text" && (
+            <>
+              <textarea
+                autoFocus={!sheet}
+                rows={2}
+                dir="auto"
+                value={String(item.text ?? "")}
+                maxLength={120}
+                aria-label={s.words}
+                onChange={(e) => {
+                  changeItem("text", open.index, (it) => ({ ...it, text: e.target.value }));
+                  remeasure("text", open.index);
+                }}
+                className="w-full resize-none rounded-xl border border-line bg-background px-3 py-2 text-sm outline-none focus:border-brand"
+              />
+              <FontRow
+                value={item.font as Font | undefined}
+                onPick={(font) => {
+                  changeItem("text", open.index, (it) => ({ ...it, font }));
+                  remeasure("text", open.index);
+                }}
+              />
+              <Swatches title={s.colour} value={item.color as string | undefined} onPick={(color) => changeItem("text", open.index, (it) => ({ ...it, color }))} />
+            </>
+          )}
+          {open.deco === "sticker" && (
+            <div>
+              <p className={label}>{s.swap}</p>
+              <div className="mt-1 flex flex-wrap gap-1">
+                {SWAPS.map((emoji) => (
+                  <button key={emoji} type="button" onClick={() => changeItem("sticker", open.index, (it) => ({ ...it, emoji }))} className="grid h-9 w-9 place-items-center rounded-lg text-xl hover:bg-brand-soft">
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          {open.deco === "image" && (
+            <div className="space-y-2">
+              <button type="button" onClick={() => pickPhotos({ deco: true, index: open.index })} className="w-full rounded-full border-2 border-line px-4 py-2 text-sm font-semibold">
+                {s.replace}
+              </button>
+              <div>
+                <p className={label}>{s.frame}</p>
+                <div className="mt-1 flex gap-1.5">
+                  {FRAMES.map((frame) => (
+                    <button
+                      key={frame}
+                      type="button"
+                      aria-pressed={(item.frame ?? "polaroid") === frame}
+                      onClick={() => {
+                        changeItem("image", open.index, (it) => ({ ...it, frame }));
+                        remeasure("image", open.index);
+                      }}
+                      className={`flex-1 rounded-full border-2 px-2 py-1.5 text-sm font-semibold ${(item.frame ?? "polaroid") === frame ? "border-brand bg-brand-soft" : "border-line"}`}
+                    >
+                      {s.frames[frame]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+          <div className="flex items-center gap-2">
+            <SizeButtons
+              smaller={s.smaller}
+              bigger={s.bigger}
+              onSize={(factor) => {
+                const [min, max] = SIZE[open.deco];
+                changeItem(open.deco, open.index, (it) => ({ ...it, size: Math.min(max, Math.max(min, Math.round(Number(it.size) * factor * 10) / 10)) }));
+                remeasure(open.deco, open.index);
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => {
+                changeItem(open.deco, open.index, () => null);
+                close();
+              }}
+              className="ms-auto rounded-full border-2 border-red-200 px-3 py-1.5 text-sm font-semibold text-red-600"
+            >
+              🗑 {s.delete}
+            </button>
+          </div>
+          <DoneButton label={s.done} onClick={close} />
+          </>,
+        )}
+
+      {enabled &&
+        open?.kind === "photo" &&
+        screen?.type === "photos" &&
+        controls(
+          place(open.box, 200),
+          <>
+          <p className={label}>{x.photoTitle}</p>
+          <div className="grid gap-2">
+            <button type="button" onClick={() => pickPhotos({ deco: false, index: open.index })} className="rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white">
               {x.replacePhoto}
             </button>
             {screen.photos.length < MAX_PHOTOS && (
@@ -307,58 +727,168 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, clas
               {x.removeThisPhoto}
             </button>
           </div>
-          <div className="mt-2 flex justify-end">
-            <button type="button" onClick={() => setOpen(null)} className="px-2 py-1 text-sm font-semibold opacity-70">
-              {x.done}
-            </button>
-          </div>
-        </div>
-      )}
-      {enabled && open?.kind === "words" && (
-        <div data-word-editor className="absolute z-50 w-[280px] max-w-[calc(100%-16px)] rounded-2xl border border-line bg-panel p-3 text-foreground shadow-2xl" style={popup(open.box, open.area, long || lines.length > 1)}>
-          <p className="text-xs font-bold uppercase tracking-wide opacity-60">{list ? x.linesTitle : x.wordsTitle}</p>
+          <DoneButton label={s.done} onClick={close} />
+          </>,
+        )}
+
+      {enabled &&
+        open?.kind === "words" &&
+        controls(
+          place(open.box, (long || lines.length > 1 ? 120 : 60) + 200 + (open.button ? 80 : 0)),
+          <>
+          <p className={label}>{list ? x.linesTitle : x.wordsTitle}</p>
           {list ? (
-            <div className="mt-2 max-h-48 space-y-1.5 overflow-y-auto">
+            <div className="max-h-48 space-y-1.5 overflow-y-auto">
               {lines.map((line, j) => (
                 <input
                   key={j}
-                  autoFocus={j === list.at(-1)}
+                  autoFocus={!sheet && j === list.at(-1)}
                   dir="auto"
                   value={getAt(card, [...list.slice(0, 4), j]) || line}
                   maxLength={80}
-                  onChange={(e) => onChange([...list.slice(0, 4), j], e.target.value)}
+                  onChange={(e) => edit([...list.slice(0, 4), j], e.target.value)}
                   className="w-full rounded-xl border border-line bg-background px-3 py-1.5 text-sm outline-none focus:border-brand"
                 />
               ))}
             </div>
           ) : long ? (
             <textarea
-              autoFocus
+              autoFocus={!sheet}
               rows={4}
               dir="auto"
               value={value}
               maxLength={limitFor(card, open.path)}
-              onChange={(e) => onChange(open.path, e.target.value)}
-              className="mt-2 w-full resize-y rounded-xl border border-line bg-background px-3 py-2 text-sm outline-none focus:border-brand"
+              onChange={(e) => edit(open.path, e.target.value)}
+              className="w-full resize-y rounded-xl border border-line bg-background px-3 py-2 text-sm outline-none focus:border-brand"
             />
           ) : (
             <input
-              autoFocus
+              autoFocus={!sheet}
               dir="auto"
               value={value}
               maxLength={limitFor(card, open.path)}
-              onChange={(e) => onChange(open.path, e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && setOpen(null)}
-              className="mt-2 w-full rounded-xl border border-line bg-background px-3 py-2 text-sm outline-none focus:border-brand"
+              onChange={(e) => edit(open.path, e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && close()}
+              className="w-full rounded-xl border border-line bg-background px-3 py-2 text-sm outline-none focus:border-brand"
             />
           )}
-          <div className="mt-2 flex justify-end">
-            <button type="button" onClick={() => setOpen(null)} className="rounded-full bg-brand px-4 py-1.5 text-sm font-semibold text-white">
-              {x.done}
-            </button>
+          {/* The colour and font of the words on this screen. */}
+          <Swatches title={s.colour} value={style.text} onPick={(text) => restyle((st) => ({ ...st, text }))} />
+          <FontRow value={open.heading ? style.heading : style.body} onPick={(font) => restyle((st) => (open.heading ? { ...st, heading: font } : { ...st, body: font }))} />
+          {open.button && <Swatches title={s.buttonColour} value={style.accent} onPick={(accent) => restyle((st) => ({ ...st, accent }))} />}
+          <DoneButton label={s.done} onClick={close} />
+          </>,
+        )}
+
+      {enabled &&
+        open?.kind === "envelope" &&
+        controls(
+          place(open.box, 150),
+          <>
+            <Swatches title={s.envelopeColour} value={style.envelope} onPick={(envelope) => restyle((st) => ({ ...st, envelope }))} />
+            <DoneButton label={s.done} onClick={close} />
+          </>,
+        )}
+
+      {enabled &&
+        open?.kind === "background" &&
+        controls(
+          { left: Math.max(8, area.width / 2 - 150), top: 16 },
+          <>
+          <Swatches title={s.backgroundColour} value={style.background?.length === 1 ? style.background[0] : undefined} onPick={(c) => restyle((st) => ({ ...st, background: [c] }))} />
+          <div>
+            <p className={label}>{s.blends}</p>
+            <div className="mt-1 flex flex-wrap gap-1.5">
+              {BLENDS.map((pair) => (
+                <button
+                  key={pair.join()}
+                  type="button"
+                  aria-label={pair.join(" → ")}
+                  onClick={() => restyle((st) => ({ ...st, background: pair, gradient: "diagonal" }))}
+                  className="h-8 w-8 rounded-full ring-1 ring-black/15"
+                  style={{ background: `linear-gradient(135deg, ${pair[0]}, ${pair[1]})` }}
+                />
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+          <DoneButton label={s.done} onClick={close} />
+          </>,
+        )}
+    </div>
+  );
+}
+
+function DoneButton({ label, onClick }: { label: string; onClick: () => void }) {
+  return (
+    <div className="flex justify-end">
+      <button type="button" onClick={onClick} className="rounded-full bg-brand px-5 py-2 text-sm font-semibold text-white">
+        {label}
+      </button>
+    </div>
+  );
+}
+
+// The colours to pick from, and any other colour.
+function Swatches({ title, value, onPick }: { title: string; value?: string; onPick: (colour: string) => void }) {
+  const { t } = useI18n();
+  return (
+    <div>
+      <p className="text-xs font-bold uppercase tracking-wide opacity-60">{title}</p>
+      <div className="mt-1 flex flex-wrap gap-1.5">
+        {PALETTE.map((c) => (
+          <button
+            key={c}
+            type="button"
+            aria-label={c}
+            aria-pressed={value?.toLowerCase() === c}
+            onClick={() => onPick(c)}
+            className={`h-7 w-7 rounded-full ring-1 ring-black/15 ${value?.toLowerCase() === c ? "outline outline-2 outline-offset-2 outline-brand" : ""}`}
+            style={{ background: c }}
+          />
+        ))}
+        <label className="relative grid h-7 w-7 cursor-pointer place-items-center rounded-full text-sm ring-1 ring-black/15" style={{ background: "conic-gradient(#f43f5e, #f59e0b, #84cc16, #06b6d4, #8b5cf6, #f43f5e)" }}>
+          <span className="sr-only">{t.studio.moreColours}</span>
+          <input type="color" value={value ?? "#000000"} onChange={(e) => onPick(e.target.value)} className="absolute inset-0 cursor-pointer opacity-0" />
+        </label>
+      </div>
+    </div>
+  );
+}
+
+// Each font, written in itself.
+function FontRow({ value, onPick }: { value?: Font; onPick: (font: Font) => void }) {
+  const { t } = useI18n();
+  return (
+    <div>
+      <p className="text-xs font-bold uppercase tracking-wide opacity-60">{t.studio.font}</p>
+      <div className="mt-1 flex gap-1.5 overflow-x-auto pb-1">
+        {FONTS.map((font) => (
+          <button
+            key={font}
+            type="button"
+            aria-pressed={value === font}
+            onClick={() => onPick(font)}
+            className={`shrink-0 rounded-lg border-2 px-2.5 py-1 text-base ${value === font ? "border-brand bg-brand-soft" : "border-line"}`}
+            style={{ fontFamily: `var(${FONT_VARS[font]})` }}
+          >
+            {t.studio.fonts[font]}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SizeButtons({ smaller, bigger, onSize }: { smaller: string; bigger: string; onSize: (factor: number) => void }) {
+  const button = "grid h-9 w-9 place-items-center rounded-full border-2 border-line text-lg font-bold";
+  return (
+    <div className="flex items-center gap-1.5">
+      <button type="button" aria-label={smaller} onClick={() => onSize(1 / 1.2)} className={button}>
+        −
+      </button>
+      <button type="button" aria-label={bigger} onClick={() => onSize(1.2)} className={button}>
+        +
+      </button>
     </div>
   );
 }

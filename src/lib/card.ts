@@ -107,6 +107,30 @@ const sticker = z.object({
   motion: z.enum(MOTIONS).optional(),
 });
 
+// Words placed anywhere on a screen, like a text box in a design app.
+const textBox = z.object({
+  text: z.string().trim().min(1).max(120),
+  x: z.number().min(0).max(100),
+  y: z.number().min(0).max(100),
+  // Letter height, as a share of the card's shorter side.
+  size: z.number().min(2).max(20),
+  color: hex.optional(),
+  font: z.enum(FONTS).optional(),
+  rotate: z.number().min(-180).max(180).optional(),
+});
+
+// One of their photos placed anywhere on a screen.
+export const FRAMES = ["polaroid", "round", "plain"] as const;
+const imageBox = z.object({
+  src: photoUrl,
+  x: z.number().min(0).max(100),
+  y: z.number().min(0).max(100),
+  // Width, as a share of the card's shorter side.
+  size: z.number().min(10).max(90),
+  rotate: z.number().min(-180).max(180).optional(),
+  frame: z.enum(FRAMES).optional(),
+});
+
 export const screenStyle = z.object({
   // One colour is a plain background; two or three make a gradient.
   background: z.array(hex).min(1).max(3).optional(),
@@ -123,10 +147,14 @@ export const screenStyle = z.object({
   // What bursts out at the screen's big moment (the envelope opening, "yes", a win).
   burst: z.enum(EFFECTS).optional(),
   stickers: z.array(sticker).max(10).optional(),
+  texts: z.array(textBox).max(8).optional(),
+  images: z.array(imageBox).max(6).optional(),
 });
 
 export type ScreenStyle = z.infer<typeof screenStyle>;
 export type Sticker = z.infer<typeof sticker>;
+export type TextBox = z.infer<typeof textBox>;
+export type ImageBox = z.infer<typeof imageBox>;
 
 // A screen's own wording for the words built into it (see lib/labels.ts).
 const labels = z.partialRecord(z.enum(LABEL_KEYS), z.union([text(160), z.array(text(80)).min(1).max(12)]));

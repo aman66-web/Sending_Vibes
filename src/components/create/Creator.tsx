@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CardPlayer } from "@/components/card/CardPlayer";
 import { Motif } from "@/components/card/motifs";
@@ -23,6 +23,8 @@ import { NO_ANSWERS, Quiz, quizPrompt, type Answers } from "./Quiz";
 import { Field } from "./ScreenEditor";
 import { openChat } from "@/components/open-chat";
 import { AtPhoneSize } from "./AtPhoneSize";
+import { STUDIO_TABS, ScreenStrip, StudioPanel, type Tab } from "./Studio";
+import { useWide } from "./use-wide";
 import { AllWords, EditableCard, setAt, type Path } from "./WordEditing";
 
 const DRAFT_KEY = "sv-draft-v1";
@@ -148,7 +150,9 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   const [aiNote, setAiNote] = useState<string | null>(null);
   // How many typed changes their account has left (see lib/allowance.ts), once known.
   const [changesLeft, setChangesLeft] = useState<number | null>(null);
-  const [undo, setUndo] = useState<CardData | null>(null);
+  // Every change can be undone (and redone), like any design app.
+  const [past, setPast] = useState<CardData[]>([]);
+  const [future, setFuture] = useState<CardData[]>([]);
   // The screens written so far while a card is being made, and a way to stop it.
   const [progress, setProgress] = useState<ScreenType[]>([]);
   const making = useRef<AbortController | null>(null);
@@ -166,7 +170,9 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   const [auth, setAuth] = useState<{ google: boolean; email: boolean; account: SignedIn | null; needed: boolean } | null>(null);
   // Clicking words on the preview edits them; Play lets the card react as it will for them.
   // The card starts out playing as it will for them; Edit mode is for changing words.
-  const [wordMode, setWordMode] = useState<"edit" | "play">("play");
+  // Like a presentation app: the screens are being designed (Edit mode) unless they
+  // press Preview mode to see the card react as it will for them.
+  const [wordMode, setWordMode] = useState<"edit" | "play">("edit");
   const wide = useWide();
   const [pickOccasion, setPickOccasion] = useState<Occasion | "all">(initialOccasion ?? "all");
   const design = mode === "premade" ? getTemplate(templateSlug) : undefined;
@@ -235,7 +241,8 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     setCard(null);
     setTo("");
     setFrom("");
-    setUndo(null);
+    setPast([]);
+    setFuture([]);
     setAiDone(false);
     setAnswers(NO_ANSWERS);
     setQuestion(0);
@@ -319,6 +326,9 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       setSelected(made.screens[0]?.id);
       setMode(template ? "premade" : "custom");
       setStep("edit");
+      setWelcome(true);
+      setPast([]);
+      setFuture([]);
       window.scrollTo({ top: 0 });
     } catch (e) {
       if (!controller.signal.aborted) setAiError(e instanceof Error ? e.message : x.errors.failed);
@@ -327,6 +337,42 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     making.current = null;
     setBusy(null);
   };
+
+  const remember = () => {
+    if (!card) return;
+    setPast((p) => [...p.slice(-39), card]);
+    setFuture([]);
+  };
+  const undoLast = () => {
+    const prev = past.at(-1);
+    if (!prev || !card) return;
+    setFuture((f) => [card, ...f]);
+    setPast(past.slice(0, -1));
+    setCard(prev);
+  };
+  const redoNext = () => {
+    const next = future[0];
+    if (!next || !card) return;
+    setPast((p) => [...p, card]);
+    setFuture(future.slice(1));
+    setCard(next);
+  };
+  // A change from the design panel or the screens strip.
+  const change = (update: (c: CardData) => CardData) => {
+    remember();
+    setCard((c) => c && update(c));
+  };
+  // The design panel's tab, and something just added for the card to select.
+  const [tab, setTab] = useState<Tab>("text");
+  const [pick, setPick] = useState<{ key: string; nonce: number } | undefined>();
+  const panel = useRef<HTMLDivElement>(null);
+  const onAdded = (added: { key: string } | { screenId: string }) => {
+    if ("screenId" in added) return goToScreen(added.screenId);
+    setWordMode("edit");
+    setPick((p) => ({ key: added.key, nonce: (p?.nonce ?? 0) + 1 }));
+  };
+  // Shown once, when the card has just been made.
+  const [welcome, setWelcome] = useState(false);
 
   // Words typed straight onto the preview.
   const editWords = (path: Path, value: string) => setCard((c) => c && setAt(c, path, value));
@@ -355,7 +401,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       const { card: changed, note, left } = await callAi({ prompt: prompt.trim(), card, focus }, { to: card.to, from: card.from });
       setAiNote(note ?? null);
       if (left !== undefined) setChangesLeft(left);
-      setUndo(card);
+      remember();
       setCard(changed);
       if (!focus || prompt === ask) setAsk("");
       if (prompt === screenAsk) setScreenAsk("");
@@ -615,6 +661,15 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
               <p className="mt-1 opacity-70">{c.editIntro}</p>
             </div>
 
+            <div ref={panel} className="scroll-mt-4">
+              <StudioPanel
+                card={card}
+                screenIndex={Math.max(card.screens.findIndex((sc) => sc.id === viewing), 0)}
+                tab={tab}
+                setTab={setTab}
+                change={change}
+                onAdded={onAdded}
+                ai={
             <section className="space-y-3 rounded-2xl border-2 border-brand/40 bg-panel p-4">
                 <h2 className="font-brand text-xl font-bold">✨ {x.changeTitle}</h2>
                 <p className="text-sm leading-relaxed opacity-80">{x.changeHow}</p>
@@ -644,12 +699,11 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                     <button disabled={busy !== null || ask.trim().length < 3} className="rounded-full bg-brand px-5 py-2.5 font-semibold text-white disabled:opacity-50">
                       {busy === "change" ? <Making lines={[x.changing]} /> : x.change}
                     </button>
-                    {undo && busy === null && (
+                    {past.length > 0 && busy === null && (
                       <button
                         type="button"
                         onClick={() => {
-                          setCard(undo);
-                          setUndo(null);
+                          undoLast();
                           setAiDone(false);
                         }}
                         className="text-sm font-semibold underline underline-offset-4"
@@ -684,6 +738,9 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                   ))}
                 </div>
               </section>
+                }
+              />
+            </div>
 
             <div className="fixed inset-x-0 bottom-0 z-20 flex gap-3 border-t border-line bg-background/95 p-4 backdrop-blur lg:static lg:border-0 lg:bg-transparent lg:p-0">
               <button onClick={() => setShowPreview(true)} className="flex-1 rounded-full border-2 border-line py-3.5 font-semibold lg:hidden">
@@ -696,12 +753,25 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
             {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
           </div>
 
-          {/* The card itself. On a phone it's first on the page, before the typing box. */}
-          <aside className="order-first lg:order-none">
+          {/* The card itself. On a phone it's first on the page, before the typing box; it never grows wider than the screen, so the screens strip scrolls instead. */}
+          <aside className="order-first min-w-0 lg:order-none">
             {/* On a phone the card comes straight after the mode switch, with the arrows under it. */}
             <div className="flex flex-col gap-3 lg:sticky lg:top-4">
               <div className="order-1 flex flex-wrap items-center justify-between gap-2 lg:order-none">
-                <ModeSwitch wordMode={wordMode} setWordMode={setWordMode} />
+                <div className="flex flex-wrap items-center gap-2">
+                  <ModeSwitch wordMode={wordMode} setWordMode={setWordMode} />
+                  {/* Only while designing, so in Preview mode the card sits higher on a phone. */}
+                  {wordMode === "edit" && (
+                    <>
+                      <button type="button" onClick={undoLast} disabled={!past.length} className="rounded-full border-2 border-line px-3 py-2 text-sm font-bold disabled:opacity-35">
+                        {t.studio.undo}
+                      </button>
+                      <button type="button" onClick={redoNext} disabled={!future.length} className="rounded-full border-2 border-line px-3 py-2 text-sm font-bold disabled:opacity-35">
+                        {t.studio.redo}
+                      </button>
+                    </>
+                  )}
+                </div>
                 <div role="tablist" aria-label={c.preview} className="hidden w-fit gap-1 rounded-full border border-line bg-panel p-1 lg:flex">
                 {(["computer", "phone"] as const).map((v) => (
                   <button
@@ -718,10 +788,33 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
               </div>
               <div className="order-3 space-y-3 lg:order-none">
                 <PreviewControls card={card} viewing={viewing} stage={stageShown} onGo={goToScreen} wordMode={wordMode} />
-                {wordMode === "edit" && <AllWords card={card} screenId={viewing} onChange={editWords} />}
+                {/* On a phone the design panel is further down the page; these jump to it. */}
+                <div className="lg:hidden">
+                  <p className="text-sm font-semibold opacity-70">{t.studio.addTitle}</p>
+                  <div className="mt-1.5 grid grid-cols-4 gap-2">
+                    {STUDIO_TABS.map(({ key, icon }) => (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => {
+                          setTab(key);
+                          panel.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                        }}
+                        className="flex flex-col items-center gap-1 rounded-2xl border-2 border-line bg-panel py-2.5 text-sm font-bold"
+                      >
+                        <span aria-hidden className="text-xl leading-none">
+                          {icon}
+                        </span>
+                        {t.studio.tabs[key]}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
-              <div className="relative order-2 lg:order-none">
-                <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onScreen={editScreen}>
+              {/* Its own layer: stickers on the card stay under the bar at the bottom of a phone, and
+                  the controls for what's selected can hang over the screens strip. */}
+              <div className="relative z-10 order-2 lg:order-none">
+                <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onScreen={editScreen} onBegin={remember} pick={pick}>
                   {!wide ? (
                     // On a phone, the card as it'll look on their phone, without a frame around it.
                     <div className="h-[min(68dvh,620px)] overflow-hidden rounded-3xl border-2 border-line">
@@ -749,15 +842,41 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                   </div>
                 )}
               </div>
+              {/* The card's screens, like a presentation's slides. */}
+              <div className="order-4 space-y-3 lg:order-none">
+                <ScreenStrip
+                  card={card}
+                  screenIndex={Math.max(card.screens.findIndex((sc) => sc.id === viewing), 0)}
+                  onGo={(id) => goToScreen(id)}
+                  change={change}
+                  onAdd={() => {
+                    setTab("screens");
+                    panel.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }}
+                />
+                {wordMode === "edit" && <AllWords card={card} screenId={viewing} onChange={editWords} />}
+              </div>
             </div>
           </aside>
         </div>
       )}
 
+      {welcome && card && step === "edit" && (
+        <Welcome
+          card={card}
+          onClose={() => setWelcome(false)}
+          onWatch={() => {
+            setWelcome(false);
+            setWordMode("play");
+            goToScreen(card.screens[0].id);
+          }}
+        />
+      )}
+
       {showPreview && card && (
         <div className="fixed inset-0 z-50 flex flex-col bg-background lg:hidden">
           <div className="relative min-h-0 flex-1">
-            <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onScreen={editScreen} className="h-full">
+            <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onScreen={editScreen} onBegin={remember} pick={pick} className="h-full">
               <CardPlayer card={card} preview sound editing={wordMode === "edit"} focusScreenId={selected} focusNonce={nudge} focusStage={focusStage} onScreenChange={setViewing} />
             </EditableCard>
             <button onClick={() => setShowPreview(false)} className="absolute start-4 top-4 z-50 rounded-full bg-black/70 px-4 py-2 text-sm font-semibold text-white">
@@ -791,18 +910,45 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   );
 }
 
-// Whether the page is wide enough for the card beside the typing box (a computer),
-// rather than above it (a phone). Pages are first drawn as for a computer.
-const WIDE = "(min-width: 1024px)";
-function useWide() {
-  return useSyncExternalStore(
-    (changed) => {
-      const query = window.matchMedia(WIDE);
-      query.addEventListener("change", changed);
-      return () => query.removeEventListener("change", changed);
-    },
-    () => window.matchMedia(WIDE).matches,
-    () => true,
+// When the card has just been made: the card, playing, and how to make it their own.
+function Welcome({ card, onClose, onWatch }: { card: CardData; onClose: () => void; onWatch: () => void }) {
+  const { t } = useI18n();
+  const s = t.studio;
+  return (
+    // Centred while it fits; on a small phone it starts at the top and scrolls, never cut off.
+    <div role="dialog" aria-modal="true" aria-labelledby="welcome-title" className="fixed inset-0 z-[70] overflow-y-auto bg-black/50">
+      <div className="flex min-h-full items-center justify-center p-4">
+        <div className="w-full max-w-3xl rounded-3xl border-2 border-foreground bg-background p-5 shadow-2xl sm:p-8">
+          <h2 id="welcome-title" className="font-brand text-3xl font-bold sm:text-4xl">
+            {s.welcomeTitle}
+          </h2>
+          <p className="mt-2 text-lg opacity-80">{fmt(s.welcomeIntro, { name: card.to })}</p>
+          <div className="mt-5 grid items-center gap-6 sm:grid-cols-[240px_1fr]">
+            <div className="mx-auto h-[300px] w-[185px] overflow-hidden rounded-[2rem] border-4 border-foreground shadow-xl sm:h-[360px] sm:w-[220px]">
+              <AtPhoneSize>
+                <CardPlayer card={card} preview bare />
+              </AtPhoneSize>
+            </div>
+            <ol className="space-y-3">
+              {s.welcomeSteps.map((step, i) => (
+                <li key={step} className="flex items-start gap-3 text-lg">
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-brand font-bold text-white">{i + 1}</span>
+                  <span>{fmt(step, { name: card.to })}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+          <div className="mt-6 flex flex-wrap justify-end gap-3">
+            <button type="button" onClick={onWatch} className="rounded-full border-2 border-foreground px-6 py-3 text-lg font-semibold">
+              ▶ {t.custom.play.replace(/^▶\s*/, "")}
+            </button>
+            <button type="button" autoFocus onClick={onClose} className="rounded-full bg-brand px-8 py-3 font-brand text-xl font-semibold text-white shadow-lg">
+              {s.startDesigning} →
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
