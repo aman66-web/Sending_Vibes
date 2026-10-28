@@ -21,6 +21,7 @@ import { SignIn, type SignedIn } from "@/components/SignIn";
 import { TwoWays } from "@/components/TwoWays";
 import { NO_ANSWERS, Quiz, quizPrompt, type Answers } from "./Quiz";
 import { Field } from "./ScreenEditor";
+import { AtPhoneSize } from "./AtPhoneSize";
 import { AllWords, EditableCard, setAt, type Path } from "./WordEditing";
 
 const DRAFT_KEY = "sv-draft-v1";
@@ -695,8 +696,10 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
               <div className="relative">
                 <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onScreen={editScreen} onOther={() => setSelected(viewing)}>
                   {view === "phone" ? (
-                    <PhoneFrame className="mx-auto h-[520px] w-[260px]">
-                      <CardPlayer key="phone" card={card} preview sound editing={wordMode === "edit"} focusScreenId={selected} focusNonce={nudge} focusStage={focusStage} onScreenChange={setViewing} />
+                    <PhoneFrame className="mx-auto h-[600px] w-[290px]" notch="h-5 w-20">
+                      <AtPhoneSize>
+                        <CardPlayer key="phone" card={card} preview sound editing={wordMode === "edit"} focusScreenId={selected} focusNonce={nudge} focusStage={focusStage} onScreenChange={setViewing} />
+                      </AtPhoneSize>
                     </PhoneFrame>
                   ) : (
                     <BrowserFrame className="h-[480px]">

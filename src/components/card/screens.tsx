@@ -189,7 +189,8 @@ export function QuestionScreen({ screen, onNext, stage = 0 }: ScreenProps<"quest
       <HeartMark className="h-12 w-12 text-[var(--c-accent)]" />
       <h2 className="font-display text-3xl font-semibold leading-tight">{screen.question}</h2>
       <div ref={area} className="relative h-64 w-full">
-        <div className="absolute inset-x-0 top-6 flex items-center justify-center gap-4">
+        {/* Long answers ("Absolutely not") go on two rows rather than off a phone's edges. */}
+        <div className="absolute inset-x-0 top-6 flex flex-wrap items-center justify-center gap-4 px-2">
           <button
             ref={yes}
             data-yes
