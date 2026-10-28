@@ -878,6 +878,7 @@ export const es: Dict = {
     copy: "Copiar",
     copied: "¡Copiado!",
     whatsapp: "Enviar por WhatsApp",
+    textMessage: "Send by text message",
     whatsappMessage: "Te he hecho algo 💌 {url}",
     openCard: "Abrir la tarjeta",
   },

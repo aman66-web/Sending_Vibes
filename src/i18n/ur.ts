@@ -874,6 +874,7 @@ export const ur: Dict = {
     copy: "کاپی کریں",
     copied: "کاپی ہو گیا!",
     whatsapp: "WhatsApp پر بھیجیں",
+    textMessage: "Send by text message",
     whatsappMessage: "میں نے آپ کے لیے کچھ بنایا ہے 💌 {url}",
     openCard: "کارڈ کھولیں",
   },

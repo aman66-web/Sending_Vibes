@@ -876,6 +876,7 @@ export const en = {
     copy: "Copy",
     copied: "Copied!",
     whatsapp: "Send on WhatsApp",
+    textMessage: "Send by text message",
     whatsappMessage: "I made you something 💌 {url}",
     openCard: "Open the card",
   },

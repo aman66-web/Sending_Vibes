@@ -874,6 +874,7 @@ export const pa: Dict = {
     copy: "ਕਾਪੀ ਕਰੋ",
     copied: "ਕਾਪੀ ਹੋ ਗਿਆ!",
     whatsapp: "WhatsApp ਉੱਤੇ ਭੇਜੋ",
+    textMessage: "Send by text message",
     whatsappMessage: "ਮੈਂ ਤੁਹਾਡੇ ਲਈ ਕੁਝ ਬਣਾਇਆ ਹੈ 💌 {url}",
     openCard: "ਕਾਰਡ ਖੋਲ੍ਹੋ",
   },

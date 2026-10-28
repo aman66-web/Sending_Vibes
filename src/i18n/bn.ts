@@ -874,6 +874,7 @@ export const bn: Dict = {
     copy: "কপি",
     copied: "কপি হয়েছে!",
     whatsapp: "WhatsApp-এ পাঠান",
+    textMessage: "Send by text message",
     whatsappMessage: "তোমার জন্য একটা জিনিস বানিয়েছি 💌 {url}",
     openCard: "কার্ডটা খুলুন",
   },

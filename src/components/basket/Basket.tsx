@@ -223,7 +223,7 @@ export function Basket({ emailReady }: { emailReady: boolean }) {
           <span>{total}</span>
         </div>
         <label className="mt-5 flex cursor-pointer gap-3 text-sm leading-snug text-ink/75">
-          <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--color-hot)]" />
+          <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 h-6 w-6 shrink-0 accent-[var(--color-hot)]" />
           <span>{b.consent}</span>
         </label>
         <button onClick={pay} disabled={busy} className="btn btn-red mt-5 w-full py-3.5 text-lg disabled:opacity-60">

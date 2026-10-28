@@ -874,6 +874,7 @@ export const gu: Dict = {
     copy: "કૉપી કરો",
     copied: "કૉપી થઈ ગયું!",
     whatsapp: "WhatsApp પર મોકલો",
+    textMessage: "Send by text message",
     whatsappMessage: "મેં તમારા માટે કંઈક બનાવ્યું છે 💌 {url}",
     openCard: "કાર્ડ ખોલો",
   },

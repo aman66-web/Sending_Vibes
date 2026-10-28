@@ -874,6 +874,7 @@ export const fr: Dict = {
     copy: "Copier",
     copied: "Copié !",
     whatsapp: "Envoyer sur WhatsApp",
+    textMessage: "Send by text message",
     whatsappMessage: "Je t'ai préparé un petit truc 💌 {url}",
     openCard: "Ouvrir la carte",
   },

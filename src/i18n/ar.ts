@@ -874,6 +874,7 @@ export const ar: Dict = {
     copy: "نسخ",
     copied: "تم النسخ!",
     whatsapp: "أرسل عبر WhatsApp",
+    textMessage: "Send by text message",
     whatsappMessage: "صنعت لك شيئًا 💌 {url}",
     openCard: "افتح البطاقة",
   },

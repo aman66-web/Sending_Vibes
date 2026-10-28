@@ -868,6 +868,7 @@ export const hi: Dict = {
     copy: "कॉपी करें",
     copied: "कॉपी हो गया!",
     whatsapp: "WhatsApp पर भेजें",
+    textMessage: "Send by text message",
     whatsappMessage: "मैंने तुम्हारे लिए कुछ बनाया है 💌 {url}",
     openCard: "कार्ड खोलें",
   },
