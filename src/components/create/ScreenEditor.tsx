@@ -218,14 +218,14 @@ function ListField({
             className="min-w-0 flex-1 rounded-lg border border-line bg-panel px-3 py-2 text-sm outline-none focus:border-brand"
           />
           {items.length > min && (
-            <button aria-label={removeLabel} onClick={() => onChange((list) => list.filter((_, j) => j !== i))} className="px-1 text-sm opacity-60 hover:opacity-100">
+            <button type="button" aria-label={removeLabel} onClick={() => onChange((list) => list.filter((_, j) => j !== i))} className="px-1 text-sm opacity-60 hover:opacity-100">
               ✕
             </button>
           )}
         </div>
       ))}
       {items.length < max && (
-        <button onClick={() => onChange((list) => [...list, ""])} className="text-xs font-semibold text-brand">
+        <button type="button" onClick={() => onChange((list) => [...list, ""])} className="text-xs font-semibold text-brand">
           {addLabel}
         </button>
       )}
@@ -262,14 +262,14 @@ function TimelineField({ screen, onChange }: { screen: TimelineScreen; onChange:
             className={`min-w-0 flex-1 ${cls}`}
           />
           {screen.events.length > 1 && (
-            <button aria-label={e.removeMoment} onClick={() => update((list) => list.filter((_, j) => j !== i))} className="px-1 pt-2 text-sm opacity-60 hover:opacity-100">
+            <button type="button" aria-label={e.removeMoment} onClick={() => update((list) => list.filter((_, j) => j !== i))} className="px-1 pt-2 text-sm opacity-60 hover:opacity-100">
               ✕
             </button>
           )}
         </div>
       ))}
       {screen.events.length < 8 && (
-        <button onClick={() => update((list) => [...list, { when: "", what: "" }])} className="text-xs font-semibold text-brand">
+        <button type="button" onClick={() => update((list) => [...list, { when: "", what: "" }])} className="text-xs font-semibold text-brand">
           {e.addMoment}
         </button>
       )}
@@ -294,7 +294,7 @@ function QuizField({ screen, onChange }: { screen: QuizScreen; onChange: Update 
           <div className="flex items-center justify-between">
             <span className="text-sm font-bold">{fmt(e.questionN, { n: qi + 1 })}</span>
             {screen.questions.length > 1 && (
-              <button onClick={() => update((qs) => qs.filter((_, i) => i !== qi))} className="text-xs font-semibold text-red-600">
+              <button type="button" onClick={() => update((qs) => qs.filter((_, i) => i !== qi))} className="text-xs font-semibold text-red-600">
                 {e.remove}
               </button>
             )}
@@ -319,7 +319,7 @@ function QuizField({ screen, onChange }: { screen: QuizScreen; onChange: Update 
                   className="flex-1 rounded-lg border border-line bg-panel px-2 py-1.5 text-sm outline-none focus:border-brand"
                 />
                 {q.options.length > 2 && (
-                  <button
+                  <button type="button"
                     aria-label={e.removeAnswer}
                     onClick={() =>
                       setQuestion(qi, {
@@ -335,7 +335,7 @@ function QuizField({ screen, onChange }: { screen: QuizScreen; onChange: Update 
               </div>
             ))}
             {q.options.length < 4 && (
-              <button onClick={() => setQuestion(qi, { options: [...q.options, ""] })} className="text-xs font-semibold text-brand">
+              <button type="button" onClick={() => setQuestion(qi, { options: [...q.options, ""] })} className="text-xs font-semibold text-brand">
                 {e.addAnswer}
               </button>
             )}
@@ -343,7 +343,7 @@ function QuizField({ screen, onChange }: { screen: QuizScreen; onChange: Update 
         </div>
       ))}
       {screen.questions.length < MAX_QUESTIONS && (
-        <button
+        <button type="button"
           onClick={() => update((qs) => [...qs, { question: "", options: ["", ""], answer: 0 }])}
           className="rounded-full border border-line px-3 py-1.5 text-sm font-semibold hover:border-brand hover:text-brand"
         >
@@ -397,7 +397,7 @@ export function PhotoField({ screen, onChange }: { screen: PhotosScreen; onChang
             <div className="relative aspect-square overflow-hidden rounded-xl bg-black/5">
               {/* eslint-disable-next-line @next/next/no-img-element -- user upload thumbnail */}
               <img src={src} alt="" className="h-full w-full object-cover" />
-              <button
+              <button type="button"
                 onClick={() => remove(i)}
                 aria-label={e.removePhoto}
                 className="absolute end-1.5 top-1.5 grid h-7 w-7 place-items-center rounded-full bg-black/60 text-sm text-white"
@@ -420,7 +420,7 @@ export function PhotoField({ screen, onChange }: { screen: PhotosScreen; onChang
           </div>
         ))}
         {screen.photos.length + uploading < MAX_PHOTOS && (
-          <button
+          <button type="button"
             onClick={() => input.current?.click()}
             className="grid aspect-square place-items-center rounded-xl border-2 border-dashed border-line text-sm font-semibold hover:border-brand hover:text-brand"
           >
