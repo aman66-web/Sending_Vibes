@@ -17,7 +17,7 @@ export type Way = "custom" | "premade";
 export function TwoWays({ onPick }: { onPick?: (way: Way) => void }) {
   const { t, currency } = useI18n();
   const c = t.create;
-  const memory = t.quiz.questions.memory;
+  const describe = t.quiz.questions.describe;
   const ways = [
     {
       way: "custom" as const,
@@ -28,7 +28,7 @@ export function TwoWays({ onPick }: { onPick?: (way: Way) => void }) {
       steps: c.personalSteps,
       price: fmt(c.fromPrice, { price: price("custom", currency) }),
       cta: c.personalCta,
-      visual: <QuestionDemo question={fmt(memory.title, { name: "Maya" })} answer={memory.placeholder.replace(/^e\.g\.\s*/, "")} />,
+      visual: <QuestionDemo question={describe.title} answer={describe.placeholder.replace(/^e\.g\.\s*/, "")} />,
     },
     {
       way: "premade" as const,
