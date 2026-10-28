@@ -8,7 +8,7 @@ import { Logo } from "@/components/Logo";
 import { BrowserFrame } from "@/components/BrowserFrame";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { addToBasket } from "@/lib/basket";
-import { EFFECTS, OCCASIONS, THEMES, type CardData, type Effect, type Occasion, type Screen, type ScreenType, type ThemeName } from "@/lib/card";
+import { OCCASIONS, type CardData, type Occasion, type ScreenType, type ThemeName } from "@/lib/card";
 import { ProductThumb } from "@/components/catalog/ProductThumb";
 import { TEMPLATES, cardTier, getTemplate, toneInfo } from "@/lib/catalog";
 import { occasions } from "@/lib/templates";
@@ -19,82 +19,15 @@ import { useI18n } from "@/i18n/client";
 import { SignIn, type SignedIn } from "@/components/SignIn";
 import { TwoWays } from "@/components/TwoWays";
 import { NO_ANSWERS, Quiz, quizPrompt, type Answers } from "./Quiz";
-import { Field, ScreenEditor, Select } from "./ScreenEditor";
+import { Field } from "./ScreenEditor";
 import { EditableCard, setAt, type Path } from "./WordEditing";
 
 const DRAFT_KEY = "sv-draft-v1";
 const MODE_KEY = "sv-draft-mode";
 // The questions in progress, kept while they sign in with Google (which leaves the site).
 const QUIZ_KEY = "sv-quiz-v1";
-const MAX_SCREENS = 12;
 // The designs shown next to each example description, in the same order as t.custom.examples.
 const EXAMPLE_SLUGS = ["be-my-valentine", "birthday-bash", "festival-of-lights", "naughty-or-nice", "please-forgive-me", "for-the-best-mum"];
-
-type Addable = Exclude<Screen["type"], "intro" | "finale">;
-
-// What "Add a screen" offers, with a starting point for each.
-const NEW_SCREENS: Record<Addable, { emoji: string; make: () => Screen }> = {
-  message: { emoji: "💌", make: () => ({ id: uid(), type: "message", title: "A little note", body: "" }) },
-  photos: { emoji: "📸", make: () => ({ id: uid(), type: "photos", title: "Us", photos: [], captions: [] }) },
-  question: {
-    emoji: "🙅",
-    make: () => ({ id: uid(), type: "question", question: "Do you love me?", yes: "Yes", no: "No", afterYes: "Good answer" }),
-  },
-  game: {
-    emoji: "🎮",
-    make: () => ({ id: uid(), type: "game", game: "catch-hearts", title: "Quick game!", instructions: "Tap 10 falling hearts", winText: "You did it!" }),
-  },
-  wheel: {
-    emoji: "🎡",
-    make: () => ({
-      id: uid(),
-      type: "wheel",
-      title: "Spin for your prize",
-      instructions: "Whatever it lands on, you get",
-      options: ["A hug", "Dinner on me", "A movie night", "Breakfast in bed"],
-      landOn: -1,
-      winText: "The wheel has spoken!",
-    }),
-  },
-  coupons: {
-    emoji: "🎟️",
-    make: () => ({ id: uid(), type: "coupons", title: "Your coupon book", instructions: "Tap one to redeem it", coupons: ["One free hug", "Breakfast in bed", "You pick the film"] }),
-  },
-  reasons: {
-    emoji: "🫙",
-    make: () => ({ id: uid(), type: "reasons", title: "Reasons I love you", instructions: "Tap the jar to pull out a note", reasons: ["Your laugh", "Your terrible jokes", "How kind you are"] }),
-  },
-  quiz: {
-    emoji: "❓",
-    make: () => ({
-      id: uid(),
-      type: "quiz",
-      title: "Quick quiz",
-      questions: [{ question: "Where did we first meet?", options: ["", ""], answer: 0 }],
-      winText: "You know me so well!",
-    }),
-  },
-  slider: {
-    emoji: "📈",
-    make: () => ({ id: uid(), type: "slider", title: "How much do you love me?", low: "A little", high: "SO much", winText: "Correct answer" }),
-  },
-  timeline: {
-    emoji: "🗓️",
-    make: () => ({ id: uid(), type: "timeline", title: "Our story so far", events: [{ when: "The day we met", what: "" }, { when: "Today", what: "Still my favourite person" }] }),
-  },
-  boxes: {
-    emoji: "🎁",
-    make: () => ({ id: uid(), type: "boxes", title: "Pick a box", instructions: "Choose wisely…", prizes: ["A hug", "A kiss", "Both"] }),
-  },
-  scratch: {
-    emoji: "🪙",
-    make: () => ({ id: uid(), type: "scratch", title: "Scratch for a surprise", instructions: "Scratch the silver panel", hidden: "Surprise!" }),
-  },
-  typeit: {
-    emoji: "⌨️",
-    make: () => ({ id: uid(), type: "typeit", title: "Enter the password", instructions: "You know it…", phrase: "I love you", winText: "Unlocked!" }),
-  },
-};
 
 type Album = { photos: string[]; captions: string[] };
 
@@ -184,9 +117,6 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   const x = t.custom;
   const router = useRouter();
   // Fireworks only work as a finale effect, so they're not offered as a background.
-  const ambientOptions = Object.fromEntries(
-    EFFECTS.filter((x) => x !== "fireworks").map((x) => [x, x === "confetti" ? t.labels.partyEmoji : t.labels.effects[x]]),
-  ) as Record<Exclude<Effect, "fireworks">, string>;
   const chosen = getTemplate(initialTemplate);
   const [saved] = useState(() => (resume ? loadQuiz() : null));
   const [draft] = useState(() => (initialOccasion || chosen || initialStart || saved ? null : loadDraft()));
@@ -417,31 +347,6 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       setAiError(e instanceof Error ? e.message : x.errors.failed);
     }
     setBusy(null);
-  };
-
-  const updateScreen = (id: string, update: (s: Screen) => Screen) =>
-    setCard((c) => c && { ...c, screens: c.screens.map((x) => (x.id === id ? update(x) : x)) });
-  const moveScreen = (id: string, dir: -1 | 1) =>
-    setCard((c) => {
-      if (!c) return c;
-      const i = c.screens.findIndex((s) => s.id === id);
-      const j = i + dir;
-      if (j < 0 || j >= c.screens.length) return c;
-      const screens = [...c.screens];
-      [screens[i], screens[j]] = [screens[j], screens[i]];
-      return { ...c, screens };
-    });
-  const removeScreen = (id: string) => setCard((c) => c && { ...c, screens: c.screens.filter((s) => s.id !== id) });
-  const addScreen = (type: Addable) => {
-    const s = NEW_SCREENS[type].make();
-    setCard((c) => {
-      if (!c) return c;
-      const finale = c.screens.findIndex((x) => x.type === "finale");
-      const screens = [...c.screens];
-      screens.splice(finale >= 0 ? finale : screens.length, 0, s);
-      return { ...c, screens };
-    });
-    setSelected(s.id);
   };
 
   const publish = async () => {
@@ -675,15 +580,14 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       )}
 
       {step === "edit" && card && (
-        <div className={`mx-auto grid gap-8 px-4 py-6 sm:px-6 ${view === "computer" ? "max-w-7xl lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]" : "max-w-6xl lg:grid-cols-[minmax(0,1fr)_380px]"}`}>
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-6 sm:px-6 lg:grid-cols-[380px_minmax(0,1fr)]">
           <div className="min-w-0 space-y-6 pb-28 lg:pb-10">
             <div>
               <h1 className="font-brand text-3xl font-bold">{c.editTitle}</h1>
               <p className="mt-1 opacity-70">{c.editIntro}</p>
             </div>
 
-            {mode === "custom" ? (
-              <section className="space-y-3 rounded-2xl border-2 border-brand/40 bg-panel p-4">
+            <section className="space-y-3 rounded-2xl border-2 border-brand/40 bg-panel p-4">
                 <h2 className="font-brand text-xl font-bold">✨ {x.changeTitle}</h2>
                 <form
                   className="space-y-3"
@@ -698,7 +602,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                       setAsk(e.target.value);
                       setAiDone(false);
                     }}
-                    rows={2}
+                    rows={4}
                     maxLength={1000}
                     dir="auto"
                     aria-label={x.changeTitle}
@@ -744,97 +648,6 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                   ))}
                 </div>
               </section>
-            ) : (
-              <div className="rounded-2xl border border-dashed border-line p-4 text-sm">
-                <p className="opacity-70">{x.premadeNote}</p>
-                <button onClick={() => setMode("custom")} className="mt-2 text-start font-semibold text-brand underline-offset-4 hover:underline">
-                  {x.unlock}
-                </button>
-              </div>
-            )}
-
-            <Panel title={c.look}>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field label={c.theirName} value={card.to} max={40} onChange={(v) => setCard({ ...card, to: v })} />
-                <Field label={c.yourName} value={card.from} max={40} onChange={(v) => setCard({ ...card, from: v })} />
-              </div>
-              <div>
-                <span className="text-sm font-semibold">{c.colours}</span>
-                <div className="mt-2 flex flex-wrap gap-3">
-                  {THEMES.map((x) => (
-                    <button
-                      key={x}
-                      onClick={() => setCard({ ...card, theme: x })}
-                      className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm ${card.theme === x ? "border-brand ring-2 ring-brand/30" : "border-line"}`}
-                    >
-                      <span className="h-5 w-5 rounded-full ring-1 ring-black/10" style={{ background: themes[x].background }} />
-                      {t.themes[x]}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Select
-                  label={c.background}
-                  value={card.ambient === "fireworks" ? "none" : card.ambient}
-                  options={ambientOptions}
-                  onChange={(v) => setCard({ ...card, ambient: v })}
-                />
-                <Select label={c.music} value={card.music ?? "none"} options={t.labels.music} onChange={(v) => setCard({ ...card, music: v })} />
-              </div>
-            </Panel>
-
-            <div className="space-y-3">
-              <h2 className="font-brand text-xl font-bold">{c.screens}</h2>
-              {card.screens.map((s, i) => {
-                const open = selected === s.id;
-                return (
-                  <div key={s.id} className={`rounded-2xl border bg-panel ${open ? "border-brand shadow-md" : "border-line"}`}>
-                    <div className="flex items-center gap-2 px-4 py-3">
-                      <button onClick={() => setSelected(open ? undefined : s.id)} className="flex min-w-0 flex-1 items-center gap-3 text-start">
-                        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-brand-soft text-xs font-bold text-brand">{i + 1}</span>
-                        <span className="shrink-0 font-semibold">{t.labels.screens[s.type]}</span>
-                        <span className="hidden min-w-0 truncate text-sm opacity-60 sm:block">{summary(s)}</span>
-                      </button>
-                      {mode === "custom" && (
-                        <>
-                          <IconButton label={c.moveUp} onClick={() => moveScreen(s.id, -1)} disabled={i === 0}>↑</IconButton>
-                          <IconButton label={c.moveDown} onClick={() => moveScreen(s.id, 1)} disabled={i === card.screens.length - 1}>↓</IconButton>
-                          <IconButton label={c.remove} onClick={() => removeScreen(s.id)} disabled={card.screens.length <= 1}>✕</IconButton>
-                        </>
-                      )}
-                    </div>
-                    {open && (
-                      <div className="space-y-4 border-t border-line px-4 py-4">
-                        <ScreenEditor screen={s} onChange={(update) => updateScreen(s.id, update)} />
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-              {mode === "premade" ? null : card.screens.length < MAX_SCREENS ? (
-                <div className="rounded-2xl border border-dashed border-line p-4">
-                  <p className="text-sm font-bold">{c.addScreen}</p>
-                  <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-                    {(Object.keys(NEW_SCREENS) as Addable[]).map((type) => (
-                      <button
-                        key={type}
-                        onClick={() => addScreen(type)}
-                        className="flex items-start gap-2 rounded-xl border border-line bg-panel p-2.5 text-start transition hover:-translate-y-0.5 hover:border-brand"
-                      >
-                        <span className="text-xl leading-none">{NEW_SCREENS[type].emoji}</span>
-                        <span className="min-w-0">
-                          <span className="block text-sm font-semibold leading-tight">{t.labels.screens[type]}</span>
-                          <span className="mt-0.5 block text-xs leading-tight opacity-60">{c.hints[type]}</span>
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <p className="text-sm opacity-60">{fmt(c.maxScreens, { n: MAX_SCREENS })}</p>
-              )}
-            </div>
 
             <div className="fixed inset-x-0 bottom-0 z-20 flex gap-3 border-t border-line bg-background/95 p-4 backdrop-blur lg:static lg:border-0 lg:bg-transparent lg:p-0">
               <button onClick={() => setShowPreview(true)} className="flex-1 rounded-full border border-line py-3.5 font-semibold lg:hidden">
@@ -849,7 +662,9 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
 
           <aside className="hidden lg:block">
             <div className="sticky top-4 space-y-3">
-              <div role="tablist" aria-label={c.preview} className="mx-auto flex w-fit gap-1 rounded-full border border-line bg-panel p-1">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <ModeSwitch wordMode={wordMode} setWordMode={setWordMode} />
+                <div role="tablist" aria-label={c.preview} className="flex w-fit gap-1 rounded-full border border-line bg-panel p-1">
                 {(["computer", "phone"] as const).map((v) => (
                   <button
                     key={v}
@@ -861,6 +676,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                     {v === "phone" ? t.product.onPhone : t.product.onComputer}
                   </button>
                 ))}
+                </div>
               </div>
               <ScreenAsk
                 card={card}
@@ -870,16 +686,16 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                 busy={busy !== null}
                 onSubmit={(id) => changeByTyping(screenAsk, id)}
               />
-              <PreviewControls card={card} viewing={viewing} onGo={goToScreen} wordMode={wordMode} setWordMode={setWordMode} />
+              <PreviewControls card={card} viewing={viewing} onGo={goToScreen} wordMode={wordMode} />
               <div className="relative">
                 <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onOther={() => setSelected(viewing)}>
                   {view === "phone" ? (
                     <PhoneFrame className="mx-auto h-[520px] w-[260px]">
-                      <CardPlayer key="phone" card={card} preview sound focusScreenId={selected} focusNonce={nudge} onScreenChange={setViewing} />
+                      <CardPlayer key="phone" card={card} preview sound editing={wordMode === "edit"} focusScreenId={selected} focusNonce={nudge} onScreenChange={setViewing} />
                     </PhoneFrame>
                   ) : (
                     <BrowserFrame className="h-[480px]">
-                      <CardPlayer key="computer" card={card} preview sound focusScreenId={selected} focusNonce={nudge} onScreenChange={setViewing} />
+                      <CardPlayer key="computer" card={card} preview sound editing={wordMode === "edit"} focusScreenId={selected} focusNonce={nudge} onScreenChange={setViewing} />
                     </BrowserFrame>
                   )}
                 </EditableCard>
@@ -900,7 +716,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
         <div className="fixed inset-0 z-50 flex flex-col bg-background lg:hidden">
           <div className="relative min-h-0 flex-1">
             <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onOther={() => {}} className="h-full">
-              <CardPlayer card={card} preview sound focusScreenId={selected} focusNonce={nudge} onScreenChange={setViewing} />
+              <CardPlayer card={card} preview sound editing={wordMode === "edit"} focusScreenId={selected} focusNonce={nudge} onScreenChange={setViewing} />
             </EditableCard>
             <button onClick={() => setShowPreview(false)} className="absolute start-4 top-4 z-50 rounded-full bg-black/70 px-4 py-2 text-sm font-semibold text-white">
               {c.closePreview}
@@ -914,7 +730,8 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
             )}
           </div>
           <div className="space-y-3 border-t border-line p-3">
-            <PreviewControls card={card} viewing={viewing} onGo={goToScreen} wordMode={wordMode} setWordMode={setWordMode} />
+            <ModeSwitch wordMode={wordMode} setWordMode={setWordMode} />
+            <PreviewControls card={card} viewing={viewing} onGo={goToScreen} wordMode={wordMode} />
             <ScreenAsk
               card={card}
               viewing={viewing}
@@ -931,38 +748,15 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   );
 }
 
-function summary(s: Screen) {
-  switch (s.type) {
-    case "intro":
-    case "message":
-    case "photos":
-    case "game":
-    case "finale":
-    case "quiz":
-    case "scratch":
-    case "typeit":
-    case "wheel":
-    case "coupons":
-    case "reasons":
-    case "slider":
-    case "timeline":
-    case "boxes":
-      return s.title;
-    case "question":
-      return s.question;
-  }
-}
-
 type PreviewControlsProps = {
   card: CardData;
   viewing?: string;
   onGo: (screenId: string) => void;
   wordMode: "edit" | "play";
-  setWordMode: (mode: "edit" | "play") => void;
 };
 
-// Edit the words or play the card, and step through its screens.
-function PreviewControls({ card, viewing, onGo, wordMode, setWordMode }: PreviewControlsProps) {
+// Step through the card's screens, with a hint for the mode it's in.
+function PreviewControls({ card, viewing, onGo, wordMode }: PreviewControlsProps) {
   const { t } = useI18n();
   const x = t.custom;
   const i = Math.max(card.screens.findIndex((s) => s.id === viewing), 0);
@@ -972,34 +766,40 @@ function PreviewControls({ card, viewing, onGo, wordMode, setWordMode }: Preview
   };
   const arrow = "grid h-9 w-9 place-items-center rounded-full border border-line bg-panel font-bold transition hover:border-brand disabled:opacity-30";
   return (
-    <div>
-      <div className="flex items-center justify-between gap-2">
-        <div role="tablist" className="flex gap-1 rounded-full border border-line bg-panel p-1">
-          {(["edit", "play"] as const).map((m) => (
-            <button
-              key={m}
-              role="tab"
-              aria-selected={wordMode === m}
-              onClick={() => setWordMode(m)}
-              className={`rounded-full px-3 py-1.5 text-sm font-semibold transition ${wordMode === m ? "bg-foreground text-background" : "opacity-70 hover:opacity-100"}`}
-            >
-              {m === "edit" ? x.editWords : x.play}
-            </button>
-          ))}
-        </div>
-        <div className="flex items-center gap-1.5">
-          <button onClick={() => go(-1)} disabled={i === 0} aria-label={x.prevScreen} className={arrow}>
-            <span className="rtl:rotate-180">←</span>
-          </button>
-          <span className="min-w-12 text-center text-sm font-semibold tabular-nums opacity-70">
-            {i + 1} / {card.screens.length}
-          </span>
-          <button onClick={() => go(1)} disabled={i === card.screens.length - 1} aria-label={x.nextScreen} className={arrow}>
-            <span className="rtl:rotate-180">→</span>
-          </button>
-        </div>
+    <div className="flex items-center justify-between gap-2">
+      <p className="text-xs opacity-60">{wordMode === "edit" ? x.clickHint : t.create.livePreview}</p>
+      <div className="flex items-center gap-1.5">
+        <button onClick={() => go(-1)} disabled={i === 0} aria-label={x.prevScreen} className={arrow}>
+          <span className="rtl:rotate-180">←</span>
+        </button>
+        <span className="min-w-12 text-center text-sm font-semibold tabular-nums opacity-70">
+          {i + 1} / {card.screens.length}
+        </span>
+        <button onClick={() => go(1)} disabled={i === card.screens.length - 1} aria-label={x.nextScreen} className={arrow}>
+          <span className="rtl:rotate-180">→</span>
+        </button>
       </div>
-      <p className="mt-2 text-center text-xs opacity-60">{wordMode === "edit" ? x.clickHint : t.create.livePreview}</p>
+    </div>
+  );
+}
+
+// Edit mode (tap any words to change them) or preview mode (the card reacts as it will for them).
+function ModeSwitch({ wordMode, setWordMode }: { wordMode: "edit" | "play"; setWordMode: (mode: "edit" | "play") => void }) {
+  const { t } = useI18n();
+  const x = t.custom;
+  return (
+    <div role="tablist" className="flex w-fit gap-1 rounded-full border-2 border-foreground/80 bg-panel p-1">
+      {(["edit", "play"] as const).map((m) => (
+        <button
+          key={m}
+          role="tab"
+          aria-selected={wordMode === m}
+          onClick={() => setWordMode(m)}
+          className={`rounded-full px-4 py-2 text-sm font-bold transition ${wordMode === m ? "bg-foreground text-background" : "opacity-70 hover:opacity-100"}`}
+        >
+          {m === "edit" ? x.editWords : x.play}
+        </button>
+      ))}
     </div>
   );
 }
@@ -1120,19 +920,3 @@ function Making({ lines }: { lines: readonly string[] }) {
   );
 }
 
-function Panel({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="space-y-4 rounded-2xl border border-line bg-panel p-4">
-      <h2 className="font-brand text-xl font-bold">{title}</h2>
-      {children}
-    </section>
-  );
-}
-
-function IconButton({ label, onClick, disabled, children }: { label: string; onClick: () => void; disabled?: boolean; children: React.ReactNode }) {
-  return (
-    <button aria-label={label} onClick={onClick} disabled={disabled} className="grid h-8 w-8 place-items-center rounded-full text-sm hover:bg-brand-soft disabled:opacity-25">
-      {children}
-    </button>
-  );
-}
