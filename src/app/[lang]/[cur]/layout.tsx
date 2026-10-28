@@ -1,5 +1,21 @@
 import type { Metadata, Viewport } from "next";
-import { Caveat, Figtree, Fraunces, Noto_Sans_Arabic, Noto_Sans_Bengali, Noto_Sans_Devanagari, Noto_Sans_Gujarati, Noto_Sans_Gurmukhi, Playfair_Display } from "next/font/google";
+import {
+  Bricolage_Grotesque,
+  Caveat,
+  Courier_Prime,
+  Creepster,
+  Dancing_Script,
+  Figtree,
+  Fraunces,
+  Fredoka,
+  Noto_Sans_Arabic,
+  Noto_Sans_Bengali,
+  Noto_Sans_Devanagari,
+  Noto_Sans_Gujarati,
+  Noto_Sans_Gurmukhi,
+  Permanent_Marker,
+  Playfair_Display,
+} from "next/font/google";
 import { ChatWidget } from "@/components/ChatWidget";
 import { I18nProvider } from "@/i18n/client";
 import { LANGUAGES } from "@/i18n/config";
@@ -12,6 +28,14 @@ const ui = Figtree({ subsets: ["latin"], variable: "--font-ui-face" });
 // Inside the cards: a classic high-contrast serif, like good printed stationery.
 const display = Playfair_Display({ subsets: ["latin"], variable: "--font-display-face", style: ["normal", "italic"] });
 const hand = Caveat({ subsets: ["latin"], variable: "--font-hand-face" });
+// Fonts a card's screens can ask for (see lib/screen-style.ts). Not preloaded, so only
+// a card that uses one downloads it.
+const script = Dancing_Script({ subsets: ["latin"], variable: "--font-script-face", preload: false });
+const rounded = Fredoka({ subsets: ["latin"], variable: "--font-rounded-face", preload: false });
+const bold = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-bold-face", preload: false });
+const typewriter = Courier_Prime({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-typewriter-face", preload: false });
+const marker = Permanent_Marker({ subsets: ["latin"], weight: "400", variable: "--font-marker-face", preload: false });
+const spooky = Creepster({ subsets: ["latin"], weight: "400", variable: "--font-spooky-face", preload: false });
 // Other scripts, used only where a page has those letters. Browsers download a
 // font only when it has characters on screen, so English pages don't pay for them.
 const devanagari = Noto_Sans_Devanagari({ subsets: ["devanagari"], variable: "--font-devanagari", preload: false });
@@ -20,7 +44,7 @@ const gujarati = Noto_Sans_Gujarati({ subsets: ["gujarati"], variable: "--font-g
 const bengali = Noto_Sans_Bengali({ subsets: ["bengali"], variable: "--font-bengali", preload: false });
 const arabic = Noto_Sans_Arabic({ subsets: ["arabic"], variable: "--font-arabic", preload: false });
 
-const fonts = [brand, ui, display, hand, devanagari, gurmukhi, gujarati, bengali, arabic].map((f) => f.variable).join(" ");
+const fonts = [brand, ui, display, hand, script, rounded, bold, typewriter, marker, spooky, devanagari, gurmukhi, gujarati, bengali, arabic].map((f) => f.variable).join(" ");
 
 // English pages are built ahead of time in both currencies; other languages are built on first visit and then kept.
 export function generateStaticParams() {

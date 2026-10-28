@@ -26,7 +26,13 @@ export function PrimaryButton({ children, onClick, className = "" }: { children:
 const ENVELOPE = "#f6efe0";
 const ENVELOPE_SHADE = "#ebe1cb";
 
-export function IntroScreen({ screen, onNext, to, from }: ScreenProps<"intro"> & { to: string; from: string }) {
+export function IntroScreen({
+  screen,
+  onNext,
+  to,
+  from,
+  envelope = { paper: ENVELOPE, shade: ENVELOPE_SHADE, ink: "#3a3127" },
+}: ScreenProps<"intro"> & { to: string; from: string; envelope?: { paper: string; shade: string; ink: string } }) {
   const sfx = useSfx();
   const [open, setOpen] = useState(false);
   // Set once the letter has come out, so a quick double tap doesn't skip straight past it.
@@ -77,15 +83,19 @@ export function IntroScreen({ screen, onNext, to, from }: ScreenProps<"intro"> &
         </span>
         <span
           className="absolute inset-0 rounded-md [clip-path:polygon(0_0,50%_54%,100%_0,100%_100%,0_100%)]"
-          style={{ zIndex: 3, background: `linear-gradient(180deg, ${ENVELOPE} 0%, ${ENVELOPE_SHADE} 100%)` }}
+          style={{ zIndex: 3, background: `linear-gradient(180deg, ${envelope.paper} 0%, ${envelope.shade} 100%)` }}
         >
-          {to && <span className="absolute inset-x-0 bottom-2 truncate px-6 font-hand text-2xl text-[#3a3127]">{to}</span>}
+          {to && (
+            <span className="absolute inset-x-0 bottom-2 truncate px-6 font-hand text-2xl" style={{ color: envelope.ink }}>
+              {to}
+            </span>
+          )}
         </span>
         <span
           className={`absolute inset-x-0 top-0 h-[60%] origin-top rounded-t-md [clip-path:polygon(0_0,100%_0,50%_100%)] ${open ? "[transform:rotateX(180deg)]" : ""}`}
           style={{
             zIndex: open ? 1 : 4,
-            background: open ? "color-mix(in srgb, var(--c-accent) 85%, black)" : ENVELOPE_SHADE,
+            background: open ? "color-mix(in srgb, var(--c-accent) 85%, black)" : envelope.shade,
             filter: "drop-shadow(0 2px 2px rgba(0,0,0,0.12))",
             transition: "transform 0.5s ease-in-out, z-index 0s linear 0.25s, background 0s linear 0.25s",
           }}

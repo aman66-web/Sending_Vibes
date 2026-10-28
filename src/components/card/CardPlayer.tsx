@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import type { CardData } from "@/lib/card";
+import type { CardData, Sticker } from "@/lib/card";
+import { screenLook } from "@/lib/screen-style";
 import { themes } from "@/lib/themes";
 import { Ambient } from "./effects";
 import { BoxesScreen, CouponsScreen, ReasonsScreen, SliderScreen, TimelineScreen, WheelScreen } from "./more-screens";
@@ -42,7 +43,6 @@ type Props = {
 };
 
 export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 0, sound = !preview, bare = false, onScreenChange, editing = false }: Props) {
-  const theme = themes[card.theme];
   const screens = useMemo(
     () => card.screens.filter((s) => preview || s.type !== "photos" || s.photos.length > 0),
     [card.screens, preview],
@@ -66,6 +66,9 @@ export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 
 
   const current = screens[Math.min(index, screens.length - 1)];
   const currentId = current?.id;
+  // Each screen can have its own colours, fonts and stickers on top of the card's theme.
+  const look = screenLook(themes[card.theme], current?.style);
+  const theme = look.theme;
   useEffect(() => {
     if (currentId) onScreenChange?.(currentId);
   }, [currentId, onScreenChange]);
@@ -101,6 +104,7 @@ export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 
     "--c-accent-text": theme.accentText,
     "--c-surface": theme.surface,
     "--c-secondary": theme.secondary,
+    ...look.css,
   } as React.CSSProperties;
 
   return (
@@ -116,7 +120,11 @@ export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 
       lang="en"
       className={`@container relative flex w-full flex-col overflow-hidden font-card ${preview ? "h-full" : "min-h-dvh"}`}
     >
-      <Ambient effect={card.ambient} />
+      {look.pattern && (
+        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ backgroundImage: look.pattern.image, backgroundSize: look.pattern.size }} />
+      )}
+      <Ambient effect={current?.style?.effect ?? card.ambient} />
+      {current?.style?.stickers && <Stickers key={`${run}-${current.id}`} stickers={current.style.stickers} />}
       {/* A printed double border, like a real card. */}
       <div aria-hidden className="pointer-events-none absolute inset-2.5 rounded-[14px] border border-current opacity-[0.16]" />
       <div aria-hidden className="pointer-events-none absolute inset-[15px] rounded-[10px] border border-current opacity-[0.08]" />
@@ -149,7 +157,7 @@ export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 
       {/* Auto margins centre short screens; long ones (lots of coupons, say) scroll inside previews. */}
       <main className={`flex flex-1 flex-col px-5 py-8 ${preview ? "min-h-0 overflow-y-auto [scrollbar-width:none]" : ""}`}>
         <div key={`${run}-${current.id}-${editing}`} className={`m-auto w-full animate-screen-in ${wide ? "max-w-4xl" : "max-w-md"}`}>
-          {current.type === "intro" && <IntroScreen screen={current} onNext={next} to={card.to} from={card.from} />}
+          {current.type === "intro" && <IntroScreen screen={current} onNext={next} to={card.to} from={card.from} envelope={look.envelope} />}
           {current.type === "question" && <QuestionScreen screen={current} onNext={next} />}
           {current.type === "photos" && <PhotosScreen screen={current} onNext={next} wide={wide} />}
           {current.type === "message" && <MessageScreen screen={current} onNext={next} />}
@@ -192,3 +200,22 @@ export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 
   );
 }
 
+// A screen's stickers: emoji placed around it, behind the words. Sizes are a share of
+// the card's shorter side, so they look the same on a phone and a computer.
+function Stickers({ stickers }: { stickers: Sticker[] }) {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      {stickers.map((s, i) => (
+        <span
+          key={i}
+          className="absolute animate-pop leading-none"
+          style={{ left: `${s.x}%`, top: `${s.y}%`, fontSize: `${s.size}cqmin`, rotate: `${s.rotate ?? 0}deg`, translate: "-50% -50%", animationDelay: `${i * 80}ms` }}
+        >
+          <span className={`block ${s.motion && s.motion !== "none" ? `sticker-${s.motion}` : ""}`} style={{ animationDelay: `${-i * 0.7}s` }}>
+            {s.emoji}
+          </span>
+        </span>
+      ))}
+    </div>
+  );
+}
