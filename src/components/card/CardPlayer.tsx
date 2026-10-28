@@ -36,9 +36,12 @@ type Props = {
   bare?: boolean;
   // Tells the creator which screen is showing, so a typed change can be about that one.
   onScreenChange?: (id: string) => void;
+  // The creator's edit mode. Switching in or out starts the screen afresh, so its words
+  // are the card's own (not, say, a runaway No button's "Are you sure?").
+  editing?: boolean;
 };
 
-export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 0, sound = !preview, bare = false, onScreenChange }: Props) {
+export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 0, sound = !preview, bare = false, onScreenChange, editing = false }: Props) {
   const theme = themes[card.theme];
   const screens = useMemo(
     () => card.screens.filter((s) => preview || s.type !== "photos" || s.photos.length > 0),
@@ -145,7 +148,7 @@ export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 
 
       {/* Auto margins centre short screens; long ones (lots of coupons, say) scroll inside previews. */}
       <main className={`flex flex-1 flex-col px-5 py-8 ${preview ? "min-h-0 overflow-y-auto [scrollbar-width:none]" : ""}`}>
-        <div key={`${run}-${current.id}`} className={`m-auto w-full animate-screen-in ${wide ? "max-w-4xl" : "max-w-md"}`}>
+        <div key={`${run}-${current.id}-${editing}`} className={`m-auto w-full animate-screen-in ${wide ? "max-w-4xl" : "max-w-md"}`}>
           {current.type === "intro" && <IntroScreen screen={current} onNext={next} to={card.to} from={card.from} />}
           {current.type === "question" && <QuestionScreen screen={current} onNext={next} />}
           {current.type === "photos" && <PhotosScreen screen={current} onNext={next} wide={wide} />}
