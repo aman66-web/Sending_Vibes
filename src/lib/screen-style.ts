@@ -116,7 +116,8 @@ export function screenLook(base: Theme, style: ScreenStyle | undefined): ScreenL
   const against = backgrounds?.length ? backgrounds : [hexIn(base.background) ?? PAPER];
   const wanted = style.text ?? (backgrounds?.length ? base.text : undefined);
   if (wanted) {
-    const text = worst(wanted, against) >= 4.5 ? wanted : readableOn(against);
+    // 3:1, the standard for large text: keeps a design's white on hot pink, but not navy on black.
+    const text = worst(wanted, against) >= 3 ? wanted : readableOn(against);
     theme.text = text;
     theme.muted = mix(text, against[0], 0.28);
   }

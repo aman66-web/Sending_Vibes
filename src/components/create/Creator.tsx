@@ -8,7 +8,8 @@ import { Logo } from "@/components/Logo";
 import { BrowserFrame } from "@/components/BrowserFrame";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { addToBasket } from "@/lib/basket";
-import { OCCASIONS, type CardData, type Occasion, type ScreenType, type ThemeName } from "@/lib/card";
+import { OCCASIONS, type CardData, type Occasion, type Screen, type ScreenType, type ThemeName } from "@/lib/card";
+import { stagesOf } from "@/lib/stages";
 import { ProductThumb } from "@/components/catalog/ProductThumb";
 import { TEMPLATES, cardTier, getTemplate, toneInfo } from "@/lib/catalog";
 import { occasions } from "@/lib/templates";
@@ -20,7 +21,8 @@ import { SignIn, type SignedIn } from "@/components/SignIn";
 import { TwoWays } from "@/components/TwoWays";
 import { NO_ANSWERS, Quiz, quizPrompt, type Answers } from "./Quiz";
 import { Field } from "./ScreenEditor";
-import { EditableCard, setAt, type Path } from "./WordEditing";
+import { AtPhoneSize } from "./AtPhoneSize";
+import { AllWords, EditableCard, setAt, type Path } from "./WordEditing";
 
 const DRAFT_KEY = "sv-draft-v1";
 const MODE_KEY = "sv-draft-mode";
@@ -319,10 +321,18 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
 
   // Words typed straight onto the preview.
   const editWords = (path: Path, value: string) => setCard((c) => c && setAt(c, path, value));
-  const goToScreen = (id: string) => {
+  // Photos swapped, added or taken out by tapping them on the preview.
+  const editScreen = (index: number, update: (screen: Screen) => Screen) =>
+    setCard((c) => c && { ...c, screens: c.screens.map((s, j) => (j === index ? update(s) : s)) });
+  // The moment within a screen the arrows last went to (see lib/stages.ts).
+  const [moment, setMoment] = useState<{ id: string; stage: number } | null>(null);
+  const goToScreen = (id: string, stage = 0) => {
     setSelected(id);
+    setMoment({ id, stage });
     setNudge((n) => n + 1);
   };
+  const stageShown = moment && moment.id === viewing ? moment.stage : 0;
+  const focusStage = moment && moment.id === selected ? moment.stage : 0;
 
   // A change to the whole card, or (with focus) to the screen showing in the preview.
   const changeByTyping = async (prompt = ask, focus?: string) => {
@@ -681,16 +691,19 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                 ))}
                 </div>
               </div>
-              <PreviewControls card={card} viewing={viewing} onGo={goToScreen} wordMode={wordMode} />
+              <PreviewControls card={card} viewing={viewing} stage={stageShown} onGo={goToScreen} wordMode={wordMode} />
+              {wordMode === "edit" && <AllWords card={card} screenId={viewing} onChange={editWords} />}
               <div className="relative">
-                <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onOther={() => setSelected(viewing)}>
+                <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onScreen={editScreen} onOther={() => setSelected(viewing)}>
                   {view === "phone" ? (
-                    <PhoneFrame className="mx-auto h-[520px] w-[260px]">
-                      <CardPlayer key="phone" card={card} preview sound editing={wordMode === "edit"} focusScreenId={selected} focusNonce={nudge} onScreenChange={setViewing} />
+                    <PhoneFrame className="mx-auto h-[600px] w-[290px]" notch="h-5 w-20">
+                      <AtPhoneSize>
+                        <CardPlayer key="phone" card={card} preview sound editing={wordMode === "edit"} focusScreenId={selected} focusNonce={nudge} focusStage={focusStage} onScreenChange={setViewing} />
+                      </AtPhoneSize>
                     </PhoneFrame>
                   ) : (
                     <BrowserFrame className="h-[480px]">
-                      <CardPlayer key="computer" card={card} preview sound editing={wordMode === "edit"} focusScreenId={selected} focusNonce={nudge} onScreenChange={setViewing} />
+                      <CardPlayer key="computer" card={card} preview sound editing={wordMode === "edit"} focusScreenId={selected} focusNonce={nudge} focusStage={focusStage} onScreenChange={setViewing} />
                     </BrowserFrame>
                   )}
                 </EditableCard>
@@ -710,8 +723,8 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       {showPreview && card && (
         <div className="fixed inset-0 z-50 flex flex-col bg-background lg:hidden">
           <div className="relative min-h-0 flex-1">
-            <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onOther={() => {}} className="h-full">
-              <CardPlayer card={card} preview sound editing={wordMode === "edit"} focusScreenId={selected} focusNonce={nudge} onScreenChange={setViewing} />
+            <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onScreen={editScreen} onOther={() => {}} className="h-full">
+              <CardPlayer card={card} preview sound editing={wordMode === "edit"} focusScreenId={selected} focusNonce={nudge} focusStage={focusStage} onScreenChange={setViewing} />
             </EditableCard>
             <button onClick={() => setShowPreview(false)} className="absolute start-4 top-4 z-50 rounded-full bg-black/70 px-4 py-2 text-sm font-semibold text-white">
               {c.closePreview}
@@ -726,7 +739,8 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
           </div>
           <div className="space-y-3 border-t border-line p-3">
             <ModeSwitch wordMode={wordMode} setWordMode={setWordMode} />
-            <PreviewControls card={card} viewing={viewing} onGo={goToScreen} wordMode={wordMode} />
+            <PreviewControls card={card} viewing={viewing} stage={stageShown} onGo={goToScreen} wordMode={wordMode} />
+            {wordMode === "edit" && <AllWords card={card} screenId={viewing} onChange={editWords} />}
             <ScreenAsk
               card={card}
               viewing={viewing}
@@ -746,34 +760,53 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
 type PreviewControlsProps = {
   card: CardData;
   viewing?: string;
-  onGo: (screenId: string) => void;
+  stage: number;
+  onGo: (screenId: string, stage: number) => void;
   wordMode: "edit" | "play";
 };
 
 // Step through the card's screens, with a hint for the mode it's in.
-function PreviewControls({ card, viewing, onGo, wordMode }: PreviewControlsProps) {
+// The arrows step through every screen and, within each, every moment worth seeing
+// on its own: the envelope closed then open, the question then "yes", and so on.
+function PreviewControls({ card, viewing, stage, onGo, wordMode }: PreviewControlsProps) {
   const { t } = useI18n();
   const x = t.custom;
   const i = Math.max(card.screens.findIndex((s) => s.id === viewing), 0);
-  const go = (step: number) => {
-    const screen = card.screens[i + step];
-    if (screen) onGo(screen.id);
+  const steps = card.screens.flatMap((s) => stagesOf(s).map((_, k) => ({ id: s.id, stage: k })));
+  const at = Math.max(
+    steps.findIndex((p) => p.id === card.screens[i]?.id && p.stage === stage),
+    steps.findIndex((p) => p.id === card.screens[i]?.id),
+    0,
+  );
+  const go = (move: number) => {
+    const target = steps[at + move];
+    if (target) onGo(target.id, target.stage);
   };
+  const stages = card.screens[i] ? stagesOf(card.screens[i]) : [];
+  const current = stages[Math.min(stage, stages.length - 1)];
   const arrow = "grid h-9 w-9 place-items-center rounded-full border border-line bg-panel font-bold transition hover:border-brand disabled:opacity-30";
   return (
-    <div className="flex items-center justify-between gap-2">
+    <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
       <p className="text-xs opacity-60">{wordMode === "edit" ? x.clickHint : t.create.livePreview}</p>
       <div className="flex items-center gap-1.5">
-        <button onClick={() => go(-1)} disabled={i === 0} aria-label={x.prevScreen} className={arrow}>
+        <button onClick={() => go(-1)} disabled={at === 0} aria-label={x.prevScreen} className={arrow}>
           <span className="rtl:rotate-180">←</span>
         </button>
         <span className="min-w-12 text-center text-sm font-semibold tabular-nums opacity-70">
           {i + 1} / {card.screens.length}
         </span>
-        <button onClick={() => go(1)} disabled={i === card.screens.length - 1} aria-label={x.nextScreen} className={arrow}>
+        <button onClick={() => go(1)} disabled={at === steps.length - 1} aria-label={x.nextScreen} className={arrow}>
           <span className="rtl:rotate-180">→</span>
         </button>
       </div>
+      {stages.length > 1 && current && (
+        <p data-stage className="flex w-full items-center justify-end gap-1.5 text-xs font-semibold opacity-70">
+          {stages.map((_, k) => (
+            <span key={k} className={`h-1.5 rounded-full transition-all ${k === Math.min(stage, stages.length - 1) ? "w-4 bg-brand" : "w-1.5 bg-current opacity-30"}`} />
+          ))}
+          <span className="ms-1">{fmt(x.stages[current.name], { n: current.n ?? "" })}</span>
+        </p>
+      )}
     </div>
   );
 }

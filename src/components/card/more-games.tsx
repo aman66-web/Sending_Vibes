@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "./effects";
 import { HeartMark } from "./ornaments";
 import { useSfx } from "./sound";
+import { useWords } from "./words";
 import { DropSprite, GameIcon, GhostSprite, HeadstoneSprite, HeartSprite, type IconName, PinataSprite, StarSprite } from "./sprites";
 
 export type GameProps = { onWin: () => void; won: boolean };
@@ -32,6 +33,7 @@ const PETALS = 9;
 
 export function LovesMeNot({ onWin, won }: GameProps) {
   const sfx = useSfx();
+  const { text } = useWords();
   const [plucked, setPlucked] = useState<boolean[]>(() => Array(PETALS).fill(false));
   const count = plucked.filter(Boolean).length;
 
@@ -43,7 +45,7 @@ export function LovesMeNot({ onWin, won }: GameProps) {
     if (next.every(Boolean)) onWin();
   };
 
-  const verdict = count === 0 ? "Pluck a petal…" : count % 2 === 1 ? "Loves me" : "Loves me not";
+  const verdict = count === 0 ? text("petalStart") : count % 2 === 1 ? text("lovesMe") : text("lovesMeNot");
   return (
     <div className="flex flex-col items-center gap-2">
       <p key={count} className="h-9 animate-pop font-display text-2xl font-semibold italic">
@@ -81,7 +83,7 @@ export function LovesMeNot({ onWin, won }: GameProps) {
           </pattern>
         </defs>
       </svg>
-      <p className="text-sm font-semibold opacity-70">{won ? "The flower has spoken." : `${PETALS - count} petals left`}</p>
+      <p className="text-sm font-semibold opacity-70">{won ? text("petalsDone") : text("petalsLeft", { n: PETALS - count })}</p>
     </div>
   );
 }
@@ -93,6 +95,7 @@ type Ghost = { id: number; cell: number };
 
 export function WhackGhosts({ onWin, won }: GameProps) {
   const sfx = useSfx();
+  const { text } = useWords();
   const reduced = useReducedMotion();
   const [ghosts, setGhosts] = useState<Ghost[]>([]);
   const [booed, setBooed] = useState<{ id: number; cell: number }[]>([]);
@@ -166,7 +169,7 @@ export function WhackGhosts({ onWin, won }: GameProps) {
                   <GhostSprite className="h-14 w-12 drop-shadow-[0_0_10px_rgba(255,255,255,0.25)]" />
                 </button>
               )}
-              {boo && <span className="pointer-events-none absolute inset-0 grid animate-pop place-items-center font-display text-lg font-bold tracking-widest text-[#f3d9a4]">BOO!</span>}
+              {boo && <span className="pointer-events-none absolute inset-0 grid animate-pop place-items-center font-display text-lg font-bold tracking-widest text-[#f3d9a4]">{text("boo")}</span>}
               <span className="pointer-events-none absolute inset-x-2 bottom-0 h-4 rounded-t-full bg-[#2a2839]" />
               <HeadstoneSprite className="pointer-events-none absolute bottom-1 right-1.5 h-6 w-5 opacity-80" />
             </div>
@@ -190,6 +193,7 @@ const TONES = [
 
 export function LaunchFireworks({ onWin, won }: GameProps) {
   const sfx = useSfx();
+  const { text } = useWords();
   const [fireworks, setFireworks] = useState<Firework[]>([]);
   const [count, setCount] = useState(0);
   const launched = useRef(0);
@@ -268,7 +272,7 @@ export function LaunchFireworks({ onWin, won }: GameProps) {
           );
         })}
         {count === 0 && (
-          <p className="pointer-events-none absolute inset-0 grid place-items-center font-display text-lg font-semibold text-white/80">Tap anywhere in the sky</p>
+          <p className="pointer-events-none absolute inset-0 grid place-items-center font-display text-lg font-semibold text-white/80">{text("skyTap")}</p>
         )}
       </div>
     </div>
@@ -299,6 +303,7 @@ function LanternShape({ lit }: { lit: boolean }) {
 
 export function ReleaseLanterns({ onWin, won }: GameProps) {
   const sfx = useSfx();
+  const { text } = useWords();
   const [released, setReleased] = useState<boolean[]>(() => Array(LANTERNS).fill(false));
 
   const release = (i: number) => {
@@ -330,7 +335,7 @@ export function ReleaseLanterns({ onWin, won }: GameProps) {
         ))}
       </div>
       {!released.some(Boolean) && (
-        <p className="pointer-events-none absolute inset-x-0 top-1/3 text-center font-display text-lg font-semibold text-white/85">Tap each lantern to let it go</p>
+        <p className="pointer-events-none absolute inset-x-0 top-1/3 text-center font-display text-lg font-semibold text-white/85">{text("lanternTap")}</p>
       )}
     </div>
   );
@@ -342,6 +347,7 @@ const BUBBLES = 20;
 
 export function BubbleWrap({ onWin, won }: GameProps) {
   const sfx = useSfx();
+  const { text } = useWords();
   const [popped, setPopped] = useState<boolean[]>(() => Array(BUBBLES).fill(false));
   const state = useRef(popped);
   const pressing = useRef(false);
@@ -365,7 +371,7 @@ export function BubbleWrap({ onWin, won }: GameProps) {
   return (
     <div className="w-full">
       <div className="mb-2 text-center font-display text-lg font-semibold">
-        {popped.filter(Boolean).length} / {BUBBLES} popped
+        {text("bubblesScore", { i: popped.filter(Boolean).length, n: BUBBLES })}
       </div>
       <div
         onPointerDown={(e) => {
@@ -511,6 +517,7 @@ function Plant({ stage }: { stage: number }) {
 
 export function GrowFlower({ onWin, won }: GameProps) {
   const sfx = useSfx();
+  const { text } = useWords();
   const [stage, setStage] = useState(0);
   const [drops, setDrops] = useState(0);
 
@@ -542,7 +549,7 @@ export function GrowFlower({ onWin, won }: GameProps) {
           onClick={water}
           className="rounded-full bg-[var(--c-accent)] px-6 py-3 font-display font-semibold text-[var(--c-accent-text)] shadow-lg active:scale-95"
         >
-          Water it ({stage}/{STAGES})
+          {text("waterIt", { i: stage, n: STAGES })}
         </button>
       )}
     </div>
@@ -558,6 +565,7 @@ type Splat = { id: number; x: number; y: number; color: string; size: number; sh
 
 export function ThrowColours({ onWin, won }: GameProps) {
   const sfx = useSfx();
+  const { text } = useWords();
   const [splats, setSplats] = useState<Splat[]>([]);
   const count = useRef(0);
   const nextId = useRef(0);
@@ -617,7 +625,7 @@ export function ThrowColours({ onWin, won }: GameProps) {
           </span>
         ))}
         {splats.length === 0 && (
-          <p className="pointer-events-none absolute inset-0 grid place-items-center font-display text-lg font-semibold text-neutral-500">Tap to throw colour</p>
+          <p className="pointer-events-none absolute inset-0 grid place-items-center font-display text-lg font-semibold text-neutral-500">{text("colourTap")}</p>
         )}
       </div>
     </div>
@@ -629,6 +637,7 @@ export function ThrowColours({ onWin, won }: GameProps) {
 // Rigged, kindly: the third pull is always the jackpot.
 export function SlotMachine({ onWin, won, symbols }: GameProps & { symbols: IconName[] }) {
   const sfx = useSfx();
+  const { text } = useWords();
   const [reels, setReels] = useState([symbols[1], symbols[2], symbols[3]]);
   const [spinning, setSpinning] = useState([false, false, false]);
   const [pulls, setPulls] = useState(0);
@@ -677,7 +686,7 @@ export function SlotMachine({ onWin, won, symbols }: GameProps & { symbols: Icon
     });
   };
 
-  const message = won ? "Jackpot!" : busy ? "Spinning…" : pulls === 0 ? "Pull the lever!" : pulls === 1 ? "No luck. Try again!" : "So close! One more…";
+  const message = won ? text("slotWin") : busy ? text("spinning") : pulls === 0 ? text("slotStart") : pulls === 1 ? text("slotMiss") : text("slotClose");
   return (
     <div className="flex w-full flex-col items-center gap-4">
       <p className="h-8 font-display text-2xl font-bold">{message}</p>
@@ -699,7 +708,7 @@ export function SlotMachine({ onWin, won, symbols }: GameProps & { symbols: Icon
           disabled={busy}
           className="rounded-full bg-[var(--c-accent)] px-8 py-3.5 font-display text-lg font-semibold text-[var(--c-accent-text)] shadow-lg transition active:scale-95 disabled:opacity-60"
         >
-          Pull
+          {text("slotPull")}
         </button>
       )}
     </div>
@@ -712,6 +721,7 @@ const HUG_MS = 2600;
 
 export function HoldHug({ onWin, won }: GameProps) {
   const sfx = useSfx();
+  const { text } = useWords();
   const [holding, setHolding] = useState(false);
   const [progress, setProgress] = useState(0);
   const value = useRef(0);
@@ -791,7 +801,7 @@ export function HoldHug({ onWin, won }: GameProps) {
           </span>
         </button>
       </div>
-      <p className="font-display text-lg font-semibold">{won ? "Hug delivered!" : holding ? "Keep holding…" : progress > 0 ? "Don't let go!" : "Press and hold"}</p>
+      <p className="font-display text-lg font-semibold">{won ? text("hugDone") : holding ? text("hugHolding") : progress > 0 ? text("hugLetGo") : text("hugStart")}</p>
     </div>
   );
 }

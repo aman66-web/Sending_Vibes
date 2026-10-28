@@ -19,6 +19,7 @@ import {
   TypeItScreen,
 } from "./screens";
 import { playMusic, setMuted, SoundEnabled, unlockAudio, useMuted } from "./sound";
+import { LabelsContext } from "./words";
 
 // A faint paper texture under every card.
 const PAPER_GRAIN =
@@ -31,6 +32,8 @@ type Props = {
   focusScreenId?: string;
   // Changing this jumps back to focusScreenId even if it hasn't changed.
   focusNonce?: number;
+  // Part-way through that screen: the envelope opened, after "yes" (see lib/stages.ts).
+  focusStage?: number;
   // Sound effects and music. Off in previews unless asked for.
   sound?: boolean;
   // Thumbnail mode: no room left for a phone notch.
@@ -42,13 +45,24 @@ type Props = {
   editing?: boolean;
 };
 
-export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 0, sound = !preview, bare = false, onScreenChange, editing = false }: Props) {
+export function CardPlayer({
+  card,
+  preview = false,
+  focusScreenId,
+  focusNonce = 0,
+  focusStage = 0,
+  sound = !preview,
+  bare = false,
+  onScreenChange,
+  editing = false,
+}: Props) {
   const screens = useMemo(
     () => card.screens.filter((s) => preview || s.type !== "photos" || s.photos.length > 0),
     [card.screens, preview],
   );
   const focusIndex = () => Math.max(screens.findIndex((s) => s.id === focusScreenId), 0);
   const [index, setIndex] = useState(focusIndex);
+  const [stage, setStage] = useState(focusScreenId ? focusStage : 0);
   // Bumped on replay so every screen remounts with fresh state.
   const [run, setRun] = useState(0);
 
@@ -59,6 +73,7 @@ export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 
     setFocused(focusTarget);
     if (focusScreenId) {
       setIndex(focusIndex());
+      setStage(focusStage);
       // Start that screen fresh (e.g. the question again, not "after yes").
       setRun((r) => r + 1);
     }
@@ -89,9 +104,13 @@ export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 
   }, [sound, tapped, muted, music]);
 
   const wide = card.layout === "wide";
-  const next = () => setIndex((i) => Math.min(i + 1, screens.length - 1));
+  const go = (i: number) => {
+    setIndex(i);
+    setStage(0);
+  };
+  const next = () => go(Math.min(index + 1, screens.length - 1));
   const replay = () => {
-    setIndex(0);
+    go(0);
     setRun((r) => r + 1);
   };
 
@@ -148,7 +167,7 @@ export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 
             key={s.id}
             aria-label={`Go to step ${i + 1}`}
             disabled={!preview && i > index}
-            onClick={() => setIndex(i)}
+            onClick={() => go(i)}
             className={`h-1.5 rounded-full transition-all ${i === index ? "w-6 bg-[var(--c-accent)]" : "w-1.5 bg-current opacity-30"}`}
           />
         ))}
@@ -156,21 +175,22 @@ export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 
 
       {/* Auto margins centre short screens; long ones (lots of coupons, say) scroll inside previews. */}
       <main className={`flex flex-1 flex-col px-5 py-8 ${preview ? "min-h-0 overflow-y-auto [scrollbar-width:none]" : ""}`}>
-        <div key={`${run}-${current.id}-${editing}`} className={`m-auto w-full animate-screen-in ${wide ? "max-w-4xl" : "max-w-md"}`}>
-          {current.type === "intro" && <IntroScreen screen={current} onNext={next} to={card.to} from={card.from} envelope={look.envelope} />}
-          {current.type === "question" && <QuestionScreen screen={current} onNext={next} />}
-          {current.type === "photos" && <PhotosScreen screen={current} onNext={next} wide={wide} />}
-          {current.type === "message" && <MessageScreen screen={current} onNext={next} />}
-          {current.type === "game" && <GameScreen screen={current} onNext={next} occasion={card.occasion} />}
-          {current.type === "quiz" && <QuizScreen screen={current} onNext={next} />}
-          {current.type === "scratch" && <ScratchScreen screen={current} onNext={next} />}
-          {current.type === "typeit" && <TypeItScreen screen={current} onNext={next} />}
-          {current.type === "wheel" && <WheelScreen screen={current} onNext={next} />}
-          {current.type === "coupons" && <CouponsScreen screen={current} onNext={next} />}
-          {current.type === "reasons" && <ReasonsScreen screen={current} onNext={next} />}
-          {current.type === "slider" && <SliderScreen screen={current} onNext={next} />}
-          {current.type === "timeline" && <TimelineScreen screen={current} onNext={next} />}
-          {current.type === "boxes" && <BoxesScreen screen={current} onNext={next} />}
+        <LabelsContext.Provider value={current.labels}>
+        <div key={`${run}-${current.id}-${stage}-${editing}`} className={`m-auto w-full animate-screen-in ${wide ? "max-w-4xl" : "max-w-md"}`}>
+          {current.type === "intro" && <IntroScreen screen={current} onNext={next} stage={stage} to={card.to} from={card.from} envelope={look.envelope} />}
+          {current.type === "question" && <QuestionScreen screen={current} onNext={next} stage={stage} />}
+          {current.type === "photos" && <PhotosScreen screen={current} onNext={next} stage={stage} wide={wide} />}
+          {current.type === "message" && <MessageScreen screen={current} onNext={next} stage={stage} />}
+          {current.type === "game" && <GameScreen screen={current} onNext={next} stage={stage} occasion={card.occasion} />}
+          {current.type === "quiz" && <QuizScreen screen={current} onNext={next} stage={stage} />}
+          {current.type === "scratch" && <ScratchScreen screen={current} onNext={next} stage={stage} />}
+          {current.type === "typeit" && <TypeItScreen screen={current} onNext={next} stage={stage} />}
+          {current.type === "wheel" && <WheelScreen screen={current} onNext={next} stage={stage} />}
+          {current.type === "coupons" && <CouponsScreen screen={current} onNext={next} stage={stage} />}
+          {current.type === "reasons" && <ReasonsScreen screen={current} onNext={next} stage={stage} />}
+          {current.type === "slider" && <SliderScreen screen={current} onNext={next} stage={stage} />}
+          {current.type === "timeline" && <TimelineScreen screen={current} onNext={next} stage={stage} />}
+          {current.type === "boxes" && <BoxesScreen screen={current} onNext={next} stage={stage} />}
           {current.type === "finale" && (
             <FinaleScreen
               screen={current}
@@ -188,6 +208,7 @@ export function CardPlayer({ card, preview = false, focusScreenId, focusNonce = 
             />
           )}
         </div>
+        </LabelsContext.Provider>
       </main>
 
       {!preview && (

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Game, Occasion } from "@/lib/card";
 import { useReducedMotion } from "./effects";
+import { useWords } from "./words";
 import {
   BubbleWrap,
   type GameProps,
@@ -161,6 +162,7 @@ const DIYAS = 5;
 
 function LightDiyas({ onWin, won }: GameProps) {
   const sfx = useSfx();
+  const { text } = useWords();
   const [lit, setLit] = useState<boolean[]>(() => Array(DIYAS).fill(false));
 
   const light = (i: number) => {
@@ -196,7 +198,7 @@ function LightDiyas({ onWin, won }: GameProps) {
             <circle cx="32" cy="74" r="2.5" fill="#ffd166" opacity={on ? 1 : 0.4} />
             <circle cx="44" cy="70" r="2.5" fill="#ffd166" opacity={on ? 1 : 0.4} />
           </svg>
-          {!on && !won && <span className="absolute -top-1 text-[10px] font-semibold uppercase tracking-[0.2em] opacity-50">tap</span>}
+          {!on && !won && <span className="absolute -top-1 text-[10px] font-semibold uppercase tracking-[0.2em] opacity-50">{text("diyaTap")}</span>}
         </button>
       ))}
     </div>
@@ -274,6 +276,7 @@ function shuffled<T>(items: T[]): T[] {
 
 function MemoryMatch({ onWin, won, occasion }: GameProps & { occasion: Occasion }) {
   const sfx = useSfx();
+  const { text } = useWords();
   const [deck] = useState(() => shuffled([...OCCASION_ICONS[occasion], ...OCCASION_ICONS[occasion]]));
   const [open, setOpen] = useState<number[]>([]);
   const [matched, setMatched] = useState<number[]>([]);
@@ -300,7 +303,7 @@ function MemoryMatch({ onWin, won, occasion }: GameProps & { occasion: Occasion 
   return (
     <div className="w-full">
       <div className="mb-3 text-center font-display text-lg font-semibold">
-        {matched.length / 2} / {deck.length / 2} pairs · {moves} moves
+        {text("memoryScore", { i: matched.length / 2, n: deck.length / 2, moves })}
       </div>
       <div className="mx-auto grid max-w-sm grid-cols-4 gap-2.5 @2xl:max-w-lg">
         {deck.map((symbol, i) => {
@@ -374,6 +377,7 @@ type MotionPermission = { requestPermission?: () => Promise<string> };
 // Built for phones: shaking fills the meter. Tapping works too, so it never gets stuck.
 function ShakeIt({ onWin, won, occasion }: GameProps & { occasion: Occasion }) {
   const sfx = useSfx();
+  const { text } = useWords();
   const sfxRef = useRef(sfx);
   const [power, setPower] = useState(0);
   const [mode, setMode] = useState<"idle" | "shake">("idle");
@@ -432,13 +436,13 @@ function ShakeIt({ onWin, won, occasion }: GameProps & { occasion: Occasion }) {
         <div className="flex flex-col items-center gap-3">
           {mode === "idle" ? (
             <button onClick={start} className="rounded-full bg-[var(--c-accent)] px-6 py-3 font-display font-semibold text-[var(--c-accent-text)] shadow-lg">
-              Start shaking
+              {text("shakeStart")}
             </button>
           ) : (
-            <p className="font-display text-lg font-semibold">Keep shaking…</p>
+            <p className="font-display text-lg font-semibold">{text("shaking")}</p>
           )}
           <button onClick={() => add.current(10)} className="text-sm font-semibold underline underline-offset-4 opacity-75">
-            Can&apos;t shake? Tap here really fast
+            {text("shakeTap")}
           </button>
         </div>
       )}
@@ -451,6 +455,7 @@ const CHASE_TARGET = 5;
 // Built for a mouse: the heart runs from the cursor. Corner it to catch it.
 function CursorChase({ onWin, won }: GameProps) {
   const sfx = useSfx();
+  const { text } = useWords();
   const area = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState({ x: 50, y: 50 });
   const [caught, setCaught] = useState(0);
@@ -483,7 +488,7 @@ function CursorChase({ onWin, won }: GameProps) {
   return (
     <div className="w-full">
       <div className="mb-2 flex items-center justify-center gap-2 font-display text-lg font-semibold">
-        Caught {caught} / {CHASE_TARGET} <HeartSprite className="h-5 w-5" />
+        {text("chaseScore", { i: caught, n: CHASE_TARGET })} <HeartSprite className="h-5 w-5" />
       </div>
       <div
         ref={area}
@@ -501,7 +506,7 @@ function CursorChase({ onWin, won }: GameProps) {
           </button>
         )}
         <p className="pointer-events-none absolute inset-x-0 bottom-3 text-center text-xs font-semibold uppercase tracking-widest opacity-50">
-          Tip: trap it in a corner
+          {text("chaseTip")}
         </p>
       </div>
     </div>

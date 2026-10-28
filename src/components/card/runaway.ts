@@ -58,5 +58,5 @@ export function useRunaway(onDodge?: () => void) {
     style: pos ? { left: pos.x, top: pos.y } : undefined,
   };
 
-  return { area, yes, noProps, dodges, moved: pos !== null, label: (initial: string) => (dodges === 0 ? initial : NO_LINES[(dodges - 1) % NO_LINES.length]) };
+  return { area, yes, noProps, dodges, moved: pos !== null, label: (initial: string, lines: string[] = NO_LINES) => (dodges === 0 ? initial : lines[(dodges - 1) % lines.length]) };
 }

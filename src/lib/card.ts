@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { LABEL_KEYS } from "./labels";
 
 // A card is a list of screens built from a fixed library of building blocks.
 // Keeping it as structured data (not free-form HTML) means templates, the
@@ -125,7 +126,10 @@ export const screenStyle = z.object({
 export type ScreenStyle = z.infer<typeof screenStyle>;
 export type Sticker = z.infer<typeof sticker>;
 
-const screenBase = { id: z.string().min(1).max(40), style: screenStyle.optional() };
+// A screen's own wording for the words built into it (see lib/labels.ts).
+const labels = z.partialRecord(z.enum(LABEL_KEYS), z.union([text(160), z.array(text(80)).min(1).max(12)]));
+
+const screenBase = { id: z.string().min(1).max(40), style: screenStyle.optional(), labels: labels.optional() };
 
 const quizQuestion = z
   .object({

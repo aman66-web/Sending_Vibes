@@ -2,12 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Screen } from "@/lib/card";
+import { SLIDER_STAGES } from "@/lib/stages";
 import { Particles } from "./effects";
-import { PrimaryButton } from "./screens";
+import { NextButton, usePressAt } from "./screens";
 import { useSfx } from "./sound";
+import { useWords } from "./words";
 
 type Of<T extends Screen["type"]> = Extract<Screen, { type: T }>;
-type ScreenProps<T extends Screen["type"]> = { screen: Of<T>; onNext: () => void };
+// `stage` starts the screen part-way through (see lib/stages.ts), for the editor.
+type ScreenProps<T extends Screen["type"]> = { screen: Of<T>; onNext: () => void; stage?: number };
 
 // ---------- Spin the wheel ----------
 
@@ -18,8 +21,9 @@ function point(deg: number, r: number) {
   return `${(Math.cos(a) * r).toFixed(2)} ${(Math.sin(a) * r).toFixed(2)}`;
 }
 
-export function WheelScreen({ screen, onNext }: ScreenProps<"wheel">) {
+export function WheelScreen({ screen, onNext, stage = 0 }: ScreenProps<"wheel">) {
   const sfx = useSfx();
+  const { text } = useWords();
   const options = screen.options;
   const n = options.length;
   const slice = 360 / n;
@@ -28,6 +32,8 @@ export function WheelScreen({ screen, onNext }: ScreenProps<"wheel">) {
   const [result, setResult] = useState<number | null>(null);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
+  const spinButton = useRef<HTMLButtonElement>(null);
+  usePressAt(stage, 1, () => spinButton.current);
 
   const spin = () => {
     if (spinning) return;
@@ -102,19 +108,20 @@ export function WheelScreen({ screen, onNext }: ScreenProps<"wheel">) {
       {result !== null ? (
         <>
           <p className="animate-pop rounded-2xl bg-[var(--c-surface)] px-6 py-3 font-display text-2xl font-semibold italic shadow-sm ring-1 ring-black/5">{options[result]}</p>
-          <PrimaryButton onClick={onNext}>Next</PrimaryButton>
+          <NextButton onClick={onNext} />
           <button onClick={spin} className="text-sm font-semibold underline underline-offset-4 opacity-75">
-            Spin again
+            {text("spinAgain")}
           </button>
         </>
       ) : (
         <button
+          ref={spinButton}
           data-spin
           onClick={spin}
           disabled={spinning}
           className="rounded-full bg-[var(--c-accent)] px-8 py-3.5 font-display text-lg font-semibold text-[var(--c-accent-text)] shadow-lg transition active:scale-95 disabled:opacity-60"
         >
-          {spinning ? "Spinning…" : "Spin the wheel"}
+          {spinning ? text("spinning") : text("spin")}
         </button>
       )}
     </div>
@@ -127,9 +134,10 @@ export function WheelScreen({ screen, onNext }: ScreenProps<"wheel">) {
 const TICKET_MASK =
   "radial-gradient(circle 9px at left center, transparent 98%, #000) left / 51% 100% no-repeat, radial-gradient(circle 9px at right center, transparent 98%, #000) right / 51% 100% no-repeat";
 
-export function CouponsScreen({ screen, onNext }: ScreenProps<"coupons">) {
+export function CouponsScreen({ screen, onNext, stage = 0 }: ScreenProps<"coupons">) {
   const sfx = useSfx();
-  const [redeemed, setRedeemed] = useState<boolean[]>(() => screen.coupons.map(() => false));
+  const { text } = useWords();
+  const [redeemed, setRedeemed] = useState<boolean[]>(() => screen.coupons.map(() => stage >= 1));
   const any = redeemed.some(Boolean);
 
   const redeem = (i: number) => {
@@ -141,7 +149,7 @@ export function CouponsScreen({ screen, onNext }: ScreenProps<"coupons">) {
   return (
     <div className="flex w-full flex-col items-center gap-4 text-center">
       <h2 className="font-display text-3xl font-bold leading-tight">{screen.title}</h2>
-      <p className="text-[var(--c-muted)]">{any ? "Screenshot this to claim it" : screen.instructions}</p>
+      <p className="text-[var(--c-muted)]">{any ? text("couponClaim") : screen.instructions}</p>
       <div className="grid w-full grid-cols-2 gap-3 @2xl:grid-cols-3">
         {screen.coupons.map((c, i) => (
           <button
@@ -152,20 +160,18 @@ export function CouponsScreen({ screen, onNext }: ScreenProps<"coupons">) {
             style={{ mask: TICKET_MASK, WebkitMask: TICKET_MASK, borderRadius: 14 }}
           >
             <span className="absolute inset-1.5 rounded-[10px] border-2 border-dashed border-[var(--c-accent)] opacity-40" />
-            <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[var(--c-accent)]">Coupon</span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[var(--c-accent)]">{text("coupon")}</span>
             <span className="font-display text-base font-bold leading-tight">{c}</span>
-            <span className={`text-[11px] font-semibold opacity-50 ${redeemed[i] ? "invisible" : ""}`}>Tap to redeem</span>
+            <span className={`text-[11px] font-semibold opacity-50 ${redeemed[i] ? "invisible" : ""}`}>{text("couponTap")}</span>
             {redeemed[i] && (
               <span className="absolute bottom-1.5 right-2 animate-stamp rounded-md border-2 border-red-600 bg-white/80 px-1.5 font-display text-xs font-black uppercase tracking-wider text-red-600">
-                Redeemed ✓
+                {text("couponDone")}
               </span>
             )}
           </button>
         ))}
       </div>
-      <PrimaryButton onClick={onNext} className={any ? "animate-pop" : ""}>
-        Next
-      </PrimaryButton>
+      <NextButton onClick={onNext} className={any ? "animate-pop" : ""} />
     </div>
   );
 }
@@ -174,10 +180,11 @@ export function CouponsScreen({ screen, onNext }: ScreenProps<"coupons">) {
 
 const SLIP_COLORS = ["#fde68a", "#fbcfe8", "#bfdbfe", "#bbf7d0", "#ddd6fe", "#fed7aa"];
 
-export function ReasonsScreen({ screen, onNext }: ScreenProps<"reasons">) {
+export function ReasonsScreen({ screen, onNext, stage = 0 }: ScreenProps<"reasons">) {
   const sfx = useSfx();
+  const { text } = useWords();
   const total = screen.reasons.length;
-  const [pulled, setPulled] = useState(0);
+  const [pulled, setPulled] = useState(Math.min(stage, total));
   const done = pulled >= total;
 
   const pull = () => {
@@ -190,7 +197,7 @@ export function ReasonsScreen({ screen, onNext }: ScreenProps<"reasons">) {
     <div className="flex w-full flex-col items-center gap-4 text-center">
       {done && <Particles mode="confetti" />}
       <h2 className="font-display text-3xl font-bold leading-tight">{screen.title}</h2>
-      <p className="text-[var(--c-muted)]">{done ? "That's all of them… for now." : screen.instructions}</p>
+      <p className="text-[var(--c-muted)]">{done ? text("jarEmpty") : screen.instructions}</p>
       <div className="flex min-h-32 w-full items-center justify-center">
         {pulled > 0 ? (
           <div
@@ -199,12 +206,12 @@ export function ReasonsScreen({ screen, onNext }: ScreenProps<"reasons">) {
             style={{ background: SLIP_COLORS[(pulled - 1) % SLIP_COLORS.length], transform: `rotate(${pulled % 2 ? -2 : 2}deg)` }}
           >
             <p className="text-xs font-bold uppercase tracking-widest opacity-60">
-              Reason #{pulled} of {total}
+              {text("jarCount", { i: pulled, n: total })}
             </p>
             <p className="mt-1 font-hand text-2xl leading-snug">{screen.reasons[pulled - 1]}</p>
           </div>
         ) : (
-          <p className="font-display text-lg font-semibold opacity-80">Tap the jar</p>
+          <p className="font-display text-lg font-semibold opacity-80">{text("jarTap")}</p>
         )}
       </div>
       <button data-jar={done ? undefined : true} onClick={pull} aria-label={done ? "The jar is empty" : "Take a note from the jar"} className="relative h-44 w-36">
@@ -230,26 +237,22 @@ export function ReasonsScreen({ screen, onNext }: ScreenProps<"reasons">) {
           </span>
         </span>
       </button>
-      <PrimaryButton onClick={onNext} className={done ? "animate-pop" : "invisible"}>
-        Next
-      </PrimaryButton>
+      <NextButton onClick={onNext} className={done ? "animate-pop" : "invisible"} />
     </div>
   );
 }
 
 // ---------- The slider that only goes up ----------
 
-const SLIDER_LINES: [number, string][] = [
-  [30, "Hmm. Be honest…"],
-  [55, "Getting warmer…"],
-  [80, "That's more like it."],
-  [100, "Nearly there…"],
-];
+// Where the slider's lines change, as it climbs (the lines themselves are labels).
+const SLIDER_STEPS = [30, 55, 80, 100];
 
-export function SliderScreen({ screen, onNext }: ScreenProps<"slider">) {
+export function SliderScreen({ screen, onNext, stage = 0 }: ScreenProps<"slider">) {
   const sfx = useSfx();
-  const [value, setValue] = useState(18);
-  const current = useRef(18);
+  const { text, list } = useWords();
+  const start = SLIDER_STAGES[stage] ?? SLIDER_STAGES[0];
+  const [value, setValue] = useState(start);
+  const current = useRef(start);
   const last = useRef<number | null>(null);
   const done = value >= 100;
 
@@ -271,7 +274,9 @@ export function SliderScreen({ screen, onNext }: ScreenProps<"slider">) {
     bump((dx / width) * 70);
   };
 
-  const line = done ? screen.winText : (SLIDER_LINES.find(([max]) => value < max)?.[1] ?? "");
+  const lines = list("sliderLines");
+  const step = SLIDER_STEPS.findIndex((max) => value < max);
+  const line = done ? screen.winText : step >= 0 ? (lines[Math.min(step, lines.length - 1)] ?? "") : "";
   return (
     <div className="flex w-full flex-col items-center gap-5 text-center">
       {done && <Particles mode="confetti" />}
@@ -319,20 +324,19 @@ export function SliderScreen({ screen, onNext }: ScreenProps<"slider">) {
           <span>{screen.high}</span>
         </div>
       </div>
-      {!done && <p className="text-xs font-semibold uppercase tracking-widest opacity-50">Drag the heart</p>}
-      <PrimaryButton onClick={onNext} className={done ? "animate-pop" : "invisible"}>
-        Next
-      </PrimaryButton>
+      {!done && <p className="text-xs font-semibold uppercase tracking-widest opacity-50">{text("sliderDrag")}</p>}
+      <NextButton onClick={onNext} className={done ? "animate-pop" : "invisible"} />
     </div>
   );
 }
 
 // ---------- Our story so far ----------
 
-export function TimelineScreen({ screen, onNext }: ScreenProps<"timeline">) {
+export function TimelineScreen({ screen, onNext, stage = 0 }: ScreenProps<"timeline">) {
   const sfx = useSfx();
+  const { text } = useWords();
   const total = screen.events.length;
-  const [shown, setShown] = useState(1);
+  const [shown, setShown] = useState(Math.min(stage + 1, total));
   const done = shown >= total;
 
   const reveal = () => {
@@ -359,16 +363,14 @@ export function TimelineScreen({ screen, onNext }: ScreenProps<"timeline">) {
         ))}
       </ol>
       {done ? (
-        <PrimaryButton onClick={onNext} className="animate-pop">
-          Next
-        </PrimaryButton>
+        <NextButton onClick={onNext} className="animate-pop" />
       ) : (
         <button
           data-reveal-next
           onClick={reveal}
           className="rounded-full bg-[var(--c-secondary)] px-6 py-3 font-display font-semibold text-[var(--c-text)] shadow ring-1 ring-black/10 transition hover:-translate-y-0.5"
         >
-          And then… ({shown}/{total})
+          {text("timelineMore", { i: shown, n: total })}
         </button>
       )}
     </div>
@@ -377,12 +379,15 @@ export function TimelineScreen({ screen, onNext }: ScreenProps<"timeline">) {
 
 // ---------- Pick a box ----------
 
-export function BoxesScreen({ screen, onNext }: ScreenProps<"boxes">) {
+export function BoxesScreen({ screen, onNext, stage = 0 }: ScreenProps<"boxes">) {
   const sfx = useSfx();
+  const { text } = useWords();
   const [picked, setPicked] = useState<number | null>(null);
   const [others, setOthers] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   useEffect(() => () => clearTimeout(timer.current), []);
+  const row = useRef<HTMLDivElement>(null);
+  usePressAt(stage, 1, () => row.current?.querySelector<HTMLElement>("[data-box]"));
 
   const pick = (i: number) => {
     if (picked !== null) return;
@@ -396,8 +401,8 @@ export function BoxesScreen({ screen, onNext }: ScreenProps<"boxes">) {
     <div className="flex w-full flex-col items-center gap-5 text-center">
       {picked !== null && <Particles mode="confetti" />}
       <h2 className="font-display text-3xl font-bold leading-tight">{screen.title}</h2>
-      <p className="text-[var(--c-muted)]">{picked !== null ? "You picked…" : screen.instructions}</p>
-      <div className="flex w-full items-end justify-center gap-4 pt-10">
+      <p className="text-[var(--c-muted)]">{picked !== null ? text("boxesPicked") : screen.instructions}</p>
+      <div ref={row} className="flex w-full items-end justify-center gap-4 pt-10">
         {screen.prizes.map((prize, i) => {
           const open = picked === i || (others && picked !== null);
           const mine = picked === i;
@@ -433,9 +438,7 @@ export function BoxesScreen({ screen, onNext }: ScreenProps<"boxes">) {
           );
         })}
       </div>
-      <PrimaryButton onClick={onNext} className={picked !== null ? "animate-pop" : "invisible"}>
-        Next
-      </PrimaryButton>
+      <NextButton onClick={onNext} className={picked !== null ? "animate-pop" : "invisible"} />
     </div>
   );
 }
