@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import type { CardData, Sticker } from "@/lib/card";
-import { screenLook } from "@/lib/screen-style";
+import type { CardData, ScreenStyle } from "@/lib/card";
+import { FONT_VARS, screenLook } from "@/lib/screen-style";
 import { themes } from "@/lib/themes";
 import { Backdrop, BurstContext } from "./effects";
 import { BoxesScreen, CouponsScreen, ReasonsScreen, SliderScreen, TimelineScreen, WheelScreen } from "./more-screens";
@@ -143,7 +143,6 @@ export function CardPlayer({
         <div aria-hidden className="pointer-events-none absolute inset-0" style={{ backgroundImage: look.pattern.image, backgroundSize: look.pattern.size }} />
       )}
       <Backdrop effect={current?.style?.effect ?? card.ambient} />
-      {current?.style?.stickers && <Stickers key={`${run}-${current.id}`} stickers={current.style.stickers} />}
       {/* A printed double border, like a real card. */}
       <div aria-hidden className="pointer-events-none absolute inset-2.5 rounded-[14px] border border-current opacity-[0.16]" />
       <div aria-hidden className="pointer-events-none absolute inset-[15px] rounded-[10px] border border-current opacity-[0.08]" />
@@ -213,6 +212,8 @@ export function CardPlayer({
         </LabelsContext.Provider>
       </main>
 
+      {current?.style && <Decorations key={`${run}-${current.id}`} style={current.style} editing={editing} />}
+
       {!preview && (
         <p className="relative z-10 pb-4 text-center text-xs opacity-60">
           From {card.from} to {card.to} · made with Envelette
@@ -223,20 +224,61 @@ export function CardPlayer({
   );
 }
 
-// A screen's stickers: emoji placed around it, behind the words. Sizes are a share of
-// the card's shorter side, so they look the same on a phone and a computer.
-function Stickers({ stickers }: { stickers: Sticker[] }) {
+// What's placed on top of a screen: emoji stickers, text boxes and photos, each at a
+// spot given as a share of the card's width and height. Sizes are a share of the card's
+// shorter side, so they look the same on a phone and a computer. They let taps through
+// to the card underneath, except while editing, when the editor can pick them out
+// (data-deco) to change or drag them.
+function Decorations({ style, editing }: { style: ScreenStyle; editing: boolean }) {
+  const { stickers = [], texts = [], images = [] } = style;
+  if (!stickers.length && !texts.length && !images.length) return null;
+  const place = (x: number, y: number, rotate = 0) => ({ left: `${x}%`, top: `${y}%`, rotate: `${rotate}deg`, translate: "-50% -50%" });
+  const item = `absolute ${editing ? "pointer-events-auto" : ""}`;
   return (
-    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+    <div aria-hidden data-deco-layer className="pointer-events-none absolute inset-0 z-20 overflow-hidden">
+      {images.map((img, i) => (
+        <span key={`i${i}`} data-deco={`image:${i}`} className={`${item} animate-pop`} style={{ ...place(img.x, img.y, img.rotate), width: `${img.size}cqmin` }}>
+          {/* eslint-disable-next-line @next/next/no-img-element -- their own photos, already resized on upload */}
+          <img
+            src={img.src}
+            alt=""
+            draggable={false}
+            className={
+              img.frame === "round"
+                ? "aspect-square w-full rounded-full object-cover shadow-lg ring-4 ring-white"
+                : img.frame === "plain"
+                  ? "w-full rounded-lg shadow-lg"
+                  : "w-full bg-white p-[5%] pb-[16%] shadow-xl"
+            }
+          />
+        </span>
+      ))}
       {stickers.map((s, i) => (
         <span
-          key={i}
-          className="absolute animate-pop leading-none"
-          style={{ left: `${s.x}%`, top: `${s.y}%`, fontSize: `${s.size}cqmin`, rotate: `${s.rotate ?? 0}deg`, translate: "-50% -50%", animationDelay: `${i * 80}ms` }}
+          key={`s${i}`}
+          data-deco={`sticker:${i}`}
+          className={`${item} animate-pop leading-none`}
+          style={{ ...place(s.x, s.y, s.rotate), fontSize: `${s.size}cqmin`, animationDelay: `${i * 80}ms` }}
         >
           <span className={`block ${s.motion && s.motion !== "none" ? `sticker-${s.motion}` : ""}`} style={{ animationDelay: `${-i * 0.7}s` }}>
             {s.emoji}
           </span>
+        </span>
+      ))}
+      {texts.map((t, i) => (
+        <span
+          key={`t${i}`}
+          data-deco={`text:${i}`}
+          className={`${item} max-w-[92%] animate-screen-in whitespace-pre-wrap text-center font-semibold leading-tight`}
+          style={{
+            ...place(t.x, t.y, t.rotate),
+            fontSize: `${t.size}cqmin`,
+            color: t.color ?? "var(--c-text)",
+            fontFamily: t.font ? `var(${FONT_VARS[t.font]})` : "var(--card-display, var(--font-display-face))",
+            width: "max-content",
+          }}
+        >
+          {t.text}
         </span>
       ))}
     </div>

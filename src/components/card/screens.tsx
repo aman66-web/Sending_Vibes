@@ -93,6 +93,7 @@ export function IntroScreen({
           slides up; tapping it again carries on, like the button underneath. */}
       <button
         ref={envelopeButton}
+        data-envelope
         aria-label={open ? screen.title : "Open the envelope"}
         onClick={() => {
           if (opened) return onNext();
