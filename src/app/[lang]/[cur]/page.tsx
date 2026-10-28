@@ -81,17 +81,8 @@ export default async function Home() {
             <p className="mx-auto mt-6 max-w-lg text-base leading-relaxed text-ink/75 sm:text-xl lg:mx-0">
               {h.intro}
             </p>
-            <p className="mt-8 text-sm font-bold uppercase tracking-wide text-ink/55">{h.waysLabel}</p>
-            <div className="mt-3 flex flex-wrap justify-center gap-3 lg:justify-start">
-              <Link href="/create?start=custom" className="btn btn-red px-6 py-3.5 text-base sm:text-lg">
-                ✨ {t.create.personalTitle} · {fmt(t.create.fromPrice, { price: aiPrice })}
-              </Link>
-              <Link href="/create?start=premade" className="btn btn-paper px-6 py-3.5 text-base sm:text-lg">
-                🎨 {t.create.readyTitle} · {price}
-              </Link>
-            </div>
-            <Link href="/cards" className="mt-4 inline-block font-semibold underline decoration-hot decoration-2 underline-offset-4">
-              {fmt(h.seeAll, { n })} →
+            <Link href="/create" className="btn btn-red mt-8 px-8 py-4 text-lg sm:text-xl">
+              {h.cta}
             </Link>
             <p className="mt-6 text-sm font-semibold text-ink/55">
               {h.reassure}
@@ -130,7 +121,7 @@ export default async function Home() {
                   <div className="space-y-2 text-sm font-bold">
                     <span className="block rounded-xl border-2 border-ink bg-hot px-3 py-2 text-white">
                       ✨ {t.create.personalTitle}
-                      <span className="block text-xs font-semibold opacity-80">{fmt(t.create.fromPrice, { price: aiPrice })}</span>
+                      <span className="block text-xs font-semibold opacity-80">{aiPrice}</span>
                     </span>
                     <span className="block rounded-xl border-2 border-ink/20 bg-paper px-3 py-2">
                       🎨 {t.create.readyTitle}

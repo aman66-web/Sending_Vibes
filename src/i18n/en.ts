@@ -296,10 +296,10 @@ export const en = {
     h1c: "cards.",
     intro: "They open an envelope, play a little game, flick through your photos and find your message at the end. You just fill in the blanks.",
     seeAll: "See all {n} designs",
-    waysLabel: "Two ways to make yours:",
+    cta: "Make your card today →",
     waysTitle: "Two ways to make your card",
     waysIntro: "Both start with a few quick questions about them, and you can change anything before you send it.",
-    reassure: "No app to download. No account. Ready in minutes.",
+    reassure: "No app to download. Ready in minutes.",
     comingUp: "Coming up",
     comingUpIntro: "Sort it now and it's one less thing to remember.",
     allOccasions: "All {n} occasions →",
@@ -349,7 +349,7 @@ export const en = {
     tierCard: "Ready-made design",
     tierCardPoints: ["Any of the {n} designs", "We write your words into it", "Up to 6 of your photos", "Every game, quiz and effect"],
     tierAi: "Personalised",
-    tierAiPoints: ["Everything in the {price} card", "Made from scratch around your answers", "Change anything by typing", "Add, remove and reorder screens"],
+    tierAiPoints: ["Made from scratch around your answers", "Every game, quiz and effect", "Change anything by typing", "Add, remove and reorder screens"],
     faqTitle: "Questions people ask",
     faqs: [
       { q: "Do they need to download an app?", a: "No. It's a link. They tap it and it opens in their browser, on any phone, tablet or computer." },
@@ -362,13 +362,13 @@ export const en = {
       { q: "How long does it take to make one?", a: "A few minutes. Answer 8 quick questions, add photos if you like, change anything you want, and you'll get your link." },
       {
         q: "What does it cost?",
-        a: "A ready-made design is {price} and a personalised card, made from scratch around your answers, is {aiPrice}. Paid once, no subscription.",
+        a: "Every card is {price}, whether it's personalised or a ready-made design. Paid once, no subscription.",
       },
     ],
     faqMore: "Anything else? The [help page](/help) has the rest.",
     finalTitle: "Go on. Make someone's day.",
     finalCta: "Make your card →",
-    finalNote: "{price} a card. No sign-up needed.",
+    finalNote: "{price} a card. No app to download.",
   },
 
   hero: {
@@ -488,7 +488,7 @@ export const en = {
     yourName: "Your name",
     colours: "Colours",
     customise: "Customise this card →",
-    noSignup: "No sign-up. Takes about two minutes.",
+    noSignup: "No app to download. Ready in minutes.",
     inside: "What's inside",
     canChange: "What you can change",
     changes: {
@@ -542,7 +542,7 @@ export const en = {
             q: "Does it work on phones and computers?",
             a: "Yes. Every card works on any phone, tablet or computer. While you're making one, you can switch the preview between a phone and a computer to see how it looks on both.",
           },
-          { q: "Do I need an account?", a: "No. You can make, buy and send a card without one." },
+          { q: "Do I need an account?", a: "You sign up with Google or your email just before your card is made, so it's saved to your account and you can find it again on any device. It's free and takes a few seconds. The person you send it to doesn't need one." },
           { q: "What occasions do you have cards for?", a: "{o} occasions, from birthdays, Valentine's Day, Diwali, Eid and Christmas to thank-yous, apologies, get-well-soon and leaving cards. See them all on the [occasions page](/occasions)." },
         ],
       },
@@ -555,7 +555,7 @@ export const en = {
           },
           {
             q: "What's the difference between personalised and a ready-made design?",
-            a: "A **personalised** card ({aiPrice}) is made from scratch around your answers: we choose the screens, games, colours and music, and write every word. A **ready-made design** ({price}) keeps one of our designs exactly as it is, and fills in the words and photos from your answers. You can edit both afterwards.",
+            a: "A **personalised** card is made from scratch around your answers: we choose the screens, games, colours and music, and write every word. A **ready-made design** keeps one of our designs exactly as it is, and fills in the words and photos from your answers. Both cost {price}, and you can edit both afterwards.",
           },
           {
             q: "What are the 8 questions?",
@@ -572,7 +572,7 @@ export const en = {
           },
           {
             q: "Can I change the card once it's made?",
-            a: "Yes, as much as you like before you buy. Click any words on the preview and type over them, swap photos, change the colours, background effect and music, or type what you'd like changed, like \"make the quiz about our trip to Rome\". On a ready-made design, adding, removing or reordering screens, or changing it by typing, makes it a personalised card ({aiPrice}).",
+            a: "Yes, as much as you like before you buy. Click any words on the preview and type over them, swap photos, change the colours, background effect and music, or type what you'd like changed, like \"make the quiz about our trip to Rome\". On a ready-made design, adding, removing or reordering screens, or changing it by typing, turns it into a personalised card, at no extra cost.",
           },
           {
             q: "Can I add my own photos?",
@@ -590,7 +590,7 @@ export const en = {
       {
         title: "Paying",
         items: [
-          { q: "How much does a card cost?", a: "{price} for a ready-made design and {aiPrice} for a personalised card, paid once. No subscription and no hidden extras." },
+          { q: "How much does a card cost?", a: "{price} per card, whether it's personalised or a ready-made design. Paid once, no subscription and no hidden extras." },
           { q: "How do I pay?", a: "By card, through Stripe's secure checkout. We never see or store your card details." },
           { q: "Can I buy more than one card?", a: "Yes. Add as many as you like to your basket and pay for them together. Each card can be sent its own way." },
           { q: "Do you have discount codes?", a: "When we're running an offer, you can enter the code on the checkout page." },
@@ -651,7 +651,7 @@ export const en = {
           "any photos you add",
           "the design, colours, music and effects you chose",
         ],
-        after: "You don't need an account. If you choose to sign in with Google, we keep the name and email address Google shares with us so we can show you the cards you've bought. When you pay, Stripe passes us your email address so we can send your receipt and links. If you ask us to email a card, we keep the recipient's email address to send it. We never use any of these for marketing.",
+        after: "To make a card you sign up with Google or your email address. We keep your email address (and your name, if Google shares it) so we can show you your cards. When you pay, Stripe passes us your email address so we can send your receipt and links. If you ask us to email a card, we keep the recipient's email address to send it. We never use any of these for marketing.",
       },
       {
         title: "Who can see a card",
@@ -824,7 +824,7 @@ export const en = {
     readyBody: "Choose one of our {n} designs and answer the same 8 questions. We'll write your words into it and add your photos. The design stays just as it is.",
     readySteps: ["Pick a design", "Answer 8 quick questions", "We fill in your words and photos"],
     readyCta: "Choose a design",
-    fromPrice: "from {price}",
+    option: "Option {n}",
     pickTitle: "Pick your design",
     pickIntro: "Next we'll ask a few questions about them and write your words into it. The design stays just as it is.",
     pickHint: "Tap a design to choose it.",
@@ -898,7 +898,7 @@ export const en = {
     badCode: "That code didn't work. Check it and try again, or send a new one.",
     codeFailed: "We couldn't send a code just now. Please try again.",
     tooMany: "That's a lot of tries. Please wait a few minutes and try again.",
-    noAccountNeeded: "You don't need an account to buy a card. Signing in just keeps them all in one place.",
+    noAccountNeeded: "Signing in keeps all your cards in one place, on any device.",
     off: "Signing in isn't switched on yet. Your card links are in your receipt email.",
     signInFailed: "That sign-in didn't work. Please try again.",
     signedInAs: "Signed in as {email}",
@@ -994,12 +994,11 @@ export const en = {
     thisScreen: "Change this screen: {name}",
     thisScreenPlaceholder: "e.g. make this funnier, add his nickname, say it's from all of us",
     go: "Change",
-    typingMakesCustom: "Changing it by typing makes it a personalised card ({price}).",
     changing: "Making the change…",
     changed: "Done. Have a look at the preview.",
     undo: "Undo",
     premadeNote: "This is a ready-made design, so its screens stay as they are. You can still change every word, photo, colour and tune.",
-    unlock: "Want to add, remove or reorder screens, or change it by typing? Make it personalised ({price})",
+    unlock: "Want to add, remove or reorder screens, or change it by typing? Unlock everything, at no extra cost",
     errors: {
       describe: "Tell us a little more about the card you'd like.",
       off: "Making cards by typing isn't switched on yet. Please pick a template for now.",

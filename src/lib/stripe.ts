@@ -22,7 +22,7 @@ const priceIds = new Map<string, string | null>();
 
 const PRODUCTS: Record<Tier, { lookup: string; name: string; description: string }> = {
   premade: { lookup: "card", name: "Interactive card", description: "A personalised interactive e-card, delivered by link" },
-  custom: { lookup: "custom_card", name: "Custom interactive card", description: "An interactive e-card made to your description, delivered by link" },
+  custom: { lookup: "custom_card", name: "Personalised interactive card", description: "An interactive e-card made from your answers, delivered by link" },
 };
 
 // A card's price as a line item. Uses the catalogue price with lookup key card_gbp,

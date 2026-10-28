@@ -12,7 +12,7 @@ import { EFFECTS, OCCASIONS, THEMES, type CardData, type Effect, type Occasion, 
 import { ProductThumb } from "@/components/catalog/ProductThumb";
 import { TEMPLATES, cardTier, getTemplate, toneInfo } from "@/lib/catalog";
 import { occasions } from "@/lib/templates";
-import { formatMoney, price, tierPrice } from "@/lib/pricing";
+import { formatMoney, tierPrice } from "@/lib/pricing";
 import { themes } from "@/lib/themes";
 import { fmt } from "@/i18n/config";
 import { useI18n } from "@/i18n/client";
@@ -747,7 +747,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
               <div className="rounded-2xl border border-dashed border-line p-4 text-sm">
                 <p className="opacity-70">{x.premadeNote}</p>
                 <button onClick={() => setMode("custom")} className="mt-2 text-start font-semibold text-brand underline-offset-4 hover:underline">
-                  {fmt(x.unlock, { price: price("custom", currency) })}
+                  {x.unlock}
                 </button>
               </div>
             )}
@@ -867,7 +867,6 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                 value={screenAsk}
                 onChange={setScreenAsk}
                 busy={busy !== null}
-                premade={mode === "premade"}
                 onSubmit={(id) => changeByTyping(screenAsk, id)}
               />
               <PreviewControls card={card} viewing={viewing} onGo={goToScreen} wordMode={wordMode} setWordMode={setWordMode} />
@@ -921,7 +920,6 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
               value={screenAsk}
               onChange={setScreenAsk}
               busy={busy !== null}
-              premade={mode === "premade"}
               onSubmit={(id) => changeByTyping(screenAsk, id)}
             />
           </div>
@@ -1011,13 +1009,12 @@ type ScreenAskProps = {
   value: string;
   onChange: (value: string) => void;
   busy: boolean;
-  premade: boolean;
   onSubmit: (screenId: string) => void;
 };
 
 // Type a change to whichever screen the preview is showing.
-function ScreenAsk({ card, viewing, value, onChange, busy, premade, onSubmit }: ScreenAskProps) {
-  const { t, currency } = useI18n();
+function ScreenAsk({ card, viewing, value, onChange, busy, onSubmit }: ScreenAskProps) {
+  const { t } = useI18n();
   const x = t.custom;
   const i = Math.max(card.screens.findIndex((s) => s.id === viewing), 0);
   const screen = card.screens[i];
@@ -1047,7 +1044,6 @@ function ScreenAsk({ card, viewing, value, onChange, busy, premade, onSubmit }: 
           {x.go}
         </button>
       </div>
-      {premade && <p className="mt-2 text-xs opacity-60">{fmt(x.typingMakesCustom, { price: price("custom", currency) })}</p>}
     </form>
   );
 }
