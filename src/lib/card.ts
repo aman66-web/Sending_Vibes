@@ -79,7 +79,53 @@ function isSupabasePhotoUrl(u: string) {
   return !!base && u.startsWith(`${base}/storage/v1/object/public/photos/`);
 }
 
-const screenBase = { id: z.string().min(1).max(40) };
+// How one screen looks, written by the AI from what they describe. Every part is
+// optional and falls back to the card's theme. Colours are plain hex and the rest are
+// fixed choices, so nothing here can carry CSS or links of its own; dark-on-dark text
+// is fixed when the screen is shown (see lib/screen-style.ts).
+export const FONTS = ["classic", "modern", "handwritten", "storybook", "script", "rounded", "bold", "typewriter", "marker", "spooky"] as const;
+export const GRADIENTS = ["down", "diagonal", "glow"] as const;
+export const PATTERNS = ["none", "dots", "stripes", "grid", "checks", "zigzag"] as const;
+export const MOTIONS = ["none", "float", "spin", "pulse", "sway", "bounce"] as const;
+export type Font = (typeof FONTS)[number];
+export type Pattern = (typeof PATTERNS)[number];
+export type Motion = (typeof MOTIONS)[number];
+
+const hex = z.string().regex(/^#[0-9a-fA-F]{6}$/, "A colour must be like #1a2b3c");
+
+// An emoji or two, never words.
+const sticker = z.object({
+  emoji: z
+    .string()
+    .max(16)
+    .regex(/^(?:\p{Extended_Pictographic}|\p{Regional_Indicator}|\p{Emoji_Modifier}|\u200d|\ufe0f|\u20e3)+$/u, "A sticker must be an emoji"),
+  x: z.number().min(0).max(100),
+  y: z.number().min(0).max(100),
+  size: z.number().min(4).max(40),
+  rotate: z.number().min(-180).max(180).optional(),
+  motion: z.enum(MOTIONS).optional(),
+});
+
+export const screenStyle = z.object({
+  // One colour is a plain background; two or three make a gradient.
+  background: z.array(hex).min(1).max(3).optional(),
+  gradient: z.enum(GRADIENTS).optional(),
+  pattern: z.enum(PATTERNS).optional(),
+  text: hex.optional(),
+  accent: hex.optional(),
+  // The envelope's paper, on the intro.
+  envelope: hex.optional(),
+  heading: z.enum(FONTS).optional(),
+  body: z.enum(FONTS).optional(),
+  // Floating in the background of this screen instead of the card's own.
+  effect: z.enum(EFFECTS).optional(),
+  stickers: z.array(sticker).max(10).optional(),
+});
+
+export type ScreenStyle = z.infer<typeof screenStyle>;
+export type Sticker = z.infer<typeof sticker>;
+
+const screenBase = { id: z.string().min(1).max(40), style: screenStyle.optional() };
 
 const quizQuestion = z
   .object({

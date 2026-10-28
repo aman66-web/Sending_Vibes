@@ -30,9 +30,9 @@
   /* Fraunces and Figtree only have Latin letters; Indian and Arabic scripts fall through to Noto. */
   --font-sans: var(--font-ui-face), var(--font-devanagari), var(--font-gurmukhi), var(--font-gujarati), var(--font-bengali), var(--font-arabic), system-ui, sans-serif;
   --font-brand: var(--font-brand-face), var(--font-devanagari), var(--font-gurmukhi), var(--font-gujarati), var(--font-bengali), var(--font-arabic), serif;
-  /* Inside the cards. */
-  --font-card: var(--font-ui-face);
-  --font-display: var(--font-display-face);
+  /* Inside the cards. A screen can swap either font for another (see lib/screen-style.ts). */
+  --font-card: var(--card-body, var(--font-ui-face));
+  --font-display: var(--card-display, var(--font-display-face));
   --font-hand: var(--font-hand-face);
 
   /* Stationery palette for the site (doesn't flip in dark mode): paper, ink,
@@ -282,6 +282,18 @@ body {
       linear-gradient(#000 0 0) content-box;
   }
 }
+
+/* Stickers on a card's screens, each moving in its own way (see CardPlayer). */
+.sticker-float { animation: sticker-float 4.5s ease-in-out infinite; }
+.sticker-spin { animation: sticker-spin 12s linear infinite; }
+.sticker-pulse { animation: sticker-pulse 2.4s ease-in-out infinite; }
+.sticker-sway { animation: sticker-sway 3.2s ease-in-out infinite; transform-origin: 50% 90%; }
+.sticker-bounce { animation: sticker-bounce 1.8s cubic-bezier(0.34, 1.4, 0.64, 1) infinite; }
+@keyframes sticker-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-14%); } }
+@keyframes sticker-spin { to { transform: rotate(360deg); } }
+@keyframes sticker-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.14); } }
+@keyframes sticker-sway { 0%, 100% { transform: rotate(-9deg); } 50% { transform: rotate(9deg); } }
+@keyframes sticker-bounce { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-22%); } 60% { transform: translateY(0); } }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

@@ -336,12 +336,13 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       const changed = await callAi({ prompt: prompt.trim(), card, focus }, { to: card.to, from: card.from });
       setUndo(card);
       setCard(changed);
+      if (!focus || prompt === ask) setAsk("");
+      if (prompt === screenAsk) setScreenAsk("");
       if (focus) {
-        setScreenAsk("");
         // Show that screen again from the start, with the change.
         setSelected(focus);
         setNudge((n) => n + 1);
-      } else setAsk("");
+      }
       setAiDone(true);
     } catch (e) {
       setAiError(e instanceof Error ? e.message : x.errors.failed);
@@ -593,7 +594,8 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                   className="space-y-3"
                   onSubmit={(e) => {
                     e.preventDefault();
-                    changeByTyping();
+                    // About the screen they're looking at, unless it's clearly about the whole card.
+                    changeByTyping(ask, viewing);
                   }}
                 >
                   <textarea
@@ -609,6 +611,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                     placeholder={x.changePlaceholder}
                     className="w-full resize-y rounded-xl border border-line bg-background px-3 py-2.5 outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
                   />
+                  <LookingAt card={card} viewing={viewing} />
                   <div className="flex flex-wrap items-center gap-3">
                     <button disabled={busy !== null || ask.trim().length < 3} className="rounded-full bg-brand px-5 py-2.5 font-semibold text-white disabled:opacity-50">
                       {busy === "change" ? <Making lines={[x.changing]} /> : x.change}
@@ -678,14 +681,6 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                 ))}
                 </div>
               </div>
-              <ScreenAsk
-                card={card}
-                viewing={viewing}
-                value={screenAsk}
-                onChange={setScreenAsk}
-                busy={busy !== null}
-                onSubmit={(id) => changeByTyping(screenAsk, id)}
-              />
               <PreviewControls card={card} viewing={viewing} onGo={goToScreen} wordMode={wordMode} />
               <div className="relative">
                 <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onOther={() => setSelected(viewing)}>
@@ -814,6 +809,16 @@ type ScreenAskProps = {
 };
 
 // Type a change to whichever screen the preview is showing.
+// Which screen a typed change goes on.
+function LookingAt({ card, viewing }: { card: CardData; viewing: string | undefined }) {
+  const { t } = useI18n();
+  const i = Math.max(card.screens.findIndex((s) => s.id === viewing), 0);
+  const screen = card.screens[i];
+  if (!screen) return null;
+  return <p className="text-sm opacity-70">{fmt(t.custom.lookingAt, { n: i + 1, name: t.labels.screens[screen.type] })}</p>;
+}
+
+// On a phone the preview covers the typing box, so it has its own box for the screen showing.
 function ScreenAsk({ card, viewing, value, onChange, busy, onSubmit }: ScreenAskProps) {
   const { t } = useI18n();
   const x = t.custom;

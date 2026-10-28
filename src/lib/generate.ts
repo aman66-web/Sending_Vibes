@@ -1,7 +1,7 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { customAlphabet } from "nanoid";
-import { EFFECTS, GAMES, MUSIC, OCCASIONS, THEMES, cardSchema, type CardData, type Game, type Screen, type ScreenType } from "./card";
+import { EFFECTS, FONTS, GAMES, MOTIONS, MUSIC, OCCASIONS, PATTERNS, THEMES, cardSchema, screenStyle, type CardData, type Game, type Screen, type ScreenType } from "./card";
 import { LANGUAGES, type Locale } from "@/i18n/config";
 import { TEMPLATES, buildCard, getTemplate } from "./catalog";
 
@@ -67,6 +67,24 @@ ${gameNotes()}
 - boxes: {"type":"boxes","title" 120,"instructions" 200,"prizes":[2 or 3 prizes, 80 each]}. They pick one of the mystery boxes.
 - finale: {"type":"finale","title" 140,"body" 600,"effect"}. effect is one of ${list(EFFECTS)}.
 
+# How each screen looks
+Every screen can have a "style" that sets its look on top of the theme. Design every screen from what they describe: "a dark blue envelope with stars twinkling" is a dark blue background, a dark blue envelope and the stars effect on that screen. If they don't describe the look, still give each screen a style that suits the card, so no two cards look alike. Keep it tasteful: a palette of two or three colours used across the whole card, varied from screen to screen.
+"style": {
+  "background": 1 to 3 colours like "#14213d"; two or three make a gradient,
+  "gradient": "down", "diagonal" or "glow" (lighter at the top), for how the colours run,
+  "pattern": one of ${list(PATTERNS)}, drawn faintly over the background,
+  "text": the colour of the words, easy to read on the background,
+  "accent": the colour of the buttons and highlights,
+  "envelope": the colour of the envelope (the intro only),
+  "heading": the font of the titles, one of ${list(FONTS)},
+  "body": the font of everything else, one of the same,
+  "effect": what floats in the background of this screen, instead of the card's ambient, one of ${list(EFFECTS)},
+  "stickers": up to 10 emoji placed around the screen: [{"emoji": one emoji, "x": 0 to 100 (% from the left), "y": 0 to 100 (% from the top), "size": 4 to 40 (% of the card's shorter side; 8 to 16 suits most), "rotate": -180 to 180, "motion": one of ${list(MOTIONS)}}]
+}
+- Every part is optional. Colours are always six-digit hex.
+- The fonts: classic is an elegant serif, modern a clean sans-serif, handwritten casual handwriting, storybook a soft old-style serif, script a flowing wedding script, rounded bubbly and friendly, bold a chunky modern headline, typewriter an old typewriter, marker a thick felt-tip pen and spooky a dripping horror font. For the body, use one that's easy to read in a long letter: modern, classic, storybook, rounded or typewriter.
+- Put stickers near the edges and corners (x under 15 or over 85, or y under 14 or over 86) so they don't cover the words, 2 to 6 on a screen. Keep the top right corner clear for the sound button.
+
 # Writing it
 - Use everything they told you: names, nicknames, inside jokes, places, hobbies. Specific beats generic every time.
 - Never invent shared memories or facts about the two of them. If they didn't give you details, write questions and lines that are playful rather than factual ("Who's the better cook?" with the answer being the sender).
@@ -75,7 +93,7 @@ ${gameNotes()}
 - If they don't describe the screens, design a card that suits these two people and the occasion. Vary it: there are 13 kinds of screen and 21 games, so don't fall back on the same few (a candle game, a quiz, photos, a message) every time. Include at least two playful screens and a heartfelt message near the end; a photos screen is welcome but not required.
 - Sound like a person, not a greeting card factory: warm, a bit funny where it fits, no clichés. Use emoji sparingly or not at all.
 - Write in the language their description is written in. If it's only names and choices, use the language you're told the site is in. For English, use British spelling.
-- Take the colours, background effect, finale effect and music from what they describe (for example "dark blue with stars" is the midnight theme with stars). If they don't say, choose what suits the feel of the card rather than the obvious default for the occasion.
+- Take the theme, background effect, finale effect and music from what they describe too (for example "dark blue with stars" suits the midnight theme with stars). If they don't say, choose what suits the feel of the card rather than the obvious default for the occasion.
 
 # Changing a card
 If you're given an existing card and a change, return the whole card with that change made. Keep everything they didn't ask to change exactly as it is, including screen ids. Photos appear as "photo-1", "photo-2" and so on: keep, move or drop those as asked, but never make new ones.
@@ -140,6 +158,30 @@ function restorePhotos(screen: Record<string, unknown>, urls: string[]) {
   return { ...screen, photos: kept.filter(Boolean), captions: captions.filter((_, i) => i >= photos.length || kept[i]) };
 }
 
+// A screen's look, keeping the parts that are right rather than failing the whole card
+// over one: "#fff" is read as "#ffffff", numbers out of range are brought in, and
+// anything else that's wrong is left out.
+function tidyStyle(style: unknown) {
+  if (!style || typeof style !== "object" || Array.isArray(style)) return undefined;
+  const fields = screenStyle.shape as Record<string, { safeParse: (v: unknown) => { success: boolean; data?: unknown } }>;
+  const longHex = (v: unknown) => (typeof v === "string" && /^#[0-9a-f]{3}$/i.test(v) ? `#${[...v.slice(1)].map((c) => c + c).join("")}` : v);
+  const clamp = (v: unknown, min: number, max: number) => (typeof v === "number" && Number.isFinite(v) ? Math.min(max, Math.max(min, v)) : v);
+  const out: Record<string, unknown> = {};
+  for (const [key, raw] of Object.entries(style)) {
+    let value = Array.isArray(raw) && key === "background" ? raw.map(longHex) : longHex(raw);
+    if (key === "stickers" && Array.isArray(raw)) {
+      value = raw
+        .filter((s) => s && typeof s === "object")
+        .map((s) => ({ ...s, x: clamp(s.x, 0, 100), y: clamp(s.y, 0, 100), size: clamp(s.size, 4, 40), rotate: clamp(s.rotate, -180, 180) }))
+        .filter((s) => fields.stickers.safeParse([s]).success)
+        .slice(0, 10);
+    }
+    const parsed = fields[key]?.safeParse(value);
+    if (parsed?.success) out[key] = parsed.data;
+  }
+  return Object.keys(out).length ? out : undefined;
+}
+
 // Pulls the JSON out of the reply and makes it a valid card, or says what's wrong.
 function toCard(text: string, input: GenerateInput, urls: string[]): { card: CardData } | { problem: string } {
   const start = text.indexOf("{");
@@ -158,7 +200,7 @@ function toCard(text: string, input: GenerateInput, urls: string[]): { card: Car
     let id = typeof s?.id === "string" && s.id.trim() ? s.id.trim().slice(0, 40) : newId();
     if (seen.has(id)) id = newId();
     seen.add(id);
-    return restorePhotos({ ...s, id }, urls);
+    return restorePhotos({ ...s, id, style: tidyStyle(s.style) }, urls);
   });
   if (typeof draft.to !== "string" || !draft.to.trim()) draft.to = input.to;
   if (typeof draft.from !== "string" || !draft.from.trim()) draft.from = input.from;
@@ -179,7 +221,7 @@ function toCard(text: string, input: GenerateInput, urls: string[]): { card: Car
 
 // Puts the words that were written into the design, so only the words can change: the
 // screens, their order, games, list lengths, colours and music stay as the design has them.
-const NOT_WORDS = new Set(["id", "type", "game", "effect", "photos", "captions", "landOn"]);
+const NOT_WORDS = new Set(["id", "type", "game", "effect", "photos", "captions", "landOn", "style"]);
 
 function copyWords(design: unknown, written: unknown): unknown {
   if (typeof design === "string") return typeof written === "string" && written.trim() ? written : design;

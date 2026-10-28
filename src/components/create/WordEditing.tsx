@@ -13,7 +13,7 @@ import type { CardData } from "@/lib/card";
 export type Path = (string | number)[];
 type Field = { path: Path; value: string };
 
-const SKIP = new Set(["id", "type", "game", "effect", "photos"]);
+const SKIP = new Set(["id", "type", "game", "effect", "photos", "style"]);
 
 // Every piece of text on one screen, plus the two names, with where each lives in the card.
 function textFields(card: CardData, screenId?: string): Field[] {
