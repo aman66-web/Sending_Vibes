@@ -30,6 +30,10 @@ export function ShareLink({ url }: { url: string }) {
         <a href={`https://wa.me/?text=${encodeURIComponent(fmt(c.whatsappMessage, { url }))}`} target="_blank" rel="noreferrer" className="btn rounded-full bg-[#25D366] px-4 py-2 text-sm text-white">
           {c.whatsapp}
         </a>
+        {/* A plain text message, for anyone who doesn't use WhatsApp. "?&body=" works on iPhones and Android. */}
+        <a href={`sms:?&body=${encodeURIComponent(fmt(c.whatsappMessage, { url }))}`} className="btn btn-paper px-4 py-2 text-sm">
+          {c.textMessage}
+        </a>
         <a href={url} target="_blank" rel="noreferrer" className="btn btn-paper px-4 py-2 text-sm">
           {c.openCard}
         </a>

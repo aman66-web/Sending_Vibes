@@ -4,6 +4,7 @@ import Link from "next/link";
 import { LogoMark } from "@/components/Logo";
 import { useI18n } from "@/i18n/client";
 import { usePathname } from "next/navigation";
+import { OPEN_CHAT } from "./open-chat";
 import { Fragment, useEffect, useRef, useState } from "react";
 
 type Message = { role: "user" | "assistant"; content: string };
@@ -115,6 +116,13 @@ export function Chat() {
 
   useEffect(() => () => request.current?.abort(), []);
 
+  // Other parts of the site can open it (the card maker's Help button on phones).
+  useEffect(() => {
+    const show = () => setOpen(true);
+    window.addEventListener(OPEN_CHAT, show);
+    return () => window.removeEventListener(OPEN_CHAT, show);
+  }, []);
+
   // Never on the card itself, where it would cover what they're playing.
   if (path.startsWith("/c/") || path.startsWith("/demo/")) return null;
 
@@ -188,8 +196,9 @@ export function Chat() {
     setDraft("");
   };
 
-  // The card maker has a fixed button bar along the bottom on phones.
-  const lift = path.startsWith("/create") ? "bottom-24 lg:bottom-5" : "bottom-5";
+  // On phones the card maker has a Help button in its top bar instead, so this
+  // never sits over an answer or the Next button.
+  const lift = path.startsWith("/create") ? "max-lg:hidden bottom-5" : "bottom-5";
 
   return (
     <>
