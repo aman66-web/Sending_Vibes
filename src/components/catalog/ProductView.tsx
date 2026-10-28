@@ -72,7 +72,7 @@ export function ProductView({ slug }: { slug: string }) {
   const template = templatesBySlug[slug];
   const { t, currency } = useI18n();
   const p = t.product;
-  const [frame, setFrame] = useState<"phone" | "desktop">("phone");
+  const [frame, setFrame] = useState<"phone" | "desktop">("desktop");
   const [to, setTo] = useState("");
   const [from, setFrom] = useState("");
   const [theme, setTheme] = useState<ThemeName>(template.theme);
@@ -92,7 +92,7 @@ export function ProductView({ slug }: { slug: string }) {
       <div className="sheet relative overflow-hidden p-5 sm:p-8">
         <div className="relative flex flex-col items-center gap-6">
           <div role="tablist" className="flex gap-1 rounded-full border-2 border-ink bg-cream p-1">
-            {(["phone", "desktop"] as const).map((f) => (
+            {(["desktop", "phone"] as const).map((f) => (
               <button
                 key={f}
                 role="tab"

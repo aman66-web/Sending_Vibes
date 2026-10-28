@@ -217,7 +217,8 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   const making = useRef<AbortController | null>(null);
   // The live preview: on a phone or a computer, which screen it's showing, and a nudge
   // that makes it jump back to a screen after that screen changes.
-  const [view, setView] = useState<"phone" | "computer">(() => (draft?.device === "desktop" ? "computer" : "phone"));
+  // The computer view comes first; the phone is a tap away.
+  const [view, setView] = useState<"phone" | "computer">("computer");
   const [viewing, setViewing] = useState<string | undefined>();
   const [nudge, setNudge] = useState(0);
   const [screenAsk, setScreenAsk] = useState("");
@@ -350,7 +351,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   };
 
   const makeFromQuiz = () => {
-    const prompt = quizPrompt(answers, t, { askForPhotos: !design });
+    const prompt = quizPrompt(answers, t, { design: Boolean(design) });
     setTo(answers.to.trim());
     setFrom(answers.from.trim());
     setIdea(prompt);
@@ -849,7 +850,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
           <aside className="hidden lg:block">
             <div className="sticky top-4 space-y-3">
               <div role="tablist" aria-label={c.preview} className="mx-auto flex w-fit gap-1 rounded-full border border-line bg-panel p-1">
-                {(["phone", "computer"] as const).map((v) => (
+                {(["computer", "phone"] as const).map((v) => (
                   <button
                     key={v}
                     role="tab"
