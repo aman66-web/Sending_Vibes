@@ -29,22 +29,39 @@ const ENVELOPE_SHADE = "#ebe1cb";
 export function IntroScreen({ screen, onNext, to, from }: ScreenProps<"intro"> & { to: string; from: string }) {
   const sfx = useSfx();
   const [open, setOpen] = useState(false);
+  // Set once the letter has come out, so a quick double tap doesn't skip straight past it.
+  const [opened, setOpened] = useState(false);
+  const after = useRef<HTMLDivElement>(null);
   const initial = (from.trim()[0] ?? "").toUpperCase() || "\u2665";
+
+  // Once it's open, bring the message and button into view: on a short screen (a small
+  // phone, or the preview while making a card) they'd otherwise sit below the fold.
+  useEffect(() => {
+    if (!open) return;
+    const timer = setTimeout(() => {
+      setOpened(true);
+      after.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }, 1100);
+    return () => clearTimeout(timer);
+  }, [open]);
+
   return (
     <div className="flex flex-col items-center gap-6 text-center">
       <div className={`transition-opacity duration-500 ${open ? "opacity-0" : ""}`}>
         <p className="text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-[var(--c-muted)]">You&apos;ve got mail</p>
         <Flourish className="mx-auto mt-3 text-[var(--c-muted)]" />
       </div>
-      {/* A cream envelope, hand-addressed, closed with a wax seal. It opens and the letter slides up. */}
+      {/* A cream envelope, hand-addressed, closed with a wax seal. It opens and the letter
+          slides up; tapping it again carries on, like the button underneath. */}
       <button
         aria-label={open ? screen.title : "Open the envelope"}
         onClick={() => {
+          if (opened) return onNext();
+          if (open) return;
           setOpen(true);
           sfx("whoosh");
           setTimeout(() => sfx("sparkle"), 450);
         }}
-        disabled={open}
         className="group relative mt-16 h-48 w-72 [perspective:900px]"
       >
         <span
@@ -85,7 +102,7 @@ export function IntroScreen({ screen, onNext, to, from }: ScreenProps<"intro"> &
         </span>
       </button>
       {open ? (
-        <div className="flex animate-screen-in flex-col items-center gap-5 [animation-delay:800ms]">
+        <div ref={after} className="flex animate-screen-in flex-col items-center gap-5 [animation-delay:800ms]">
           <p className="text-lg text-[var(--c-muted)]">{screen.subtitle}</p>
           <PrimaryButton onClick={onNext}>{screen.button}</PrimaryButton>
         </div>
