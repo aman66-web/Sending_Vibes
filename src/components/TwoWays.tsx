@@ -28,7 +28,7 @@ export function TwoWays({ onPick }: { onPick?: (way: Way) => void }) {
       steps: c.personalSteps,
       price: price("custom", currency),
       cta: c.personalCta,
-      visual: <QuestionDemo question={describe.title} answer={describe.placeholder.replace(/^e\.g\.\s*/, "")} />,
+      visual: <QuestionDemo question={describe.title} answer={c.personalDemo} />,
     },
     {
       way: "premade" as const,

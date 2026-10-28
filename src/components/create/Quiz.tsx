@@ -13,11 +13,10 @@ import { SignIn, type SignedIn } from "@/components/SignIn";
 import { PhotoField } from "./ScreenEditor";
 
 // The questions a card is written from: a personalised one from scratch, or a
-// ready-made design with their words written into it. The main one is describing the
-// card they want, in their own words; the personal ones (a memory, what they most want
-// to say) are optional, since not everyone wants to share them. Then up to two
-// follow-ups written about their answers, which can be skipped, an optional step to
-// add photos, and signing up before it's made.
+// ready-made design with their words written into it. The main one is describing how
+// the card should look, screen by screen (or, for a design, what it should say). Then
+// up to two follow-ups written about their answers, which can be skipped, an optional
+// step to add photos, and signing up before it's made.
 
 export type Answers = {
   to: string;
@@ -27,8 +26,6 @@ export type Answers = {
   vibes: Tone[];
   vibeOther: string;
   describe: string;
-  personal: string;
-  message: string;
   from: string;
   // Null until they've been asked for.
   followups: { q: string; a: string }[] | null;
@@ -44,44 +41,40 @@ export const NO_ANSWERS: Answers = {
   vibes: [],
   vibeOther: "",
   describe: "",
-  personal: "",
-  message: "",
   from: "",
   followups: null,
   photos: [],
   captions: [],
 };
 
-const QUESTIONS = ["to", "relation", "occasion", "vibe", "describe", "personal", "message", "from"] as const;
+const QUESTIONS = ["to", "relation", "occasion", "vibe", "describe", "from"] as const;
 type Question = (typeof QUESTIONS)[number];
-// The fewest characters the description needs before moving on: it's what the card is made from.
-export const MIN_CHARS: Partial<Record<Question, number>> = { describe: 30 };
-// Questions that can be skipped.
-const OPTIONAL = new Set<Question>(["personal", "message"]);
+// The fewest characters the description needs before moving on: it's what the card is made
+// from. Describing a card screen by screen takes more words than saying what a design should say.
+const minChars = (key: Question, design: boolean) => (key === "describe" ? (design ? 30 : 60) : 0);
 const FOLLOWUPS = 2;
 
 // The answers written out for the card writer. Labels are in the visitor's language.
-// Photos only shape a card made from scratch; a design keeps its own screens.
-export function quizPrompt(a: Answers, t: Dict, { askForPhotos = true } = {}) {
+// With a ready-made design the description is what it should say, and the design keeps its
+// own screens; otherwise it's how the card should look, screen by screen.
+export function quizPrompt(a: Answers, t: Dict, { design = false } = {}) {
   const to = a.to.trim();
   const feel = [...a.vibes.map((v) => t.tones[v]), a.vibeOther.trim()].filter(Boolean);
   const lines = [
     `Occasion: ${a.occasion ? t.occasions[a.occasion].label : a.occasionOther.trim()}`,
     `It's for ${to} (${a.relation.trim()}), from ${a.from.trim()}.`,
     `How it should feel: ${feel.join(", ")}`,
-    `The card I'd like: ${a.describe.trim()}`,
+    design ? `What the card should say: ${a.describe.trim()}` : `How the card should look, screen by screen (build it in exactly this order): ${a.describe.trim()}`,
   ];
-  if (a.personal.trim()) lines.push(`Something personal to include: ${a.personal.trim()}`);
-  if (a.message.trim()) lines.push(`What I most want them to know: ${a.message.trim()}`);
   for (const f of a.followups ?? []) if (f.a.trim()) lines.push(`${f.q}\n${f.a.trim()}`);
-  if (askForPhotos && a.photos.length) lines.push(`I've added ${a.photos.length} photo${a.photos.length > 1 ? "s" : ""}, so include a photos screen.`);
+  if (!design && a.photos.length)
+    lines.push(`I've added ${a.photos.length} photo${a.photos.length > 1 ? "s" : ""}. If I haven't said where they go, add a photos screen where it fits.`);
   return lines.join("\n");
 }
 
 // Whether a core question has been answered well enough to move on.
-function answered(key: Question, a: Answers, relations: string[]) {
+function answered(key: Question, a: Answers, relations: string[], design: boolean) {
   const long = (text: string, min = 1) => text.trim().length >= min;
-  if (OPTIONAL.has(key)) return true;
   switch (key) {
     case "to":
       return long(a.to);
@@ -94,7 +87,7 @@ function answered(key: Question, a: Answers, relations: string[]) {
     case "vibe":
       return a.vibes.length > 0 || long(a.vibeOther, 2);
     default:
-      return long(a[key], MIN_CHARS[key]);
+      return long(a[key], minChars(key, design));
   }
 }
 
@@ -137,7 +130,7 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
   const total = QUESTIONS.length + (followups ? followups.length : FOLLOWUPS) + (photoStep ? 1 : 0) + (signUp ? 1 : 0);
   const core = (QUESTIONS as readonly string[]).includes(step) ? (step as Question) : null;
   const followIndex = step.startsWith("f") && step !== "from" ? Number(step.slice(1)) : -1;
-  const ready = core ? answered(core, answers, q.relations) : step === "signup" ? Boolean(signUp?.account) : step !== "thinking";
+  const ready = core ? answered(core, answers, q.relations, Boolean(design)) : step === "signup" ? Boolean(signUp?.account) : step !== "thinking";
   const input = useRef<HTMLInputElement & HTMLTextAreaElement>(null);
   // Which questions have their "Other" box open.
   const [other, setOther] = useState<Partial<Record<Question, boolean>>>({});
@@ -158,7 +151,7 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
       const res = await fetch("/api/followups", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ summary: quizPrompt(answers, t) }),
+        body: JSON.stringify({ summary: quizPrompt(answers, t, { design: Boolean(design) }) }),
       });
       if (res.ok) questions = ((await res.json()).questions ?? []).slice(0, FOLLOWUPS);
     } catch {}
@@ -178,7 +171,7 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
   };
   const toggle = <T,>(list: T[], item: T) => (list.includes(item) ? list.filter((x) => x !== item) : [...list, item]);
   // Starts a written answer off with a phrase they tapped.
-  const start = (field: "describe" | "personal", phrase: string) => {
+  const start = (field: "describe", phrase: string) => {
     setAnswers((a) => ({ ...a, [field]: a[field].trim() ? `${a[field].trimEnd()} ${phrase}` : phrase }));
     input.current?.focus();
   };
@@ -187,8 +180,10 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
     `${shape} border-2 px-4 py-2.5 text-start font-semibold transition ${selected ? "border-brand bg-brand text-white" : "border-line bg-panel hover:-translate-y-0.5 hover:border-brand"}`;
   const field = "w-full rounded-2xl border-2 border-line bg-panel px-5 py-4 text-lg outline-none focus:border-brand focus:ring-4 focus:ring-brand/15";
 
-  const title = core
-    ? fmt(q.questions[core].title, { name })
+  // With a ready-made design, the main question is what it should say rather than how it looks.
+  const words = core === "describe" && design ? q.questions.say : core ? q.questions[core] : null;
+  const title = words
+    ? fmt(words.title, { name })
     : step === "photos"
       ? fmt(q.photosTitle, { name })
       : step === "signup"
@@ -196,8 +191,8 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
         : step === "thinking"
           ? fmt(q.followLoading, { name })
           : (followups?.[followIndex]?.q ?? "");
-  const hint = core
-    ? q.questions[core].hint
+  const hint = words
+    ? words.hint
     : step === "photos"
       ? q.photosHint
       : step === "signup"
@@ -317,29 +312,27 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
               )}
             </div>
           )}
-          {(step === "describe" || step === "personal" || step === "message") && (
+          {step === "describe" && (
             <>
-              {(step === "describe" || step === "personal") && (
-                <div className="mb-3 flex flex-wrap gap-2">
-                  {(step === "describe" ? q.describeStarters : q.personalStarters).map((phrase) => (
-                    <button key={phrase} type="button" onClick={() => start(step, phrase)} className="rounded-full border border-line bg-panel px-3 py-1.5 text-sm font-semibold transition hover:border-brand hover:text-brand">
-                      + {phrase}
-                    </button>
-                  ))}
-                </div>
-              )}
+              <div className="mb-3 flex flex-wrap gap-2">
+                {(design ? q.sayStarters : q.describeStarters).map((phrase) => (
+                  <button key={phrase} type="button" onClick={() => start(step, phrase)} className="rounded-full border border-line bg-panel px-3 py-1.5 text-sm font-semibold transition hover:border-brand hover:text-brand">
+                    + {phrase}
+                  </button>
+                ))}
+              </div>
               <textarea
                 ref={input}
                 value={answers[step]}
-                maxLength={step === "describe" ? 1000 : 500}
-                rows={step === "describe" ? 5 : 4}
+                maxLength={1000}
+                rows={5}
                 dir="auto"
                 onChange={(e) => set(step, e.target.value)}
-                placeholder={q.questions[step].placeholder}
+                placeholder={(design ? q.questions.say : q.questions.describe).placeholder}
                 aria-label={title}
                 className={`${field} resize-y leading-relaxed`}
               />
-              {MIN_CHARS[step] && <CharsLeft value={answers[step]} min={MIN_CHARS[step]} more={q.moreChars} enough={q.enough} />}
+              {minChars(step, Boolean(design)) > 0 && <CharsLeft value={answers[step]} min={minChars(step, Boolean(design))} more={q.moreChars} enough={q.enough} />}
             </>
           )}
           {step === "thinking" && (
@@ -383,7 +376,7 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
               ← {q.back}
             </button>
           )}
-          {(followIndex >= 0 || (core && OPTIONAL.has(core))) && (
+          {followIndex >= 0 && (
             <button type="button" onClick={() => (last ? onGenerate() : setIndex(at + 1))} className="px-3 py-3 text-sm font-semibold opacity-60 hover:opacity-100">
               {q.skip}
             </button>
