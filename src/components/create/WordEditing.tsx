@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useI18n } from "@/i18n/client";
 import { fmt } from "@/i18n/config";
-import { FONTS, FRAMES, type CardData, type Font, type Screen, type ScreenStyle } from "@/lib/card";
+import { DIRECTIONS, FONTS, FRAMES, TRANSITIONS, type CardData, type Crop, type Font, type Screen, type ScreenStyle, type Tune } from "@/lib/card";
+import { CATCHING, USUAL_GOAL } from "@/components/card/tune";
 import { FONT_VARS } from "@/lib/screen-style";
 import { LISTS, TEXTS, isList, labelList, labelsOn, type LabelKey, type ListKey } from "@/lib/labels";
 import { uploadPhoto } from "./image";
@@ -158,13 +159,13 @@ type Selected = { box: Box; area: Area } & (
   | { kind: "background" }
 );
 type Gesture = {
-  mode: "move" | "resize";
+  mode: "move" | "resize" | "rotate";
   deco: Deco;
   index: number;
   x: number;
   y: number;
-  // Where the item was, its size, and the card's own box, when the gesture began.
-  start: { x: number; y: number; size: number };
+  // Where the item was, its size and turn, and the card's own box, when the gesture began.
+  start: { x: number; y: number; size: number; rotate: number };
   card: DOMRect;
   box: Box;
   centre?: { x: number; y: number };
@@ -188,6 +189,14 @@ const BLENDS = [
 ];
 const SWAPS = ["❤️", "💖", "⭐", "✨", "🎈", "🎉", "🌸", "🌈", "🦋", "🐶", "🍰", "👑"];
 const SIZE: Record<Deco, [number, number]> = { sticker: [4, 40], text: [2, 20], image: [10, 90] };
+// The most of each a screen holds (see lib/card.ts).
+const MOST: Record<Deco, number> = { sticker: 10, text: 8, image: 6 };
+// An angle between -180 and 180 degrees, whole, and exactly straight when within 4 degrees of it.
+const straight = (deg: number) => {
+  const d = Math.round((((deg % 360) + 540) % 360) - 180);
+  const nearest = Math.round(d / 90) * 90;
+  return Math.abs(d - nearest) <= 4 ? (nearest === -180 ? 180 : nearest) : d;
+};
 
 type Props = {
   card: CardData;
@@ -200,11 +209,13 @@ type Props = {
   onBegin?: () => void;
   // Selects something just added from the panel, like "text:2".
   pick?: { key: string; nonce: number };
+  // Changing this opens the screen's own settings, as if its background were tapped.
+  openSettings?: number;
   className?: string;
   children: React.ReactNode;
 };
 
-export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBegin, pick, className = "", children }: Props) {
+export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBegin, pick, openSettings = 0, className = "", children }: Props) {
   const { t } = useI18n();
   const x = t.custom;
   const s = t.studio;
@@ -219,6 +230,9 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
   // Which photo the chosen file replaces (a photos screen's, or a placed one), or null to add them.
   const [replacing, setReplacing] = useState<{ deco: boolean; index: number } | null>(null);
   const [uploading, setUploading] = useState(0);
+  // A sticker, text box or photo copied to paste on any screen, and a word to say it's been copied.
+  const [clip, setClip] = useState<{ deco: Deco; item: Record<string, unknown> } | null>(null);
+  const [flash, setFlash] = useState<string | null>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const screenIndex = card.screens.findIndex((sc) => sc.id === screenId);
   const screen = card.screens[screenIndex];
@@ -259,6 +273,15 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
     begin();
     onScreen(screenIndex, (sc) => ({ ...sc, style: update(sc.style ?? {}) }));
   };
+  // How the screen plays (style.tune); a setting back at its usual value is dropped.
+  const tune = style.tune ?? {};
+  const retune = (change: Partial<Tune>) =>
+    restyle((st) => {
+      const next = Object.fromEntries(Object.entries({ ...st.tune, ...change }).filter(([, v]) => v !== undefined));
+      return { ...st, tune: Object.keys(next).length ? next : undefined };
+    });
+  const usualGoal = screen?.type === "game" ? (USUAL_GOAL as Partial<Record<string, number>>)[screen.game] : undefined;
+  const goal = usualGoal === undefined ? undefined : (tune.goal ?? usualGoal);
   const listOf = (deco: Deco) => (deco === "sticker" ? "stickers" : deco === "text" ? "texts" : "images") as "stickers" | "texts" | "images";
   const changeItem = (deco: Deco, index: number, update: (item: Record<string, unknown>) => Record<string, unknown> | null) =>
     restyle((st) => {
@@ -310,6 +333,42 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
       if (el) setOpen((o) => (o?.kind === "deco" && o.deco === deco && o.index === index ? { ...o, box: boxOf(el) } : o));
     });
 
+  // Copy, paste and duplicate. A pasted one lands a little down and to the right, and is selected.
+  const itemAt = (deco: Deco, index: number) => (style[listOf(deco)] as Record<string, unknown>[] | undefined)?.[index];
+  const say = (words: string) => {
+    setFlash(words);
+    setTimeout(() => setFlash((f) => (f === words ? null : f)), 2200);
+  };
+  const copy = (deco: Deco, index: number) => {
+    const item = itemAt(deco, index);
+    if (!item) return;
+    setClip({ deco, item: structuredClone(item) });
+    say(s.copied);
+  };
+  const putDown = (deco: Deco, item: Record<string, unknown>) => {
+    const at = (style[listOf(deco)] as unknown[] | undefined)?.length ?? 0;
+    if (at >= MOST[deco]) return say(s.full);
+    const nudge = (v: unknown) => Math.min(95, Number(v ?? 50) + 6);
+    begun.current = false;
+    onBegin?.();
+    onScreen(screenIndex, (sc) => {
+      const st = sc.style ?? {};
+      const key = listOf(deco);
+      return { ...sc, style: { ...st, [key]: [...((st[key] as unknown[] | undefined) ?? []), { ...structuredClone(item), x: nudge(item.x), y: nudge(item.y) }] } };
+    });
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        const el = decoEl(deco, at);
+        if (el) choose({ kind: "deco", deco, index: at, box: boxOf(el) });
+      }),
+    );
+  };
+  const paste = () => clip && putDown(clip.deco, clip.item);
+  const duplicate = (deco: Deco, index: number) => {
+    const item = itemAt(deco, index);
+    if (item) putDown(deco, item);
+  };
+
   const selectHit = (hit: Hit | null) => {
     if (!hit) return select(null);
     if (hit.kind === "photo") {
@@ -330,6 +389,18 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
     if (hit.kind === "deco") return choose({ kind: "deco", deco: hit.deco, index: hit.index, box: boxOf(hit.el) });
     choose({ kind: hit.kind, box: boxOf(hit.el) });
   };
+
+  // The screen's settings asked for from outside (the ⚙ button under the card).
+  useEffect(() => {
+    if (!openSettings) return;
+    const frame = requestAnimationFrame(() => {
+      const el = root.current?.querySelector(".font-card");
+      if (el) choose({ kind: "background", box: boxOf(el) });
+    });
+    return () => cancelAnimationFrame(frame);
+    // Only when asked again.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openSettings]);
 
   // Something just added from the panel: select it once it's on the card.
   const [picked, setPicked] = useState(pick?.nonce);
@@ -352,12 +423,25 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [picked]);
 
-  // Delete removes the selected sticker, text or photo; Escape lets go of it.
+  // Delete removes the selected sticker, text or photo and Escape lets go of it; Ctrl (⌘ on
+  // a Mac) with C copies it, V pastes and D duplicates.
   useEffect(() => {
-    if (!enabled || open?.kind !== "deco") return;
+    if (!enabled) return;
     const onKey = (e: KeyboardEvent) => {
-      if ((e.target as HTMLElement)?.closest("input, textarea")) return;
-      if (e.key === "Delete" || e.key === "Backspace") {
+      if ((e.target as HTMLElement)?.closest("input, textarea, [contenteditable]")) return;
+      const command = e.metaKey || e.ctrlKey;
+      if (command && e.key.toLowerCase() === "v" && clip) {
+        e.preventDefault();
+        return paste();
+      }
+      if (open?.kind !== "deco") return;
+      if (command && e.key.toLowerCase() === "c") {
+        e.preventDefault();
+        copy(open.deco, open.index);
+      } else if (command && e.key.toLowerCase() === "d") {
+        e.preventDefault();
+        duplicate(open.deco, open.index);
+      } else if (e.key === "Delete" || e.key === "Backspace") {
         e.preventDefault();
         changeItem(open.deco, open.index, () => null);
         select(null);
@@ -369,7 +453,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
 
   // Dragging a sticker, text box or photo moves it; dragging the corner handle resizes it.
   const startGesture = (mode: Gesture["mode"], deco: Deco, index: number, e: React.PointerEvent, el: Element) => {
-    const item = (style[listOf(deco)] as { x: number; y: number; size: number }[] | undefined)?.[index];
+    const item = (style[listOf(deco)] as { x: number; y: number; size: number; rotate?: number }[] | undefined)?.[index];
     const cardBox = el.closest("[data-deco-layer]")?.getBoundingClientRect();
     if (!item || !cardBox) return false;
     const r = el.getBoundingClientRect();
@@ -379,7 +463,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
       index,
       x: e.clientX,
       y: e.clientY,
-      start: { x: item.x, y: item.y, size: item.size },
+      start: { x: item.x, y: item.y, size: item.size, rotate: item.rotate ?? 0 },
       card: cardBox,
       box: boxOf(el),
       centre: { x: r.left + r.width / 2, y: r.top + r.height / 2 },
@@ -413,6 +497,13 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
         return { ...sc, style: { ...st, [key]: list } };
       });
       setOpen((o) => o && { kind: "deco", deco: g.deco, index: g.index, area: o.area, box: { ...g.box, left: g.box.left + dx, top: g.box.top + dy } });
+    } else if (g.mode === "rotate") {
+      // Turned by the angle the pointer has swept round its middle, settling on straight when close.
+      const c = g.centre!;
+      const swept = ((Math.atan2(e.clientY - c.y, e.clientX - c.x) - Math.atan2(g.y - c.y, g.x - c.x)) * 180) / Math.PI;
+      const turned = straight(g.start.rotate + swept);
+      changeItem(g.deco, g.index, (it) => ({ ...it, rotate: turned }));
+      remeasure(g.deco, g.index);
     } else {
       const c = g.centre!;
       const factor = Math.hypot(e.clientX - c.x, e.clientY - c.y) / Math.max(Math.hypot(g.x - c.x, g.y - c.y), 1);
@@ -463,7 +554,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
       try {
         const url = await uploadPhoto(chosen[0]);
         begin();
-        onScreen(index, (sc) => ({ ...sc, style: { ...sc.style, images: (sc.style?.images ?? []).map((img, j) => (j === replace.index ? { ...img, src: url } : img)) } }));
+        onScreen(index, (sc) => ({ ...sc, style: { ...sc.style, images: (sc.style?.images ?? []).map((img, j) => (j === replace.index ? { ...img, src: url, crop: undefined } : img)) } }));
       } catch {
         setPhotoError(t.editor.uploadFailed);
       } finally {
@@ -483,7 +574,8 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
         onBegin?.();
         onScreen(index, (sc) => {
           if (sc.type !== "photos") return sc;
-          if (replace && replace.index < sc.photos.length) return { ...sc, photos: sc.photos.map((p, j) => (j === replace.index ? url : p)) };
+          // A new photo starts whole in its frame.
+          if (replace && replace.index < sc.photos.length) return { ...sc, photos: sc.photos.map((p, j) => (j === replace.index ? url : p)), crops: sc.crops?.map((c, j) => (j === replace.index ? null : c)) };
           if (sc.photos.length >= MAX_PHOTOS) return sc;
           return { ...sc, photos: [...sc.photos, url], captions: [...sc.photos.map((_, j) => sc.captions[j] ?? ""), ""] };
         });
@@ -497,7 +589,9 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
 
   const removePhoto = (i: number) => {
     onBegin?.();
-    onScreen(screenIndex, (sc) => (sc.type === "photos" ? { ...sc, photos: sc.photos.filter((_, j) => j !== i), captions: sc.captions.filter((_, j) => j !== i) } : sc));
+    onScreen(screenIndex, (sc) =>
+      sc.type === "photos" ? { ...sc, photos: sc.photos.filter((_, j) => j !== i), captions: sc.captions.filter((_, j) => j !== i), crops: sc.crops?.filter((_, j) => j !== i) } : sc,
+    );
     select(null);
   };
 
@@ -510,16 +604,12 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
   const area = open?.area ?? { width: 600, height: 600, top: 0, view: 900 };
   // The controls go under what's selected or above it, wherever they fit in the window
   // without covering it (they may hang over the edge of the preview); else beside it.
-  const place = (box: Box, tall: number) => {
-    const left = Math.max(8, Math.min(box.left + box.width / 2 - 150, area.width - 308));
-    const below = box.top + box.height + 14;
-    if (area.top + below + tall <= area.view) return { left, top: below };
-    if (area.top + box.top - tall - 14 >= 0) return { left, top: box.top - tall - 14 };
-    const top = Math.max(8, Math.min(box.top + box.height / 2 - tall / 2, area.height - tall - 8));
-    if (box.left + box.width + 314 < area.width) return { left: box.left + box.width + 14, top };
-    if (box.left - 314 >= 0) return { left: box.left - 314, top };
-    return { left, top: below };
-  };
+  // On a computer the controls sit just left of the card, over the design panel, so they never
+  // cover what's being changed: level with it, and kept inside the window.
+  const place = (box: Box, tall: number) => ({
+    left: -316,
+    top: Math.max(12 - area.top, Math.min(box.top - 12, area.view - area.top - tall - 12)),
+  });
   const item = open?.kind === "deco" ? (style[listOf(open.deco)] as Record<string, unknown>[] | undefined)?.[open.index] : undefined;
   // The controls for what's selected: beside it on a computer, a sheet at the bottom on a phone.
   const controls = (at: { left: number; top: number }, body: React.ReactNode) =>
@@ -535,11 +625,13 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
         document.body,
       )
     ) : (
-      <div data-edit-ui data-word-editor className="absolute z-50 w-[300px] max-w-[calc(100%-16px)] space-y-3 rounded-2xl border border-line bg-panel p-3 text-foreground shadow-2xl" style={at}>
+      <div data-edit-ui data-word-editor className="absolute z-50 max-h-[calc(100dvh-24px)] w-[300px] space-y-3 overflow-y-auto rounded-2xl border border-line bg-panel p-3 text-foreground shadow-2xl" style={at}>
         {body}
       </div>
     );
   const label = "text-xs font-bold uppercase tracking-wide opacity-60";
+  // The turning handle sits above what's selected, or below it when that's at the very top.
+  const turnBelow = open !== null && open.box.top < 44;
   const close = () => select(null);
 
   return (
@@ -605,6 +697,48 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
           onPointerUp={() => endGesture()}
         />
       )}
+      {/* A round handle above it (below it, at the very top) to turn it, like a design app. */}
+      {enabled && open?.kind === "deco" && (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute z-[47] w-0.5 bg-brand"
+          style={{ left: open.box.left + open.box.width / 2 - 1, top: turnBelow ? open.box.top + open.box.height + 3 : open.box.top - 12, height: 9 }}
+        />
+      )}
+      {enabled && open?.kind === "deco" && (
+        <span
+          data-edit-ui
+          role="slider"
+          aria-label={s.turn}
+          aria-valuenow={Number(item?.rotate ?? 0)}
+          className="absolute z-[48] grid h-8 w-8 cursor-grab touch-none place-items-center rounded-full border-2 border-brand bg-white text-lg font-bold text-brand shadow-lg active:cursor-grabbing"
+          style={{ left: open.box.left + open.box.width / 2 - 16, top: turnBelow ? open.box.top + open.box.height + 12 : open.box.top - 44 }}
+          onPointerDown={(e) => {
+            e.stopPropagation();
+            const el = decoEl(open.deco, open.index);
+            if (el) startGesture("rotate", open.deco, open.index, e, el);
+          }}
+          onPointerMove={(e) => moveGesture(e)}
+          onPointerUp={() => endGesture()}
+        >
+          ↻
+        </span>
+      )}
+      {enabled && clip && (
+        <button
+          type="button"
+          data-edit-ui
+          onClick={paste}
+          className="absolute bottom-3 start-3 z-[49] rounded-full bg-foreground px-4 py-2 text-sm font-bold text-background shadow-lg"
+        >
+          📋 {s.paste}
+        </button>
+      )}
+      {flash && uploading === 0 && !photoError && (
+        <p role="status" className="pointer-events-none absolute inset-x-0 top-3 z-50 mx-auto w-fit max-w-[90%] rounded-full bg-black/80 px-4 py-2 text-center text-sm font-semibold text-white shadow-lg">
+          {flash}
+        </p>
+      )}
       {(uploading > 0 || photoError) && (
         <p role="status" className="absolute inset-x-0 top-3 z-50 mx-auto w-fit max-w-[90%] rounded-full bg-black/80 px-4 py-2 text-center text-sm font-semibold text-white shadow-lg">
           {uploading > 0 ? t.editor.uploading : photoError}
@@ -615,7 +749,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
         open?.kind === "deco" &&
         item &&
         controls(
-          place(open.box, open.deco === "text" ? 330 : 190),
+          place(open.box, open.deco === "text" ? 520 : open.deco === "image" ? 560 : 380),
           <>
           <p className={label}>{open.deco === "text" ? s.text : open.deco === "image" ? s.photo : s.element}</p>
           <p className="text-xs opacity-60">{s.dragHint}</p>
@@ -680,8 +814,49 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
                   ))}
                 </div>
               </div>
+              <CropControls crop={item.crop as Crop | undefined} onCrop={(crop) => changeItem("image", open.index, (it) => ({ ...it, crop }))} />
             </div>
           )}
+          <div className="flex gap-2">
+            <button type="button" onClick={() => duplicate(open.deco, open.index)} className="flex-1 rounded-full border-2 border-line px-3 py-1.5 text-sm font-semibold">
+              ⧉ {s.duplicate}
+            </button>
+            <button type="button" onClick={() => copy(open.deco, open.index)} className="flex-1 rounded-full border-2 border-line px-3 py-1.5 text-sm font-semibold">
+              📋 {s.copy}
+            </button>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <p className={`${label} me-1`}>{s.turnTitle}</p>
+            {([
+              [-15, "↺", s.turnLeft],
+              [15, "↻", s.turnRight],
+            ] as const).map(([by, icon, name]) => (
+              <button
+                key={by}
+                type="button"
+                aria-label={name}
+                onClick={() => {
+                  changeItem(open.deco, open.index, (it) => ({ ...it, rotate: straight(Number(it.rotate ?? 0) + by) }));
+                  remeasure(open.deco, open.index);
+                }}
+                className="grid h-9 w-9 place-items-center rounded-full border-2 border-line text-lg font-bold"
+              >
+                {icon}
+              </button>
+            ))}
+            {Number(item.rotate ?? 0) !== 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  changeItem(open.deco, open.index, (it) => ({ ...it, rotate: 0 }));
+                  remeasure(open.deco, open.index);
+                }}
+                className="ms-auto rounded-full border-2 border-line px-3 py-1.5 text-sm font-semibold"
+              >
+                {s.straighten}
+              </button>
+            )}
+          </div>
           <div className="flex items-center gap-2">
             <SizeButtons
               smaller={s.smaller}
@@ -711,7 +886,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
         open?.kind === "photo" &&
         screen?.type === "photos" &&
         controls(
-          place(open.box, 200),
+          place(open.box, 340),
           <>
           <p className={label}>{x.photoTitle}</p>
           <div className="grid gap-2">
@@ -727,6 +902,15 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
               {x.removeThisPhoto}
             </button>
           </div>
+          <CropControls
+            crop={screen.crops?.[open.index] ?? undefined}
+            onCrop={(crop) => {
+              begin();
+              onScreen(screenIndex, (sc) =>
+                sc.type === "photos" ? { ...sc, crops: sc.photos.map((_, j) => (j === open.index ? (crop ?? null) : (sc.crops?.[j] ?? null))) } : sc,
+              );
+            }}
+          />
           <DoneButton label={s.done} onClick={close} />
           </>,
         )}
@@ -793,7 +977,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
       {enabled &&
         open?.kind === "background" &&
         controls(
-          { left: Math.max(8, area.width / 2 - 150), top: 16 },
+          place({ left: 0, top: 0, width: area.width, height: 0 }, 520),
           <>
           <Swatches title={s.backgroundColour} value={style.background?.length === 1 ? style.background[0] : undefined} onPick={(c) => restyle((st) => ({ ...st, background: [c] }))} />
           <div>
@@ -811,12 +995,77 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
               ))}
             </div>
           </div>
+          <div>
+            <p className={label}>{s.comesIn}</p>
+            <div className="mt-1 flex flex-wrap gap-1.5">
+              {TRANSITIONS.map((tr) => (
+                <button key={tr} type="button" aria-pressed={(style.transition ?? "rise") === tr} onClick={() => restyle((st) => ({ ...st, transition: tr }))} className={chip((style.transition ?? "rise") === tr)}>
+                  {s.transitions[tr]}
+                </button>
+              ))}
+            </div>
+          </div>
+          {screen && (screen.type === "game" || screen.type === "message" || screen.type === "wheel") && (
+            <div>
+              <p className={label}>{s.speed}</p>
+              <div className="mt-1 flex flex-wrap gap-1.5">
+                {SPEEDS.map(([value, name]) => (
+                  <button key={name} type="button" aria-pressed={(tune.speed ?? 1) === value} onClick={() => retune({ speed: value === 1 ? undefined : value })} className={chip((tune.speed ?? 1) === value)}>
+                    {s.speeds[name]}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          {goal !== undefined && (
+            <div className="flex items-center gap-2">
+              <p className={`${label} flex-1`}>{s.toWin}</p>
+              <button type="button" aria-label={s.fewer} disabled={goal <= 1} onClick={() => retune({ goal: goal - 1 })} className="grid h-9 w-9 place-items-center rounded-full border-2 border-line text-lg font-bold disabled:opacity-35">
+                −
+              </button>
+              <span className="w-8 text-center text-lg font-bold tabular-nums">{goal}</span>
+              <button type="button" aria-label={s.more} disabled={goal >= 40} onClick={() => retune({ goal: goal + 1 })} className="grid h-9 w-9 place-items-center rounded-full border-2 border-line text-lg font-bold disabled:opacity-35">
+                +
+              </button>
+            </div>
+          )}
+          {screen?.type === "game" && (CATCHING.includes(screen.game) || screen.game === "whack-ghosts") && (
+            <div className="flex items-center gap-2">
+              <p className={`${label} flex-1`}>{s.pieceSize}</p>
+              <SizeButtons smaller={s.smaller} bigger={s.bigger} onSize={(factor) => retune({ size: Math.min(2.5, Math.max(0.5, Math.round((tune.size ?? 1) * factor * 100) / 100)) })} />
+            </div>
+          )}
+          {screen?.type === "game" && CATCHING.includes(screen.game) && (
+            <div>
+              <p className={label}>{s.comesFrom}</p>
+              <div className="mt-1 flex flex-wrap gap-1.5">
+                {DIRECTIONS.map((d) => {
+                  const on = (tune.from ?? (screen.game === "pop-balloons" ? "bottom" : "top")) === d;
+                  return (
+                    <button key={d} type="button" aria-pressed={on} onClick={() => retune({ from: d })} className={chip(on)}>
+                      {s.directions[d]}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
           <DoneButton label={s.done} onClick={close} />
           </>,
         )}
     </div>
   );
 }
+
+// The speeds offered for a screen that plays (style.tune.speed).
+const SPEEDS = [
+  [0.5, "slow"],
+  [1, "normal"],
+  [1.6, "fast"],
+  [2.5, "faster"],
+] as const;
+
+const chip = (on: boolean) => `rounded-full border-2 px-3 py-1 text-sm font-semibold ${on ? "border-brand bg-brand-soft" : "border-line"}`;
 
 function DoneButton({ label, onClick }: { label: string; onClick: () => void }) {
   return (
@@ -875,6 +1124,35 @@ function FontRow({ value, onPick }: { value?: Font; onPick: (font: Font) => void
           </button>
         ))}
       </div>
+    </div>
+  );
+}
+
+// Which part of a photo shows in its frame: zoom in, then slide it about. Without a crop it
+// shows whole and centred.
+function CropControls({ crop, onCrop }: { crop?: Crop; onCrop: (crop: Crop | undefined) => void }) {
+  const { t } = useI18n();
+  const s = t.studio;
+  const now = crop ?? { x: 50, y: 50, zoom: 1 };
+  const slider = (name: string, key: keyof Crop, min: number, max: number, step: number) => (
+    <label className="flex items-center gap-3 text-sm">
+      <span className="w-20 shrink-0 font-semibold">{name}</span>
+      <input type="range" min={min} max={max} step={step} value={now[key]} onChange={(e) => onCrop({ ...now, [key]: Number(e.target.value) })} className="min-w-0 flex-1 accent-[var(--color-brand)]" />
+    </label>
+  );
+  return (
+    <div className="space-y-1.5 rounded-xl bg-background p-2.5">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-bold uppercase tracking-wide opacity-60">{s.inFrame}</p>
+        {crop && (
+          <button type="button" onClick={() => onCrop(undefined)} className="text-xs font-semibold underline underline-offset-2">
+            {s.resetCrop}
+          </button>
+        )}
+      </div>
+      {slider(s.zoom, "zoom", 1, 4, 0.05)}
+      {slider(s.sideways, "x", 0, 100, 1)}
+      {slider(s.upDown, "y", 0, 100, 1)}
     </div>
   );
 }

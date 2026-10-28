@@ -365,9 +365,19 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   // The design panel's tab, and something just added for the card to select.
   const [tab, setTab] = useState<Tab>("text");
   const [pick, setPick] = useState<{ key: string; nonce: number } | undefined>();
+  // Bumped to open the settings of the screen being looked at.
+  const [settings, setSettings] = useState(0);
+  // The card filling the whole screen, as they'll see it (on a computer; phones have their own).
+  const [bigView, setBigView] = useState(false);
   const panel = useRef<HTMLDivElement>(null);
+  const cardBox = useRef<HTMLDivElement>(null);
   const onAdded = (added: { key: string } | { screenId: string }) => {
-    if ("screenId" in added) return goToScreen(added.screenId);
+    if ("screenId" in added) {
+      goToScreen(added.screenId);
+      // On a phone the panel is below the card, so bring the new screen into view.
+      if (!wide) requestAnimationFrame(() => cardBox.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+      return;
+    }
     setWordMode("edit");
     setPick((p) => ({ key: added.key, nonce: (p?.nonce ?? 0) + 1 }));
   };
@@ -772,7 +782,8 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                     </>
                   )}
                 </div>
-                <div role="tablist" aria-label={c.preview} className="hidden w-fit gap-1 rounded-full border border-line bg-panel p-1 lg:flex">
+                <div className="hidden items-center gap-2 lg:flex">
+                <div role="tablist" aria-label={c.preview} className="flex w-fit gap-1 rounded-full border border-line bg-panel p-1">
                 {(["computer", "phone"] as const).map((v) => (
                   <button
                     key={v}
@@ -785,13 +796,17 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                   </button>
                 ))}
                 </div>
+                <button type="button" onClick={() => setBigView(true)} className="rounded-full border-2 border-foreground/80 px-4 py-1.5 text-sm font-bold">
+                  {c.fullScreen}
+                </button>
+                </div>
               </div>
               <div className="order-3 space-y-3 lg:order-none">
                 <PreviewControls card={card} viewing={viewing} stage={stageShown} onGo={goToScreen} wordMode={wordMode} />
                 {/* On a phone the design panel is further down the page; these jump to it. */}
                 <div className="lg:hidden">
                   <p className="text-sm font-semibold opacity-70">{t.studio.addTitle}</p>
-                  <div className="mt-1.5 grid grid-cols-4 gap-2">
+                  <div className="mt-1.5 grid grid-cols-5 gap-1.5">
                     {STUDIO_TABS.map(({ key, icon }) => (
                       <button
                         key={key}
@@ -813,8 +828,8 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
               </div>
               {/* Its own layer: stickers on the card stay under the bar at the bottom of a phone, and
                   the controls for what's selected can hang over the screens strip. */}
-              <div className="relative z-10 order-2 lg:order-none">
-                <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onScreen={editScreen} onBegin={remember} pick={pick}>
+              <div ref={cardBox} className="relative z-10 order-2 scroll-mt-4 lg:order-none">
+                <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onScreen={editScreen} onBegin={remember} pick={pick} openSettings={settings}>
                   {!wide ? (
                     // On a phone, the card as it'll look on their phone, without a frame around it.
                     <div className="h-[min(68dvh,620px)] overflow-hidden rounded-3xl border-2 border-line">
@@ -853,6 +868,10 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                     setTab("screens");
                     panel.current?.scrollIntoView({ behavior: "smooth", block: "start" });
                   }}
+                  onSettings={() => {
+                    setWordMode("edit");
+                    setSettings((n) => n + 1);
+                  }}
                 />
                 {wordMode === "edit" && <AllWords card={card} screenId={viewing} onChange={editWords} />}
               </div>
@@ -872,6 +891,8 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
           }}
         />
       )}
+
+      {bigView && card && <FullScreenView card={card} startAt={viewing} closeLabel={c.closePreview} onClose={() => setBigView(false)} />}
 
       {showPreview && card && (
         <div className="fixed inset-0 z-50 flex flex-col bg-background lg:hidden">
@@ -948,6 +969,40 @@ function Welcome({ card, onClose, onWatch }: { card: CardData; onClose: () => vo
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+// The card filling the whole screen, as the person getting it will see it. Uses the
+// browser's own full screen where it can; Escape or the button closes it.
+function FullScreenView({ card, startAt, closeLabel, onClose }: { card: CardData; startAt?: string; closeLabel: string; onClose: () => void }) {
+  const box = useRef<HTMLDivElement>(null);
+  const close = useRef(onClose);
+  useEffect(() => {
+    close.current = onClose;
+  });
+  useEffect(() => {
+    const el = box.current;
+    el?.requestFullscreen?.().catch(() => {});
+    // Leaving the browser's full screen (Escape, or its own button) closes the view too.
+    const onChange = () => !document.fullscreenElement && close.current();
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && close.current();
+    document.addEventListener("fullscreenchange", onChange);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("fullscreenchange", onChange);
+      window.removeEventListener("keydown", onKey);
+      if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    };
+  }, []);
+  return (
+    <div ref={box} role="dialog" aria-modal="true" aria-label={closeLabel} className="fixed inset-0 z-[80] flex flex-col bg-black">
+      <div className="relative min-h-0 flex-1">
+        <CardPlayer card={card} preview sound focusScreenId={startAt} />
+      </div>
+      <button type="button" onClick={() => close.current()} className="absolute start-4 top-4 z-50 rounded-full bg-black/70 px-4 py-2 text-sm font-semibold text-white">
+        ✕ {closeLabel}
+      </button>
     </div>
   );
 }

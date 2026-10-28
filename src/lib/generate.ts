@@ -1,7 +1,7 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { customAlphabet } from "nanoid";
-import { EFFECTS, FONTS, FRAMES, GAMES, MOTIONS, MUSIC, OCCASIONS, PATTERNS, THEMES, cardSchema, screenStyle, type CardData, type Game, type Screen, type ScreenType } from "./card";
+import { DIRECTIONS, EFFECTS, FONTS, FRAMES, GAMES, MOTIONS, MUSIC, OCCASIONS, PATTERNS, THEMES, TRANSITIONS, cardSchema, screenStyle, type CardData, type Game, type Screen, type ScreenType } from "./card";
 import { LANGUAGES, type Locale } from "@/i18n/config";
 import { TEMPLATES, buildCard, getTemplate } from "./catalog";
 import { GAME_LABELS, LABELS_ON, LISTS, TEXTS, isList, type LabelKey } from "./labels";
@@ -89,7 +89,9 @@ Every screen can have a "style" that sets its look on top of the theme. Design e
   "burst": what bursts out at this screen's big moment, one of ${list(EFFECTS)}: when the envelope opens on the intro, when they say yes, win a game, finish the quiz, scratch it off, solve the phrase, the wheel lands, open a box, reach 100% or empty the jar. Without one, these moments throw confetti (the intro does nothing),
   "stickers": up to 10 emoji placed around the screen: [{"emoji": one emoji, "x": 0 to 100 (% from the left), "y": 0 to 100 (% from the top), "size": 4 to 40 (% of the card's shorter side; 8 to 16 suits most), "rotate": -180 to 180, "motion": one of ${list(MOTIONS)}}],
   "texts": up to 8 text boxes placed anywhere: [{"text" 120, "x", "y", "size": 2 to 20 (letter height, % of the shorter side; 5 is ordinary, 10 is big), "color", "font", "rotate"}],
-  "images": their own photos placed on the screen: [{"src", "x", "y", "size": 10 to 90 (width), "rotate", "frame": one of ${list(FRAMES)}}]. They add these themselves; keep, move, resize or remove them as asked, but never make new ones.
+  "images": their own photos placed on the screen: [{"src", "x", "y", "size": 10 to 90 (width), "rotate", "frame": one of ${list(FRAMES)}, "crop": {"x": 0 to 100, "y": 0 to 100, "zoom": 1 to 4} (which part of the photo shows in its frame: zoomed in towards that point, % across and down)}]. They add these themselves; keep, move, resize, turn, crop or remove them as asked, but never make new ones. A photos screen's "crops" does the same for its photos, one for each photo in order (null for whole).
+  "transition": how this screen comes in when it's reached (the animation between screens), one of ${list(TRANSITIONS)}. Without one it rises gently into place,
+  "tune": how this screen plays: {"speed": 0.25 to 3 (1 is normal, 0.5 half speed, 2 twice as fast: how fast a game's pieces move and appear, how fast the ghosts pop up, how quickly the hug fills, how fast the message types itself out, how long the wheel spins), "goal": 1 to 40 (how many it takes to win a game: things to catch or pop, ghosts, candles, diyas, lanterns, fireworks, bubbles, piñata hits, splats, petals, pairs to match, taps to unwrap, hearts to chase), "size": 0.5 to 2.5 (how big a game's pieces are), "from": one of ${list(DIRECTIONS)} (where a catching game's pieces come from: falling from the top, rising from the bottom, across from either side, or popping up all over)}
 }
 - Every part is optional. Colours are always six-digit hex.
 - The fonts: classic is an elegant serif, modern a clean sans-serif, handwritten casual handwriting, storybook a soft old-style serif, script a flowing wedding script, rounded bubbly and friendly, bold a chunky modern headline, typewriter an old typewriter, marker a thick felt-tip pen and spooky a dripping horror font. For the body, use one that's easy to read in a long letter: modern, classic, storybook, rounded or typewriter.
@@ -111,7 +113,8 @@ ${labelGuide()}
 
 # Changing a card
 If you're given an existing card and a change, return the whole card with that change made. Keep everything they didn't ask to change exactly as it is, including screen ids. Photos appear as "photo-1", "photo-2" and so on: keep, move or drop those as asked, but never make new ones.
-- Do whatever they ask that these screens, styles, labels, bursts and effects can do; that's almost everything. "Fireworks when the envelope opens" is a fireworks burst on the intro; "change Next to Let's go" is the next label; "add a game after this" is a new game screen after it.
+- Do whatever they ask that these screens, styles, labels, bursts, effects, transitions and tunes can do; that's almost everything. "Fireworks when the envelope opens" is a fireworks burst on the intro; "change Next to Let's go" is the next label; "add a game after this" is a new game screen after it; "a different animation between the screens" is a transition on each screen; "slow the balloons down and send them all over" is a tune with a lower speed and "from": "everywhere"; "make it 5 to win" is a tune goal.
+- They can ask for changes to one screen, several ("screens 2 and 3", "the quiz and the wheel") or every screen. Screens are numbered from 1 in the order they appear.
 - Also add "note" to the card: one or two short, friendly sentences telling them what you changed, in plain words, like "Fireworks now burst out of the envelope when it opens." If something they asked for can't be done, say so plainly in the note and what you did instead.
 
 # Two of our designs, for the voice and the JSON format (not a structure to copy)
@@ -194,16 +197,30 @@ function tidyStyle(style: unknown) {
     const items = (max: number, size: [number, number]) =>
       (raw as unknown[])
         .filter((s): s is Record<string, unknown> => Boolean(s) && typeof s === "object")
-        .map((s) => ({ ...s, x: clamp(s.x, 0, 100), y: clamp(s.y, 0, 100), size: clamp(s.size, ...size), rotate: clamp(s.rotate, -180, 180) }))
+        .map((s) => ({ ...s, x: clamp(s.x, 0, 100), y: clamp(s.y, 0, 100), size: clamp(s.size, ...size), rotate: clamp(s.rotate, -180, 180), ...("crop" in s ? { crop: tidyCrop(s.crop) } : {}) }))
         .filter((s) => fields[key].safeParse([s]).success)
         .slice(0, max);
     if (Array.isArray(raw) && key === "stickers") value = items(10, [4, 40]);
     if (Array.isArray(raw) && key === "texts") value = items(8, [2, 20]);
     if (Array.isArray(raw) && key === "images") value = items(6, [10, 90]);
+    // How a screen plays, with each number brought into range.
+    if (key === "tune" && raw && typeof raw === "object" && !Array.isArray(raw)) {
+      const t = raw as Record<string, unknown>;
+      value = { ...t, speed: clamp(t.speed, 0.25, 3), goal: typeof t.goal === "number" ? clamp(Math.round(t.goal), 1, 40) : t.goal, size: clamp(t.size, 0.5, 2.5) };
+    }
     const parsed = fields[key]?.safeParse(value);
     if (parsed?.success) out[key] = parsed.data;
   }
   return Object.keys(out).length ? out : undefined;
+}
+
+// Which part of a photo shows, with numbers brought into range, or nothing if it isn't one.
+function tidyCrop(crop: unknown) {
+  if (!crop || typeof crop !== "object") return undefined;
+  const { x, y, zoom } = crop as Record<string, unknown>;
+  if (![x, y, zoom].every((v) => typeof v === "number" && Number.isFinite(v))) return undefined;
+  const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
+  return { x: clamp(x as number, 0, 100), y: clamp(y as number, 0, 100), zoom: clamp(zoom as number, 1, 4) };
 }
 
 // A screen's own wording for its built-in words, keeping the ones that fit: known
@@ -240,7 +257,13 @@ function toCard(text: string, input: GenerateInput, urls: string[]): { card: Car
     seen.add(id);
     // Photo links back first, so the look is checked with the real ones.
     const restored = restorePhotos({ ...s, id }, urls);
-    return { ...restored, style: tidyStyle(restored.style), labels: tidyLabels(restored.labels) };
+    const tidy: Record<string, unknown> = { ...restored, style: tidyStyle(restored.style), labels: tidyLabels(restored.labels) };
+    // A photos screen's crops only where they make sense, one per photo.
+    if ("crops" in tidy) {
+      const crops = tidy.crops;
+      tidy.crops = Array.isArray(crops) && Array.isArray(tidy.photos) ? tidy.photos.map((_, i) => tidyCrop(crops[i]) ?? null) : undefined;
+    }
+    return tidy;
   });
   if (typeof draft.to !== "string" || !draft.to.trim()) draft.to = input.to;
   if (typeof draft.from !== "string" || !draft.from.trim()) draft.from = input.from;
@@ -258,7 +281,9 @@ function toCard(text: string, input: GenerateInput, urls: string[]): { card: Car
     return { problem: `The card didn't fit the format:\n${issues.join("\n")}` };
   }
   const { screens } = parsed.data;
-  if (screens[0]?.type !== "intro" || screens.at(-1)?.type !== "finale") return { problem: "The first screen must be the intro and the last the finale." };
+  // A new card opens with the envelope and ends with the finale. A card being changed keeps
+  // whatever order they've arranged in the editor.
+  if (!input.card && (screens[0]?.type !== "intro" || screens.at(-1)?.type !== "finale")) return { problem: "The first screen must be the intro and the last the finale." };
   return { card: parsed.data, note: note || undefined };
 }
 
@@ -297,7 +322,7 @@ function request(input: GenerateInput): { message: string; urls: string[]; desig
     const { card, urls } = hidePhotos(withoutTemplate(input.card));
     const screen = input.card.screens.find((s) => s.id === input.focus);
     const about = screen
-      ? `\n\nThey're looking at the screen with id "${screen.id}" (a ${screen.type} screen), so "this", "here" and "this screen" mean that one. Make the change to that screen, unless what they ask is clearly about the whole card (like the colours, the music, or adding or removing screens). Leave the other screens as they are.`
+      ? `\n\nThey're looking at screen ${input.card.screens.indexOf(screen) + 1} of ${input.card.screens.length} (id "${screen.id}", a ${screen.type} screen), so "this", "here" and "this screen" mean that one. Make the change there, unless they say which screens they mean (by number, by what's on them, "all of them", "every screen") or it's clearly about the whole card (like the colours, the music, or adding or removing screens). Leave the screens they didn't mean as they are.`
       : "";
     return { message: `Here is the card:\n${JSON.stringify(card)}${about}\n\nThe change they want:\n${prompt}`, urls };
   }

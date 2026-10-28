@@ -7,13 +7,14 @@ import type { CardData, Font, ScreenStyle } from "@/lib/card";
 import { FONT_VARS, screenLook } from "@/lib/screen-style";
 import { themes } from "@/lib/themes";
 import { uploadPhoto } from "./image";
-import { KIT_GROUPS, copyScreen, screenEmoji, type KitItem } from "./screen-kit";
+import { copyScreen, screenEmoji } from "./screen-kit";
+import { ScreensTab } from "./ScreensTab";
 
 // The card designer's panel, like a presentation app's: add text, add screens (ready-made
 // layouts), add elements (photos and icons), or ask the AI. Everything is added to the
 // screen being looked at, then tapped on the card to change it.
 
-export type Tab = "text" | "screens" | "elements" | "ai";
+export type Tab = "text" | "upload" | "screens" | "elements" | "ai";
 
 type Change = (update: (card: CardData) => CardData) => void;
 
@@ -33,6 +34,7 @@ type Props = {
 
 export const STUDIO_TABS: { key: Tab; icon: string }[] = [
   { key: "text", icon: "T" },
+  { key: "upload", icon: "⬆" },
   { key: "screens", icon: "▤" },
   { key: "elements", icon: "★" },
   { key: "ai", icon: "✨" },
@@ -73,7 +75,6 @@ export function StudioPanel({ card, screenIndex, tab, setTab, change, onAdded, a
   const { t } = useI18n();
   const s = t.studio;
   const screen = card.screens[screenIndex];
-  const names = { to: card.to, from: card.from };
   const files = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<string | null>(null);
@@ -88,39 +89,39 @@ export function StudioPanel({ card, screenIndex, tab, setTab, change, onAdded, a
     onAdded({ key: `${key === "stickers" ? "sticker" : key === "texts" ? "text" : "image"}:${done.at}` });
   };
   const addText = (text: string, look: { font?: Font; color?: string; size: number }) => add("texts", { text, x: 50, y: spot.y, ...look }, 8);
-  const addScreen = (item: KitItem) => {
-    if (card.screens.length >= MAX_SCREENS) return setNote(fmt(s.tooManyScreens, { n: MAX_SCREENS }));
-    const made = item.make(names);
-    change((c) => ({ ...c, screens: [...c.screens.slice(0, screenIndex + 1), made, ...c.screens.slice(screenIndex + 1)] }));
-    onAdded({ screenId: made.id });
-  };
-  const addPhotos = async (chosen: FileList | null) => {
-    if (!chosen?.length) return;
+  // Photos they've uploaded, kept in this browser, plus any already on the card.
+  const [uploads, setUploads] = useState<string[]>(readUploads);
+  const onCard = card.screens.flatMap((sc) => [...(sc.type === "photos" ? sc.photos : []), ...(sc.style?.images ?? []).map((img) => img.src)]);
+  const gallery = [...new Set([...uploads, ...onCard])];
+  const upload = async (chosen: FileList | null) => {
+    const list = Array.from(chosen ?? []).slice(0, 12);
+    if (files.current) files.current.value = "";
+    if (!list.length) return;
     setBusy(true);
     setNote(null);
-    let latest = card;
-    for (const [i, file] of Array.from(chosen).slice(0, 6).entries()) {
+    for (const file of list) {
       try {
         const src = await uploadPhoto(file);
-        const done = addTo(latest, screenIndex, "images", { src, x: 50 + ((i * 12) % 36) - 18, y: 45 + ((i * 9) % 20), size: 45, rotate: [-4, 3, -2, 5, -3, 2][i % 6], frame: "polaroid" }, 6);
-        if (!done) break;
-        latest = done.card;
-        change(() => done.card);
-        onAdded({ key: `image:${done.at}` });
+        setUploads((u) => {
+          const next = [src, ...u.filter((x) => x !== src)].slice(0, 40);
+          saveUploads(next);
+          return next;
+        });
       } catch {
         setNote(t.editor.uploadFailed);
       }
     }
-    if (files.current) files.current.value = "";
     setBusy(false);
   };
+  // Puts one of their photos on the screen they're on, ready to move, turn and resize.
+  const placePhoto = (src: string) => add("images", { src, x: spot.x, y: 45, size: 45, rotate: [-4, 3, -2, 5][count % 4], frame: "polaroid" }, 6);
 
   const big = "w-full rounded-2xl border-2 border-line bg-panel px-4 py-3 text-start font-semibold transition hover:-translate-y-0.5 hover:border-brand";
   const heading = "text-xs font-bold uppercase tracking-wide opacity-60";
 
   return (
     <section className="space-y-4">
-      <div role="tablist" aria-label={s.howTitle} className="grid grid-cols-4 gap-2">
+      <div role="tablist" aria-label={s.howTitle} className="grid grid-cols-5 gap-1.5">
         {STUDIO_TABS.map(({ key, icon }) => (
           <button
             key={key}
@@ -177,39 +178,43 @@ export function StudioPanel({ card, screenIndex, tab, setTab, change, onAdded, a
       )}
 
       {tab === "screens" && (
-        <div className="space-y-4">
-          <p className="text-sm opacity-70">{s.screensIntro}</p>
-          {KIT_GROUPS.map((group) => (
-            <div key={group.key} className="space-y-2">
-              <p className={heading}>{s.groups[group.key]}</p>
-              <div className={group.key === "games" ? "grid grid-cols-2 gap-2" : "space-y-2"}>
-                {group.items.map((item) => (
-                  <button key={item.key} type="button" onClick={() => addScreen(item)} className={`${big} flex items-center gap-3 py-2.5`}>
-                    <span aria-hidden className="text-2xl">
-                      {item.emoji}
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block leading-tight">{item.game ? t.labels.games[item.game] : t.labels.screens[item.type]}</span>
-                      {!item.game && <span className="block text-xs font-normal opacity-60">{s.kit[item.type]}</span>}
-                    </span>
-                  </button>
-                ))}
-              </div>
+        <ScreensTab
+          card={card}
+          screenIndex={screenIndex}
+          full={card.screens.length >= MAX_SCREENS}
+          onFull={() => setNote(fmt(s.tooManyScreens, { n: MAX_SCREENS }))}
+          onAdd={(made, at) => {
+            change((c) => ({ ...c, screens: [...c.screens.slice(0, at), made, ...c.screens.slice(at)] }));
+            onAdded({ screenId: made.id });
+          }}
+        />
+      )}
+
+      {tab === "upload" && (
+        <div className="space-y-3">
+          <p className="text-sm leading-relaxed opacity-70">{s.photosHint}</p>
+          <button type="button" disabled={busy} onClick={() => files.current?.click()} className={`${big} text-center text-lg disabled:opacity-60`}>
+            {busy ? t.editor.uploading : `⬆ ${s.addPhotos}`}
+          </button>
+          <input ref={files} type="file" accept="image/*" multiple className="hidden" onChange={(e) => upload(e.target.files)} />
+          <p className={heading}>{s.photosTitle}</p>
+          {gallery.length ? (
+            <div className="grid grid-cols-3 gap-2">
+              {gallery.map((src) => (
+                <button key={src} type="button" aria-label={s.putOnCard} onClick={() => placePhoto(src)} className="aspect-square overflow-hidden rounded-xl border-2 border-line transition hover:-translate-y-0.5 hover:border-brand">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- their own photos, already resized on upload */}
+                  <img src={src} alt="" className="h-full w-full object-cover" draggable={false} />
+                </button>
+              ))}
             </div>
-          ))}
+          ) : (
+            <p className="text-sm opacity-60">{s.noUploads}</p>
+          )}
         </div>
       )}
 
       {tab === "elements" && (
         <div className="space-y-4">
-          <div className="space-y-2">
-            <p className={heading}>{s.photosTitle}</p>
-            <button type="button" disabled={busy} onClick={() => files.current?.click()} className={`${big} text-center text-lg disabled:opacity-60`}>
-              {busy ? t.editor.uploading : `🖼 ${s.addPhotos}`}
-            </button>
-            <input ref={files} type="file" accept="image/*" multiple className="hidden" onChange={(e) => addPhotos(e.target.files)} />
-            <p className="text-xs opacity-60">{s.photosHint}</p>
-          </div>
           <p className={heading}>{s.iconsTitle}</p>
           {(Object.keys(ICONS) as (keyof typeof ICONS)[]).map((group) => (
             <div key={group}>
@@ -239,7 +244,22 @@ export function StudioPanel({ card, screenIndex, tab, setTab, change, onAdded, a
 
 // The card's screens in a row, like a presentation's slides: tap one to work on it;
 // the one you're on can be duplicated, moved or deleted.
-export function ScreenStrip({ card, screenIndex, onGo, change, onAdd }: { card: CardData; screenIndex: number; onGo: (id: string) => void; change: Change; onAdd: () => void }) {
+export function ScreenStrip({
+  card,
+  screenIndex,
+  onGo,
+  change,
+  onAdd,
+  onSettings,
+}: {
+  card: CardData;
+  screenIndex: number;
+  onGo: (id: string) => void;
+  change: Change;
+  onAdd: () => void;
+  // Opens this screen's own settings: its background, how it comes in, how its game plays.
+  onSettings: () => void;
+}) {
   const { t } = useI18n();
   const s = t.studio;
   // The card stays on the screen that moved, at its new place.
@@ -292,6 +312,9 @@ export function ScreenStrip({ card, screenIndex, onGo, change, onAdd }: { card: 
       </div>
       {current && (
         <div className="flex flex-wrap items-center gap-2">
+          <button type="button" className={action} onClick={onSettings}>
+            ⚙ {s.screenSettings}
+          </button>
           <button
             type="button"
             className={action}
@@ -326,4 +349,20 @@ export function ScreenStrip({ card, screenIndex, onGo, change, onAdd }: { card: 
       )}
     </div>
   );
+}
+
+// Their uploaded photos, remembered in this browser between visits.
+const UPLOADS_KEY = "sv-uploads-v1";
+function readUploads(): string[] {
+  try {
+    const list = JSON.parse(localStorage.getItem(UPLOADS_KEY) ?? "[]");
+    return Array.isArray(list) ? list.filter((x): x is string => typeof x === "string") : [];
+  } catch {
+    return [];
+  }
+}
+function saveUploads(list: string[]) {
+  try {
+    localStorage.setItem(UPLOADS_KEY, JSON.stringify(list));
+  } catch {}
 }
