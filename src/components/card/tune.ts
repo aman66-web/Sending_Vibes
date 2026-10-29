@@ -20,26 +20,10 @@ export function useTune() {
   };
 }
 
-// How many it usually takes to win each game whose goal can be changed.
-export const USUAL_GOAL = {
-  "catch-hearts": 10,
-  "pop-balloons": 10,
-  "catch-snowflakes": 10,
-  "catch-stars": 10,
-  "catch-candy": 10,
-  "light-diyas": 5,
-  "blow-candles": 5,
-  "memory-match": 6,
-  "unwrap-gift": 6,
-  "cursor-chase": 5,
-  "loves-me-not": 9,
-  "whack-ghosts": 8,
-  "launch-fireworks": 6,
-  "release-lanterns": 5,
-  "bubble-wrap": 20,
-  pinata: 8,
-  "throw-colours": 12,
-} satisfies Partial<Record<Game, number>>;
+// How many it usually takes to win each game whose goal can be changed, and the most each
+// one shows. Kept with the rest of the games' facts in lib/games.ts, which the card writer
+// reads too, so there's one list to change.
+export { GOAL_MAX, USUAL_GOAL } from "@/lib/games";
 
 // The games whose pieces move about, so they can come from elsewhere or be bigger.
 export const CATCHING: Game[] = ["catch-hearts", "pop-balloons", "catch-snowflakes", "catch-stars", "catch-candy"];

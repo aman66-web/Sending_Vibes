@@ -9,6 +9,7 @@ import { Flourish, HeartMark, Laurel } from "./ornaments";
 import { useSfx } from "./sound";
 import { HELP_AFTER, useStuck, useTune } from "./tune";
 import { cropStyle } from "@/lib/screen-style";
+import { isRtl } from "./personal";
 import { useWords } from "./words";
 import { Envelope, TapHint, type EnvelopeColours } from "./Envelope";
 import { Keepsake } from "./Keepsake";
@@ -513,6 +514,9 @@ export function QuizScreen({ screen, onNext, stage = 0 }: ScreenProps<"quiz">) {
   );
 }
 
+// How wide a stroke scratches off, in pixels from the finger.
+const SCRATCH_BRUSH = 32;
+
 // A silver panel they rub away with a finger (or mouse) to reveal a hidden message.
 export function ScratchScreen({ screen, onNext, stage = 0 }: ScreenProps<"scratch">) {
   const sfx = useSfx();
@@ -526,7 +530,8 @@ export function ScratchScreen({ screen, onNext, stage = 0 }: ScreenProps<"scratc
 
   useEffect(() => {
     const el = canvas.current;
-    const ctx = el?.getContext("2d");
+    // It's read back often to see how much is scratched off; the first call sets that up.
+    const ctx = el?.getContext("2d", { willReadFrequently: true });
     if (!el || !ctx) return;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     el.width = el.clientWidth * dpr;
@@ -560,7 +565,8 @@ export function ScratchScreen({ screen, onNext, stage = 0 }: ScreenProps<"scratc
     const scale = el.clientWidth / box.width || 1;
     ctx.globalCompositeOperation = "destination-out";
     ctx.beginPath();
-    ctx.arc((e.clientX - box.left) * scale, (e.clientY - box.top) * scale, 24, 0, Math.PI * 2);
+    // A broad brush, so a slow or shaky finger still clears plenty.
+    ctx.arc((e.clientX - box.left) * scale, (e.clientY - box.top) * scale, SCRATCH_BRUSH, 0, Math.PI * 2);
     ctx.fill();
     strokes.current += 1;
     if (strokes.current % 5 === 0) sfx("tick");
@@ -619,19 +625,43 @@ export function ScratchScreen({ screen, onNext, stage = 0 }: ScreenProps<"scratc
   );
 }
 
-const normalise = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]/g, "").replace(/\s+/g, " ").trim();
+// Accents people rarely type: Latin ones (é, ü), Arabic vowel marks and the stretching
+// stroke, Hebrew points. Other marks stay, as in Hindi or Bengali they're part of the letter.
+const ACCENTS = /[\u0300-\u036f\u1ab0-\u1aff\u1dc0-\u1dff\u20d0-\u20ff\ufe20-\ufe2f\u0591-\u05c7\u0610-\u061a\u064b-\u065f\u0670\u0640]/g;
+
+// What counts when matching the phrase: letters and numbers in any script, ignoring case,
+// those accents, punctuation and extra spaces (and full-width or other look-alike forms).
+const normalise = (s: string) =>
+  s
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(ACCENTS, "")
+    .normalize("NFKC")
+    .replace(/[^\p{L}\p{N}\p{M}\s]/gu, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+// Each letter with the marks written on it, so a Hindi letter and its vowel sign share a tile.
+const lettersOf = (s: string) => s.match(/\P{M}\p{M}*|\p{M}+/gu) ?? [];
 
 // They have to type the secret phrase. Made for a keyboard, works with a phone keyboard too.
 export function TypeItScreen({ screen, onNext, stage = 0 }: ScreenProps<"typeit">) {
   const sfx = useSfx();
   const { text } = useWords();
-  const target = normalise(screen.phrase);
+  // A phrase with no letters or numbers at all (only emoji, say) is matched just as it is.
+  const loose = !normalise(screen.phrase);
+  const match = (s: string) => (loose ? s.trim().toLowerCase() : normalise(s));
+  const target = match(screen.phrase);
+  const tiles = lettersOf(target);
+  // Where each tile ends in the phrase, to show it once everything up to there is right.
+  const ends = tiles.reduce<number[]>((all, t) => [...all, (all.at(-1) ?? 0) + t.length], []);
+  const rtl = isRtl(screen.phrase);
   const [value, setValue] = useState(stage >= 1 ? screen.phrase : "");
   const [hints, setHints] = useState(0);
   // Times they've gone wrong while typing, to offer the answer after a few.
   const [slips, setSlips] = useState(0);
   const stuck = useStuck(HELP_AFTER.typeit, slips, 3);
-  const typed = normalise(value);
+  const typed = match(value);
   const solved = typed === target;
   // How many leading characters are right so far.
   let correct = 0;
@@ -642,6 +672,17 @@ export function TypeItScreen({ screen, onNext, stage = 0 }: ScreenProps<"typeit"
     sfx("unlock");
     setTimeout(() => sfx("win"), 200);
   };
+  // Each hint types the next letter in for them (putting right anything wrong before it),
+  // so pressing it enough times solves it.
+  const hint = () => {
+    let h = Math.min(Math.max(hints, ends.filter((end) => end <= correct).length) + 1, tiles.length);
+    while (h < tiles.length && tiles[h - 1] === " ") h++;
+    setHints(h);
+    const filled = tiles.slice(0, h).join("");
+    if (filled === target) return solve(filled);
+    setValue(filled);
+    sfx("tap");
+  };
 
   return (
     <div className="flex w-full flex-col items-center gap-5 text-center">
@@ -649,18 +690,18 @@ export function TypeItScreen({ screen, onNext, stage = 0 }: ScreenProps<"typeit"
       <h2 className="font-display text-3xl font-semibold leading-tight">{screen.title}</h2>
       <p className="text-lg text-[var(--c-muted)]">{solved ? screen.winText : screen.instructions}</p>
       {/* The tiles show it a letter at a time (or not yet), so the editor reads it from here. */}
-      <div className={`flex flex-wrap justify-center gap-1.5 ${wrongNow ? "animate-shake" : ""}`} aria-hidden data-text={screen.phrase}>
-        {target.split("").map((ch, i) =>
+      <div dir={rtl ? "rtl" : "ltr"} className={`flex flex-wrap justify-center gap-1.5 ${wrongNow ? "animate-shake" : ""}`} aria-hidden data-text={screen.phrase}>
+        {tiles.map((ch, i) =>
           ch === " " ? (
             <span key={i} className="w-4" />
           ) : (
             <span
               key={i}
               className={`grid h-11 w-9 place-items-center rounded-lg font-display text-xl font-bold uppercase shadow-sm ring-1 ring-black/10 @2xl:h-14 @2xl:w-11 @2xl:text-2xl ${
-                i < correct || i < hints ? "bg-[var(--c-accent)] text-[var(--c-accent-text)]" : "bg-[var(--c-secondary)]"
+                ends[i] <= correct || i < hints ? "bg-[var(--c-accent)] text-[var(--c-accent-text)]" : "bg-[var(--c-secondary)]"
               }`}
             >
-              {i < correct || i < hints ? ch : ""}
+              {ends[i] <= correct || i < hints ? ch : ""}
             </span>
           ),
         )}
@@ -670,7 +711,7 @@ export function TypeItScreen({ screen, onNext, stage = 0 }: ScreenProps<"typeit"
           <input
             value={value}
             onChange={(e) => {
-              const next = normalise(e.target.value);
+              const next = match(e.target.value);
               if (next === target) return solve(e.target.value);
               setValue(e.target.value);
               if (next.length > typed.length) {
@@ -682,12 +723,16 @@ export function TypeItScreen({ screen, onNext, stage = 0 }: ScreenProps<"typeit"
             aria-label="Type the secret phrase"
             placeholder={text("typeStart")}
             data-text={text("typeStart")}
+            dir={rtl ? "rtl" : "auto"}
+            // The phone's keyboard mustn't "fix" the secret phrase into something else.
             autoComplete="off"
+            autoCorrect="off"
             autoCapitalize="off"
             spellCheck={false}
+            enterKeyHint="done"
             className="w-full max-w-sm rounded-2xl bg-[var(--c-secondary)] px-5 py-4 text-center font-display text-xl font-semibold text-[var(--c-text)] shadow-sm outline-none ring-1 ring-black/10 placeholder:opacity-50 focus:ring-2 focus:ring-[var(--c-accent)]"
           />
-          <button onClick={() => setHints((h) => Math.min(h + 1, target.length))} className="min-h-11 px-4 text-base font-semibold underline underline-offset-4 opacity-80">
+          <button onClick={hint} className="min-h-11 px-4 text-base font-semibold underline underline-offset-4 opacity-80">
             {text("typeHint")}
           </button>
         </>
