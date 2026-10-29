@@ -1,16 +1,24 @@
 "use client";
 
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { fmt } from "@/i18n/config";
 import { useI18n } from "@/i18n/client";
+import { stillToWrite } from "@/lib/blanks";
 import type { CardData, Screen } from "@/lib/card";
+import { occasions } from "@/lib/templates";
 import { ScreenPreview } from "./ScreenPreview";
-import { KIT_GROUPS, type KitItem } from "./screen-kit";
+import { FAMILY, FESTIVE, LOVE } from "./kit/parts";
+import { KIT, KIT_FILTERS, KIT_GROUPS, inFilter, matches, ranked, type KitFilter, type KitGroupKey, type KitItem } from "./screen-kit";
 
-// The Screens tab: ready-made screens grouped by what they're for. Each group opens to show
-// its screens as they'll really look on this card, and tapping one asks where it should go.
+// The Screens tab: over two hundred ready-made screens in the usual groups, to browse by
+// occasion or search by name. Each group shows the six that suit this card best, as they'll
+// really look on it, with the rest a tap away; tapping one asks where it should go. Previews
+// only play while they're on screen (see ScreenPreview), so a long list stays quick.
 
 const GROUP_EMOJI = { start: "💌", words: "✉️", fun: "🎁", games: "🎮", end: "🎆" } as const;
+const FILTER_EMOJI = { birthday: "🎂", love: "❤️", festive: "🎆", family: "🏡", fun: "😄", all: "✨" } as const;
+// How many of each group show before "Show all".
+const FIRST = 6;
 
 type Props = {
   card: CardData;
@@ -26,17 +34,132 @@ type Props = {
 export function ScreensTab({ card, screenIndex, onAdd, full, onFull }: Props) {
   const { t } = useI18n();
   const s = t.studio;
-  const [open, setOpen] = useState<string | null>(null);
+  const k = t.kit;
+  const [filter, setFilter] = useState<KitFilter>("card");
+  const [query, setQuery] = useState("");
+  // Groups showing all their screens, for the filter or search they were opened under.
+  const [opened, setOpened] = useState<{ view: string; groups: KitGroupKey[] }>({ view: "", groups: [] });
   const [placing, setPlacing] = useState<KitItem | null>(null);
-  const nameOf = (item: KitItem) => (item.game ? t.labels.games[item.game] : t.labels.screens[item.type]);
+  const searchBox = useRef<HTMLInputElement>(null);
+  const searching = query.trim() !== "";
+  const view = searching ? `search:${query.trim()}` : filter;
+  const open = opened.view === view ? opened.groups : [];
+  const nameOf = (item: KitItem) => k.items[item.key]?.name ?? (item.game ? t.labels.games[item.game] : t.labels.screens[item.type]);
+
+  // Everything a screen can be found by: its name, what it is, its group and its occasions.
+  const findBy = useMemo(() => {
+    const words = (item: KitItem) => {
+      const own = k.items[item.key];
+      const group = KIT_GROUPS.find((g) => g.items.includes(item))?.key;
+      const tags = item.tags.flatMap((tag) => (tag === "any" ? [] : tag === "fun" ? [k.filters.fun] : [t.occasions[tag].label]));
+      const kinds = [
+        item.tags.includes("birthday") && k.filters.birthday,
+        LOVE.some((o) => item.tags.includes(o)) && k.filters.love,
+        FESTIVE.some((o) => item.tags.includes(o)) && k.filters.festive,
+        FAMILY.some((o) => item.tags.includes(o)) && k.filters.family,
+      ];
+      return [own?.name, own?.about, t.labels.screens[item.type], item.game && t.labels.games[item.game], group && s.groups[group], ...tags, ...kinds].filter(Boolean).join(" ");
+    };
+    return new Map(KIT.map((item) => [item, words(item)]));
+  }, [k, s, t.labels, t.occasions]);
+
+  const groups = useMemo(
+    () =>
+      KIT_GROUPS.map((group) => {
+        const items = group.items.filter((item) => (searching ? matches(findBy.get(item) ?? "", query) : inFilter(item, filter, card.occasion)));
+        return { key: group.key, items: ranked(items, card.occasion, FIRST) };
+      }).filter((group) => group.items.length > 0),
+    [searching, query, filter, card.occasion, findBy],
+  );
+  const found = groups.reduce((n, g) => n + g.items.length, 0);
+
+  const clearSearch = () => {
+    setQuery("");
+    searchBox.current?.focus();
+  };
+
+  const toggle = (key: KitGroupKey) => {
+    const isOpen = open.includes(key);
+    setOpened({ view, groups: isOpen ? open.filter((g) => g !== key) : [...open, key] });
+    // Folding a long group away would leave them further down the page; bring its heading back.
+    if (isOpen) requestAnimationFrame(() => document.getElementById(`kit-${key}`)?.scrollIntoView({ block: "nearest", behavior: "smooth" }));
+  };
+
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <p className="text-sm opacity-70">{s.screensIntro}</p>
-      {KIT_GROUPS.map((group) => {
-        const isOpen = open === group.key;
+
+      <div className="relative">
+        <svg aria-hidden viewBox="0 0 24 24" className="pointer-events-none absolute start-3.5 top-1/2 h-5 w-5 -translate-y-1/2 opacity-50" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+          <circle cx="10.5" cy="10.5" r="6.5" />
+          <path d="M15.5 15.5 21 21" />
+        </svg>
+        <input
+          type="search"
+          value={query}
+          ref={searchBox}
+          onChange={(e) => setQuery(e.target.value)}
+          aria-label={k.searchLabel}
+          placeholder={k.searchPlaceholder}
+          enterKeyHint="search"
+          autoComplete="off"
+          className="min-h-12 w-full rounded-2xl border-2 border-line bg-panel py-2.5 pe-12 ps-11 text-base outline-none transition placeholder:opacity-50 focus:border-brand [&::-webkit-search-cancel-button]:hidden"
+        />
+        {searching && (
+          <button
+            type="button"
+            onClick={clearSearch}
+            aria-label={k.clearSearch}
+            className="absolute end-0.5 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full text-lg opacity-70 hover:opacity-100"
+          >
+            ✕
+          </button>
+        )}
+      </div>
+
+      <div role="group" aria-label={k.filtersLabel} className="flex flex-wrap gap-2">
+        {KIT_FILTERS.map((f) => {
+          const on = !searching && filter === f;
+          return (
+            <button
+              key={f}
+              type="button"
+              aria-pressed={on}
+              onClick={() => {
+                setFilter(f);
+                setQuery("");
+              }}
+              className={`inline-flex min-h-11 items-center gap-1.5 rounded-full border-2 px-4 text-sm font-bold transition ${on ? "border-brand bg-brand text-white" : "border-line bg-panel hover:border-brand"}`}
+            >
+              <span aria-hidden>{f === "card" ? occasions[card.occasion].emoji : FILTER_EMOJI[f]}</span>
+              {k.filters[f]}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Says how many were found as they type, for screen readers. */}
+      <p role="status" className="sr-only">
+        {searching ? (found === 1 ? k.foundOne : fmt(k.found, { n: found })) : ""}
+      </p>
+
+      {groups.length === 0 && (
+        <div className="rounded-2xl border-2 border-dashed border-line p-5 text-center">
+          <p className="font-semibold">{searching ? fmt(k.noMatch, { q: query.trim() }) : k.noneHere}</p>
+          {searching && (
+            <button type="button" onClick={clearSearch} className="mt-3 min-h-11 rounded-full border-2 border-line bg-panel px-5 font-bold transition hover:border-brand">
+              {k.clearSearch}
+            </button>
+          )}
+        </div>
+      )}
+
+      {groups.map((group) => {
+        const isOpen = open.includes(group.key);
+        const shown = isOpen ? group.items : group.items.slice(0, FIRST);
         return (
-          <div key={group.key} className="overflow-hidden rounded-2xl border-2 border-line bg-panel">
-            <button type="button" aria-expanded={isOpen} onClick={() => setOpen(isOpen ? null : group.key)} className="flex w-full items-center gap-3 px-4 py-3 text-start">
+          <section key={group.key} aria-labelledby={`kit-${group.key}`} className="scroll-mt-4 overflow-hidden rounded-2xl border-2 border-line bg-panel">
+            <h3 id={`kit-${group.key}`} className="flex scroll-mt-4 items-center gap-3 px-4 py-3">
               <span aria-hidden className="text-2xl">
                 {GROUP_EMOJI[group.key]}
               </span>
@@ -44,29 +167,33 @@ export function ScreensTab({ card, screenIndex, onAdd, full, onFull }: Props) {
                 <span className="block font-bold">{s.groups[group.key]}</span>
                 <span className="block text-xs opacity-60">{group.items.length === 1 ? s.oneScreen : fmt(s.screenCount, { n: group.items.length })}</span>
               </span>
-              <span aria-hidden className={`text-xl leading-none transition ${isOpen ? "rotate-180" : ""}`}>
-                ▾
-              </span>
-            </button>
-            {isOpen && (
-              <div className="grid grid-cols-2 gap-3 border-t border-line p-3">
-                {group.items.map((item) => (
-                  <button
-                    key={item.key}
-                    type="button"
-                    onClick={() => (full ? onFull() : setPlacing(item))}
-                    className="group rounded-2xl p-1.5 text-start transition hover:bg-brand-soft"
-                  >
-                    <KitPreview card={card} item={item} />
-                    <span className="mt-1.5 block px-0.5 text-sm font-bold leading-tight">{nameOf(item)}</span>
-                    {!item.game && <span className="block px-0.5 text-xs leading-snug opacity-60">{s.kit[item.type]}</span>}
-                  </button>
-                ))}
+            </h3>
+            <ul className="grid grid-cols-2 gap-3 border-t border-line p-3">
+              {shown.map((item) => (
+                <li key={item.key}>
+                  <KitTile card={card} item={item} name={nameOf(item)} about={k.items[item.key]?.about ?? ""} onPick={() => (full ? onFull() : setPlacing(item))} />
+                </li>
+              ))}
+            </ul>
+            {group.items.length > FIRST && (
+              <div className="px-3 pb-3">
+                <button
+                  type="button"
+                  aria-expanded={isOpen}
+                  onClick={() => toggle(group.key)}
+                  className="flex min-h-11 w-full items-center justify-center gap-2 rounded-full border-2 border-line bg-background px-4 py-2 font-bold transition hover:border-brand"
+                >
+                  {isOpen ? k.showFewer : fmt(k.showAll, { n: group.items.length })}
+                  <span aria-hidden className={`text-lg leading-none transition ${isOpen ? "rotate-180" : ""}`}>
+                    ▾
+                  </span>
+                </button>
               </div>
             )}
-          </div>
+          </section>
         );
       })}
+
       {placing && (
         <WherePicker
           card={card}
@@ -83,10 +210,24 @@ export function ScreensTab({ card, screenIndex, onAdd, full, onFull }: Props) {
   );
 }
 
-// A ready-made screen as it'll look on this card.
-function KitPreview({ card, item }: { card: CardData; item: KitItem }) {
+// A ready-made screen as it'll look on this card, its name, what it's for, and whether
+// it's ready as it is or has words (or photos) for them to add.
+function KitTile({ card, item, name, about, onPick }: { card: CardData; item: KitItem; name: string; about: string; onPick: () => void }) {
+  const { t } = useI18n();
   const screen = useMemo(() => item.make({ to: card.to, from: card.from }), [item, card.to, card.from]);
-  return <ScreenPreview card={card} screen={screen} />;
+  // A photos screen without photos is skipped when the card plays, so it always needs some.
+  const needs = useMemo(() => (screen.type === "photos" ? "photos" : stillToWrite({ screens: [screen] }).length ? "words" : null), [screen]);
+  return (
+    <button type="button" onClick={onPick} className="group block w-full rounded-2xl p-1.5 text-start transition hover:bg-brand-soft">
+      <ScreenPreview card={card} screen={screen} />
+      <span className="mt-1.5 block px-0.5 text-sm font-bold leading-tight">{name}</span>
+      {about && <span className="mt-0.5 block px-0.5 text-xs leading-snug opacity-70">{about}</span>}
+      <span className={`mt-1 block px-0.5 text-xs font-semibold ${needs ? "text-brand" : "opacity-60"}`}>
+        <span aria-hidden>{needs === "photos" ? "📷 " : needs ? "✏️ " : "✓ "}</span>
+        {needs === "photos" ? t.kit.addPhotos : needs ? t.kit.writeYours : t.kit.ready}
+      </span>
+    </button>
+  );
 }
 
 // Where a new screen goes: the card's screens in order, each as it looks, with a "Put it
