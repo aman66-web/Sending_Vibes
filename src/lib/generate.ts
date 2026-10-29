@@ -108,7 +108,7 @@ Every screen has a "style" that sets its look on top of the theme. If they descr
 }
 - Every part is optional. Colours are always six-digit hex.
 - The fonts: classic is an elegant serif, modern a clean sans-serif, handwritten casual handwriting, storybook a soft old-style serif, script a flowing wedding script, rounded bubbly and friendly, bold a chunky modern headline, typewriter an old typewriter, marker a thick felt-tip pen and spooky a dripping horror font. For the body, use one that's easy to read in a long letter: modern, classic, storybook, rounded or typewriter.
-- Put stickers near the edges and corners (x under 15 or over 85, or y under 14 or over 86) so they don't cover the words, 2 to 5 on a screen. Keep the top right corner clear (x over 80 with y under 16): the sound button sits there.
+- Put stickers near the edges and corners (x under 15 or over 85, or y under 14 or over 86) so they don't cover the words, 2 to 5 on a screen. Keep two top corners clear for the card's own buttons: the top right (x over 80 with y under 16) for the sound button, and on every screen after the first the top left (x under 28 with y under 13) for Back. A big sticker needs to sit further down. The same goes for text boxes and photos.
 
 # The words built into the screens
 Screens also say a few things of their own: the envelope's "You've got mail", the Next buttons, the excuses the runaway No button makes, a game's "Keep shaking…". Left out, they say the usual thing. To change them on a screen, give it "labels" with just the ones to change, e.g. "labels": {"next": "Onwards", "noLines": ["Nope", "Try again"]}. Do this when they ask for particular wording, or when a line would clearly suit the card better. Each screen's labels and what they usually say ({i}, {n} and {moves} become numbers; lists are said in turn):
@@ -421,11 +421,42 @@ function tidyGame(screen: Raw, fix: Fix): Raw {
   return out;
 }
 
-// Stickers in the top right corner would sit under the sound button: over to the left they go.
-function clearCorner(screen: Raw): Raw {
+// The card's own buttons over the top corners, in pixels, at the sizes cards are played and
+// previewed at (as components/card/CardPlayer.tsx draws them; scripts/card-chrome.ts checks
+// the designs the same way): Back in the top left from the second screen on, and the sound
+// button in the top right, lower down in the previews.
+const PLAYED = [[360, 640], [375, 667], [390, 844], [414, 896], [768, 1024], [1280, 800]] as const;
+const PREVIEWED = [[290, 618], [760, 470]] as const;
+type Box = [left: number, top: number, right: number, bottom: number];
+const BACK: Box = [12, 12, 112, 58];
+const overlap = (a: Box, b: Box) => Math.max(0, Math.min(a[2], b[2]) - Math.max(a[0], b[0])) * Math.max(0, Math.min(a[3], b[3]) - Math.max(a[1], b[1]));
+
+// Whether a sticker would be partly hidden under one of the buttons on any of those screens
+// (a sliver is fine: an emoji has margins of its own). It's about as wide as it is tall.
+function underButtons(x: number, y: number, size: number, first: boolean) {
+  for (const [views, played] of [[PLAYED, true], [PREVIEWED, false]] as const) {
+    for (const [w, h] of views) {
+      const half = (0.55 * size * Math.min(w, h)) / 100;
+      const box: Box = [(x * w) / 100 - half, (y * h) / 100 - half, (x * w) / 100 + half, (y * h) / 100 + half];
+      const top = played ? 12 : 40;
+      const hidden = (button: Box) => overlap(box, button) / (2 * half) ** 2 > 0.02;
+      if (hidden([w - 60, top, w - 12, top + 48]) || (played && !first && hidden(BACK))) return true;
+    }
+  }
+  return false;
+}
+
+// Stickers under the card's own buttons move straight down until they're clear, so they stay
+// on their own side (one too big to clear stays where it is).
+function clearButtons(screen: Raw, first: boolean): Raw {
   const style = screen.style;
   if (!isObj(style) || !Array.isArray(style.stickers)) return screen;
-  const stickers = style.stickers.map((s) => (isObj(s) && typeof s.x === "number" && typeof s.y === "number" && s.x > 82 && s.y < 16 ? { ...s, x: 100 - s.x } : s));
+  const stickers = style.stickers.map((s) => {
+    if (!isObj(s) || typeof s.x !== "number" || typeof s.y !== "number" || typeof s.size !== "number") return s;
+    let y = s.y;
+    while (y <= 50 && underButtons(s.x, y, s.size, first)) y += 1;
+    return y === s.y || y > 50 ? s : { ...s, y };
+  });
   return { ...screen, style: { ...style, stickers } };
 }
 
@@ -460,14 +491,15 @@ function repairScreens(screens: Raw[], fix: Fix): Raw[] {
       let screen = s.type === "quiz" ? tidyQuiz(s) : s.type === "wheel" ? tidyWheel(s) : s;
       screen = fitScreen(screen);
       if (screen.type === "game") screen = tidyGame(screen, fix);
-      return fix.fresh ? clearCorner(screen) : screen;
+      return screen;
     } catch (e) {
       // A repair that goes wrong mustn't cost them the card: the checks still run.
       console.error("couldn't tidy a generated screen", e);
       return s;
     }
   });
-  return fix.fresh ? tidyOrder(fixed, fix) : fixed;
+  // Back shows from the second screen on, so the order comes first.
+  return fix.fresh ? tidyOrder(fixed, fix).map((screen, i) => clearButtons(screen, i === 0)) : fixed;
 }
 
 // What the repairs need to know about the card being made.

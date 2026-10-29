@@ -121,7 +121,7 @@ const SISTER: AiExample = {
           burst: "confetti",
           transition: "zoom",
           stickers: [
-            { emoji: "🧁", x: 10, y: 10, size: 12, rotate: -12, motion: "float" },
+            { emoji: "🧁", x: 9, y: 50, size: 12, rotate: -12, motion: "float" },
             { emoji: "🍰", x: 89, y: 90, size: 12, rotate: 10, motion: "none" },
           ],
         },
@@ -171,7 +171,7 @@ const SISTER: AiExample = {
           body: "rounded",
           transition: "zoom",
           stickers: [
-            { emoji: "🩹", x: 10, y: 11, size: 12, rotate: -20, motion: "pulse" },
+            { emoji: "🩹", x: 11, y: 89, size: 12, rotate: -20, motion: "pulse" },
             { emoji: "🛼", x: 88, y: 88, size: 14, rotate: 12, motion: "bounce" },
           ],
         },
