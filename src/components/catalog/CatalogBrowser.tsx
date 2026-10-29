@@ -73,20 +73,23 @@ export function CatalogBrowser({ limit, allFilters = false, initialOccasion, ord
             }}
             className="mb-5 max-w-md"
           >
-            <label className="relative block">
-              <span className="sr-only">{c.searchLabel}</span>
-              <span aria-hidden className="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-lg opacity-50">
-                🔍
+            {/* A label that stays readable, not just a pale placeholder that goes when they type. */}
+            <label className="block">
+              <span className="mb-1.5 block ps-1 font-brand text-base font-bold text-ink">{c.searchLabel}</span>
+              <span className="relative block">
+                <span aria-hidden className="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-lg">
+                  🔍
+                </span>
+                <input
+                  ref={search}
+                  type="search"
+                  enterKeyHint="search"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder={c.searchPlaceholder}
+                  className="w-full rounded-full border-2 border-ink bg-paper py-3 pe-5 ps-12 text-base font-semibold shadow-[3px_3px_0_var(--color-ink)] outline-none placeholder:font-normal placeholder:text-ink/70 focus:shadow-[3px_3px_0_var(--color-hot)]"
+                />
               </span>
-              <input
-                ref={search}
-                type="search"
-                enterKeyHint="search"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder={c.searchPlaceholder}
-                className="w-full rounded-full border-2 border-ink bg-paper py-3 pe-5 ps-12 text-base font-semibold shadow-[3px_3px_0_var(--color-ink)] outline-none placeholder:text-ink/40 focus:shadow-[3px_3px_0_var(--color-hot)]"
-              />
             </label>
           </form>
         )}
