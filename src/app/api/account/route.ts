@@ -2,7 +2,7 @@ import { allowanceLeft } from "@/lib/allowance";
 import { NextResponse } from "next/server";
 import { authReady, currentAccount, emailSignInReady, googleEnabled } from "@/lib/auth";
 import { ordersFor } from "@/lib/orders";
-import { getCard } from "@/lib/storage";
+import { getCard, openedTimes } from "@/lib/storage";
 
 // The signed-in buyer and every card they've paid for, and which ways of signing in are on.
 export async function GET() {
@@ -32,6 +32,9 @@ export async function GET() {
         };
       }),
     );
+    // "Opened ✓": when each card was first opened, if it has been (lib/storage.ts).
+    const opened = await openedTimes(cards.map((c) => c.id));
+    for (const c of cards) Object.assign(c, { openedAt: opened[c.id] });
     // How many typed changes and new cards they have left today.
     const [change, card] = await Promise.all([allowanceLeft(account, "change"), allowanceLeft(account, "card")]).catch(() => [null, null]);
     const left = change && card ? { change: change.left, card: card.left } : undefined;

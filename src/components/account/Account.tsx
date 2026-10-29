@@ -10,7 +10,7 @@ import { useI18n } from "@/i18n/client";
 import type { Occasion, ThemeName } from "@/lib/card";
 import { themes } from "@/lib/themes";
 
-type Card = { id: string; to: string; from: string; paidAt: string; occasion: Occasion; theme: ThemeName; email?: string; sendOn?: string };
+type Card = { id: string; to: string; from: string; paidAt: string; occasion: Occasion; theme: ThemeName; email?: string; sendOn?: string; openedAt?: string };
 type State = { enabled: boolean; google: boolean; email: boolean; account: { email: string | null; name: string | null } | null; cards: Card[]; error?: boolean };
 
 // The signed-in buyer's cards, or a way to sign in (Google or an emailed code).
@@ -89,6 +89,8 @@ export function Account() {
                       {fmt(t.email.cardFor, { to: card.to, from: card.from })}
                     </p>
                     <p className="mt-1 text-sm text-ink/60">{fmt(a.bought, { date: date(card.paidAt) })}</p>
+                    {/* The first time it was opened (api/cards/[id]/opened). */}
+                    {card.openedAt && <p className="mt-1 text-sm font-semibold text-air">{fmt(t.reply.opened, { date: date(card.openedAt) })}</p>}
                   </div>
                 </div>
                 <ShareLink url={`${window.location.origin}/c/${card.id}`} />
