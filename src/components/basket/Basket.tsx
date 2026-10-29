@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useSyncExternalStore } from "react";
 import { Motif } from "@/components/card/motifs";
+import { RichText } from "@/components/RichText";
 import { fmt } from "@/i18n/config";
 import { useI18n } from "@/i18n/client";
 import { MAX_SCHEDULE_DAYS, basketSnapshot, onBasketChange, removeFromBasket, serverBasket, writeBasket, type BasketItem } from "@/lib/basket";
@@ -224,7 +225,21 @@ export function Basket({ emailReady }: { emailReady: boolean }) {
         </div>
         <label className="mt-5 flex cursor-pointer gap-3 text-sm leading-snug text-ink/75">
           <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 h-6 w-6 shrink-0 accent-[var(--color-hot)]" />
-          <span>{b.consent}</span>
+          {/* Agreeing to the terms, then (smaller) that the cards come straight away, so they
+              can't be cancelled once delivered, which the law asks them to say they understand. */}
+          <span>
+            {b.consent.split("\n").map((line, i) =>
+              i === 0 ? (
+                <span key={i} className="block text-base font-semibold text-ink">
+                  <RichText text={line} />
+                </span>
+              ) : (
+                <span key={i} className="mt-1 block">
+                  {line}
+                </span>
+              ),
+            )}
+          </span>
         </label>
         <button onClick={pay} disabled={busy} className="btn btn-red mt-5 w-full py-3.5 text-lg disabled:opacity-60">
           {busy ? b.paying : fmt(b.pay, { amount: total })}

@@ -749,7 +749,7 @@ export const en = {
     line: "Interactive cards × {n}",
     total: "Total",
     delivery: "Delivered by link, anywhere in the world",
-    consent: "I'd like my cards straight away, and I understand that once they're delivered I lose my 14-day right to cancel.",
+    consent: "I agree to the [terms and conditions](/terms).\nThat includes getting my cards straight away, so I can't cancel once they've been delivered.",
     pay: "Pay {amount}",
     paying: "Opening secure checkout…",
     secure: "Secure payment by Stripe. We never see your card details.",
@@ -764,7 +764,7 @@ export const en = {
       badEmail: "That email address doesn't look right.",
       needDate: "Pick the day it should arrive.",
       tooFar: "Pick a day within the next {days} days.",
-      consent: "Tick the box to confirm you'd like your cards straight away.",
+      consent: "Tick the box to agree to the terms and conditions.",
     },
     thanks: {
       metaTitle: "Thank you · Envelette",
