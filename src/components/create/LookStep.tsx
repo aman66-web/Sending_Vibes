@@ -94,7 +94,7 @@ export function LookStep({ name, occasion, tones, look, music, onLook, onMusic }
   };
 
   const chip = (on: boolean) =>
-    `inline-flex min-h-12 items-center gap-2 rounded-full border-2 px-4 py-2.5 font-semibold transition ${focusRing} ${on ? "border-brand bg-brand text-white" : "border-line bg-panel hover:-translate-y-0.5 hover:border-brand"}`;
+    `inline-flex min-h-12 items-center gap-2 rounded-full border-2 px-4 py-2.5 font-semibold transition ${focusRing} ${on ? "border-brand bg-brand text-on-brand" : "border-line bg-panel hover:-translate-y-0.5 hover:border-brand"}`;
 
   return (
     <div>
@@ -123,7 +123,7 @@ export function LookStep({ name, occasion, tones, look, music, onLook, onMusic }
                 <span className="absolute start-2 top-2 rounded-full bg-sun px-2.5 py-1 text-xs font-black uppercase tracking-wide text-ink shadow-sm">{l.suggested}</span>
               )}
               {on && (
-                <span aria-hidden className="absolute end-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-brand text-base font-black text-white shadow-md">
+                <span aria-hidden className="absolute end-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-brand text-base font-black text-on-brand shadow-md">
                   ✓
                 </span>
               )}

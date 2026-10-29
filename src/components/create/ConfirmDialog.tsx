@@ -53,7 +53,7 @@ export function ConfirmDialog({ title, body, keep, yes, onKeep, onYes }: Props) 
             {body}
           </p>
           <div className="mt-6 flex flex-col gap-3">
-            <button type="button" autoFocus onClick={once(onKeep)} className="min-h-14 rounded-full bg-brand px-6 font-brand text-xl font-semibold text-white shadow-lg">
+            <button type="button" autoFocus onClick={once(onKeep)} className="min-h-14 rounded-full bg-brand px-6 font-brand text-xl font-semibold text-on-brand shadow-lg">
               {keep}
             </button>
             <button type="button" onClick={once(onYes)} className="min-h-14 rounded-full border-2 border-red-600 px-6 text-lg font-semibold text-red-700 dark:border-red-400 dark:text-red-300">

@@ -7,7 +7,7 @@ import { useRef } from "react";
 
 // A choice to tap. Selected ones are filled in, so it's clear what's chosen.
 export const chip = (selected: boolean, shape = "rounded-full") =>
-  `${shape} min-h-11 border-2 px-4 py-2.5 text-start font-semibold transition ${selected ? "border-brand bg-brand text-white" : "border-line bg-panel hover:-translate-y-0.5 hover:border-brand"}`;
+  `${shape} min-h-11 border-2 px-4 py-2.5 text-start font-semibold transition ${selected ? "border-brand bg-brand text-on-brand" : "border-line bg-panel hover:-translate-y-0.5 hover:border-brand"}`;
 
 // Big enough to read, and 16px or more so phones don't zoom in.
 export const field = "w-full rounded-2xl border-2 border-line bg-panel px-5 py-4 text-lg outline-none focus:border-brand focus:ring-4 focus:ring-brand/15";
@@ -74,7 +74,7 @@ export function WriteBox({
           <button
             type="button"
             onClick={() => !value.includes(extra.text) && add(extra.text)}
-            className="min-h-11 rounded-full border-2 border-brand bg-brand-soft px-4 py-2 font-bold text-brand transition hover:bg-brand hover:text-white"
+            className="min-h-11 rounded-full border-2 border-brand bg-brand-soft px-4 py-2 font-bold text-on-brand-soft transition hover:bg-brand hover:text-on-brand"
           >
             🎲 {extra.label}
           </button>

@@ -735,7 +735,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
               />
               <LookingAt card={card} viewing={viewing} />
               <div className="flex flex-wrap items-center gap-3">
-                <button disabled={busy !== null || ask.trim().length < 3} className="min-h-12 rounded-full bg-brand px-6 py-3 text-base font-semibold text-white disabled:opacity-50">
+                <button disabled={busy !== null || ask.trim().length < 3} className="min-h-12 rounded-full bg-brand px-6 py-3 text-base font-semibold text-on-brand disabled:opacity-50">
                   {busy === "change" ? <Making lines={[x.changing]} /> : t.studio.askButton}
                 </button>
                 {past.length > 0 && busy === null && (
@@ -869,10 +869,10 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                     <SignIn google={signUp.google} email={signUp.email} next="/create?resume=1" onSignedIn={signUp.onSignedIn} onGoogle={signUp.onGoogle} />
                   </div>
                 )}
-                <button disabled={busy !== null || mustSignUp} className="w-full rounded-full bg-brand py-3.5 font-brand text-lg font-semibold text-white shadow-lg disabled:opacity-70">
+                <button disabled={busy !== null || mustSignUp} className="w-full rounded-full bg-brand py-3.5 font-brand text-lg font-semibold text-on-brand shadow-lg disabled:opacity-70">
                   {x.make} ✨
                 </button>
-                <p className="text-center text-sm opacity-60">{x.takesAMoment}</p>
+                <p className="text-center text-sm opacity-75">{x.takesAMoment}</p>
                 {aiError && <ErrorNotice message={aiError} onRetry={canRetry(aiError, t) && !mustSignUp ? makeFromIdea : undefined} />}
               </form>
 
@@ -989,7 +989,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                 <button onClick={() => setShowPreview(true)} className="flex-1 rounded-full border-2 border-line py-3.5 font-semibold lg:hidden">
                   {c.fullScreen}
                 </button>
-                <button ref={basketButton} onClick={() => publish()} disabled={saving} className="flex-[2] rounded-full bg-brand py-3.5 font-brand text-lg font-semibold text-white shadow-lg disabled:opacity-50 lg:w-full">
+                <button ref={basketButton} onClick={() => publish()} disabled={saving} className="flex-[2] rounded-full bg-brand py-3.5 font-brand text-lg font-semibold text-on-brand shadow-lg disabled:opacity-50 lg:w-full">
                   {saving ? c.adding : fmt(c.addToBasket, { price: formatMoney(tierPrice(cardTier(card), currency), currency) })}
                 </button>
               </div>
@@ -1267,7 +1267,7 @@ function StillToWrite({ card, onGo, onAnyway, onClose }: { card: CardData; onGo:
           </div>
           {/* On a phone, Go back is at the bottom, where the Add to basket button was. */}
           <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row-reverse">
-            <button type="button" onClick={once(onClose)} className="flex-1 rounded-full bg-brand py-3 font-semibold text-white">
+            <button type="button" onClick={once(onClose)} className="flex-1 rounded-full bg-brand py-3 font-semibold text-on-brand">
               {c.toWriteBack}
             </button>
             <button type="button" onClick={once(onAnyway)} className="flex-1 rounded-full border-2 border-line py-3 font-semibold">
@@ -1465,7 +1465,7 @@ function ScreenAsk({ card, viewing, value, onChange, busy, onSubmit }: ScreenAsk
           placeholder={x.thisScreenPlaceholder}
           className="min-w-0 flex-1 rounded-full border-2 border-line bg-background px-4 py-2.5 text-base outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
         />
-        <button disabled={busy || value.trim().length < 3} className="min-h-11 shrink-0 rounded-full bg-brand px-5 py-2.5 text-base font-semibold text-white disabled:opacity-50">
+        <button disabled={busy || value.trim().length < 3} className="min-h-11 shrink-0 rounded-full bg-brand px-5 py-2.5 text-base font-semibold text-on-brand disabled:opacity-50">
           {x.go}
         </button>
       </div>

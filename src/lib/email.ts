@@ -54,7 +54,7 @@ function shareButtons(order: Order, item: OrderItem) {
   const message = fmt(basket.share.message, { to: item.to });
   const whatsapp = `https://wa.me/?text=${encodeURIComponent(`${message} ${url}`)}`;
   const mail = `mailto:?subject=${encodeURIComponent(fmt(basket.share.title, { from: item.from }))}&body=${encodeURIComponent(`${message}\n\n${url}`)}`;
-  return `<div style="margin-top:4px">${smallButton(whatsapp, create.whatsapp, "#25D366", "#ffffff")}${smallButton(mail, basket.share.byEmail, "#fbf7ef", "#1f1b16")}</div>`;
+  return `<div style="margin-top:4px">${smallButton(whatsapp, create.whatsapp, "#25D366", "#1f1b16")}${smallButton(mail, basket.share.byEmail, "#fbf7ef", "#1f1b16")}</div>`;
 }
 
 // What the receipt says about each card, once this attempt's card emails have gone (or not).

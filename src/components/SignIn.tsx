@@ -146,7 +146,7 @@ export function SignIn({ google, email: byEmail, next, onSignedIn, onGoogle }: P
         </a>
       )}
       {google && byEmail && (
-        <p className="flex items-center gap-3 text-sm font-semibold opacity-50">
+        <p className="flex items-center gap-3 text-sm font-semibold opacity-70">
           <span className="h-px flex-1 bg-current" />
           {a.or}
           <span className="h-px flex-1 bg-current" />
@@ -241,7 +241,7 @@ export function SignIn({ google, email: byEmail, next, onSignedIn, onGoogle }: P
         </div>
       )}
       {error && (
-        <p role="alert" className="text-sm font-semibold text-red-600">
+        <p role="alert" className="text-sm font-semibold text-red-700">
           {error}
         </p>
       )}

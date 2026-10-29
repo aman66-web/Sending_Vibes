@@ -1036,7 +1036,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
                 changeItem(open.deco, open.index, () => null);
                 close();
               }}
-              className="ms-auto min-h-11 rounded-full border-2 border-red-200 px-4 py-2 text-base font-semibold text-red-700"
+              className="ms-auto min-h-11 rounded-full border-2 border-red-200 px-4 py-2 text-base font-semibold text-red-700 dark:border-red-800 dark:text-red-300"
             >
               🗑 {s.delete}
             </button>
@@ -1052,7 +1052,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
           x.photoTitle,
           <>
           <div className="grid gap-2">
-            <button type="button" onClick={() => pickPhotos({ deco: false, index: open.index })} className="min-h-11 rounded-full bg-brand px-4 py-2.5 text-base font-semibold text-white">
+            <button type="button" onClick={() => pickPhotos({ deco: false, index: open.index })} className="min-h-11 rounded-full bg-brand px-4 py-2.5 text-base font-semibold text-on-brand">
               {x.replacePhoto}
             </button>
             {screen.photos.length < MAX_PHOTOS && (
@@ -1060,7 +1060,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
                 {x.morePhotos}
               </button>
             )}
-            <button type="button" onClick={(e) => fresh(e) && removePhoto(open.index)} className="min-h-11 rounded-full border-2 border-line px-4 py-2.5 text-base font-semibold text-red-700">
+            <button type="button" onClick={(e) => fresh(e) && removePhoto(open.index)} className="min-h-11 rounded-full border-2 border-line px-4 py-2.5 text-base font-semibold text-red-700 dark:text-red-300">
               {x.removeThisPhoto}
             </button>
           </div>
@@ -1247,7 +1247,7 @@ const chip = (on: boolean) => `min-h-11 rounded-full border-2 px-3.5 py-2 text-b
 
 function DoneButton({ label, onClick }: { label: string; onClick: (e: React.MouseEvent) => void }) {
   return (
-    <button type="button" onClick={onClick} className="min-h-12 shrink-0 rounded-full bg-brand px-6 py-2.5 text-base font-bold text-white">
+    <button type="button" onClick={onClick} className="min-h-12 shrink-0 rounded-full bg-brand px-6 py-2.5 text-base font-bold text-on-brand">
       <span aria-hidden>✓</span> {label}
     </button>
   );

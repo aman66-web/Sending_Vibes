@@ -145,9 +145,9 @@ export function InsideStep({ name, occasion, gentle, include, length, describe, 
         </span>
         <span className="min-w-0 flex-1">
           <span className="block text-lg">
-            {q.chooseForMe} <span className={`text-base font-normal ${chooseForMe ? "text-white/85" : "opacity-70"}`}>({q.recommended})</span>
+            {q.chooseForMe} <span className={`text-base font-normal ${chooseForMe ? "text-on-brand" : "opacity-70"}`}>({q.recommended})</span>
           </span>
-          <span className={`block text-base font-normal ${chooseForMe ? "text-white/85" : "opacity-70"}`}>{fmt(q.chooseForMeHint, { name })}</span>
+          <span className={`block text-base font-normal ${chooseForMe ? "text-on-brand" : "opacity-70"}`}>{fmt(q.chooseForMeHint, { name })}</span>
         </span>
         {chooseForMe && <span aria-hidden>✓</span>}
       </button>
@@ -163,7 +163,7 @@ export function InsideStep({ name, occasion, gentle, include, length, describe, 
                 {pickEmoji(key)}
               </span>
               <span className="leading-snug">{pickName(key, t)}</span>
-              <span className={`text-sm font-normal leading-snug ${on ? "text-white/85" : "opacity-70"}`}>{game ? t.labels.screens.game : t.studio.kit[key as ScreenPick]}</span>
+              <span className={`text-sm font-normal leading-snug ${on ? "text-on-brand" : "opacity-70"}`}>{game ? t.labels.screens.game : t.studio.kit[key as ScreenPick]}</span>
               {on && (
                 <span aria-hidden className="absolute end-3 top-2.5">
                   ✓
@@ -185,7 +185,7 @@ export function InsideStep({ name, occasion, gentle, include, length, describe, 
         {LENGTHS.map((l) => (
           <button key={l} type="button" aria-pressed={length === l} onClick={() => onLength(length === l ? "" : l)} className={chip(length === l, "rounded-2xl")}>
             <span className="block">{q.lengths[l].label}</span>
-            <span className={`block text-sm font-normal ${length === l ? "text-white/85" : "opacity-70"}`}>{q.lengths[l].detail}</span>
+            <span className={`block text-sm font-normal ${length === l ? "text-on-brand" : "opacity-70"}`}>{q.lengths[l].detail}</span>
           </button>
         ))}
       </div>

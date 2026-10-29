@@ -32,7 +32,7 @@ export async function ComingUp() {
             />
             <span className="text-4xl transition group-hover:-rotate-6">{occasions[d.occasion].emoji}</span>
             <p className="mt-auto pt-8 font-brand text-2xl font-bold leading-tight">{dateName(d, t)}</p>
-            <p className={`mt-0.5 text-sm font-semibold ${first ? "text-white/75" : "text-ink/55"}`}>
+            <p className={`mt-0.5 text-sm font-semibold ${first ? "text-white" : "text-ink/55"}`}>
               {formatDay(d.date, tag, t, d.approx)} · {whenLabel(d.days, t)}
             </p>
             <p className={`mt-3 text-sm font-bold underline decoration-2 underline-offset-4 ${first ? "decoration-white/60" : "decoration-hot/50"}`}>
