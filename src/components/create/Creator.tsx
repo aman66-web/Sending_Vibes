@@ -22,7 +22,7 @@ import { TwoWays } from "@/components/TwoWays";
 import { NO_ANSWERS, Quiz, quizPrompt, type Answers } from "./Quiz";
 import { Field } from "./ScreenEditor";
 import { openChat } from "@/components/open-chat";
-import { AtPhoneSize } from "./AtPhoneSize";
+import { AtComputerSize, AtPhoneSize } from "./AtPhoneSize";
 import { STUDIO_TABS, ScreenStrip, StudioPanel, type Tab } from "./Studio";
 import { useWide } from "./use-wide";
 import { AllWords, EditableCard, setAt, type Path } from "./WordEditing";
@@ -158,8 +158,8 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   const making = useRef<AbortController | null>(null);
   // The live preview: on a phone or a computer, which screen it's showing, and a nudge
   // that makes it jump back to a screen after that screen changes.
-  // The computer view comes first; the phone is a tap away.
-  const [view, setView] = useState<"phone" | "computer">("computer");
+  // It starts as the device they're on (see `shown` below); the other is a tap away.
+  const [view, setView] = useState<"phone" | "computer" | null>(null);
   const [viewing, setViewing] = useState<string | undefined>();
   const [nudge, setNudge] = useState(0);
   const [screenAsk, setScreenAsk] = useState("");
@@ -174,6 +174,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   // press Preview mode to see the card react as it will for them.
   const [wordMode, setWordMode] = useState<"edit" | "play">("edit");
   const wide = useWide();
+  const shown = view ?? (wide ? "computer" : "phone");
   const [pickOccasion, setPickOccasion] = useState<Occasion | "all">(initialOccasion ?? "all");
   const design = mode === "premade" ? getTemplate(templateSlug) : undefined;
   const ideaBox = useRef<HTMLTextAreaElement>(null);
@@ -770,6 +771,10 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
               <div className="order-1 flex flex-wrap items-center justify-between gap-2 lg:order-none">
                 <div className="flex flex-wrap items-center gap-2">
                   <ModeSwitch wordMode={wordMode} setWordMode={setWordMode} />
+                  {/* On a phone, as icons so it fits beside the mode switch. */}
+                  <div className="lg:hidden">
+                    <DeviceSwitch view={shown} setView={setView} compact />
+                  </div>
                   {/* Only while designing, so in Preview mode the card sits higher on a phone. */}
                   {wordMode === "edit" && (
                     <>
@@ -783,19 +788,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                   )}
                 </div>
                 <div className="hidden items-center gap-2 lg:flex">
-                <div role="tablist" aria-label={c.preview} className="flex w-fit gap-1 rounded-full border border-line bg-panel p-1">
-                {(["computer", "phone"] as const).map((v) => (
-                  <button
-                    key={v}
-                    role="tab"
-                    aria-selected={view === v}
-                    onClick={() => setView(v)}
-                    className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${view === v ? "bg-foreground text-background" : "opacity-70 hover:opacity-100"}`}
-                  >
-                    {v === "phone" ? t.product.onPhone : t.product.onComputer}
-                  </button>
-                ))}
-                </div>
+                <DeviceSwitch view={shown} setView={setView} />
                 <button type="button" onClick={() => setBigView(true)} className="rounded-full border-2 border-foreground/80 px-4 py-1.5 text-sm font-bold">
                   {c.fullScreen}
                 </button>
@@ -830,14 +823,23 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                   the controls for what's selected can hang over the screens strip. */}
               <div ref={cardBox} className="relative z-10 order-2 scroll-mt-4 lg:order-none">
                 <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onScreen={editScreen} onBegin={remember} pick={pick} openSettings={settings}>
-                  {!wide ? (
+                  {!wide && shown === "computer" ? (
+                    // On a phone, the card laid out as on a laptop and shrunk to fit.
+                    <BrowserFrame className="aspect-[16/10]">
+                      {!showPreview && (
+                        <AtComputerSize>
+                          <CardPlayer key="here-computer" card={card} preview sound editing={wordMode === "edit"} focusScreenId={selected} focusNonce={nudge} focusStage={focusStage} onScreenChange={setViewing} />
+                        </AtComputerSize>
+                      )}
+                    </BrowserFrame>
+                  ) : !wide ? (
                     // On a phone, the card as it'll look on their phone, without a frame around it.
                     <div className="h-[min(68dvh,620px)] overflow-hidden rounded-3xl border-2 border-line">
                       {!showPreview && (
                         <CardPlayer key="here" card={card} preview sound editing={wordMode === "edit"} focusScreenId={selected} focusNonce={nudge} focusStage={focusStage} onScreenChange={setViewing} />
                       )}
                     </div>
-                  ) : view === "phone" ? (
+                  ) : shown === "phone" ? (
                     <PhoneFrame className="mx-auto h-[600px] w-[290px]" notch="h-5 w-20">
                       <AtPhoneSize>
                         <CardPlayer key="phone" card={card} preview sound editing={wordMode === "edit"} focusScreenId={selected} focusNonce={nudge} focusStage={focusStage} onScreenChange={setViewing} />
@@ -1073,11 +1075,41 @@ function ModeSwitch({ wordMode, setWordMode }: { wordMode: "edit" | "play"; setW
           role="tab"
           aria-selected={wordMode === m}
           onClick={() => setWordMode(m)}
-          className={`rounded-full px-4 py-2 text-sm font-bold transition ${wordMode === m ? "bg-foreground text-background" : "opacity-70 hover:opacity-100"}`}
+          // A little narrower on a phone, so the 📱/💻 switch fits beside it.
+          className={`rounded-full px-2.5 py-2 text-sm font-bold transition sm:px-4 ${wordMode === m ? "bg-foreground text-background" : "opacity-70 hover:opacity-100"}`}
         >
           {m === "edit" ? x.editWords : x.play}
         </button>
       ))}
+    </div>
+  );
+}
+
+// The card as it'll look on a phone or on a computer. Compact is just the icons, with the
+// words for screen readers and on hover.
+function DeviceSwitch({ view, setView, compact = false }: { view: "phone" | "computer"; setView: (view: "phone" | "computer") => void; compact?: boolean }) {
+  const { t } = useI18n();
+  return (
+    <div role="tablist" aria-label={t.create.preview} className={`flex w-fit gap-1 rounded-full bg-panel p-1 ${compact ? "border-2 border-foreground/80" : "border border-line"}`}>
+      {(["computer", "phone"] as const).map((v) => {
+        const label = v === "phone" ? t.product.onPhone : t.product.onComputer;
+        // The labels start with their icon, e.g. "📱 On a phone".
+        const [icon, ...words] = label.split(" ");
+        return (
+          <button
+            key={v}
+            role="tab"
+            aria-selected={view === v}
+            aria-label={compact ? words.join(" ") : undefined}
+            title={compact ? words.join(" ") : undefined}
+            onClick={() => setView(v)}
+            // Compact, it's as tall as the mode switch beside it.
+            className={`rounded-full text-sm font-semibold transition ${compact ? "grid h-9 w-8 place-items-center text-base leading-none" : "px-4 py-1.5"} ${view === v ? "bg-foreground text-background" : "opacity-70 hover:opacity-100"}`}
+          >
+            {compact ? icon : label}
+          </button>
+        );
+      })}
     </div>
   );
 }
