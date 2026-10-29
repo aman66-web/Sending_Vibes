@@ -23,7 +23,8 @@ import { NO_ANSWERS, Quiz, briefFrom, quizPrompt, type Answers } from "./Quiz";
 import { Field } from "./ScreenEditor";
 import { openChat } from "@/components/open-chat";
 import { AtComputerSize, AtPhoneSize } from "./AtPhoneSize";
-import { STUDIO_TABS, ScreenStrip, StudioPanel, type Tab } from "./Studio";
+import { ScreenStrip, StudioPanel, type Tab } from "./Studio";
+import { useFreshTap } from "./one-tap";
 import { useWide } from "./use-wide";
 import { AllWords, EditableCard, setAt, type Path } from "./WordEditing";
 import { stageFor, stillToWrite } from "@/lib/blanks";
@@ -375,8 +376,9 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     remember();
     setCard((c) => c && update(c));
   };
-  // The design panel's tab, and something just added for the card to select.
-  const [tab, setTab] = useState<Tab>("text");
+  // The design panel's tab, and something just added for the card to select. It opens on
+  // the words, as a plain form: changing them is what most people come to do.
+  const [tab, setTab] = useState<Tab>("words");
   const [pick, setPick] = useState<{ key: string; nonce: number } | undefined>();
   // Bumped to open the settings of the screen being looked at.
   const [settings, setSettings] = useState(0);
@@ -402,6 +404,13 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   // Photos swapped, added or taken out by tapping them on the preview.
   const editScreen = (index: number, update: (screen: Screen) => Screen) =>
     setCard((c) => c && { ...c, screens: c.screens.map((s, j) => (j === index ? update(s) : s)) });
+  // The same for the Words tab, by the screen's id, so a photo still uploading lands on its own
+  // screen even if the screens are moved about meanwhile.
+  const editScreenById = (id: string, update: (screen: Screen) => Screen) =>
+    setCard((c) => c && { ...c, screens: c.screens.map((s) => (s.id === id ? update(s) : s)) });
+  // What a typed change did, shown over the card for a few seconds as it lands.
+  const [landed, setLanded] = useState<string | null>(null);
+  const fresh = useFreshTap();
   // The moment within a screen the arrows last went to (see lib/stages.ts).
   const [moment, setMoment] = useState<{ id: string; stage: number } | null>(null);
   const goToScreen = (id: string, stage = 0) => {
@@ -418,6 +427,9 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     setBusy("change");
     setAiError(null);
     setAiDone(false);
+    setLanded(null);
+    // On a phone the typing box is below the card: bring the card up to watch the change land.
+    if (!wide && !showPreview) cardBox.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     // Typing changes are a custom-card thing.
     setMode("custom");
     try {
@@ -434,6 +446,9 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
         setNudge((n) => n + 1);
       }
       setAiDone(true);
+      const said = `✓ ${note || x.changed}`;
+      setLanded(said);
+      setTimeout(() => setLanded((now) => (now === said ? null : now)), 4000);
     } catch (e) {
       setAiError(e instanceof Error ? e.message : x.errors.failed);
     }
@@ -466,6 +481,99 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       setSaving(false);
     }
   };
+
+  // The design panel: beside the card on a computer, under the card and its screens on a phone.
+  const studio = card && (
+    <div ref={panel} className="scroll-mt-4">
+      <StudioPanel
+        card={card}
+        screenIndex={Math.max(card.screens.findIndex((sc) => sc.id === viewing), 0)}
+        tab={tab}
+        setTab={setTab}
+        change={change}
+        editScreen={editScreenById}
+        editWords={editWords}
+        remember={remember}
+        keepDesign={mode === "premade"}
+        onAdded={onAdded}
+        ai={
+          <section className="space-y-3 rounded-2xl border-2 border-brand/40 bg-panel p-4">
+            <h2 className="font-brand text-xl font-bold">✨ {t.studio.askTitle}</h2>
+            <p className="text-base leading-relaxed opacity-80">{t.studio.askHow}</p>
+            <form
+              className="space-y-3"
+              onSubmit={(e) => {
+                e.preventDefault();
+                // About the screen they're looking at, unless it's clearly about the whole card.
+                changeByTyping(ask, viewing);
+              }}
+            >
+              <textarea
+                value={ask}
+                onChange={(e) => {
+                  setAsk(e.target.value);
+                  setAiDone(false);
+                }}
+                rows={4}
+                maxLength={1000}
+                dir="auto"
+                aria-label={t.studio.askTitle}
+                placeholder={x.changePlaceholder}
+                className="w-full resize-y rounded-xl border-2 border-line bg-background px-3 py-2.5 text-base outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+              />
+              <LookingAt card={card} viewing={viewing} />
+              <div className="flex flex-wrap items-center gap-3">
+                <button disabled={busy !== null || ask.trim().length < 3} className="min-h-12 rounded-full bg-brand px-6 py-3 text-base font-semibold text-white disabled:opacity-50">
+                  {busy === "change" ? <Making lines={[x.changing]} /> : t.studio.askButton}
+                </button>
+                {past.length > 0 && busy === null && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      undoLast();
+                      setAiDone(false);
+                    }}
+                    className="min-h-11 px-2 text-base font-semibold underline underline-offset-4"
+                  >
+                    {x.undo}
+                  </button>
+                )}
+              </div>
+              {changesLeft !== null && <p className="text-sm font-semibold opacity-75">{fmt(x.changesLeft, { n: changesLeft })}</p>}
+              {aiDone && (
+                <p role="status" className="rounded-xl bg-emerald-50 px-3 py-2.5 text-base font-semibold text-emerald-900 ring-1 ring-emerald-200">
+                  ✓ {aiNote || x.changed}
+                </p>
+              )}
+              {aiError && (
+                <p role="alert" className="text-base font-semibold text-red-700">
+                  {aiError}
+                </p>
+              )}
+            </form>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-base opacity-75">{x.quickTitle}</span>
+              {x.quick.map((q) => (
+                <button
+                  key={q}
+                  type="button"
+                  disabled={busy !== null}
+                  onClick={(e) => {
+                    if (!fresh(e)) return;
+                    setAsk(q);
+                    changeByTyping(q);
+                  }}
+                  className="min-h-11 rounded-full border-2 border-line bg-background px-4 py-2 text-base font-semibold transition hover:border-brand hover:text-brand disabled:opacity-50"
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
+          </section>
+        }
+      />
+    </div>
+  );
 
   return (
     <div className="min-h-dvh">
@@ -687,91 +795,14 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       {step === "edit" && card && (
         <div className="mx-auto grid max-w-7xl gap-8 px-4 py-6 sm:px-6 lg:grid-cols-[380px_minmax(0,1fr)]">
           <div className="min-w-0 space-y-6 pb-28 lg:pb-10">
-            <div>
+            {/* On a phone the welcome has said this and the card comes first, so it's only for screen readers there. */}
+            <div className="sr-only lg:not-sr-only">
               <h1 className="font-brand text-3xl font-bold">{c.editTitle}</h1>
-              <p className="mt-1 opacity-70">{c.editIntro}</p>
+              <p className="mt-1 opacity-75">{t.studio.intro}</p>
             </div>
 
-            <div ref={panel} className="scroll-mt-4">
-              <StudioPanel
-                card={card}
-                screenIndex={Math.max(card.screens.findIndex((sc) => sc.id === viewing), 0)}
-                tab={tab}
-                setTab={setTab}
-                change={change}
-                onAdded={onAdded}
-                ai={
-            <section className="space-y-3 rounded-2xl border-2 border-brand/40 bg-panel p-4">
-                <h2 className="font-brand text-xl font-bold">✨ {x.changeTitle}</h2>
-                <p className="text-sm leading-relaxed opacity-80">{x.changeHow}</p>
-                <form
-                  className="space-y-3"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    // About the screen they're looking at, unless it's clearly about the whole card.
-                    changeByTyping(ask, viewing);
-                  }}
-                >
-                  <textarea
-                    value={ask}
-                    onChange={(e) => {
-                      setAsk(e.target.value);
-                      setAiDone(false);
-                    }}
-                    rows={4}
-                    maxLength={1000}
-                    dir="auto"
-                    aria-label={x.changeTitle}
-                    placeholder={x.changePlaceholder}
-                    className="w-full resize-y rounded-xl border border-line bg-background px-3 py-2.5 outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
-                  />
-                  <LookingAt card={card} viewing={viewing} />
-                  <div className="flex flex-wrap items-center gap-3">
-                    <button disabled={busy !== null || ask.trim().length < 3} className="rounded-full bg-brand px-5 py-2.5 font-semibold text-white disabled:opacity-50">
-                      {busy === "change" ? <Making lines={[x.changing]} /> : x.change}
-                    </button>
-                    {past.length > 0 && busy === null && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          undoLast();
-                          setAiDone(false);
-                        }}
-                        className="text-sm font-semibold underline underline-offset-4"
-                      >
-                        {x.undo}
-                      </button>
-                    )}
-                  </div>
-                  {changesLeft !== null && <p className="text-xs font-semibold opacity-60">{fmt(x.changesLeft, { n: changesLeft })}</p>}
-                  {aiDone && (
-                    <p role="status" className="rounded-xl bg-emerald-50 px-3 py-2.5 text-sm font-semibold text-emerald-900 ring-1 ring-emerald-200">
-                      ✓ {aiNote || x.changed}
-                    </p>
-                  )}
-                  {aiError && <p className="text-sm font-semibold text-red-600">{aiError}</p>}
-                </form>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-sm opacity-60">{x.quickTitle}</span>
-                  {x.quick.map((q) => (
-                    <button
-                      key={q}
-                      type="button"
-                      disabled={busy !== null}
-                      onClick={() => {
-                        setAsk(q);
-                        changeByTyping(q);
-                      }}
-                      className="rounded-full border border-line bg-background px-3 py-1.5 text-sm font-semibold transition hover:border-brand hover:text-brand disabled:opacity-50"
-                    >
-                      {q}
-                    </button>
-                  ))}
-                </div>
-              </section>
-                }
-              />
-            </div>
+            {/* On a computer the design panel is beside the card; on a phone it's under the card (below). */}
+            {wide && studio}
 
             <div className="fixed inset-x-0 bottom-0 z-20 flex gap-3 border-t border-line bg-background/95 p-4 backdrop-blur lg:static lg:border-0 lg:bg-transparent lg:p-0">
               <button onClick={() => setShowPreview(true)} className="flex-1 rounded-full border-2 border-line py-3.5 font-semibold lg:hidden">
@@ -795,17 +826,13 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                   <div className="lg:hidden">
                     <DeviceSwitch view={shown} setView={setView} compact />
                   </div>
-                  {/* Only while designing, so in Preview mode the card sits higher on a phone. */}
-                  {wordMode === "edit" && (
-                    <>
-                      <button type="button" onClick={undoLast} disabled={!past.length} className="rounded-full border-2 border-line px-3 py-2 text-sm font-bold disabled:opacity-35">
-                        {t.studio.undo}
-                      </button>
-                      <button type="button" onClick={redoNext} disabled={!future.length} className="rounded-full border-2 border-line px-3 py-2 text-sm font-bold disabled:opacity-35">
-                        {t.studio.redo}
-                      </button>
-                    </>
-                  )}
+                  {/* In both modes, so there's always a way back after a change. */}
+                  <button type="button" onClick={undoLast} disabled={!past.length} className="min-h-11 rounded-full border-2 border-line px-4 py-2 text-base font-bold disabled:opacity-35">
+                    {t.studio.undo}
+                  </button>
+                  <button type="button" onClick={redoNext} disabled={!future.length} className="min-h-11 rounded-full border-2 border-line px-4 py-2 text-base font-bold disabled:opacity-35">
+                    {t.studio.redo}
+                  </button>
                 </div>
                 <div className="hidden items-center gap-2 lg:flex">
                 <DeviceSwitch view={shown} setView={setView} />
@@ -814,35 +841,13 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                 </button>
                 </div>
               </div>
-              <div className="order-3 space-y-3 lg:order-none">
+              <div className="order-3 lg:order-none">
                 <PreviewControls card={card} viewing={viewing} stage={stageShown} onGo={goToScreen} wordMode={wordMode} />
-                {/* On a phone the design panel is further down the page; these jump to it. */}
-                <div className="lg:hidden">
-                  <p className="text-sm font-semibold opacity-70">{t.studio.addTitle}</p>
-                  <div className="mt-1.5 grid grid-cols-5 gap-1.5">
-                    {STUDIO_TABS.map(({ key, icon }) => (
-                      <button
-                        key={key}
-                        type="button"
-                        onClick={() => {
-                          setTab(key);
-                          panel.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-                        }}
-                        className="flex flex-col items-center gap-1 rounded-2xl border-2 border-line bg-panel py-2.5 text-sm font-bold"
-                      >
-                        <span aria-hidden className="text-xl leading-none">
-                          {icon}
-                        </span>
-                        {t.studio.tabs[key]}
-                      </button>
-                    ))}
-                  </div>
-                </div>
               </div>
               {/* Its own layer: stickers on the card stay under the bar at the bottom of a phone, and
                   the controls for what's selected can hang over the screens strip. */}
               <div ref={cardBox} className="relative z-10 order-2 scroll-mt-4 lg:order-none">
-                <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onScreen={editScreen} onBegin={remember} pick={pick} openSettings={settings}>
+                <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onScreen={editScreen} onBegin={remember} pick={pick} openSettings={settings} onNewLook={(next) => change(() => next)}>
                   {!wide && shown === "computer" ? (
                     // On a phone, the card laid out as on a laptop and shrunk to fit.
                     <BrowserFrame className="aspect-[16/10]">
@@ -874,14 +879,20 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                 </EditableCard>
                 {busy === "change" && (
                   <div className="absolute inset-0 z-50 grid place-items-center">
-                    <span className="rounded-full bg-black/75 px-5 py-3 text-sm font-semibold text-white shadow-lg">
+                    <span className="rounded-full bg-black/75 px-5 py-3 text-base font-semibold text-white shadow-lg">
                       <Making lines={[x.changing]} />
                     </span>
                   </div>
                 )}
+                {/* What a typed change did, as it lands. */}
+                {landed && busy === null && (
+                  <p role="status" className="pointer-events-none absolute inset-x-0 bottom-4 z-50 mx-auto w-fit max-w-[90%] rounded-2xl bg-black/80 px-5 py-3 text-center text-base font-semibold text-white shadow-lg">
+                    {landed}
+                  </p>
+                )}
               </div>
-              {/* The card's screens, like a presentation's slides. */}
-              <div className="order-4 space-y-3 lg:order-none">
+              {/* The card's screens, like a presentation's slides, then (on a phone) the design panel. */}
+              <div className="order-4 space-y-4 lg:order-none">
                 <ScreenStrip
                   card={card}
                   screenIndex={Math.max(card.screens.findIndex((sc) => sc.id === viewing), 0)}
@@ -896,7 +907,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                     setSettings((n) => n + 1);
                   }}
                 />
-                {wordMode === "edit" && <AllWords card={card} screenId={viewing} onChange={editWords} />}
+                {!wide && studio}
               </div>
             </div>
           </aside>
@@ -938,7 +949,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       {showPreview && card && (
         <div className="fixed inset-0 z-50 flex flex-col bg-background lg:hidden">
           <div className="relative min-h-0 flex-1">
-            <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onScreen={editScreen} onBegin={remember} pick={pick} className="h-full">
+            <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onScreen={editScreen} onBegin={remember} pick={pick} onNewLook={(next) => change(() => next)} className="h-full">
               <CardPlayer card={card} preview sound editing={wordMode === "edit"} focusScreenId={selected} focusNonce={nudge} focusStage={focusStage} onScreenChange={setViewing} />
             </EditableCard>
             <button onClick={() => setShowPreview(false)} className="absolute start-4 top-4 z-50 rounded-full bg-black/70 px-4 py-2 text-sm font-semibold text-white">
@@ -1158,15 +1169,15 @@ function PreviewControls({ card, viewing, stage, onGo, wordMode }: PreviewContro
   };
   const stages = card.screens[i] ? stagesOf(card.screens[i]) : [];
   const current = stages[Math.min(stage, stages.length - 1)];
-  const arrow = "grid h-9 w-9 place-items-center rounded-full border border-line bg-panel font-bold transition hover:border-brand disabled:opacity-30";
+  const arrow = "grid h-12 w-12 place-items-center rounded-full border-2 border-line bg-panel text-xl font-bold transition hover:border-brand disabled:opacity-30";
   return (
     <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
-      <p className="text-xs opacity-60">{wordMode === "edit" ? x.clickHint : t.create.livePreview}</p>
+      <p className="text-sm opacity-80">{wordMode === "edit" ? x.clickHint : t.studio.watchHint}</p>
       <div className="flex items-center gap-1.5">
         <button onClick={() => go(-1)} disabled={at === 0} aria-label={x.prevScreen} className={arrow}>
           <span className="rtl:rotate-180">←</span>
         </button>
-        <span className="min-w-12 text-center text-sm font-semibold tabular-nums opacity-70">
+        <span className="min-w-12 text-center text-base font-semibold tabular-nums opacity-80">
           {i + 1} / {card.screens.length}
         </span>
         <button onClick={() => go(1)} disabled={at === steps.length - 1} aria-label={x.nextScreen} className={arrow}>
@@ -1174,7 +1185,7 @@ function PreviewControls({ card, viewing, stage, onGo, wordMode }: PreviewContro
         </button>
       </div>
       {stages.length > 1 && current && (
-        <p data-stage className="flex w-full items-center justify-end gap-1.5 text-xs font-semibold opacity-70">
+        <p data-stage className="flex w-full items-center justify-end gap-1.5 text-sm font-semibold opacity-80">
           {stages.map((_, k) => (
             <span key={k} className={`h-1.5 rounded-full transition-all ${k === Math.min(stage, stages.length - 1) ? "w-4 bg-brand" : "w-1.5 bg-current opacity-30"}`} />
           ))}
@@ -1185,10 +1196,9 @@ function PreviewControls({ card, viewing, stage, onGo, wordMode }: PreviewContro
   );
 }
 
-// Edit mode (tap any words to change them) or preview mode (the card reacts as it will for them).
+// Change it (tap anything to change it) or Watch it (the card reacts as it will for them).
 function ModeSwitch({ wordMode, setWordMode }: { wordMode: "edit" | "play"; setWordMode: (mode: "edit" | "play") => void }) {
   const { t } = useI18n();
-  const x = t.custom;
   return (
     <div role="tablist" className="flex w-fit gap-1 rounded-full border-2 border-foreground/80 bg-panel p-1">
       {(["edit", "play"] as const).map((m) => (
@@ -1198,9 +1208,9 @@ function ModeSwitch({ wordMode, setWordMode }: { wordMode: "edit" | "play"; setW
           aria-selected={wordMode === m}
           onClick={() => setWordMode(m)}
           // A little narrower on a phone, so the 📱/💻 switch fits beside it.
-          className={`rounded-full px-2.5 py-2 text-sm font-bold transition sm:px-4 ${wordMode === m ? "bg-foreground text-background" : "opacity-70 hover:opacity-100"}`}
+          className={`min-h-11 rounded-full px-2.5 py-2 text-base font-bold transition sm:px-4 ${wordMode === m ? "bg-foreground text-background" : "opacity-75 hover:opacity-100"}`}
         >
-          {m === "edit" ? x.editWords : x.play}
+          {t.studio.modes[m]}
         </button>
       ))}
     </div>
@@ -1226,7 +1236,7 @@ function DeviceSwitch({ view, setView, compact = false }: { view: "phone" | "com
             title={compact ? words.join(" ") : undefined}
             onClick={() => setView(v)}
             // Compact, it's as tall as the mode switch beside it.
-            className={`rounded-full text-sm font-semibold transition ${compact ? "grid h-9 w-8 place-items-center text-base leading-none" : "px-4 py-1.5"} ${view === v ? "bg-foreground text-background" : "opacity-70 hover:opacity-100"}`}
+            className={`rounded-full text-sm font-semibold transition ${compact ? "grid h-11 w-9 place-items-center text-lg leading-none" : "px-4 py-1.5"} ${view === v ? "bg-foreground text-background" : "opacity-75 hover:opacity-100"}`}
           >
             {compact ? icon : label}
           </button>
@@ -1252,7 +1262,7 @@ function LookingAt({ card, viewing }: { card: CardData; viewing: string | undefi
   const i = Math.max(card.screens.findIndex((s) => s.id === viewing), 0);
   const screen = card.screens[i];
   if (!screen) return null;
-  return <p className="text-sm opacity-70">{fmt(t.custom.lookingAt, { n: i + 1, name: t.labels.screens[screen.type] })}</p>;
+  return <p className="text-sm opacity-75">{fmt(t.custom.lookingAt, { n: i + 1, name: t.labels.screens[screen.type] })}</p>;
 }
 
 // On a phone the preview covers the typing box, so it has its own box for the screen showing.
@@ -1281,9 +1291,9 @@ function ScreenAsk({ card, viewing, value, onChange, busy, onSubmit }: ScreenAsk
           maxLength={1000}
           dir="auto"
           placeholder={x.thisScreenPlaceholder}
-          className="min-w-0 flex-1 rounded-full border border-line bg-background px-4 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+          className="min-w-0 flex-1 rounded-full border-2 border-line bg-background px-4 py-2.5 text-base outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
         />
-        <button disabled={busy || value.trim().length < 3} className="shrink-0 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+        <button disabled={busy || value.trim().length < 3} className="min-h-11 shrink-0 rounded-full bg-brand px-5 py-2.5 text-base font-semibold text-white disabled:opacity-50">
           {x.go}
         </button>
       </div>
