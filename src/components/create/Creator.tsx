@@ -8,7 +8,7 @@ import { Logo } from "@/components/Logo";
 import { BrowserFrame } from "@/components/BrowserFrame";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { addToBasket } from "@/lib/basket";
-import { OCCASIONS, type CardData, type Occasion, type Screen, type ScreenType, type ThemeName } from "@/lib/card";
+import { OCCASIONS, type CardData, type Occasion, type Screen, type ThemeName } from "@/lib/card";
 import { stagesOf } from "@/lib/stages";
 import { ProductThumb } from "@/components/catalog/ProductThumb";
 import { TEMPLATES, cardTier, getTemplate, toneInfo } from "@/lib/catalog";
@@ -28,6 +28,9 @@ import { useWide } from "./use-wide";
 import { AllWords, EditableCard, setAt, type Path } from "./WordEditing";
 import { stageFor, stillToWrite } from "@/lib/blanks";
 import type { Brief } from "@/lib/brief";
+import { recentLooks, rememberLook } from "@/lib/recent-looks";
+import { AiError, MakingScreen, NO_PROGRESS, keepScreenOn, type Progress } from "./MakingScreen";
+import { FirstLook } from "./FirstLook";
 
 const DRAFT_KEY = "sv-draft-v1";
 const MODE_KEY = "sv-draft-mode";
@@ -37,6 +40,8 @@ const QUIZ_KEY = "sv-quiz-v1";
 const EXAMPLE_SLUGS = ["be-my-valentine", "birthday-bash", "festival-of-lights", "naughty-or-nice", "please-forgive-me", "for-the-best-mum"];
 
 type Album = { photos: string[]; captions: string[] };
+// A new card being asked for: everything makeCard was given, and which try this is.
+type MakeJob = { prompt: string; names: { to: string; from: string }; source: "quiz" | "describe"; album?: Album; template?: string; brief?: Brief; attempt: number };
 
 // Puts photos added before the card was written into its photos screen. A card made
 // from scratch gets one before the message (or finale) if the writer didn't include
@@ -166,8 +171,13 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   const [past, setPast] = useState<CardData[]>([]);
   const [future, setFuture] = useState<CardData[]>([]);
   // The screens written so far while a card is being made, and a way to stop it.
-  const [progress, setProgress] = useState<ScreenType[]>([]);
+  const [progress, setProgress] = useState<Progress>(NO_PROGRESS);
   const making = useRef<AbortController | null>(null);
+  // The card being made, kept so "Try again" can ask for exactly the same again; its big
+  // idea once the writer has one; and how it ended ("ready" for a moment, or why it didn't).
+  const [job, setJob] = useState<MakeJob | null>(null);
+  const [concept, setConcept] = useState<string | null>(null);
+  const [outcome, setOutcome] = useState<"ready" | { error: string } | null>(null);
   // The live preview: on a phone or a computer, which screen it's showing, and a nudge
   // that makes it jump back to a screen after that screen changes.
   // It starts as the device they're on (see `shown` below); the other is a tap away.
@@ -265,43 +275,75 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   };
 
   // Asks for a new card from a description, or for a change to the current one. The
-  // reply streams in: a line for each screen as it's written, then the finished card.
+  // reply streams in: the card's big idea, a line for each screen as it's written, then
+  // the finished card. Whatever goes wrong comes out as an AiError in plain words, never
+  // the browser's own "Failed to fetch".
   const callAi = async (
-    body: { prompt: string; card?: CardData; focus?: string; template?: string; keepDesign?: boolean; brief?: Brief },
+    body: { prompt: string; card?: CardData; focus?: string; template?: string; keepDesign?: boolean; brief?: Brief; avoid?: string[] },
     names: { to: string; from: string },
-    onProgress?: (screens: ScreenType[]) => void,
+    on?: { progress?: (progress: Progress) => void; idea?: (idea: string) => void },
     signal?: AbortSignal,
-  ): Promise<{ card: CardData; note?: string; left?: number }> => {
-    const res = await fetch("/api/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...body, to: names.to.trim(), from: names.from.trim() }),
-      signal,
-    });
-    if (!res.ok || !res.body) {
-      const json = await res.json().catch(() => ({}));
-      throw new Error(json.error ?? x.errors.failed);
-    }
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = "";
-    for (;;) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      let end;
-      while ((end = buffer.indexOf("\n")) >= 0) {
-        const line = buffer.slice(0, end).trim();
-        buffer = buffer.slice(end + 1);
-        if (!line) continue;
-        const event = JSON.parse(line);
-        if (event.type === "progress") onProgress?.(event.screens);
-        else if (event.type === "card")
-          return { card: event.card as CardData, note: typeof event.note === "string" ? event.note : undefined, left: typeof event.left === "number" ? event.left : undefined };
-        else if (event.type === "error") throw new Error(event.error ?? x.errors.failed);
+  ): Promise<{ card: CardData; note?: string; left?: number; direction?: string }> => {
+    try {
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...body, to: names.to.trim(), from: names.from.trim() }),
+        signal,
+      });
+      if (!res.ok || !res.body) {
+        const json = await res.json().catch(() => ({}));
+        // Worth another go when the server had a bad moment; not for a limit, signing in or a switched-off service.
+        throw new AiError(typeof json.error === "string" ? json.error : x.errors.failed, res.status >= 500 && res.status !== 503);
       }
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      for (;;) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        let end;
+        while ((end = buffer.indexOf("\n")) >= 0) {
+          const line = buffer.slice(0, end).trim();
+          buffer = buffer.slice(end + 1);
+          if (!line) continue;
+          // A garbled line, or a kind of event this page doesn't know yet, is passed over.
+          let event;
+          try {
+            event = JSON.parse(line);
+          } catch {
+            continue;
+          }
+          if (!event || typeof event !== "object") continue;
+          if (event.type === "idea") {
+            if (typeof event.idea === "string" && event.idea.trim()) on?.idea?.(event.idea.trim().slice(0, 200));
+          } else if (event.type === "progress") {
+            if (!Array.isArray(event.screens)) continue;
+            const screens = event.screens.map((s: unknown) => (typeof s === "string" ? s : ""));
+            const titles: unknown[] = Array.isArray(event.titles) ? event.titles : [];
+            on?.progress?.({ screens, titles: screens.map((_: string, i: number) => (typeof titles[i] === "string" && titles[i].trim() ? titles[i].trim().slice(0, 80) : null)) });
+          } else if (event.type === "card") {
+            if (!Array.isArray(event.card?.screens) || !event.card.screens.length) throw new AiError(x.errors.failed, true);
+            return {
+              card: event.card as CardData,
+              note: typeof event.note === "string" ? event.note : undefined,
+              left: typeof event.left === "number" ? event.left : undefined,
+              direction: typeof event.direction === "string" ? event.direction : undefined,
+            };
+          } else if (event.type === "error") {
+            const error = typeof event.error === "string" ? event.error : x.errors.failed;
+            throw new AiError(error, error !== x.errors.refused);
+          }
+        }
+      }
+      // It ended without the card: the connection went part-way through.
+      throw new AiError(x.errors.connection, true);
+    } catch (e) {
+      if (e instanceof AiError || signal?.aborted) throw e;
+      // "Failed to fetch", "Load failed" and the like: the connection dropped.
+      throw new AiError(x.errors.connection, true);
     }
-    throw new Error(x.errors.failed);
   };
 
   const makeFromIdea = () => {
@@ -325,16 +367,36 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     const controller = new AbortController();
     making.current = controller;
     clearQuiz();
+    setJob((j) => ({ prompt, names, source, album, template, brief, attempt: (j?.attempt ?? 0) + 1 }));
     setBusy("make");
     setAiError(null);
-    setProgress([]);
+    setProgress(NO_PROGRESS);
+    setConcept(null);
+    setOutcome(null);
     setStep("making");
     window.scrollTo({ top: 0 });
+    // Straight from the tap, as some phones only allow it then.
+    const letGo = keepScreenOn();
     try {
-      const { card: written } = await callAi(template ? { prompt, template, keepDesign: true, brief } : { prompt, brief }, names, setProgress, controller.signal);
+      // The looks of their last few cards, for the writer to steer away from.
+      const avoid = recentLooks();
+      const { card: written, direction } = await callAi(
+        { ...(template ? { prompt, template, keepDesign: true, brief } : { prompt, brief }), ...(avoid.length ? { avoid } : {}) },
+        names,
+        {
+          // The list only grows: if the writer has a second go, it starts again from nothing.
+          progress: (p) => setProgress((was) => (p.screens.length >= was.screens.length ? p : was)),
+          idea: setConcept,
+        },
+        controller.signal,
+      );
+      rememberLook(direction);
       // A colour picked on the product page carries over, but only for that design.
       const coloured = template && initialTheme && template === initialTemplate ? { ...written, theme: initialTheme } : written;
       const made = withPhotos(coloured, album, t.labels.screens.photos, !template);
+      // A moment to say it's ready, with the envelope sealed, before it plays for them.
+      setOutcome("ready");
+      await new Promise((done) => setTimeout(done, 1200));
       setCard(made);
       setSelected(made.screens[0]?.id);
       setMode(template ? "premade" : "custom");
@@ -344,12 +406,21 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       setFuture([]);
       window.scrollTo({ top: 0 });
     } catch (e) {
-      if (!controller.signal.aborted) setAiError(e instanceof Error ? e.message : x.errors.failed);
-      setStep(source);
+      if (controller.signal.aborted) setStep(source);
+      // Another go could work, so they stay here with a big button to try again.
+      else if (e instanceof AiError && e.retry) setOutcome({ error: e.message });
+      else {
+        setAiError(e instanceof Error ? e.message : x.errors.failed);
+        setStep(source);
+      }
+    } finally {
+      letGo();
     }
     making.current = null;
     setBusy(null);
   };
+  // The same card asked for again, after it didn't come through.
+  const makeAgain = () => job && makeCard(job.prompt, job.names, job.source, job.album, job.template, job.brief);
 
   const remember = () => {
     if (!card) return;
@@ -462,7 +533,8 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       clearDraft();
       router.push("/basket");
     } catch (e) {
-      setError(e instanceof Error ? e.message : c.failed);
+      // A dropped connection says so, not the browser's "Failed to fetch".
+      setError(e instanceof TypeError ? x.errors.connection : e instanceof Error ? e.message : c.failed);
       setSaving(false);
     }
   };
@@ -583,35 +655,25 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
         </section>
       )}
 
-      {step === "making" && (
-        <section className="mx-auto flex min-h-[calc(100dvh-4.5rem)] max-w-xl flex-col items-center justify-center px-4 py-10 text-center">
-          <WritingEnvelope />
-          <h1 className="mt-6 font-brand text-4xl font-bold sm:text-5xl">{x.makingTitle}</h1>
-          <p className="mt-2 min-h-6 opacity-70">
-            <RotatingLine lines={x.making} />
-          </p>
-          <div className="mt-5 h-2 w-full max-w-sm overflow-hidden rounded-full bg-line">
-            <div className="h-full rounded-full bg-brand transition-[width] duration-700" style={{ width: `${Math.min(92, 8 + progress.length * 12)}%` }} />
-          </div>
-          <div className="mt-8 w-full rounded-3xl border border-line bg-panel p-5 text-start shadow-sm">
-            <p className="text-xs font-bold uppercase tracking-wide opacity-50">{x.yourIdea}</p>
-            <p dir="auto" className="mt-1 line-clamp-4 font-hand text-xl leading-snug">“{idea.trim()}”</p>
-            <ul className="mt-4 space-y-2 border-t border-line pt-4 text-sm font-semibold" aria-live="polite">
-              {progress.map((type, i) => (
-                <li key={i} className="flex animate-screen-in items-center gap-2">
-                  <span className="grid h-5 w-5 place-items-center rounded-full bg-brand text-[11px] text-white">✓</span>
-                  {t.labels.screens[type]}
-                </li>
-              ))}
-              <li className="flex items-center gap-2 opacity-50">
-                <span aria-hidden className="h-5 w-5 animate-spin rounded-full border-2 border-brand/25 border-t-brand" />…
-              </li>
-            </ul>
-          </div>
-          <button onClick={() => making.current?.abort()} className="mt-6 text-sm font-semibold opacity-60 hover:opacity-100">
-            {x.back}
-          </button>
-        </section>
+      {step === "making" && job && (
+        <MakingScreen
+          key={job.attempt}
+          to={job.names.to}
+          from={job.names.from}
+          brief={job.brief}
+          template={job.template}
+          typed={job.source === "describe" ? job.prompt : undefined}
+          photos={job.album?.photos.length ?? 0}
+          concept={concept}
+          progress={progress}
+          outcome={outcome}
+          onStop={() => making.current?.abort()}
+          onRetry={makeAgain}
+          onBack={() => {
+            setOutcome(null);
+            setStep(job.source);
+          }}
+        />
       )}
 
       {step === "choose" && (
@@ -904,14 +966,22 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       )}
 
       {welcome && card && step === "edit" && (
-        <Welcome
+        <FirstLook
           card={card}
-          onClose={() => setWelcome(false)}
-          onWatch={() => {
+          onFinish={() => {
             setWelcome(false);
-            setWordMode("play");
+            publish();
+          }}
+          onEdit={() => {
+            setWelcome(false);
+            setWordMode("edit");
             goToScreen(card.screens[0].id);
           }}
+          onNewLook={(restyled) => {
+            remember();
+            setCard(restyled);
+          }}
+          onUndo={past.length ? undoLast : undefined}
         />
       )}
 
@@ -1047,48 +1117,6 @@ function StillToWrite({ card, onGo, onAnyway, onClose }: { card: CardData; onGo:
             </button>
             <button type="button" onClick={once(onAnyway)} className="flex-1 rounded-full border-2 border-line py-3 font-semibold">
               {c.toWriteAnyway}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// When the card has just been made: the card, playing, and how to make it their own.
-function Welcome({ card, onClose, onWatch }: { card: CardData; onClose: () => void; onWatch: () => void }) {
-  const { t } = useI18n();
-  const s = t.studio;
-  return (
-    // Centred while it fits; on a small phone it starts at the top and scrolls, never cut off.
-    <div role="dialog" aria-modal="true" aria-labelledby="welcome-title" className="fixed inset-0 z-[70] overflow-y-auto bg-black/50">
-      <div className="flex min-h-full items-center justify-center p-4">
-        <div className="w-full max-w-3xl rounded-3xl border-2 border-foreground bg-background p-5 shadow-2xl sm:p-8">
-          <h2 id="welcome-title" className="font-brand text-3xl font-bold sm:text-4xl">
-            {s.welcomeTitle}
-          </h2>
-          <p className="mt-2 text-lg opacity-80">{fmt(s.welcomeIntro, { name: card.to })}</p>
-          <div className="mt-5 grid items-center gap-6 sm:grid-cols-[240px_1fr]">
-            <div className="mx-auto h-[300px] w-[185px] overflow-hidden rounded-[2rem] border-4 border-foreground shadow-xl sm:h-[360px] sm:w-[220px]">
-              <AtPhoneSize>
-                <CardPlayer card={card} preview bare />
-              </AtPhoneSize>
-            </div>
-            <ol className="space-y-3">
-              {s.welcomeSteps.map((step, i) => (
-                <li key={step} className="flex items-start gap-3 text-lg">
-                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-brand font-bold text-white">{i + 1}</span>
-                  <span>{fmt(step, { name: card.to })}</span>
-                </li>
-              ))}
-            </ol>
-          </div>
-          <div className="mt-6 flex flex-wrap justify-end gap-3">
-            <button type="button" onClick={onWatch} className="rounded-full border-2 border-foreground px-6 py-3 text-lg font-semibold">
-              ▶ {t.custom.play.replace(/^▶\s*/, "")}
-            </button>
-            <button type="button" autoFocus onClick={onClose} className="rounded-full bg-brand px-8 py-3 font-brand text-xl font-semibold text-white shadow-lg">
-              {s.startDesigning} →
             </button>
           </div>
         </div>
@@ -1288,62 +1316,6 @@ function ScreenAsk({ card, viewing, value, onChange, busy, onSubmit }: ScreenAsk
         </button>
       </div>
     </form>
-  );
-}
-
-// An envelope with a card rising out of it while its lines are written.
-function WritingEnvelope() {
-  return (
-    <svg viewBox="0 0 200 170" className="w-56 text-brand sm:w-64" aria-hidden>
-      {[
-        [26, 40, 0],
-        [176, 30, 0.6],
-        [160, 96, 1.2],
-        [36, 104, 0.9],
-      ].map(([cx, cy, delay]) => (
-        <path
-          key={`${cx}-${cy}`}
-          d={`M${cx} ${cy - 7}l2 5 5 2-5 2-2 5-2-5-5-2 5-2z`}
-          fill="currentColor"
-          className="animate-twinkle"
-          style={{ animationDelay: `${delay}s`, transformBox: "fill-box", transformOrigin: "center" }}
-        />
-      ))}
-      <path d="M40 78 L100 40 L160 78 Z" fill="var(--panel)" stroke="var(--foreground)" strokeWidth="2.5" strokeLinejoin="round" opacity="0.9" />
-      <g className="animate-letter">
-        <rect x="56" y="44" width="88" height="74" rx="4" fill="var(--panel)" stroke="var(--foreground)" strokeWidth="2.5" />
-        {[60, 72, 84].map((y, i) => (
-          <path
-            key={y}
-            d={`M68 ${y} H${i === 2 ? 112 : 132}`}
-            stroke="currentColor"
-            strokeWidth="3"
-            strokeLinecap="round"
-            pathLength={100}
-            strokeDasharray="100"
-            className="animate-write"
-            style={{ animationDelay: `${i * 0.25}s` }}
-          />
-        ))}
-        <path d="M118 98 c0-5 7-5 7 0 c0-5 7-5 7 0 c0 5-7 9-7 9 s-7-4-7-9z" fill="currentColor" />
-      </g>
-      <path d="M40 78 V150 H160 V78 L100 116 Z" fill="var(--panel)" stroke="var(--foreground)" strokeWidth="2.5" strokeLinejoin="round" />
-      <path d="M40 150 L88 108 M160 150 L112 108" stroke="var(--foreground)" strokeWidth="2" opacity="0.35" />
-    </svg>
-  );
-}
-
-// Shows one line at a time, moving on every few seconds and stopping on the last.
-function RotatingLine({ lines }: { lines: readonly string[] }) {
-  const [i, setI] = useState(0);
-  useEffect(() => {
-    const timer = setInterval(() => setI((n) => Math.min(n + 1, lines.length - 1)), 4000);
-    return () => clearInterval(timer);
-  }, [lines.length]);
-  return (
-    <span key={i} className="inline-block animate-screen-in" aria-live="polite">
-      {lines[i]}
-    </span>
   );
 }
 
