@@ -24,6 +24,7 @@ export const USUAL_GOAL = {
   "bubble-wrap": 20,
   pinata: 8,
   "throw-colours": 12,
+  "grow-flower": 5,
 } satisfies Partial<Record<Game, number>>;
 
 export type GoalGame = keyof typeof USUAL_GOAL;
@@ -50,13 +51,7 @@ export const GOAL_MAX: Record<GoalGame, number> = {
   "bubble-wrap": 40,
   pinata: 30,
   "throw-colours": 30,
-};
-
-// Games that stand their pieces in one row that doesn't wrap: past this many, the row is
-// wider than a phone and the ones off the edge can't be tapped, so the game can't be won.
-export const PHONE_MAX: Partial<Record<GoalGame, number>> = {
-  "blow-candles": 6,
-  "release-lanterns": 5,
+  "grow-flower": 12,
 };
 
 // What the player counts in each game, for reading "Blow out all 7 candles" in its words.
@@ -78,17 +73,14 @@ export const GOAL_NOUNS: Record<GoalGame, string[]> = {
   "bubble-wrap": ["bubbles?"],
   pinata: ["hits?", "whacks?", "bashes", "smacks?", "taps?", "swings?", "times"],
   "throw-colours": ["splats?", "splashes", "handfuls?", "throws?"],
+  "grow-flower": ["waterings?", "drops?", "times"],
 };
 
 // The games whose pieces move, so a slower speed makes them easier.
 export const MOVING: Game[] = ["catch-hearts", "pop-balloons", "catch-snowflakes", "catch-stars", "catch-candy", "whack-ghosts", "cursor-chase"];
 
-// Games that need a quick eye, a good memory, a mouse or a shake: not for grandparents or
-// small children.
+// Games that need a quick eye, a good memory or a shake: not for grandparents or small children.
 export const HARD_GAMES: Game[] = ["memory-match", "shake-it", "cursor-chase", "whack-ghosts"];
-
-// Built for a mouse: on a phone the heart just sits there.
-export const MOUSE_GAMES: Game[] = ["cursor-chase"];
 
 // How a card for a grandparent (or anyone who asked for gentle games) and one for a small
 // child should play at most, whatever the card writer chose (see lib/generate.ts).
@@ -104,19 +96,19 @@ export const GAME_GUIDE: Record<Game, string> = {
   "catch-stars": "stars fall and they tap them. Usually 10, up to 40. Wishes, night skies, congratulations",
   "catch-candy": "wrapped sweets fall and they tap them. Usually 10, up to 40. Halloween, children, anyone with a sweet tooth",
   "light-diyas": "a row of little clay lamps; they tap each one to light it. Usually 5, up to 12. Calm and easy, lovely for grandparents; Diwali, or any warm, glowing card",
-  "blow-candles": "candles on a two-tier cake; they tap each flame to blow it out. Usually 5, at most 6 (more don't fit across a phone). Never promise their age in candles: say \"blow them all out\" instead",
-  "memory-match": "turn over cards two at a time to find the pairs of pictures (the occasion's own set). Up to 6 pairs. The hardest game: needs a good memory, so not for grandparents or small children",
-  "unwrap-gift": "a wrapped present; they tap it again and again to tear the paper until it opens. Usually 6 taps, up to 10 on a phone. Easy for anyone",
+  "blow-candles": "candles on a two-tier cake with their name piped on it; they tap each flame to blow it out. Usually 5, up to 12. Never promise their age in candles: say \"blow them all out\" instead",
+  "memory-match": "turn over cards two at a time to find the pairs (their own photos, then the occasion's pictures). Up to 6 pairs. The hardest game: needs a good memory, so not for grandparents or small children",
+  "unwrap-gift": "a wrapped present with a name tag; they tap it again and again to tear the paper until it opens on one of their photos. Usually 6 taps, up to 30. Easy for anyone",
   "shake-it": "they shake the phone to fill a meter, with a tap-fast button for computers and for anyone who can't shake. No goal. Fun for teens and friends, not for grandparents",
-  "cursor-chase": "a heart runs away from the mouse pointer and they trap it in a corner. Built for a computer: on a phone it just sits still, so only use it when they ask for a computer game. Usually 5, up to 20",
-  "loves-me-not": "a daisy; they pluck the petals one by one, \"loves me\", \"loves me not\". Always an odd number, so it ends on \"loves me\". Usually 9, up to 15. Romantic or teasing",
+  "cursor-chase": "a heart darts away from their finger (or the mouse) and they catch it with a quick, close tap. Usually 5, up to 20. A chase: not for grandparents or small children",
+  "loves-me-not": "a daisy; they pluck the petals one by one, \"loves me\", \"loves me not\", and it always ends on \"loves me\". Usually 9, up to 15. Romantic or teasing",
   "whack-ghosts": "ghosts pop up in a 3 by 3 grid and vanish again; they tap them quickly. Usually 8, up to 30. Needs quick reactions: Halloween, teens and friends, not grandparents or small children",
-  "launch-fireworks": "a night sky; they tap anywhere to send up a firework. Usually 6, up to 20. Easy and showy: New Year, Diwali, big congratulations",
-  "release-lanterns": "a row of paper lanterns at the foot of a night sky; they tap each one to let it float away. Usually 5, at most 5 (more don't fit across a phone). Calm, lovely for grandparents, wishes, missing you, Diwali, Eid",
+  "launch-fireworks": "a night sky; they tap anywhere to send up a firework, and their name lights up the sky at the end. Usually 6, up to 20. Easy and showy: New Year, Diwali, big congratulations",
+  "release-lanterns": "paper lanterns at the foot of a night sky; they tap each one to let it float away, and their name lights up the sky at the end. Usually 5, up to 10. Calm, lovely for grandparents, wishes, missing you, Diwali, Eid",
   "bubble-wrap": "a sheet of bubble wrap; they tap or drag a finger across to pop it. Usually 20, up to 40. Satisfying: get well, exams, stress, leaving",
-  pinata: "a swinging piñata; they tap to hit it until it bursts. Usually 8, up to 30 (12 or fewer keeps the counter on a phone). Parties, birthdays, congratulations",
-  "grow-flower": "a plant pot; they water it 5 times and it grows into a flower. Always 5, no goal. Gentle and easy: Mother's Day, thanks, get well, new baby, grandparents",
+  pinata: "a swinging piñata; they tap to hit it until it bursts. Usually 8, up to 30. Parties, birthdays, congratulations",
+  "grow-flower": "a plant pot with their name on it; they water it until it grows into a flower. Usually 5 waterings, up to 12. Gentle and easy: Mother's Day, thanks, get well, new baby, grandparents",
   "throw-colours": "they tap anywhere to throw powder paint until the screen is covered. Usually 12, up to 30. Holi, or any loud, colourful celebration",
   "slot-machine": "they pull a lever; the third pull always hits the jackpot (the occasion's pictures). No goal. Good for a \"you've won\" reveal",
-  "hold-hug": "they press and hold a big button for a few seconds to send a hug; letting go drains it. No goal (a lower speed makes it take longer). The easiest game of all: grandparents, small children, missing you, sorry, get well",
+  "hold-hug": "they press and hold a big button for a few seconds to send a hug, which fills with their photo; letting go drains it. No goal (a lower speed makes it take longer). The easiest game of all: grandparents, small children, missing you, sorry, get well",
 };

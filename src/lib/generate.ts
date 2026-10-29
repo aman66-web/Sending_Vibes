@@ -4,11 +4,11 @@ import { customAlphabet } from "nanoid";
 import { DIRECTIONS, EFFECTS, FONTS, FRAMES, GAMES, MOTIONS, MUSIC, OCCASIONS, PATTERNS, THEMES, TRANSITIONS, cardSchema, screenStyle, type CardData, type Game, type Occasion, type Screen, type ScreenType } from "./card";
 import { LANGUAGES, type Locale } from "@/i18n/config";
 import { AI_EXAMPLES } from "./ai-examples";
-import { BLANKS_FOR_AI } from "./blanks";
+import { BLANKS_FOR_AI, isBlank } from "./blanks";
 import type { Brief } from "./brief";
 import { buildCard, getTemplate } from "./catalog";
 import { pickDirection, type Direction } from "./directions";
-import { GAME_GUIDE, GENTLE_TUNE, GOAL_MAX, GOAL_NOUNS, LITTLE_TUNE, MOVING, PHONE_MAX, USUAL_GOAL, hasGoal, type GoalGame } from "./games";
+import { GAME_GUIDE, GENTLE_TUNE, GOAL_MAX, GOAL_NOUNS, LITTLE_TUNE, MOVING, USUAL_GOAL, hasGoal, type GoalGame } from "./games";
 import { GAME_LABELS, LABELS_ON, LISTS, TEXTS, isList, type LabelKey } from "./labels";
 import { getLook, type Look } from "./looks";
 
@@ -126,7 +126,7 @@ ${labelGuide()}
 - Don't guess anyone's gender. Use their name or "you" unless the relationship or what they told you makes it clear (mum, sister, "she").
 
 # Who's playing
-- Most people open their card on a phone, with one thumb, so every game must work with taps. Use cursor-chase only when they ask for a game to play on a computer.
+- Most people open their card on a phone, with one thumb, so every game must work with taps.
 - Grandparents, anyone they say is older or not used to phones, and any card they want kept gentle: 4 to 7 screens; only easy screens and games (hold-hug, grow-flower, unwrap-gift, light-diyas, release-lanterns, blow-candles, launch-fireworks, a catching game slowed down, scratch, boxes, coupons, reasons, slider, timeline, a yes/no question); on games with moving pieces a tune with speed 0.7 and size 1.5; a goal of 6 or fewer; no typeit, memory-match, shake-it, whack-ghosts or cursor-chase; clear fonts (storybook, classic, rounded or modern for the body, never script for anything long); short, warm sentences and a longer letter. A quiz has at most 3 easy questions.
 - Small children (under 5): 4 to 6 screens, very few words, big pieces (tune size 1.6, speed 0.8, a goal of 8 or fewer), rounded or handwritten fonts, games that are just tapping (catching games, pop-balloons, bubble-wrap, unwrap-gift, hold-hug, grow-flower). No typeit and no quiz: a grown-up will be reading it to them.
 - Children (5 to 12): bright and silly, short words, any tapping game, a quiz about the things they love.
@@ -413,13 +413,8 @@ function tidyGame(screen: Raw, fix: Fix): Raw {
     tune.size = Math.max(typeof tune.size === "number" ? tune.size : 1, fix.tune.size);
   }
   if (hasGoal(game)) {
-    // More than fit across a phone can't all be tapped there, so the game could never be won.
-    const cap = Math.min(GOAL_MAX[game], fix.desktop ? 40 : (PHONE_MAX[game] ?? 40), fix.tune?.goal ?? 40);
-    // An odd number of petals, so it ends on "loves me".
-    const allowed = (n: number) => {
-      const v = Math.min(cap, Math.max(1, Math.round(n)));
-      return game === "loves-me-not" && v % 2 === 0 ? Math.max(1, v - 1) : v;
-    };
+    const cap = Math.min(GOAL_MAX[game], fix.tune?.goal ?? 40);
+    const allowed = (n: number) => Math.min(cap, Math.max(1, Math.round(n)));
     const said = GAME_WORDS.flatMap((f) => (typeof out[f] === "string" ? [...(out[f] as string).matchAll(counts(game))].map((m) => numberIn(m[1])) : [])).find((n) => n > 0);
     const goal = said !== undefined ? allowed(said) : typeof tune.goal === "number" ? allowed(tune.goal) : USUAL_GOAL[game] > cap ? allowed(cap) : undefined;
     if (goal !== undefined) tune.goal = goal;
@@ -485,8 +480,6 @@ function repairScreens(screens: Raw[], fix: Fix): Raw[] {
 type Fix = {
   // A new card, written now (not one being changed, nor a design's words).
   fresh: boolean;
-  // Made for a computer, where long rows of pieces fit.
-  desktop: boolean;
   // How the games may play at most, for grandparents or small children.
   tune?: { size: number; speed: number; goal: number };
   // The screens they picked, by screen-kit key.
@@ -614,16 +607,46 @@ function picked(include: string[] | undefined) {
   return (include ?? []).filter((k) => (k.startsWith("game:") ? (GAMES as readonly string[]).includes(k.slice(5)) : SCREEN_TYPES.has(k) || k === "game"));
 }
 
+// Words that say something, loosely ("keys" matches "key"), without the little words, the
+// questions' own wording ("Occasion:", "How it should feel:") or what any card for the
+// occasion would say.
+const stem = (word: string) => (word.length > 3 ? word.replace(/s$/, "") : word);
+const COMMON = new Set(
+  "the and for you your our are was were with this that from have has had its not but all can will just very much more most what who how when where why which they them their there then than into out about been some any each every here also only even ever like love loved lovely happy day days card cards say said should feel make made want know year years time times little big new best good great really occasion screen screens order build exactly look photo photos added fits funny heartfelt cute romantic festive birthday christmas diwali eid valentine valentines anniversary sorry thank thanks congrats congratulations halloween mother mothers father fathers mum dad rakhi holi baby wedding well soon miss friend friendship leaving graduation retirement home welcome"
+    .split(" ")
+    .map(stem),
+);
+const wordsIn = (text: string) =>
+  new Set((text.toLowerCase().match(/[\p{L}\p{M}\p{N}]+/gu) ?? []).map(stem).filter((w) => (w.length >= 3 || /^\d+$/.test(w)) && !COMMON.has(w)));
+
+// Whether words written into a blank come from what they told us. A letter needs a couple of
+// their own details in it (their names don't count); anything shorter needs at least half
+// its words from them, so "It's a boy!" stays a blank unless they said so. Their names
+// alone ("Sam") are fine.
+function toldBy(input: GenerateInput) {
+  const told = wordsIn(`${input.prompt}\n${input.brief?.about ?? ""}\n${input.to}\n${input.from}`);
+  const names = wordsIn(`${input.to} ${input.from}`);
+  return (written: string) => {
+    const words = [...wordsIn(written)];
+    const theirs = words.filter((w) => !names.has(w));
+    if (written.length > 200) return theirs.filter((w) => told.has(w)).length >= 2;
+    if (!theirs.length) return words.length > 0;
+    return theirs.filter((w) => told.has(w)).length / theirs.length >= 0.5;
+  };
+}
+
 // Puts the words that were written into the design, so only the words can change: the
 // screens, their order, games, list lengths, colours and music stay as the design has them.
 const NOT_WORDS = new Set(["id", "type", "game", "effect", "photos", "captions", "landOn", "style"]);
 
-function copyWords(design: unknown, written: unknown): unknown {
-  if (typeof design === "string") return typeof written === "string" && written.trim() ? written : design;
-  if (Array.isArray(design)) return design.map((item, i) => copyWords(item, Array.isArray(written) ? written[i] : undefined));
+// A blank in the design ("Type your surprise here") only takes words that come from what
+// they told us: never news, dates or promises the model made up.
+function copyWords(design: unknown, written: unknown, told: (words: string) => boolean): unknown {
+  if (typeof design === "string") return typeof written === "string" && written.trim() && (!isBlank(design) || told(written)) ? written : design;
+  if (Array.isArray(design)) return design.map((item, i) => copyWords(item, Array.isArray(written) ? written[i] : undefined, told));
   if (design && typeof design === "object") {
     const from = (written && typeof written === "object" ? written : {}) as Raw;
-    const out = Object.fromEntries(Object.entries(design).map(([k, v]) => [k, NOT_WORDS.has(k) ? v : copyWords(v, from[k])]));
+    const out = Object.fromEntries(Object.entries(design).map(([k, v]) => [k, NOT_WORDS.has(k) ? v : copyWords(v, from[k], told)]));
     // A quiz's right answer goes with its new options, as long as it's one of them.
     if ("answer" in out && Array.isArray(out.options)) {
       const answer = from.answer;
@@ -634,16 +657,16 @@ function copyWords(design: unknown, written: unknown): unknown {
   return design;
 }
 
-function fillDesign(design: CardData, written: CardData): CardData {
+function fillDesign(design: CardData, written: CardData, told: (words: string) => boolean): CardData {
   const screens = design.screens.map((screen, i) => {
     const match = written.screens.find((s) => s.id === screen.id && s.type === screen.type) ?? (written.screens[i]?.type === screen.type ? written.screens[i] : undefined);
-    return match ? (copyWords(screen, match) as Screen) : screen;
+    return match ? (copyWords(screen, match, told) as Screen) : screen;
   });
   const parsed = cardSchema.safeParse({ ...design, screens });
   if (!parsed.success) return design;
   // The new words checked again against the design's games and quizzes (a number of
   // candles, an option said twice), keeping the words as written if that goes wrong.
-  const fix: Fix = { fresh: false, desktop: design.device === "desktop", include: [] };
+  const fix: Fix = { fresh: false, include: [] };
   const repaired = cardSchema.safeParse({ ...parsed.data, screens: repairScreens(parsed.data.screens as unknown as Raw[], fix) });
   return repaired.success ? repaired.data : parsed.data;
 }
@@ -666,6 +689,9 @@ const OCCASION_WORDS: [Occasion, RegExp][] = [
   ["valentine", /\bvalentine/i],
   ["anniversary", /\banniversary\b/i],
   ["wedding", /\b(wedding|getting married|engaged|engagement)\b/i],
+  ["newhome", /\b(new (home|house|flat|place)|moved house|moving house|moving in|housewarming)\b/i],
+  ["graduation", /\b(graduat\w*|finished uni)\b/i],
+  ["retirement", /\b(retir\w*)\b/i],
   ["newbaby", /\b(new baby|newborn|baby (boy|girl)|just had a baby)\b/i],
   ["getwell", /\b(get well|feel better|recover|recovery|surgery|operation|hospital)\b/i],
   ["halloween", /\bhalloween\b/i],
@@ -675,8 +701,8 @@ const OCCASION_WORDS: [Occasion, RegExp][] = [
   ["rakhi", /\b(rakhi|raksha bandhan)\b/i],
   ["holi", /\bholi\b/i],
   ["sorry", /\b(sorry|apologi[sz]e)\b/i],
-  ["congrats", /\b(congrat\w*|well done|passed|graduat\w+|promotion)\b/i],
-  ["leaving", /\b(leaving|retire\w*|retirement|farewell|moving away)\b/i],
+  ["congrats", /\b(congrat\w*|well done|passed|promotion)\b/i],
+  ["leaving", /\b(leaving|farewell|moving away)\b/i],
   ["missyou", /\bmiss(ing)? you\b/i],
   ["thanks", /\b(thank you|thanks)\b/i],
 ];
@@ -730,12 +756,12 @@ function request(input: GenerateInput, plan: Plan): { message: string; urls: str
   if (base && input.keepDesign) {
     const design = buildCard(base, input.to, input.from);
     return {
-      message: `${names}${choices(input.brief, [], true)}They picked this design:\n${JSON.stringify(withoutTemplate(design))}\n\nRewrite its words to fit what they told you. Keep the design exactly as it is: the same screens in the same order with the same ids and types, the same number of items in every list, the same game on each game screen, and the same occasion, theme, ambient, music and finale effect. Only the words change, and every one of them should feel written for these two: their names, their details, their jokes, in the feelings they picked. Start the JSON with "idea": one sentence under 90 characters with the big idea for this card, and let the words play on it. Keep any number in a game's words the same as the design's. In a quiz, make every option different and set each "answer" to the index of the right option. Leave photos empty.\n\nWhat they told you:\n${prompt}`,
+      message: `${names}${choices(input.brief, [], true)}They picked this design:\n${JSON.stringify(withoutTemplate(design))}\n\nRewrite its words to fit what they told you. Keep the design exactly as it is: the same screens in the same order with the same ids and types, the same number of items in every list, the same game on each game screen, and the same occasion, theme, ambient, music and finale effect. Only the words change, and every word that isn't a blank should feel written for these two: their names, their details, their jokes, in the feelings they picked. Some of its words are blanks for them to fill in (the exact words listed under "Changing a card"). Leave each blank exactly as it is unless what they told you gives you its words. Never make up news, dates, quotes, answers, prizes or promises they didn't give you: a hidden surprise stays a blank unless they told you what it is, so never guess something like "It's a boy!". Start the JSON with "idea": one sentence under 90 characters with the big idea for this card, and let the words play on it. Keep any number in a game's words the same as the design's. In a quiz, make every option different and set each "answer" to the index of the right option. Leave photos empty.\n\nWhat they told you:\n${prompt}`,
       urls: [],
       design,
     };
   }
-  const start = base ? `They picked this design to start from; rework it to fit what they want:\n${JSON.stringify(withoutTemplate(buildCard(base, input.to, input.from)))}\n\n` : "";
+  const start = base ? `They picked this design to start from; rework it to fit what they want, leaving any blanks in it (the exact words listed under "Changing a card") as they are unless what they told you gives you their words:\n${JSON.stringify(withoutTemplate(buildCard(base, input.to, input.from)))}\n\n` : "";
   // Their colours win over the look and their favourite colour, and we need to know when they did.
   const colours = plan.look || input.brief?.accent ? '\nIf what they told you describes colours of their own, use theirs instead, and add "ownColours": true to the card.' : "";
   const direction = plan.direction ? `${plan.direction.text}${colours}\n\n` : "";
@@ -744,8 +770,8 @@ function request(input: GenerateInput, plan: Plan): { message: string; urls: str
 
 // What to work out once for a request.
 function planFor(input: GenerateInput): Plan {
-  if (input.card) return { kind: "change", fix: { fresh: false, desktop: input.card.device === "desktop", include: [] } };
-  if (input.keepDesign && getTemplate(input.template)) return { kind: "card", fix: { fresh: false, desktop: false, include: [] } };
+  if (input.card) return { kind: "change", fix: { fresh: false, include: [] } };
+  if (input.keepDesign && getTemplate(input.template)) return { kind: "card", fix: { fresh: false, include: [] } };
   const brief = input.brief;
   const { gentle, little } = players(brief);
   const include = picked(brief?.include);
@@ -763,7 +789,7 @@ function planFor(input: GenerateInput): Plan {
     accent: brief?.accent,
   });
   const tune = gentle ? GENTLE_TUNE : little ? LITTLE_TUNE : undefined;
-  return { kind: "card", fix: { fresh: true, desktop: false, tune, include }, look, direction };
+  return { kind: "card", fix: { fresh: true, tune, include }, look, direction };
 }
 
 // The screens written so far, read from the JSON as it streams in, each with its title (or
@@ -819,7 +845,7 @@ export async function generateCard(input: GenerateInput, { onProgress, onIdea, s
   let best: { card: CardData; note?: string; idea?: string } | undefined;
   let idea: string | undefined;
   const finish = (r: { card: CardData; note?: string; idea?: string }) => ({
-    card: design ? fillDesign(design, r.card) : r.card,
+    card: design ? fillDesign(design, r.card, toldBy(input)) : r.card,
     note: input.card ? r.note : undefined,
     direction: plan.direction?.id || undefined,
     idea: input.card ? undefined : (r.idea ?? idea),
