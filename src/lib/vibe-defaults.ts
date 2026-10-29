@@ -65,6 +65,9 @@ const OCCASION_FEELINGS: Record<Occasion, Feeling[]> = {
   missyou: ["heartfelt", "cute"],
   friendship: ["funny", "cute"],
   leaving: ["funny", "heartfelt"],
+  graduation: ["festive", "heartfelt"],
+  retirement: ["funny", "heartfelt"],
+  newhome: ["cute", "festive"],
 };
 
 const PARTNERS: Relation[] = ["partner", "crush", "wife", "husband"];

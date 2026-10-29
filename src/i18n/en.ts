@@ -1037,6 +1037,9 @@ export const en = {
       missyou: ["We last saw each other ", "I miss our ", "Can't wait to "],
       friendship: ["We met ", "Our in-joke: ", "Loves ", "Nickname: "],
       leaving: ["Off to ", "We'll miss ", "Always says ", "From everyone at "],
+      graduation: ["Graduating in ", "From ", "Next stop: ", "We're so proud of "],
+      retirement: ["Retiring after ", "Years at ", "Now there's time for ", "We'll miss "],
+      newhome: ["The new place is in ", "Moving in on ", "Can't wait to see ", "Favourite room: "],
       other: ["Loves ", "Nickname: ", "Our in-joke: ", "A memory: "],
     },
     age: {
@@ -1104,7 +1107,7 @@ export const en = {
     questions: {
       to: { title: "Who's this card for?", hint: "Their name, or whatever you call them.", placeholder: "e.g. Olivia" },
       relation: { title: "Who is {name} to you?", hint: "Tap one, or type your own.", placeholder: "Someone else? Type it here" },
-      occasion: { title: "What's the occasion?", hint: "Tap one.", placeholder: "Type the occasion, e.g. graduation, retirement, new home" },
+      occasion: { title: "What's the occasion?", hint: "Tap one.", placeholder: "Type the occasion, e.g. engagement, exam results, passing a driving test" },
       vibe: { title: "How should it feel?", hint: "Tap up to {n}. The first one leads.", placeholder: "Describe it, e.g. cheeky, nostalgic, a bit soppy" },
       look: { title: "Pick a look for {name}'s card", hint: "Tap the one you like best, then choose the music. You can change both later." },
       inside: { title: "What should {name}'s card have?", hint: "Leave it to us, or tap the games and screens you'd like." },
