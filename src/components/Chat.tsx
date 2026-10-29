@@ -123,8 +123,9 @@ export function Chat() {
     return () => window.removeEventListener(OPEN_CHAT, show);
   }, []);
 
-  // Never on the card itself, where it would cover what they're playing.
-  if (path.startsWith("/c/") || path.startsWith("/demo/")) return null;
+  // Never on the card itself, where it would cover what they're playing, nor on the
+  // full-screen demos (/demo/…, /cards/…/play), whose bar along the bottom it would hide.
+  if (path.startsWith("/c/") || path.startsWith("/demo/") || /\/play\/?$/.test(path)) return null;
 
   const closeOnPhone = () => {
     if (window.matchMedia("(max-width: 639px)").matches) setOpen(false);
