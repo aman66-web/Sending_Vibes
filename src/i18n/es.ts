@@ -308,7 +308,7 @@ export const es: Dict = {
       lullaby: "Nana",
       spooky: "De miedo",
       joy: "Himno de la alegría",
-      auld: "Auld Lang Syne",
+      auld: "Canción de la despedida",
     },
   },
 
@@ -362,7 +362,7 @@ export const es: Dict = {
     howIntro: "Cuatro pasos sencillos, de principio a fin.",
     how: [
       { title: "Elige cómo hacerla", body: "A medida y creada desde cero, o con uno de nuestros {n} diseños ya hechos." },
-      { title: "Responde a 6 preguntas rápidas", body: "Para quién es, la ocasión y cómo quieres exactamente que sea tu tarjeta, pantalla a pantalla." },
+      { title: "Responde a unas preguntas rápidas", body: "Para quién es, la ocasión, el tono que quieres darle y qué llevará dentro. Casi todo se responde con un toque, y te sugerimos respuestas." },
       { title: "Hazla tuya", body: "Escribe cualquier cambio que quieras o toca cualquier texto para reescribirlo, y pon tus fotos. La hacemos juntos, con tu toque personal." },
       { title: "Paga y envíala", body: "Se la enviamos por correo, al momento o el día que elijas. O recibes un enlace para enviarla como prefieras." },
     ],
@@ -416,7 +416,7 @@ export const es: Dict = {
       },
       {
         q: "¿Cuánto se tarda en crear una?",
-        a: "A few minutes. Answer a few quick questions, mostly with a tap, add photos if you like, change anything you want, and you'll get your link.",
+        a: "Unos minutos. Responde a unas preguntas rápidas, casi todas con un toque, añade fotos si quieres, cambia lo que te apetezca y tendrás tu enlace.",
       },
       {
         q: "¿Quién está detrás de Envelette?",
@@ -627,7 +627,7 @@ export const es: Dict = {
     yourName: "Tu nombre",
     colours: "Colores",
     customise: "Personaliza esta tarjeta →",
-    stickyCta: "Customise this card · {price}",
+    stickyCta: "Personaliza esta tarjeta · {price}",
     noSignup: "Sin registro. Se tarda unos dos minutos.",
     inside: "Qué incluye",
     canChange: "Qué puedes cambiar",
@@ -823,7 +823,7 @@ export const es: Dict = {
           "las fotos que añadas",
           "el diseño, los colores, la música y los efectos que elijas",
         ],
-        after: "No necesitas crear una cuenta. Si decides iniciar sesión con Google, guardamos el nombre y el correo electrónico que Google comparte con nosotros para poder mostrarte las tarjetas que has comprado. Cuando pagas, Stripe nos facilita tu correo electrónico para que podamos enviarte el recibo y los enlaces. Si nos pides que enviemos una tarjeta por correo, guardamos el correo electrónico de quien la recibe para poder enviársela. Nunca usamos ninguno de estos datos con fines de marketing.",
+        after: "Para crear una tarjeta, te registras con Google o con tu correo electrónico. Guardamos tu correo electrónico (y tu nombre, si Google lo comparte) para poder mostrarte tus tarjetas. Cuando pagas, Stripe nos facilita tu correo electrónico para que podamos enviarte el recibo y los enlaces. Si nos pides que enviemos una tarjeta por correo, guardamos el correo electrónico de quien la recibe para poder enviársela. En ese correo aparece tu nombre y, si esa persona contesta, la respuesta te llega directamente a ti, así que verá tu correo electrónico. Nunca usamos ninguno de estos datos con fines de marketing.",
       },
       {
         title: "Quién puede ver una tarjeta",
@@ -1202,7 +1202,7 @@ export const es: Dict = {
   },
 
   quiz: {
-    progress: "Pregunta {n} de {total}",
+    progress: "Paso {n} de {total}",
     intro: "Responde a unas preguntas rápidas, casi todas con un toque, y crearemos una tarjeta solo para esa persona. Después puedes cambiar lo que quieras.",
     next: "Siguiente",
     skip: "Saltar",

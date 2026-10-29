@@ -307,7 +307,7 @@ export const pl: Dict = {
       lullaby: "Kołysanka",
       spooky: "Upiorna",
       joy: "Oda do radości",
-      auld: "Auld Lang Syne",
+      auld: "Ogniska już dogasa blask",
     },
   },
 
@@ -361,7 +361,7 @@ export const pl: Dict = {
     howIntro: "Cztery proste kroki, od początku do końca.",
     how: [
       { title: "Wybierz sposób", body: "Kartka na miarę, zrobiona od zera, albo jeden z naszych {n} gotowych projektów." },
-      { title: "Odpowiedz na 6 krótkich pytań", body: "Dla kogo jest kartka, z jakiej okazji i jak dokładnie ma wyglądać, ekran po ekranie." },
+      { title: "Odpowiedz na kilka krótkich pytań", body: "Dla kogo jest kartka, z jakiej okazji, jaki ma mieć nastrój i co ma się w niej znaleźć. Na większość pytań odpowiadasz jednym stuknięciem, a odpowiedzi ci podpowiadamy." },
       { title: "Zrób ją po swojemu", body: "Wpisz, co chcesz zmienić, albo kliknij dowolne słowa, żeby je przepisać, i wstaw swoje zdjęcia. Tworzymy ją razem, z twoim osobistym akcentem." },
       { title: "Zapłać i wyślij", body: "Wyślemy ją e-mailem od razu albo w wybranym przez ciebie dniu. Możesz też dostać link i wysłać go, jak tylko chcesz." },
     ],
@@ -415,7 +415,7 @@ export const pl: Dict = {
       },
       {
         q: "Ile trwa zrobienie kartki?",
-        a: "A few minutes. Answer a few quick questions, mostly with a tap, add photos if you like, change anything you want, and you'll get your link.",
+        a: "Kilka minut. Odpowiedz na kilka krótkich pytań, przeważnie jednym stuknięciem, dodaj zdjęcia, jeśli chcesz, zmień, co tylko chcesz, i gotowe: dostaniesz swój link.",
       },
       {
         q: "Kto stoi za Envelette?",
@@ -626,7 +626,7 @@ export const pl: Dict = {
     yourName: "Twoje imię",
     colours: "Kolory",
     customise: "Dostosuj tę kartkę →",
-    stickyCta: "Customise this card · {price}",
+    stickyCta: "Dostosuj tę kartkę · {price}",
     noSignup: "Bez rejestracji. Zajmie ci około dwóch minut.",
     inside: "Co jest w środku",
     canChange: "Co możesz zmienić",
@@ -822,7 +822,7 @@ export const pl: Dict = {
           "zdjęcia, które dodasz",
           "wybrany projekt, kolory, muzykę i efekty",
         ],
-        after: "Nie musisz zakładać konta. Jeśli zdecydujesz się zalogować przez Google, przechowujemy imię i nazwisko oraz adres e-mail, które udostępnia nam Google, żeby pokazać ci kupione przez ciebie kartki. Gdy płacisz, Stripe przekazuje nam twój adres e-mail, żebyśmy mogli wysłać ci potwierdzenie zakupu i linki. Jeśli poprosisz nas o wysłanie kartki e-mailem, przechowujemy adres e-mail odbiorcy, żeby ją dostarczyć. Żadnych z tych danych nigdy nie wykorzystujemy do celów marketingowych.",
+        after: "Żeby zrobić kartkę, rejestrujesz się przez Google albo za pomocą adresu e-mail. Przechowujemy twój adres e-mail (oraz imię i nazwisko, jeśli udostępni je Google), żeby móc pokazać ci twoje kartki. Gdy płacisz, Stripe przekazuje nam twój adres e-mail, żebyśmy mogli wysłać ci potwierdzenie zakupu i linki. Jeśli poprosisz nas o wysłanie kartki e-mailem, przechowujemy adres e-mail odbiorcy, żeby ją dostarczyć. W tym e-mailu widać twoje imię, a jeśli odbiorca na niego odpowie, odpowiedź trafi prosto do ciebie, więc zobaczy on twój adres e-mail. Żadnych z tych danych nigdy nie wykorzystujemy do celów marketingowych.",
       },
       {
         title: "Kto może zobaczyć kartkę",
@@ -1201,7 +1201,7 @@ export const pl: Dict = {
   },
 
   quiz: {
-    progress: "Pytanie {n} z {total}",
+    progress: "Krok {n} z {total}",
     intro: "Odpowiedz na kilka krótkich pytań, przeważnie jednym stuknięciem, a zrobimy kartkę specjalnie dla tej osoby. Potem możesz zmienić wszystko.",
     next: "Dalej",
     skip: "Pomiń",

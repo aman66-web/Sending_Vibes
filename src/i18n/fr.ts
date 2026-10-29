@@ -358,7 +358,7 @@ export const fr: Dict = {
     howIntro: "Quatre étapes simples, du début à la fin.",
     how: [
       { title: "Choisis ta formule", body: "Sur mesure et créée de A à Z, ou l'un de nos {n} modèles prêts à l'emploi." },
-      { title: "Réponds à 6 questions rapides", body: "Pour qui elle est, l'occasion, et à quoi ta carte doit ressembler exactement, écran par écran." },
+      { title: "Réponds à quelques questions rapides", body: "Pour qui elle est, l'occasion, l'ambiance voulue et ce qu'elle doit contenir. Le plus souvent, un simple toucher suffit, et on te suggère des réponses." },
       { title: "Mets-y ta touche", body: "Écris les changements que tu veux, ou clique sur n'importe quel mot pour le réécrire, et ajoute tes photos. On la crée ensemble, avec ta touche personnelle." },
       { title: "Paie et envoie", body: "On lui envoie par e-mail, tout de suite ou le jour de ton choix. Ou tu reçois un lien à envoyer comme tu veux." },
     ],
@@ -412,7 +412,7 @@ export const fr: Dict = {
       },
       {
         q: "Combien de temps faut-il pour en créer une ?",
-        a: "A few minutes. Answer a few quick questions, mostly with a tap, add photos if you like, change anything you want, and you'll get your link.",
+        a: "Quelques minutes. Réponds à quelques questions rapides, la plupart d'un simple toucher, ajoute des photos si tu en as envie, modifie tout ce que tu veux, et tu recevras ton lien.",
       },
       {
         q: "Qui se cache derrière Envelette ?",
@@ -623,7 +623,7 @@ export const fr: Dict = {
     yourName: "Ton prénom",
     colours: "Couleurs",
     customise: "Personnaliser cette carte →",
-    stickyCta: "Customise this card · {price}",
+    stickyCta: "Personnaliser cette carte · {price}",
     noSignup: "Sans inscription. Environ deux minutes.",
     inside: "Ce qu'il y a dedans",
     canChange: "Ce que tu peux modifier",
@@ -819,7 +819,7 @@ export const fr: Dict = {
           "les photos que tu ajoutes",
           "le modèle, les couleurs, la musique et les effets que tu as choisis",
         ],
-        after: "Pas besoin de compte. Si tu choisis de te connecter avec Google, on conserve le nom et l'adresse e-mail que Google nous transmet, pour pouvoir te montrer les cartes que tu as achetées. Quand tu paies, Stripe nous transmet ton adresse e-mail pour qu'on puisse t'envoyer ton reçu et tes liens. Si tu nous demandes d'envoyer une carte par e-mail, on conserve l'adresse e-mail du destinataire pour la lui envoyer. On n'utilise jamais aucune de ces informations à des fins marketing.",
+        after: "Pour créer une carte, tu t'inscris avec Google ou avec ton adresse e-mail. On conserve ton adresse e-mail (et ton nom, si Google nous le transmet) pour pouvoir te montrer tes cartes. Quand tu paies, Stripe nous transmet ton adresse e-mail pour qu'on puisse t'envoyer ton reçu et tes liens. Si tu nous demandes d'envoyer une carte par e-mail, on conserve l'adresse e-mail du destinataire pour la lui envoyer. Cet e-mail affiche ton nom, et si le destinataire y répond, la réponse t'arrive directement, donc il verra ton adresse e-mail. On n'utilise jamais aucune de ces informations à des fins marketing.",
       },
       {
         title: "Qui peut voir une carte",
@@ -1198,7 +1198,7 @@ export const fr: Dict = {
   },
 
   quiz: {
-    progress: "Question {n} sur {total}",
+    progress: "Étape {n} sur {total}",
     intro: "Réponds à quelques questions rapides, la plupart d'un simple toucher, et on crée une carte rien que pour cette personne. Tu pourras tout modifier ensuite.",
     next: "Suivant",
     skip: "Passer",
