@@ -15,6 +15,7 @@ import { OCCASION_ICONS } from "../src/components/card/sprites";
 import { cardSchema, type Game, type Screen } from "../src/lib/card";
 import { TEMPLATES, buildCard, type Template } from "../src/lib/catalog";
 import { MORE_DESIGNS } from "../src/lib/catalog-more";
+import { DESIGN_SCREENS } from "../src/lib/design-history";
 import { labelsOn } from "../src/lib/labels";
 import { contrast } from "../src/lib/screen-style";
 import { themes } from "../src/lib/themes";
@@ -195,6 +196,10 @@ function checkDesign(t: Template): Found {
   const screens = t.screens(t.demo.to, t.demo.from);
   if (screens[0]?.type !== "intro") problems.push("the first screen must be the intro");
   if (screens.at(-1)?.type !== "finale") problems.push("the last screen must be the finale");
+  // Cards already saved only keep counting as this design if its earlier screens are kept,
+  // so any new list of screens has to be recorded before it ships (see cardTier).
+  const list = t.screens("", "").map((s) => s.type).join(",");
+  if (!DESIGN_SCREENS[t.slug]?.includes(list)) problems.push(`its screens (${list}) aren't in lib/design-history.ts: run \`npx tsx scripts/design-history.ts\` so cards made with its earlier screens still count as this design`);
   const ids = screens.map((s) => s.id);
   for (const id of new Set(ids.filter((id, i) => ids.indexOf(id) !== i))) problems.push(`screen id "${id}" is used twice`);
   screens.forEach((s, i) => checkScreen(t, s, i, found));
