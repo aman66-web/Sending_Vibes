@@ -829,7 +829,7 @@ export const pl: Dict = {
         paragraphs: [
           "Każdy, kto ma link do kartki, może ją otworzyć, więc udostępniaj go tylko osobom, którym chcesz ją pokazać. Linki to długie, losowe kody, których w praktyce nie da się odgadnąć, a kartek nigdy nie ma na żadnych listach, w wyszukiwarkach ani nigdzie indziej na stronie. Prosimy też wyszukiwarki, żeby ich nie indeksowały.",
           "Gdy kartka zostanie otwarta po raz pierwszy, wysyłamy jej nadawcy e-mail z tą informacją. Zapisujemy tylko czas otwarcia, a nie to, kto ją otworzył ani gdzie.",
-          "Jeśli odpowiesz na kartkę, którą ktoś ci przysłał, wyślemy tej osobie e-mailem wybraną przez ciebie reakcję i słowa, które dopiszesz, a także zachowamy je razem z kartką. Adresu e-mail nadawcy nigdy nie zobaczysz.",
+          "Jeśli odpowiesz na kartkę, którą ktoś ci przysłał, wyślemy tej osobie e-mailem wybraną przez ciebie reakcję i słowa, które dopiszesz, a także zachowamy je razem z kartką. Sama kartka nigdy nie pokazuje adresu e-mail nadawcy.",
         ],
       },
       {
@@ -1857,7 +1857,8 @@ export const pl: Dict = {
         party: "{to} uważa, że twoja kartka jest genialna",
       },
       replySaid: "Do tego dopisek:",
-      replyNote: "Odpowiedź przyszła prosto z kartki, którą {to} ma od ciebie. Nigdy nie pokazujemy tej osobie twojego adresu e-mail.",
+      replyNote: "Odpowiedź przyszła prosto z kartki, którą {to} ma od ciebie.",
+      replyPrivate: "Nigdy nie pokazujemy tej osobie twojego adresu e-mail.",
     },
   },
   kit: {

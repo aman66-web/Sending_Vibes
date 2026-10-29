@@ -826,7 +826,7 @@ export const fr: Dict = {
         paragraphs: [
           "Toute personne qui a le lien de la carte peut l'ouvrir, alors ne le partage qu'avec les personnes à qui tu veux la montrer. Les liens sont de longs codes aléatoires pratiquement impossibles à deviner, et les cartes ne sont jamais listées, trouvables par recherche ni affichées ailleurs sur le site. On demande aussi aux moteurs de recherche de ne pas les indexer.",
           "La première fois qu'une carte est ouverte, on prévient par e-mail la personne qui l'a envoyée. On ne garde que l'heure, pas qui l'a ouverte ni où.",
-          "Si tu réponds à une carte qu'on t'a envoyée, on transmet par e-mail à la personne qui l'a envoyée la réaction que tu as choisie et les mots que tu as ajoutés, et on les conserve avec la carte. Tu ne vois jamais son adresse e-mail.",
+          "Si tu réponds à une carte qu'on t'a envoyée, on transmet par e-mail à la personne qui l'a envoyée la réaction que tu as choisie et les mots que tu as ajoutés, et on les conserve avec la carte. La carte elle-même ne montre jamais son adresse e-mail.",
         ],
       },
       {
@@ -1864,7 +1864,8 @@ export const fr: Dict = {
         party: "{to} a trouvé ta carte géniale",
       },
       replySaid: "Avec ce petit mot :",
-      replyNote: "{to} a répondu directement depuis la carte. On ne lui montre jamais ton adresse e-mail.",
+      replyNote: "{to} a répondu directement depuis la carte.",
+      replyPrivate: "On ne lui montre jamais ton adresse e-mail.",
     },
   },
   kit: {

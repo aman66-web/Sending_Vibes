@@ -830,7 +830,7 @@ export const es: Dict = {
         paragraphs: [
           "Cualquiera que tenga el enlace de la tarjeta puede abrirla, así que compártelo solo con las personas que quieras que la vean. Los enlaces son códigos largos y aleatorios que, en la práctica, no se pueden adivinar, y las tarjetas nunca aparecen en listas ni buscadores, ni se muestran en ninguna otra parte de la web. También pedimos a los buscadores que no las indexen.",
           "La primera vez que se abre una tarjeta, se lo comunicamos por correo a quien la envió. Solo guardamos la hora, no quién la abrió ni desde dónde.",
-          "Si respondes a una tarjeta que te han enviado, le hacemos llegar por correo a quien te la envió la reacción que has tocado y las palabras que hayas añadido, y las guardamos con la tarjeta. Tú nunca verás su correo electrónico.",
+          "Si respondes a una tarjeta que te han enviado, le hacemos llegar por correo a quien te la envió la reacción que has tocado y las palabras que hayas añadido, y las guardamos con la tarjeta. La tarjeta nunca muestra su correo electrónico.",
         ],
       },
       {
@@ -1858,7 +1858,8 @@ export const es: Dict = {
         party: "A {to} tu tarjeta le ha parecido genial",
       },
       replySaid: "Además, ha escrito:",
-      replyNote: "{to} ha respondido desde la propia tarjeta. Nunca le mostramos tu correo electrónico.",
+      replyNote: "{to} ha respondido desde la propia tarjeta.",
+      replyPrivate: "Nunca le mostramos tu correo electrónico.",
     },
   },
   kit: {
