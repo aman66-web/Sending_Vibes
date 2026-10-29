@@ -105,7 +105,7 @@ export function FirstLook({ card, onFinish, onEdit, onNewLook, onUndo, favourite
             <button type="button" onClick={onEdit} className={second}>
               {x.happyChange}
             </button>
-            <NewLookButton card={card} onChange={onNewLook} favourite={favourite} className={second} />
+            <NewLookButton card={card} onChange={onNewLook} favourite={favourite} className={second} inRow />
           </div>
         </div>
       </div>
