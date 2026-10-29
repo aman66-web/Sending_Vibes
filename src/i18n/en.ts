@@ -1360,7 +1360,40 @@ export const en = {
   },
 
   // Picking a look and music before the card is made (components/create/LookStep.tsx).
-  looks: {},
+  looks: {
+    title: "Pick a look for {name}'s card",
+    hint: "Tap the one you like best. You can still change the colours afterwards.",
+    suggested: "Suggested",
+    moreLooks: "Show {n} more looks",
+    // One for each look in lib/looks.ts, by its key.
+    names: {
+      classic: "Classic & elegant",
+      party: "Bright & playful",
+      cute: "Soft & cute",
+      garden: "Fresh garden",
+      midnight: "Midnight & stars",
+      blush: "Rose & blush",
+      blackgold: "Black & gold",
+      jewel: "Jewel & gold",
+      crescent: "Moonlit emerald",
+      cosy: "Cosy Christmas",
+      evergreen: "Evergreen & gold",
+      sky: "Sky & clouds",
+      doodle: "Notebook doodles",
+      vintage: "Vintage letter",
+      minimal: "Clean & simple",
+      rainbow: "Rainbow colours",
+      velvet: "Red velvet",
+      spooky: "Spooky night",
+    },
+    music: "Music",
+    musicHint: "Tap one to hear a few seconds of it. Turn your sound up first.",
+    moreMusic: "More…",
+    playing: "Playing a little of {tune}. Tap it again to stop.",
+    // Read out for the small preview of the card's envelope.
+    preview: "How {name}'s card will look",
+    previewNoName: "How the card will look",
+  },
 
   // A new look for the whole card at a tap (components/create/NewLook.tsx, lib/vary.ts).
   vary: {},

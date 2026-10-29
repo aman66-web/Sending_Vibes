@@ -8,7 +8,7 @@ import { NEW_DESIGNS, type Template } from "@/lib/catalog";
 import { themes } from "@/lib/themes";
 
 // The line printed across the top of each card front. Card artwork is in English, like the cards.
-const FRONT: Record<Occasion, string> = {
+export const FRONT: Record<Occasion, string> = {
   valentine: "Happy Valentine's Day",
   birthday: "Happy Birthday",
   diwali: "Happy Diwali",
