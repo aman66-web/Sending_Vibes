@@ -1,14 +1,16 @@
 // Checks the art direction of the first 26 ready-made designs (Valentine's to Christmas)
 // in src/lib/catalog.ts. Run it with: node_modules/.bin/jiti scripts/check-art-a.ts
 // It builds each design for "Lily" from "Sam", validates the card like a saved one, and
-// checks the looks: stickers by the edges and clear of the sound button, colours as
+// checks the looks: stickers by the edges and clear of the card's own buttons, colours as
 // six-digit hex, words readable on their backgrounds, and the house standard (photos,
 // two interactive moments, a sincere message, 4 to 9 screens).
 
 import { TEMPLATES, buildCard } from "../src/lib/catalog";
 import { cardSchema, type Game, type Screen, type ScreenType } from "../src/lib/card";
 import { labelsOn } from "../src/lib/labels";
-import { contrast } from "../src/lib/screen-style";
+import { contrast, screenLook } from "../src/lib/screen-style";
+import { themes } from "../src/lib/themes";
+import { buttonWords, underButtons } from "./card-chrome";
 
 const SLUGS = [
   "be-my-valentine",
@@ -78,7 +80,7 @@ for (const t of mine) {
   if (!screens.some((s) => s.type === "photos") && !NO_PHOTOS.has(t.slug)) fail(t.slug, "no photos screen");
   if (screens.some((s) => s.type === "photos") && !t.demo.photos?.length) fail(t.slug, "a photos screen but no demo photos for previews");
 
-  for (const s of screens) checkScreen(t.slug, s);
+  for (const s of screens) checkScreen(t.slug, s, t.theme, s === screens[0]);
 
   // Fronts of the same occasion should differ: heading font and envelope colours.
   const first = screens[0].style;
@@ -95,7 +97,7 @@ for (const t of mine) {
   }
 }
 
-function checkScreen(slug: string, s: Screen) {
+function checkScreen(slug: string, s: Screen, theme: keyof typeof themes, first: boolean) {
   const where = `${slug} ${s.id}`;
   const style = s.style;
   if (!style) return fail(where, "no style");
@@ -122,15 +124,22 @@ function checkScreen(slug: string, s: Screen) {
     // white, and draw the accent on them.
     const onWhite = s.type === "coupons" || (s.type === "game" && ON_WHITE.includes(s.game));
     if (onWhite && contrast(style.accent, "#ffffff") < 3) fail(where, `accent ${style.accent} is drawn on white here and only reaches ${contrast(style.accent, "#ffffff").toFixed(2)}:1 (want 3)`);
+    // The words on the buttons (Next, Spin) are everyday-sized, so they need 4.5:1.
+    if (buttonWords(style.accent) < 4.5) fail(where, `the words on its buttons (${style.accent}) are only ${buttonWords(style.accent).toFixed(2)}:1 (want 4.5)`);
   }
+  const look = screenLook(themes[theme], style);
+  if (contrast(look.theme.accent, look.theme.accentText) < 4.5) fail(where, "button words don't read on the button as drawn");
 
-  // Stickers: 2 to 6, by the edges, never in the top right where the sound button sits.
+  // Stickers: 2 to 6, by the edges, never under the card's own buttons (sound in the top
+  // right, Back in the top left from the second screen on).
   const stickers = style.stickers ?? [];
   if (stickers.length < 2 || stickers.length > 6) fail(where, `${stickers.length} stickers (want 2 to 6)`);
   for (const st of stickers) {
     const at = `${st.emoji} at ${st.x},${st.y}`;
     if (!(st.x < 15 || st.x > 85 || st.y < 14 || st.y > 86)) fail(where, `${at} isn't near an edge`);
     if (st.x > 75 && st.y < 20) fail(where, `${at} is in the top right, under the sound button`);
+    const hidden = underButtons(st, first);
+    if (hidden) fail(where, `${at} is ${hidden}`);
     if (st.x < 4 || st.x > 96 || st.y < 4 || st.y > 96) fail(where, `${at} is half off the card`);
     if (st.size < 8 || st.size > 14) fail(where, `${at} is size ${st.size} (want 8 to 14)`);
   }

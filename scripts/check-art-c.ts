@@ -7,6 +7,7 @@ import { isBlank, stillToWrite } from "../src/lib/blanks";
 import { LABEL_KEYS, labelsOn } from "../src/lib/labels";
 import { contrast, screenLook } from "../src/lib/screen-style";
 import { themes } from "../src/lib/themes";
+import { buttonWords, underButtons } from "./card-chrome";
 
 const SLUGS = [
   "pop-the-champagne",
@@ -64,7 +65,7 @@ function overWhite(layer: string, background: string) {
   return Number.isFinite(alpha) ? mix(background, "#ffffff", alpha) : undefined;
 }
 
-function checkStyle(slug: string, screen: Screen, theme: keyof typeof themes) {
+function checkStyle(slug: string, screen: Screen, theme: keyof typeof themes, first: boolean) {
   const where = `${screen.id} (${screen.type})`;
   const style: ScreenStyle | undefined = screen.style;
   if (!style) return fail(slug, `${where} has no style`);
@@ -83,7 +84,10 @@ function checkStyle(slug: string, screen: Screen, theme: keyof typeof themes) {
   const look = screenLook(themes[theme], style);
   const backgrounds = style.background ?? [];
   if (style.text && look.theme.text !== style.text) fail(slug, `${where} text ${style.text} is swapped for ${look.theme.text} as too faint`);
-  if (style.accent && look.theme.accent !== style.accent) fail(slug, `${where} accent ${style.accent} falls back to the text colour`);
+  if (style.accent && look.theme.accent !== style.accent) fail(slug, `${where} accent ${style.accent} is changed when shown (too faint, or its button words wouldn't read)`);
+  // The words on the buttons (Next, Spin) are everyday-sized, so they need 4.5:1.
+  if (style.accent && buttonWords(style.accent) < 4.5) fail(slug, `${where} button words on ${style.accent} are only ${buttonWords(style.accent).toFixed(2)}:1`);
+  if (contrast(look.theme.accent, look.theme.accentText) < 4.5) fail(slug, `${where} button words don't read on the button as drawn`);
   for (const bg of backgrounds) {
     const text = contrast(look.theme.text, bg);
     if (text < 4.5) fail(slug, `${where} text on ${bg} is only ${text.toFixed(2)}:1`);
@@ -106,13 +110,16 @@ function checkStyle(slug: string, screen: Screen, theme: keyof typeof themes) {
     if (distance(style.envelope, look.theme.accent) < 60) fail(slug, `${where} envelope ${style.envelope} hides its seal (${look.theme.accent})`);
   }
 
-  // Stickers: 2 to 6, near the edges and corners, never in the top right where the sound button is.
+  // Stickers: 2 to 6, near the edges and corners, never under the card's own buttons (sound
+  // in the top right, Back in the top left from the second screen on).
   const stickers = style.stickers ?? [];
   if (stickers.length < 2 || stickers.length > 6) fail(slug, `${where} has ${stickers.length} stickers (2 to 6 wanted)`);
   for (const s of stickers) {
     const edge = s.x < 15 || s.x > 85 || s.y < 14 || s.y > 86;
     if (!edge) fail(slug, `${where} sticker ${s.emoji} at ${s.x},${s.y} is over the middle`);
     if (s.x > 70 && s.y < 22) fail(slug, `${where} sticker ${s.emoji} at ${s.x},${s.y} covers the sound button`);
+    const hidden = underButtons(s, first);
+    if (hidden) fail(slug, `${where} sticker ${s.emoji} at ${s.x},${s.y} is ${hidden}`);
     if (s.size < 6 || s.size > 14) fail(slug, `${where} sticker ${s.emoji} is size ${s.size} (6 to 14 wanted)`);
   }
   const spots = new Set(stickers.map((s) => `${s.x},${s.y}`));
@@ -167,7 +174,7 @@ for (const slug of SLUGS) {
   if (intro?.type === "intro" && intro.button.trim().toLowerCase() === "open") fail(slug, 'intro button just says "Open"');
 
   for (const screen of screens) {
-    checkStyle(slug, screen, t.theme);
+    checkStyle(slug, screen, t.theme, screen === screens[0]);
     checkLabels(slug, screen);
     // The wheel cuts its slice labels short after 16 letters.
     if (screen.type === "wheel") for (const option of screen.options) if (option.length > 16) fail(slug, `wheel option "${option}" is cut short on the wheel`);

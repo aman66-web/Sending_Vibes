@@ -1,12 +1,14 @@
 // Checks every ready-made screen in the Screens tab (src/components/create/screen-kit.ts):
 // each one builds a valid screen for short and long names, gets a new id every time, has its
-// name and description in en.ts, and only uses blanks the editor knows about. Also warns
-// where a look's colours are too close to read (they'd be swapped when shown).
+// name and description in en.ts, and only uses blanks the editor knows about. Its button
+// words must read on the button and its stickers stay clear of the card's own buttons (Back
+// and sound). Also warns where a look's colours are too close to read (they'd be swapped when shown).
 // Run with: npx tsx scripts/check-kit.ts
 
 import { screenSchema } from "@/lib/card";
 import { isBlank } from "@/lib/blanks";
 import { contrast } from "@/lib/screen-style";
+import { buttonWords, underButtons } from "./card-chrome";
 import { en } from "@/i18n/en";
 import { KIT, KIT_FILTERS, KIT_GROUPS, inFilter, kitItem, ranked, screenEmoji } from "@/components/create/screen-kit";
 
@@ -60,6 +62,12 @@ for (const item of KIT) {
     const worst = (c: string) => Math.min(...bg.map((x) => contrast(c, x)));
     if (a.style?.text && worst(a.style.text) < 3) warnings.push(`${item.key}: text ${a.style.text} is faint on ${bg.join(" → ")} (${worst(a.style.text).toFixed(2)})`);
     if (a.style?.accent && worst(a.style.accent) < 2) warnings.push(`${item.key}: button ${a.style.accent} is faint on ${bg.join(" → ")} (${worst(a.style.accent).toFixed(2)})`);
+  }
+  // Everyday-sized words on the buttons need 4.5:1; any screen but an opening one can come after the first.
+  if (a.style?.accent && buttonWords(a.style.accent) < 4.5) fail(item.key, `button words on ${a.style.accent} are only ${buttonWords(a.style.accent).toFixed(2)}:1`);
+  for (const st of a.style?.stickers ?? []) {
+    const hidden = underButtons(st, a.type === "intro");
+    if (hidden) fail(item.key, `sticker ${st.emoji} at ${st.x},${st.y} is ${hidden}`);
   }
   if (screenEmoji(a) === "▫️") fail(item.key, "no emoji for its kind of screen");
 }
