@@ -9,6 +9,7 @@ import { TEMPLATES, buildCard, cardTier } from "../src/lib/catalog";
 import { contrast, screenLook } from "../src/lib/screen-style";
 import { themes } from "../src/lib/themes";
 import { PALETTES, isOurSticker, restyle, toPalette } from "../src/lib/vary";
+import { underButtons } from "./card-chrome";
 
 let failures = 0;
 let checks = 0;
@@ -82,6 +83,10 @@ function checkLook(before: CardData, after: CardData, label: string, opts: { gen
     if (s.type === "game") expect(ours.length <= (opts.gentle ? stickersOf(before.screens[i]).length : 0), `${label} #${i}: no stickers of ours added to a game`);
     for (const st of ours) {
       expect(!(st.x > 75 && st.y < 22), `${label} #${i}: top right kept clear (${st.x}, ${st.y})`);
+      // The same rule as the art checks. Back isn't on the first screen, but screens can be
+      // moved, so ours keep clear of it everywhere.
+      const hidden = underButtons(st, false);
+      expect(!hidden, `${label} #${i}: sticker ${st.emoji} at ${st.x}, ${st.y} (size ${st.size}) isn't ${hidden}`);
       expect(st.x < 15 || st.x > 85 || st.y < 14 || st.y > 86, `${label} #${i}: sticker near an edge (${st.x}, ${st.y})`);
     }
     // Readable as drawn, and as we picked it (well above screen-style's own minimum).

@@ -437,19 +437,20 @@ const STICKERS: Record<Occasion, string[]> = {
   newhome: ["🏡", "🔑", "🪴", "📦", "✨", "🛋️"],
 };
 
-// Where stickers go: corners and edges, clear of the words in the middle, the progress dots
-// at the top and the line along the bottom. Never the top right, where the sound button is.
-// The spots halfway down the sides are only for screens without long lines of words, which
-// on a phone run almost to the edge.
-type Spot = { x: [number, number]; y: [number, number]; size: [number, number]; side?: true };
+// Where stickers go: corners and edges, clear of the words in the middle and the line along
+// the bottom, and of the card's own buttons (see clearOfButtons): the top spots sit below
+// Back, as the designs' do, and nothing goes in the top right, where the sound button is.
+// The top edge and the spots halfway down the sides are only for screens without long lines
+// of words, which on a phone run almost to the edges and start just under Back.
+type Spot = { x: [number, number]; y: [number, number]; size: [number, number]; roomy?: true };
 const SPOTS: Spot[] = [
-  { x: [5, 12], y: [4, 11], size: [9, 12] },
-  { x: [23, 30], y: [3, 7], size: [6.5, 8] },
+  { x: [7, 11], y: [14.5, 18], size: [8.5, 10.5] },
+  { x: [28, 34], y: [12.8, 13.6], size: [6.5, 7.5], roomy: true },
   { x: [5, 12], y: [89, 95], size: [9, 12] },
   { x: [88, 95], y: [89, 95], size: [9, 12] },
-  { x: [3, 6], y: [26, 36], size: [6.5, 8], side: true },
-  { x: [3, 6], y: [62, 74], size: [6.5, 8], side: true },
-  { x: [94, 97], y: [42, 70], size: [6.5, 8], side: true },
+  { x: [3, 6], y: [28, 38], size: [6.5, 8], roomy: true },
+  { x: [3, 6], y: [62, 74], size: [6.5, 8], roomy: true },
+  { x: [94, 97], y: [42, 70], size: [6.5, 8], roomy: true },
 ];
 const WORDY = new Set<Screen["type"]>(["message", "reasons", "quiz", "timeline", "coupons"]);
 const MOTION_PICKS = ["float", "sway", "float", "sway", "pulse", "none"] as const;
@@ -475,8 +476,14 @@ export function isOurSticker(s: Sticker) {
   const want = sealFor(s, hundredths.map((h) => Math.floor(h / 10)));
   return hundredths.every((h, i) => h % 10 === want[i]);
 }
-// Near an edge, clear of the words, and out of the sound button's corner.
-const safeSpot = (s: { x: number; y: number }) => (s.x < 15 || s.x > 85 || s.y < 14 || s.y > 86) && !(s.x > 75 && s.y < 22) && s.x >= 1 && s.x <= 99 && s.y >= 1 && s.y <= 99;
+// Clear of the card's own buttons, which sit over the stickers: Back in the top left (from the
+// second screen on; kept clear on every screen, so a moved screen is fine too) and sound in the
+// top right, lower down in the previews. A little more room than scripts/card-chrome.ts asks,
+// at every size the card is shown, for a sticker of this size (% of the card's shorter side).
+const clearOfButtons = (x: number, y: number, size: number) => !(x < 32 + 0.6 * size && y < 8 + 0.6 * size) && !(x > 75 && y < 22 + 0.4 * size);
+// Near an edge, clear of the words and of the card's buttons.
+const safeSpot = (s: { x: number; y: number; size: number }) =>
+  (s.x < 15 || s.x > 85 || s.y < 14 || s.y > 86) && clearOfButtons(s.x, s.y, s.size) && s.x >= 1 && s.x <= 99 && s.y >= 1 && s.y <= 99;
 
 // ---------- Making a look ----------
 
@@ -644,7 +651,7 @@ function planStickers(rand: Rand, card: CardData, kinds: number, wanted: (s: Scr
     if (own.length >= 2) return;
     const taken = [...own, ...(style.texts ?? []), ...(style.images ?? [])];
     const free = shuffle(rand, SPOTS).filter((spot) => {
-      if (spot.side && WORDY.has(screen.type)) return false;
+      if (spot.roomy && WORDY.has(screen.type)) return false;
       const [x, y] = [(spot.x[0] + spot.x[1]) / 2, (spot.y[0] + spot.y[1]) / 2];
       return taken.every((t) => Math.hypot(t.x - x, t.y - y) > 16);
     });
@@ -739,7 +746,8 @@ function gentleLook(card: CardData, rand: Rand, tone: Tone | undefined, keep: Ke
   const spare = shuffle(rand, STICKERS[card.occasion]).filter((e) => !emoji.includes(e));
   const swapped = new Map(shuffle(rand, emoji).slice(0, Math.min(spare.length, rand() < 0.5 ? 1 : 2)).map((e, i) => [e, spare[i]]));
   const nudge = (st: Sticker): Sticker => {
-    const moved = { x: st.x + between(rand, [-3, 3]), y: st.y + between(rand, [-3, 3]) };
+    // Near the top, only ever down, away from the card's buttons.
+    const moved = { x: st.x + between(rand, [-3, 3]), y: st.y + between(rand, st.y < 50 ? [0, 3] : [-3, 3]), size: st.size };
     const at = safeSpot(moved) ? moved : st;
     const size = Math.min(40, Math.max(4, st.size * between(rand, [0.9, 1.12])));
     const turned = Math.max(-180, Math.min(180, (st.rotate ?? 0) + Math.round(between(rand, [-8, 8]))));
