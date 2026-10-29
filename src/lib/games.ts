@@ -76,6 +76,33 @@ export const GOAL_NOUNS: Record<GoalGame, string[]> = {
   "grow-flower": ["waterings?", "drops?", "times"],
 };
 
+const NUMBER_WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty"];
+const BIG_WORDS: Record<string, number> = { thirty: 30, forty: 40 };
+
+// A count, in figures or words ("7", "seven").
+export const numberIn = (word: string) => (/^\d+$/.test(word) ? Number(word) : (BIG_WORDS[word.toLowerCase()] ?? NUMBER_WORDS.indexOf(word.toLowerCase())));
+
+// A count just before what the game counts, with up to two words between ("all 7 little
+// candles"), but not "30 years of candles", "Happy 30th" or "one heart at a time".
+function countPattern(game: GoalGame) {
+  const words = [...NUMBER_WORDS.slice(2), ...Object.keys(BIG_WORDS)].join("|");
+  const between = "(?:\\s+(?!(?:years?|yrs|days?|weeks?|months?|hours?|minutes?|mins?|seconds?)\\b)[\\p{L}'’-]+){0,2}";
+  return new RegExp(`\\b(\\d{1,2}|${words})${between}\\s+(?:${GOAL_NOUNS[game].join("|")})\\b`, "giu");
+}
+
+// The words on a game screen that can say how many it takes to win.
+export const GAME_WORDS = ["instructions", "title", "winText"] as const;
+
+// How many the words say it takes to win, from the first that says (the instructions first).
+export function goalInWords(game: GoalGame, texts: string[]): number | undefined {
+  return texts.flatMap((text) => [...text.matchAll(countPattern(game))].map((m) => numberIn(m[1]))).find((n) => n > 0);
+}
+
+// The words, with every count of what the game counts made this many.
+export function withGoal(game: GoalGame, text: string, goal: number) {
+  return text.replace(countPattern(game), (whole, n: string) => (numberIn(n) === goal ? whole : whole.replace(n, String(goal))));
+}
+
 // The games whose pieces move, so a slower speed makes them easier.
 export const MOVING: Game[] = ["catch-hearts", "pop-balloons", "catch-snowflakes", "catch-stars", "catch-candy", "whack-ghosts", "cursor-chase"];
 
