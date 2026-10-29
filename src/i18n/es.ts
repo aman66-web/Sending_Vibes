@@ -1227,6 +1227,7 @@ export const es: Dict = {
     surpriseSay: "¡Sorpréndeme! Escríbela como creas que más le va a gustar.",
     photosTitle: "¿Tienes fotos tuyas con {name}?",
     photosHint: "Opcional. Añade hasta 6 e irán directamente a la tarjeta. Puedes cambiarlas más tarde.",
+    waitingPhotos: "Esperando las fotos…",
     photosHintAdd: "Opcional. Añade hasta 6 y las pondremos en una pantalla de fotos justo antes del final. Puedes cambiarlas más tarde.",
     comingUp: "Próximas fechas",
     allOccasions: "Todas las ocasiones",
