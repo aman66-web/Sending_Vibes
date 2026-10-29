@@ -11,7 +11,7 @@ import { price } from "@/lib/pricing";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getI18n();
-  return { title: t.help.metaTitle, description: t.help.metaDescription };
+  return { title: t.help.metaTitle, description: t.help.metaDescription, alternates: { canonical: "/help" } };
 }
 
 export default async function HelpPage() {

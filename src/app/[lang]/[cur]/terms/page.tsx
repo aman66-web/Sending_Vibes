@@ -5,7 +5,7 @@ import { CONTACT_EMAIL, TERMS } from "@/lib/terms";
 
 // The terms agreed to at checkout. In English for everyone, as the version that applies.
 
-export const metadata: Metadata = { title: TERMS.metaTitle, description: TERMS.metaDescription };
+export const metadata: Metadata = { title: TERMS.metaTitle, description: TERMS.metaDescription, alternates: { canonical: "/terms" } };
 
 // The contact email, as a link to write to it.
 function WithEmail({ text }: { text: string }) {

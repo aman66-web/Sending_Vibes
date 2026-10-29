@@ -4,7 +4,8 @@ import { getI18n } from "@/i18n/server";
 import { OCCASIONS, THEMES, type Occasion, type ThemeName } from "@/lib/card";
 
 export async function generateMetadata(): Promise<Metadata> {
-  return { title: (await getI18n()).t.create.metaTitle };
+  // ?occasion= and ?template= links all count as the one page.
+  return { title: (await getI18n()).t.create.metaTitle, alternates: { canonical: "/create" } };
 }
 
 type Search = { occasion?: string; template?: string; to?: string; from?: string; theme?: string; start?: string; resume?: string; error?: string; edit?: string };

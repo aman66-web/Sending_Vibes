@@ -45,9 +45,17 @@ const securityHeaders = [
   { key: "Permissions-Policy", value: "geolocation=(), microphone=(), browsing-topics=()" },
 ];
 
+// Sent cards are private. Their pages already say "noindex", but this header covers their
+// link-preview images too, at both addresses a card can be reached by.
+const PRIVATE = [{ key: "X-Robots-Tag", value: "noindex, nofollow" }];
+
 const nextConfig: NextConfig = {
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      { source: "/c/:path*", headers: PRIVATE },
+      { source: "/:lang/:cur/c/:path*", headers: PRIVATE },
+    ];
   },
 };
 

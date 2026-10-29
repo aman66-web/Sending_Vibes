@@ -14,7 +14,7 @@ export const revalidate = 3600;
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getI18n();
-  return { title: t.occasionsPage.metaTitle, description: fmt(t.occasionsPage.metaDescription, { n: OCCASIONS.length }) };
+  return { title: t.occasionsPage.metaTitle, description: fmt(t.occasionsPage.metaDescription, { n: OCCASIONS.length }), alternates: { canonical: "/occasions" } };
 }
 
 export default async function OccasionsPage() {

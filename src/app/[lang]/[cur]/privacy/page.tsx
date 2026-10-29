@@ -4,7 +4,7 @@ import { getI18n } from "@/i18n/server";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getI18n();
-  return { title: t.privacy.metaTitle, description: t.privacy.metaDescription };
+  return { title: t.privacy.metaTitle, description: t.privacy.metaDescription, alternates: { canonical: "/privacy" } };
 }
 
 export default async function PrivacyPage() {
