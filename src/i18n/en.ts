@@ -954,6 +954,43 @@ export const en = {
     textMessage: "Send by text message",
     whatsappMessage: "I made you something 💌 {url}",
     openCard: "Open the card",
+    // Before Start over throws the card away.
+    startOverTitle: "Start a new card?",
+    startOverBody: "Your card for {name} will be thrown away, and it can't be brought back.",
+    startOverEditBody: "Your changes to the card for {name} will be thrown away. The card in your basket stays just as it was.",
+    startOverKeep: "No, keep my card",
+    startOverYes: "Yes, throw it away",
+    startDifferent: "Start a different card",
+    // After deleting a screen.
+    deleted: "Screen {n} · {name} deleted",
+    dismiss: "Close",
+    // Coming back to the card maker with something unfinished.
+    carryOnTitle: "Welcome back! Carry on where you left off?",
+    carryOnDraft: "Carry on with your card for {name}",
+    carryOnDraftHint: "Just as you left it",
+    carryOnBasket: "Change your card for {name}",
+    carryOnBasketHint: "It's in your basket. You can still change anything.",
+    carryOnQuiz: "Carry on with the questions for {name}",
+    carryOnAnswers: "Carry on with your answers",
+    carryOnQuizHint: "Your answers so far are all still here",
+    startNew: "Start a new one",
+    cantOpen: "We can't open that card to change it on this device. It's still safe in your basket.",
+    toBasket: "🧺 Go to my basket",
+    changeCard: "✏️ Change this card",
+    // When something goes wrong.
+    tryAgain: "Try again",
+    askHelp: "Ask us for help",
+    fixScreen: "Go to screen {n} · {name}",
+    saveOffline: "We couldn't reach Envelette just now. Check you're online, then try again. Your card is safe here.",
+    basketFull: "Your basket is full: it holds {n} cards. Pay for those first, then add this one. Your card is safe here.",
+    // Signing in with a code from their email (components/SignIn.tsx).
+    code: {
+      steps: ["Open your email and find the one from Envelette.", "The code is in its title: “{subject}”.", "Come back here and type it in, or paste it. You're signed in as soon as it's all there."],
+      hidden: "······",
+      paste: "📋 Paste the code",
+      pasteHint: "To paste it, press and hold in the box above, then choose Paste.",
+      resent: "✓ We've sent you a new code.",
+    },
   },
 
   account: {

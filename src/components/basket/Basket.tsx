@@ -6,7 +6,7 @@ import { Motif } from "@/components/card/motifs";
 import { RichText } from "@/components/RichText";
 import { fmt } from "@/i18n/config";
 import { useI18n } from "@/i18n/client";
-import { MAX_SCHEDULE_DAYS, basketSnapshot, onBasketChange, removeFromBasket, serverBasket, writeBasket, type BasketItem } from "@/lib/basket";
+import { MAX_SCHEDULE_DAYS, basketSnapshot, madeIds, onBasketChange, removeFromBasket, serverBasket, writeBasket, type BasketItem } from "@/lib/basket";
 import { getTemplate } from "@/lib/catalog";
 import { formatMoney, tierPrice } from "@/lib/pricing";
 import { themes } from "@/lib/themes";
@@ -66,6 +66,8 @@ export function Basket({ emailReady }: { emailReady: boolean }) {
   }
 
   const total = formatMoney(items.reduce((sum, i) => sum + tierPrice(i.tier ?? "premade", currency), 0), currency);
+  // Cards made in this browser can go back into the card maker to be changed.
+  const made = madeIds();
 
   const pay = async () => {
     const problems: Record<string, string> = {};
@@ -123,6 +125,14 @@ export function Basket({ emailReady }: { emailReady: boolean }) {
                     {template && <span className="text-ink/45"> · {template.name}</span>}
                   </p>
                   <p className="mt-1 font-semibold">{formatMoney(tierPrice(item.tier ?? "premade", currency), currency)}</p>
+                  {made.has(item.id) && (
+                    <Link
+                      href={`/create?edit=${encodeURIComponent(item.id)}`}
+                      className="mt-3 inline-flex min-h-11 items-center rounded-full border-2 border-ink/25 px-4 text-base font-semibold transition hover:border-ink"
+                    >
+                      {t.create.changeCard}
+                    </Link>
+                  )}
                 </div>
                 <button onClick={() => removeFromBasket([item.id])} className="self-start text-sm font-semibold text-ink/60 underline-offset-4 hover:text-ink hover:underline">
                   {b.remove}

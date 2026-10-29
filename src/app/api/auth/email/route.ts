@@ -38,7 +38,8 @@ export async function POST(req: NextRequest) {
     const { data, error } = await admin.auth.admin.generateLink({ type: "magiclink", email });
     if (error || !data.properties?.email_otp) throw error ?? new Error("No code came back");
     await sendSignInCode(email, data.properties.email_otp, locale);
-    return NextResponse.json({ ok: true });
+    // How long the code is, so the sign-in box can check it as soon as it's all typed.
+    return NextResponse.json({ ok: true, digits: data.properties.email_otp.length });
   } catch (e) {
     console.error("Sign-in code failed", e);
     return fail(a.codeFailed, 500);
