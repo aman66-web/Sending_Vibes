@@ -674,6 +674,10 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       if (cardNow.current !== sent) {
         setAiHeld(true);
         setBusy(null);
+        // Over the card too, where they're looking as it finishes: they were changing something
+        // elsewhere, away from the note under the typing box.
+        setLanded(c.changedMeanwhile);
+        setTimeout(() => setLanded((now) => (now === c.changedMeanwhile ? null : now)), 8000);
         return;
       }
       setAiNote(note ?? null);
