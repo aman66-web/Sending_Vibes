@@ -1848,6 +1848,7 @@ export const fr: Dict = {
     failed: "L'envoi n'a pas marché. Réessaie, s'il te plaît.",
     sendBack: "Envoyer une carte à {name} à ton tour 💌",
     makeOwn: "Ou en créer une pour quelqu'un d'autre",
+    ownView: "C'est ici que {name} pourra te dire merci ou t'envoyer une carte à son tour.",
     opened: "Ouverte le {date} ✓",
     email: {
       openedSubject: "{to} a ouvert ta carte 💌",

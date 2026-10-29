@@ -1842,6 +1842,7 @@ export const es: Dict = {
     failed: "No se ha enviado. Inténtalo de nuevo.",
     sendBack: "Responde a {name} con otra tarjeta 💌",
     makeOwn: "O crea una para otra persona",
+    ownView: "Aquí es donde {name} podrá darte las gracias o enviarte otra tarjeta.",
     opened: "Abierta el {date} ✓",
     email: {
       openedSubject: "{to} ha abierto tu tarjeta 💌",

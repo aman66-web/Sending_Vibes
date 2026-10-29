@@ -1838,6 +1838,7 @@ export const ar: Dict = {
     failed: "لم يُرسَل الردّ. حاول مرة أخرى من فضلك.",
     sendBack: "ردّ على {name} ببطاقة 💌",
     makeOwn: "أو اصنع بطاقة لشخص آخر",
+    ownView: "هنا يستطيع {name} أن يرسل لك شكرًا أو يردّ عليك ببطاقة.",
     opened: "فُتحت في {date} ✓",
     email: {
       openedSubject: "فتح {to} بطاقتك 💌",

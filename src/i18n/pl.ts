@@ -1841,6 +1841,7 @@ export const pl: Dict = {
     failed: "Nie udało się wysłać. Spróbuj ponownie.",
     sendBack: "Odpowiedz kartką – {name} na pewno się ucieszy 💌",
     makeOwn: "Albo zrób kartkę dla kogoś innego",
+    ownView: "Tutaj {name} może ci podziękować albo odpowiedzieć kartką.",
     opened: "Otwarto: {date} ✓",
     email: {
       openedSubject: "{to} już ogląda twoją kartkę 💌",
