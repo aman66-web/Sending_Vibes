@@ -57,6 +57,9 @@ type Props = {
   // The creator's edit mode. Switching in or out starts the screen afresh, so its words
   // are the card's own (not, say, a runaway No button's "Are you sure?").
   editing?: boolean;
+  // A preview that grows to fit each screen (filling at least its box) instead of scrolling
+  // inside itself: the editor's own on a phone, so a swipe on it always scrolls the page.
+  grow?: boolean;
 };
 
 export function CardPlayer({
@@ -69,6 +72,7 @@ export function CardPlayer({
   bare = false,
   onScreenChange,
   editing = false,
+  grow = false,
 }: Props) {
   const screens = useMemo(
     () => card.screens.filter((s) => preview || s.type !== "photos" || s.photos.length > 0),
@@ -151,7 +155,7 @@ export function CardPlayer({
       // The cards are written in English, so they read left to right even on Arabic and Urdu pages.
       dir="ltr"
       lang="en"
-      className={`@container relative flex w-full flex-col overflow-hidden font-card ${preview ? "h-full" : "min-h-dvh"}`}
+      className={`@container relative flex w-full flex-col overflow-hidden font-card ${grow ? "flex-1" : preview ? "h-full" : "min-h-dvh"}`}
     >
       {look.pattern && (
         <div aria-hidden className="pointer-events-none absolute inset-0" style={{ backgroundImage: look.pattern.image, backgroundSize: look.pattern.size }} />
@@ -187,7 +191,7 @@ export function CardPlayer({
       </div>
 
       {/* Auto margins centre short screens; long ones (lots of coupons, say) scroll inside previews. */}
-      <main className={`flex flex-1 flex-col px-5 py-8 ${preview ? "min-h-0 overflow-y-auto [scrollbar-width:none]" : ""}`}>
+      <main className={`flex flex-1 flex-col px-5 py-8 ${preview && !grow ? "min-h-0 overflow-y-auto [scrollbar-width:none]" : ""}`}>
         <LabelsContext.Provider value={current.labels}>
         <BurstContext.Provider value={current.style?.burst}>
         <TuneContext.Provider value={current.style?.tune ?? NO_TUNE}>

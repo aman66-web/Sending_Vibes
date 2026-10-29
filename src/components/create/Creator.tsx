@@ -139,6 +139,16 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   const [card, setCard] = useState<CardData | null>(draft);
   const [selected, setSelected] = useState<string | undefined>(draft?.screens[0]?.id);
   const [showPreview, setShowPreview] = useState(false);
+  // The full-screen preview on a phone covers the page, which mustn't scroll behind it.
+  useEffect(() => {
+    if (!showPreview) return;
+    const html = document.documentElement;
+    const was = html.style.overflow;
+    html.style.overflow = "hidden";
+    return () => {
+      html.style.overflow = was;
+    };
+  }, [showPreview]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Making a card by typing, and changing one by typing.
@@ -842,10 +852,11 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                       )}
                     </BrowserFrame>
                   ) : !wide ? (
-                    // On a phone, the card as it'll look on their phone, without a frame around it.
-                    <div className="h-[min(68dvh,620px)] overflow-hidden rounded-3xl border-2 border-line">
+                    // On a phone, the card as it'll look on their phone, without a frame around it. It
+                    // grows to fit a long screen rather than scrolling inside, so swipes scroll the page.
+                    <div className="flex min-h-[min(68dvh,620px)] flex-col overflow-hidden rounded-3xl border-2 border-line">
                       {!showPreview && (
-                        <CardPlayer key="here" card={card} preview sound editing={wordMode === "edit"} focusScreenId={selected} focusNonce={nudge} focusStage={focusStage} onScreenChange={setViewing} />
+                        <CardPlayer key="here" card={card} preview grow sound editing={wordMode === "edit"} focusScreenId={selected} focusNonce={nudge} focusStage={focusStage} onScreenChange={setViewing} />
                       )}
                     </div>
                   ) : shown === "phone" ? (

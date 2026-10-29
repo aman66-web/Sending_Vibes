@@ -140,7 +140,8 @@ function Catcher({ onWin, won, kind }: GameProps & { kind: string }) {
       <div className="mb-2 flex items-center justify-center gap-2 font-display text-lg font-semibold">
         {Math.min(score, target)} / {target} {config.icon}
       </div>
-      <div className="relative h-72 w-full touch-none select-none overflow-hidden rounded-3xl bg-[var(--c-secondary)]/40 ring-1 ring-black/5">
+      {/* Caught with a tap, so a swipe across it can still scroll the page. */}
+      <div className="relative h-72 w-full touch-pan-y select-none overflow-hidden rounded-3xl bg-[var(--c-secondary)]/40 ring-1 ring-black/5">
         {drops.map((d) => (
           <button
             key={d.id}
