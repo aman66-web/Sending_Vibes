@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import type { Game, Tune } from "@/lib/card";
 
 // How the screen on show plays (style.tune): its speed, how many to win, the size of its
@@ -43,3 +43,30 @@ export const USUAL_GOAL = {
 
 // The games whose pieces move about, so they can come from elsewhere or be bigger.
 export const CATCHING: Game[] = ["catch-hearts", "pop-balloons", "catch-snowflakes", "catch-stars", "catch-candy"];
+
+// Whether this is the card itself, opened by the person it's for, rather than a preview
+// while it's being made (or in the shop). Only the real card offers help, sends anything
+// or moves the page about, so previews look as designed and run no timers.
+export const LiveContext = createContext(false);
+
+// How long someone can be on a screen that has to be won before it offers to finish it
+// for them ("Need a hand?"), so a slow finger or a phone keyboard never leaves them stuck.
+export const HELP_AFTER = { game: 30_000, scratch: 20_000, typeit: 30_000, quiz: 25_000, slider: 25_000 };
+
+// True once they've been at it for `after` ms, or have missed `maxMisses` times (`misses`
+// so far). Starts again when `restart` changes (the next question, say).
+export function useStuck(after: number, misses = 0, maxMisses = Infinity, restart: unknown = null) {
+  const live = useContext(LiveContext);
+  const [late, setLate] = useState(false);
+  const [since, setSince] = useState(restart);
+  if (since !== restart) {
+    setSince(restart);
+    setLate(false);
+  }
+  useEffect(() => {
+    if (!live) return;
+    const timer = setTimeout(() => setLate(true), after);
+    return () => clearTimeout(timer);
+  }, [live, after, restart]);
+  return live && (late || misses >= maxMisses);
+}

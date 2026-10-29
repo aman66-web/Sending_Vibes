@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useRef, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import type { Effect } from "@/lib/card";
 
 // Drawn shapes rather than emoji, in the card's own colours, so the background
@@ -154,21 +155,35 @@ export function Particles({ mode, loop = false }: { mode: "confetti" | "firework
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
     resize();
-    window.addEventListener("resize", resize);
+    // The card can grow under it (a button appearing), not just the window.
+    const sized = new ResizeObserver(resize);
+    sized.observe(canvas);
+    // The card's own button colour among the foil, so a Holi or Christmas card bursts in its colours.
+    const accent = getComputedStyle(canvas).getPropertyValue("--c-accent").trim();
+    const colors = /^#[0-9a-f]{6}$/i.test(accent) ? [accent, accent, ...COLORS] : COLORS;
+    // The part of the canvas that's on screen: on a long card, they go off where they're looking.
+    const view = () => {
+      const box = canvas.getBoundingClientRect();
+      const s = box.height / h || 1;
+      const top = Math.min(Math.max(0, -box.top / s), h);
+      const bottom = Math.max(Math.min(h, (window.innerHeight - box.top) / s), top);
+      return bottom - top > 120 ? { top, height: bottom - top } : { top: 0, height: h };
+    };
 
     const particles: Particle[] = [];
     const rockets: Rocket[] = [];
     const scale = reduced ? 0.3 : 1;
 
     const confettiBurst = (n: number) => {
+      const v = view();
       for (let i = 0; i < n * scale; i++) {
         particles.push({
           x: w / 2 + (Math.random() - 0.5) * w * 0.3,
-          y: h * 0.55,
+          y: v.top + v.height * 0.55,
           vx: (Math.random() - 0.5) * 14,
           vy: -Math.random() * 16 - 6,
           life: 1,
-          color: pick(COLORS),
+          color: pick(colors),
           size: 6 + Math.random() * 6,
           spin: (Math.random() - 0.5) * 0.4,
           rot: Math.random() * Math.PI,
@@ -183,8 +198,16 @@ export function Particles({ mode, loop = false }: { mode: "confetti" | "firework
         particles.push({ x, y, vx: Math.cos(a) * speed, vy: Math.sin(a) * speed, life: 1, color, size: 2.5, spin: 0, rot: 0 });
       }
     };
-    const launch = () =>
-      rockets.push({ x: w * (0.15 + Math.random() * 0.7), y: h, vy: -(9 + Math.random() * 4), targetY: h * (0.15 + Math.random() * 0.3), color: pick(COLORS) });
+    const launch = () => {
+      const v = view();
+      rockets.push({
+        x: w * (0.15 + Math.random() * 0.7),
+        y: v.top + v.height,
+        vy: -(9 + Math.random() * 4),
+        targetY: v.top + v.height * (0.15 + Math.random() * 0.3),
+        color: pick(colors),
+      });
+    };
 
     if (mode === "confetti") confettiBurst(160);
     else for (let i = 0; i < 3; i++) setTimeout(launch, i * 350);
@@ -282,18 +305,32 @@ export function Particles({ mode, loop = false }: { mode: "confetti" | "firework
     return () => {
       cancelAnimationFrame(raf);
       io.disconnect();
-      window.removeEventListener("resize", resize);
+      sized.disconnect();
     };
   }, [mode, loop]);
 
   return <canvas ref={ref} aria-hidden className="pointer-events-none absolute inset-0 h-full w-full" />;
 }
 
+// Where celebrations are drawn: a layer over the whole card, behind its words, provided
+// by CardPlayer. Drawn inside a screen instead, they'd be trapped in its text box (its
+// entrance animation leaves a transform) and painted over its words. null while the
+// layer is still being put in place; without a layer at all, they're drawn where they are.
+export const FxLayer = createContext<HTMLElement | null | undefined>(undefined);
+
+function InFxLayer({ children }: { children: React.ReactNode }) {
+  const layer = useContext(FxLayer);
+  if (layer === undefined) return children;
+  return layer ? createPortal(children, layer) : null;
+}
+
 export function FinaleEffect({ effect }: { effect: Effect }) {
-  if (effect === "fireworks") return <Particles mode="fireworks" loop />;
-  if (effect === "confetti") return <Particles mode="confetti" loop />;
   if (effect === "none") return null;
-  return <Ambient effect={effect} intense />;
+  return (
+    <InFxLayer>
+      {effect === "fireworks" || effect === "confetti" ? <Particles mode={effect} loop /> : <Ambient effect={effect} intense />}
+    </InFxLayer>
+  );
 }
 
 // What's floating behind a screen. Fireworks keep going off in the sky.
@@ -311,6 +348,5 @@ export function Burst({ usual = "confetti" }: { usual?: Effect | null }) {
   const own = useContext(BurstContext);
   const effect = own ?? usual;
   if (!effect || effect === "none") return null;
-  if (effect === "fireworks" || effect === "confetti") return <Particles mode={effect} />;
-  return <Ambient effect={effect} intense />;
+  return <InFxLayer>{effect === "fireworks" || effect === "confetti" ? <Particles mode={effect} /> : <Ambient effect={effect} intense />}</InFxLayer>;
 }

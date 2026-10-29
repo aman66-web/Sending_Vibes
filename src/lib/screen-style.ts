@@ -8,6 +8,8 @@ import type { Theme } from "./themes";
 
 const INK = "#1f1b16";
 const PAPER = "#fdfbf6";
+// The least contrast for words people have to read (WCAG's 4.5:1 for normal text).
+const READABLE = 4.5;
 
 type Rgb = [number, number, number];
 
@@ -112,14 +114,15 @@ export function screenLook(base: Theme, style: ScreenStyle | undefined): ScreenL
     theme.surface = dark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.62)";
     theme.secondary = dark ? "rgba(255,255,255,0.11)" : mix(mid, "#ffffff", 0.85);
   }
-  // Without a background of its own, check against the theme's (light themes are light at the top).
-  const against = backgrounds?.length ? backgrounds : [hexIn(base.background) ?? PAPER];
+  // Without a background of its own, check against every colour in the theme's.
+  const against = backgrounds?.length ? backgrounds : hexesIn(base.background);
   const wanted = style.text ?? (backgrounds?.length ? base.text : undefined);
   if (wanted) {
-    // 3:1, the standard for large text: keeps a design's white on hot pink, but not navy on black.
-    const text = worst(wanted, against) >= 3 ? wanted : readableOn(against);
+    // 4.5:1, the standard for everyday text, as the letters and instructions are in it too.
+    const text = worst(wanted, against) >= READABLE ? wanted : readableOn(against);
     theme.text = text;
-    theme.muted = mix(text, against[0], 0.28);
+    // The softer ink for instructions and subtitles: as soft as it can be and still read.
+    theme.muted = [0.28, 0.2, 0.12].map((amount) => mix(text, against[0], amount)).find((m) => worst(m, against) >= READABLE) ?? text;
   }
   if (style.accent) {
     // A button that's nearly the background colour is no use; fall back to the text colour.
@@ -139,9 +142,10 @@ export function screenLook(base: Theme, style: ScreenStyle | undefined): ScreenL
   return { theme, css, envelope, pattern: pattern(style.pattern, theme.text) ?? undefined };
 }
 
-// The first hex colour in a CSS background, for checking contrast against a theme.
-function hexIn(background: string) {
-  return /#[0-9a-fA-F]{6}/.exec(background)?.[0];
+// Every hex colour in a CSS background (each stop of a gradient), for checking contrast against a theme.
+function hexesIn(background: string) {
+  const found = background.match(/#[0-9a-fA-F]{6}/g);
+  return found?.length ? found : [PAPER];
 }
 
 // Shows the part of a photo chosen for its frame (see Crop in lib/card.ts). The photo's
