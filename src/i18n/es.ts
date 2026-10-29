@@ -1150,6 +1150,7 @@ export const es: Dict = {
     changeCard: "✏️ Cambiar esta tarjeta",
     tryAgain: "Otra vez",
     askHelp: "Pídenos ayuda",
+    changedMeanwhile: "Has cambiado la tarjeta mientras trabajábamos en ella, así que hemos mantenido tus cambios y la hemos dejado tal cual. Vuelve a pedirlo si todavía lo quieres.",
     fixScreen: "Ir a la pantalla {n} · {name}",
     saveOffline: "Ahora mismo no hemos podido conectar con Envelette. Comprueba que tienes conexión a internet y vuelve a intentarlo. Tu tarjeta está a salvo aquí.",
     basketFull: "Tu cesta está llena: caben {n} tarjetas. Paga primero esas y luego añade esta. Tu tarjeta está a salvo aquí.",

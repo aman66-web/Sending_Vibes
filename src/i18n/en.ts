@@ -1114,6 +1114,7 @@ export const en = {
     // When something goes wrong.
     tryAgain: "Try again",
     askHelp: "Ask us for help",
+    changedMeanwhile: "You changed the card while we were working on it, so we've kept your changes and left the card as it is. Ask again if you'd still like it.",
     fixScreen: "Go to screen {n} · {name}",
     saveOffline: "We couldn't reach Envelette just now. Check you're online, then try again. Your card is safe here.",
     basketFull: "Your basket is full: it holds {n} cards. Pay for those first, then add this one. Your card is safe here.",

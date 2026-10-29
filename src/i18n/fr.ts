@@ -1146,6 +1146,7 @@ export const fr: Dict = {
     changeCard: "✏️ Modifier cette carte",
     tryAgain: "Recommencer",
     askHelp: "Nous demander de l'aide",
+    changedMeanwhile: "Tu as modifié la carte pendant qu'on y travaillait, alors on a gardé tes changements et laissé la carte telle quelle. Redemande si tu le veux toujours.",
     fixScreen: "Aller à l'écran {n} · {name}",
     saveOffline: "On n'a pas pu joindre Envelette pour l'instant. Vérifie ta connexion Internet, puis réessaie. Ta carte est en sécurité ici.",
     basketFull: "Ton panier est plein : il peut contenir {n} cartes. Paie d'abord celles qui y sont, puis ajoute celle-ci. Ta carte est en sécurité ici.",

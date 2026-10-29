@@ -1149,6 +1149,7 @@ export const pl: Dict = {
     changeCard: "✏️ Zmień tę kartkę",
     tryAgain: "Spróbuj jeszcze raz",
     askHelp: "Poproś nas o pomoc",
+    changedMeanwhile: "Kartka zmieniła się w trakcie naszej pracy, więc zostawiliśmy twoje zmiany i niczego nie ruszaliśmy. Poproś jeszcze raz, jeśli nadal tego chcesz.",
     fixScreen: "Przejdź do ekranu {n} · {name}",
     saveOffline: "Nie udało się teraz połączyć z Envelette. Sprawdź, czy masz internet, i spróbuj ponownie. Twoja kartka jest tu bezpieczna.",
     basketFull: "Koszyk jest już pełny (limit kartek: {n}). Najpierw zapłać za te, które w nim są, a potem dodaj tę. Twoja kartka jest tu bezpieczna.",
