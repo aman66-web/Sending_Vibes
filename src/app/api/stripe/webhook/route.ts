@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
-import { fulfilSession, markExpired } from "@/lib/orders";
+import { StillSending, fulfilSession, markExpired } from "@/lib/orders";
 import { stripe } from "@/lib/stripe";
 
 // Stripe calls this when a checkout is paid (straight away, or later for bank
@@ -23,7 +23,13 @@ export async function POST(req: Request) {
   switch (event.type) {
     case "checkout.session.completed":
     case "checkout.session.async_payment_succeeded":
-      await fulfilSession(event.data.object.id, { strict: true });
+      try {
+        await fulfilSession(event.data.object.id, { strict: true });
+      } catch (e) {
+        // The thank-you page is sending this order's emails right now: Stripe comes back later.
+        if (e instanceof StillSending) return NextResponse.json({ error: "Still sending" }, { status: 503 });
+        throw e;
+      }
       break;
     case "checkout.session.expired": {
       const orderId = event.data.object.metadata?.order_id;
