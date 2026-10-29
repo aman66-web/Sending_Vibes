@@ -1,6 +1,10 @@
 "use client";
 
+import { useRef, useState } from "react";
+import { fmt } from "@/i18n/config";
+import { useI18n } from "@/i18n/client";
 import type { CardData } from "@/lib/card";
+import { newSeed, restyle } from "@/lib/vary";
 
 // "Try another look": gives the whole card new colours, fonts and finishing touches at a
 // tap, without changing a word or a screen (see lib/vary.ts). Undo brings the old one back.
@@ -10,9 +14,33 @@ type Props = {
   // Called with the restyled card; the caller saves the old one for Undo first.
   onChange: (card: CardData) => void;
   className?: string;
+  // Their favourite colour from the questions (brief.accent), or null if they didn't give one,
+  // so it stays wherever it's used. Left out, button colours that aren't ours are kept, in case.
+  favourite?: string | null;
 };
 
-export function NewLookButton(props: Props) {
-  void props;
-  return null;
+export function NewLookButton({ card, onChange, className = "", favourite }: Props) {
+  const { t } = useI18n();
+  const v = t.vary;
+  // A run of looks of their own, stepped through a tap at a time. The seed is made on the
+  // first tap rather than while drawing, so nothing random happens during render.
+  const seed = useRef<string | null>(null);
+  const [look, setLook] = useState(1);
+  const another = () => {
+    seed.current ??= newSeed();
+    const next = look + 1;
+    onChange(restyle(card, `${seed.current}:${next}`, { favourite }));
+    setLook(next);
+  };
+  return (
+    <div className={`flex flex-wrap items-center gap-x-3 gap-y-1.5 ${className}`}>
+      <button type="button" onClick={another} className="btn btn-paper min-h-12 text-lg">
+        <span aria-hidden>🎨</span>
+        {v.button}
+      </button>
+      <p aria-live="polite" className="text-sm font-semibold opacity-70">
+        {look > 1 ? `${fmt(v.look, { n: look })} · ${v.again}` : v.hint}
+      </p>
+    </div>
+  );
 }

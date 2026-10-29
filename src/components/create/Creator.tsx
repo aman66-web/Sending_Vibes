@@ -30,6 +30,7 @@ import { AllWords, EditableCard, setAt, type Path } from "./WordEditing";
 import { stageFor, stillToWrite } from "@/lib/blanks";
 import type { Brief } from "@/lib/brief";
 import { recentLooks, rememberLook } from "@/lib/recent-looks";
+import { newSeed, restyle } from "@/lib/vary";
 import { AiError, MakingScreen, NO_PROGRESS, keepScreenOn, type Progress } from "./MakingScreen";
 import { FirstLook } from "./FirstLook";
 
@@ -407,7 +408,11 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       rememberLook(direction);
       // A colour picked on the product page carries over, but only for that design.
       const coloured = template && initialTheme && template === initialTemplate ? { ...written, theme: initialTheme } : written;
-      const made = withPhotos(coloured, album, t.labels.screens.photos, !template);
+      const filled = withPhotos(coloured, album, t.labels.screens.photos, !template);
+      // A ready-made design gets a gentle look of its own (new button and envelope colours,
+      // stickers, a font of the same kind), so no two people's copies look the same. Its theme
+      // and words stay as picked, and the shop's previews of it stay as designed.
+      const made = template ? restyle(filled, newSeed(), { gentle: true, favourite: brief?.accent ?? null }) : filled;
       // A moment to say it's ready, with the envelope sealed, before it plays for them.
       setOutcome("ready");
       await new Promise((done) => setTimeout(done, 1200));

@@ -223,11 +223,11 @@ export function CardPlayer({
       {sound && (
         <button
           onClick={() => setMuted(!muted)}
-          aria-label={muted ? "Turn sound on" : "Turn sound off"}
+          aria-label={muted ? "Turn sound and vibration on" : "Turn sound and vibration off"}
           aria-pressed={!muted}
-          className={`absolute right-3 z-30 grid h-11 w-11 place-items-center rounded-full bg-[var(--c-surface)] text-lg shadow-sm ring-1 ring-black/10 backdrop-blur ${preview ? "top-10" : "top-3"}`}
+          className={`absolute right-3 z-30 grid h-12 w-12 place-items-center rounded-full bg-[var(--c-surface)] text-xl shadow-sm ring-1 ring-black/10 backdrop-blur ${preview ? "top-10" : "top-3"}`}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor" stroke="none" />
             {muted ? <path d="M16 9.5l5 5M21 9.5l-5 5" /> : <path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" />}
           </svg>
@@ -279,7 +279,7 @@ export function CardPlayer({
           className={`m-auto w-full outline-none ${ENTRANCE[current.style?.transition ?? "rise"]} ${wide ? "max-w-4xl" : "max-w-md"}`}
         >
           <ScreenGuard screen={current} last={index >= screens.length - 1} onSkip={index >= screens.length - 1 ? replay : next}>
-          {current.type === "intro" && <IntroScreen screen={current} onNext={next} stage={stage} to={card.to} from={card.from} envelope={look.envelope} />}
+          {current.type === "intro" && <IntroScreen screen={current} onNext={next} stage={stage} to={card.to} from={card.from} envelope={look.envelope} occasion={card.occasion} editing={editing} />}
           {current.type === "question" && <QuestionScreen screen={current} onNext={next} stage={stage} />}
           {current.type === "photos" && <PhotosScreen screen={current} onNext={next} stage={stage} wide={wide} />}
           {current.type === "message" && <MessageScreen screen={current} onNext={next} stage={stage} />}
@@ -297,6 +297,7 @@ export function CardPlayer({
             <FinaleScreen
               screen={current}
               onReplay={replay}
+              from={card.from}
               footer={
                 // The real card, for the person it's for: tell the sender what they thought, or
                 // send one back (ReplyPanel.tsx). Demos keep the plain link; previews show nothing.
