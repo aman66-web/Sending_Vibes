@@ -1,5 +1,5 @@
 import type { Effect, Font, Game, Occasion, Pattern, ScreenType, ThemeName, Transition } from "./card";
-import { HARD_GAMES, MOUSE_GAMES } from "./games";
+import { HARD_GAMES } from "./games";
 import type { Look } from "./looks";
 
 // A creative direction for each new card the AI writes: a palette, a pair of fonts, a
@@ -36,17 +36,17 @@ const PALETTES: Palette[] = [
   { id: "inkcoral", name: "Ink & coral", moods: ["deep", "bright"], deep: "#1c2230", light: "#fff4ee", soft: "#ffc2ad", accent: "#ff6f59", theme: "sunset" },
   { id: "lilacmint", name: "Lilac & mint", moods: ["soft", "fresh"], deep: "#3d2f63", light: "#f7f2fc", soft: "#cdb8f0", accent: "#2fb393", theme: "lavender" },
   { id: "bubblegum", name: "Bubblegum & grape", moods: ["bright", "retro"], deep: "#4a1d6e", light: "#fff0f7", soft: "#ffb3d9", accent: "#ff3d8b", theme: "party" },
-  { id: "butter", name: "Butter & cornflower", moods: ["soft", "fresh"], occasions: ["newbaby", "getwell", "thanks", "mothersday", "friendship"], deep: "#2f4f7a", light: "#fffaf0", soft: "#ffe9a8", accent: "#3c78c8", theme: "sky" },
+  { id: "butter", name: "Butter & cornflower", moods: ["soft", "fresh"], occasions: ["newbaby", "getwell", "thanks", "mothersday", "friendship", "newhome"], deep: "#2f4f7a", light: "#fffaf0", soft: "#ffe9a8", accent: "#3c78c8", theme: "sky" },
   { id: "peachteal", name: "Peach & teal", moods: ["warm", "fresh"], deep: "#134e5e", light: "#fff3ea", soft: "#ffcfb0", accent: "#f26b38", theme: "mint" },
   { id: "nightpeach", name: "Midnight & peach", moods: ["deep", "soft"], deep: "#23214a", light: "#fdf1e8", soft: "#f9c7a5", accent: "#ff8a65", theme: "midnight" },
   { id: "olive", name: "Olive & mustard", moods: ["retro", "warm"], deep: "#3e3a1f", light: "#f7f0dc", soft: "#e3b448", accent: "#c4512b", theme: "ivory" },
   { id: "mintchoc", name: "Mint & cocoa", moods: ["fresh", "retro"], deep: "#3b2620", light: "#f1fbf6", soft: "#b5ead7", accent: "#2fa37f", theme: "mint" },
   { id: "berryoat", name: "Berry & oat", moods: ["warm", "soft"], deep: "#4b1c3a", light: "#f5efe6", soft: "#d9c6b0", accent: "#b8336a", theme: "rose" },
-  { id: "seaglass", name: "Sea glass & apricot", moods: ["fresh", "soft"], occasions: ["missyou", "leaving", "getwell", "thanks", "fathersday"], deep: "#1d4e5f", light: "#eef7f4", soft: "#a8d8cf", accent: "#e8833a", theme: "mint" },
+  { id: "seaglass", name: "Sea glass & apricot", moods: ["fresh", "soft"], occasions: ["missyou", "leaving", "getwell", "thanks", "fathersday", "retirement", "newhome"], deep: "#1d4e5f", light: "#eef7f4", soft: "#a8d8cf", accent: "#e8833a", theme: "mint" },
   { id: "aubergine", name: "Aubergine & apricot", moods: ["warm", "deep"], deep: "#3a1c3d", light: "#fff2e6", soft: "#ffb38a", accent: "#ff7a3d", theme: "sunset" },
-  { id: "skypoppy", name: "Sky & poppy", moods: ["fresh", "bright"], occasions: ["fathersday", "congrats", "leaving", "birthday", "friendship"], deep: "#24476b", light: "#f3f8fc", soft: "#bcdcf2", accent: "#e63946", theme: "sky" },
+  { id: "skypoppy", name: "Sky & poppy", moods: ["fresh", "bright"], occasions: ["fathersday", "congrats", "leaving", "birthday", "friendship", "graduation", "retirement"], deep: "#24476b", light: "#f3f8fc", soft: "#bcdcf2", accent: "#e63946", theme: "sky" },
   { id: "fern", name: "Fern & honey", moods: ["fresh", "deep"], deep: "#20342a", light: "#f2f5ec", soft: "#c3d9a5", accent: "#e0913a", theme: "mint" },
-  { id: "popcorn", name: "Popcorn & raspberry", moods: ["bright", "retro"], occasions: ["birthday", "congrats", "newyear", "friendship", "leaving"], deep: "#1e1b4b", light: "#fffdf5", soft: "#ffd23f", accent: "#ff4d6d", theme: "party" },
+  { id: "popcorn", name: "Popcorn & raspberry", moods: ["bright", "retro"], occasions: ["birthday", "congrats", "newyear", "friendship", "leaving", "graduation"], deep: "#1e1b4b", light: "#fffdf5", soft: "#ffd23f", accent: "#ff4d6d", theme: "party" },
   { id: "cherry", name: "Cherry & milk", moods: ["deep", "warm"], occasions: ["valentine", "anniversary", "mothersday", "wedding", "sorry"], deep: "#5c0f22", light: "#fff0f2", soft: "#ffb8c6", accent: "#e8233f", theme: "rose" },
   // Made for particular festivals.
   { id: "magenta", name: "Marigold & magenta", moods: ["bright", "warm"], occasions: ["diwali", "holi", "rakhi", "wedding"], deep: "#5b1149", light: "#fff4e0", soft: "#ffb627", accent: "#e4007c", theme: "marigold" },
@@ -55,6 +55,9 @@ const PALETTES: Palette[] = [
   { id: "snowberry", name: "Snow & berry", moods: ["fresh", "bright"], occasions: ["christmas"], deep: "#7a1530", light: "#f8fbff", soft: "#cfe3f2", accent: "#1f6f50", theme: "noel" },
   { id: "tealgold", name: "Teal & saffron", moods: ["deep", "warm"], occasions: ["eid", "wedding", "anniversary", "rakhi"], deep: "#0d4d4d", light: "#f6f0e2", soft: "#9fd3c7", accent: "#e09f2e", theme: "crescent" },
   { id: "pumpkin", name: "Pumpkin & slime", moods: ["deep", "retro"], occasions: ["halloween"], deep: "#1a1423", light: "#f6ead8", soft: "#f28c28", accent: "#7ed957", theme: "spooky" },
+  { id: "gown", name: "Gown & sunshine", moods: ["bright", "deep"], occasions: ["graduation", "congrats"], deep: "#2b2440", light: "#fbf8ef", soft: "#ffd84d", accent: "#e4572e", theme: "party" },
+  { id: "deckchair", name: "Deckchair stripes", moods: ["fresh", "warm"], occasions: ["retirement", "leaving"], deep: "#1f5f5b", light: "#fff8ee", soft: "#f5b0a2", accent: "#f28f3b", theme: "mint" },
+  { id: "frontdoor", name: "Front door & stone", moods: ["warm", "fresh"], occasions: ["newhome"], deep: "#2e4a3f", light: "#faf6ef", soft: "#e8d5b9", accent: "#c8473f", theme: "ivory" },
   { id: "gulal", name: "Gulal splash", moods: ["bright"], occasions: ["holi"], deep: "#2b1a5e", light: "#fffaf0", soft: "#2ec4b6", accent: "#ff4f9a", theme: "holi" },
 ];
 
@@ -91,8 +94,8 @@ type Shape = {
   guide: string;
   tones: string[];
   gentle?: boolean;
-  // Too much to read or do for a small child.
-  little?: boolean;
+  // Fine for a small child; "only" when it's made for one.
+  little?: boolean | "only";
   lengths: ("short" | "medium" | "long")[];
 };
 
@@ -104,7 +107,7 @@ const SHAPES: Shape[] = [
   { id: "story", name: "Our story", guide: "a timeline of what they told you (playful, never invented), a jar of reasons, then the letter", tones: ["heartfelt", "romantic"], gentle: true, lengths: ["medium", "long"] },
   { id: "hunt", name: "Treasure hunt", guide: "a typeit lock with a clue only they'd get, then mystery boxes, then the letter as the treasure", tones: ["funny", "cute", "romantic"], lengths: ["medium", "long"] },
   { id: "calm", name: "Gentle and slow", guide: "few screens, one easy game, photos if there are any and a long, warm letter in short sentences", tones: ["heartfelt", "cute", "romantic", "festive"], gentle: true, lengths: ["short", "medium"] },
-  { id: "play", name: "Play time", guide: "mostly tapping games, each with a big, happy win line, and a very short letter for a grown-up to read aloud", tones: ["cute", "funny", "festive", "heartfelt"], little: true, lengths: ["short", "medium"] },
+  { id: "play", name: "Play time", guide: "mostly tapping games, each with a big, happy win line, and a very short letter for a grown-up to read aloud", tones: ["cute", "funny", "festive", "heartfelt"], little: "only", lengths: ["short", "medium"] },
   { id: "party", name: "Party in a card", guide: "two lively games close together, a how-much slider, then a big finale", tones: ["festive", "funny", "cute"], little: true, lengths: ["medium", "long"] },
   { id: "parts", name: "A letter in pieces", guide: "the message comes in parts: a question, a line hidden under a scratch panel, a jar of reasons, then the rest of the letter", tones: ["romantic", "heartfelt"], lengths: ["medium", "long"] },
   { id: "sweet", name: "Short and sweet", guide: "four or five screens: one perfect game and one great line, nothing extra", tones: ["cute", "funny", "heartfelt", "festive"], gentle: true, little: true, lengths: ["short"] },
@@ -133,8 +136,11 @@ const SIGNATURES: Moment[] = [
   { id: "snow", screen: "catch-snowflakes", text: "the \"catch-snowflakes\" game", occasions: ["christmas", "newyear"], little: true },
   { id: "ghosts", screen: "whack-ghosts", text: "the \"whack-ghosts\" game", occasions: ["halloween"] },
   { id: "colours", screen: "throw-colours", text: "the \"throw-colours\" game", occasions: ["holi"], gentle: true, little: true },
-  { id: "rockets", screen: "launch-fireworks", text: "the \"launch-fireworks\" game", occasions: ["newyear", "diwali", "congrats", "eid"], gentle: true, little: true },
-  { id: "lanterns", screen: "release-lanterns", text: "the \"release-lanterns\" game, each lantern carrying a wish for them", occasions: ["diwali", "eid", "missyou", "newyear", "leaving", "wedding"], gentle: true },
+  { id: "rockets", screen: "launch-fireworks", text: "the \"launch-fireworks\" game", occasions: ["newyear", "diwali", "congrats", "eid", "graduation"], gentle: true, little: true },
+  { id: "lanterns", screen: "release-lanterns", text: "the \"release-lanterns\" game, each lantern carrying a wish for them", occasions: ["diwali", "eid", "missyou", "newyear", "leaving", "wedding", "retirement"], gentle: true },
+  { id: "exam", screen: "quiz", text: "a quiz set like an exam paper about them, with a pass mark", occasions: ["graduation"] },
+  { id: "freedom", screen: "coupons", text: "a coupon book of lazy days and the things they'll finally have time for", occasions: ["retirement"], gentle: true },
+  { id: "keys", screen: "typeit", text: "a typeit lock that opens the front door of their new home, with a clue from their details", occasions: ["newhome"] },
   { id: "petals", screen: "loves-me-not", text: "the \"loves-me-not\" game", occasions: ["valentine", "anniversary", "wedding", "sorry"] },
   { id: "unwrap", screen: "unwrap-gift", text: "the \"unwrap-gift\" game", notFor: ["sorry", "getwell", "missyou"], gentle: true, little: true },
   { id: "balloons", screen: "pop-balloons", text: "the \"pop-balloons\" game", notFor: ["sorry", "missyou", "halloween"], gentle: true, little: true },
@@ -210,6 +216,9 @@ const OCCASION_EFFECTS: Partial<Record<Occasion, Effect[]>> = {
   valentine: ["hearts"],
   newbaby: ["bubbles", "stars"],
   wedding: ["petals"],
+  graduation: ["confetti", "stars"],
+  retirement: ["balloons", "bubbles"],
+  newhome: ["confetti", "sparkles"],
 };
 
 export type DirectionInput = {
@@ -290,13 +299,14 @@ function pickFonts(input: DirectionInput, avoid: Set<string>) {
 
 function pickShape(input: DirectionInput, avoid: Set<string>) {
   const tones = input.tones ?? [];
-  const ok = (s: Shape) => (!input.gentle || s.gentle === true) && (!input.little || s.little === true) && (!input.length || s.lengths.includes(input.length));
+  const ok = (s: Shape) =>
+    (!input.gentle || s.gentle === true) && (input.little ? s.little !== undefined && s.little !== false : s.little !== "only") && (!input.length || s.lengths.includes(input.length));
   return pick(fresh(SHAPES, avoid, ok), (s) => 1 + toneWeight(tones, s.tones));
 }
 
 const suitsOccasion = (m: Moment, occasion?: Occasion) => (!m.occasions || (occasion !== undefined && m.occasions.includes(occasion))) && !(occasion && m.notFor?.includes(occasion));
 const suitsPlayer = (m: Moment, input: DirectionInput) =>
-  (!input.gentle || m.gentle === true) && (!input.little || m.little === true) && !MOUSE_GAMES.includes(m.screen as Game) && !((input.gentle || input.little) && HARD_GAMES.includes(m.screen as Game));
+  (!input.gentle || m.gentle === true) && (!input.little || m.little === true) && !((input.gentle || input.little) && HARD_GAMES.includes(m.screen as Game));
 
 function pickSignature(input: DirectionInput, avoid: Set<string>) {
   // Half the time, not the game everyone expects for the occasion.
