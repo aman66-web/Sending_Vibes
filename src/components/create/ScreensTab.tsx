@@ -6,6 +6,7 @@ import { useI18n } from "@/i18n/client";
 import { stillToWrite } from "@/lib/blanks";
 import type { CardData, Screen } from "@/lib/card";
 import { occasions } from "@/lib/templates";
+import { useFreshTap } from "./one-tap";
 import { ScreenPreview } from "./ScreenPreview";
 import { FAMILY, FESTIVE, LOVE } from "./kit/parts";
 import { KIT, KIT_FILTERS, KIT_GROUPS, inFilter, matches, ranked, type KitFilter, type KitGroupKey, type KitItem } from "./screen-kit";
@@ -40,6 +41,8 @@ export function ScreensTab({ card, screenIndex, onAdd, full, onFull }: Props) {
   // Groups showing all their screens, for the filter or search they were opened under.
   const [opened, setOpened] = useState<{ view: string; groups: KitGroupKey[] }>({ view: "", groups: [] });
   const [placing, setPlacing] = useState<KitItem | null>(null);
+  // A double tap on a screen mustn't also tap the question that opens under the finger.
+  const fresh = useFreshTap();
   const searchBox = useRef<HTMLInputElement>(null);
   const searching = query.trim() !== "";
   const view = searching ? `search:${query.trim()}` : filter;
@@ -171,7 +174,7 @@ export function ScreensTab({ card, screenIndex, onAdd, full, onFull }: Props) {
             <ul className="grid grid-cols-2 gap-3 border-t border-line p-3">
               {shown.map((item) => (
                 <li key={item.key}>
-                  <KitTile card={card} item={item} name={nameOf(item)} about={k.items[item.key]?.about ?? ""} onPick={() => (full ? onFull() : setPlacing(item))} />
+                  <KitTile card={card} item={item} name={nameOf(item)} about={k.items[item.key]?.about ?? ""} onPick={(e) => fresh(e) && (full ? onFull() : setPlacing(item))} />
                 </li>
               ))}
             </ul>
@@ -212,7 +215,7 @@ export function ScreensTab({ card, screenIndex, onAdd, full, onFull }: Props) {
 
 // A ready-made screen as it'll look on this card, its name, what it's for, and whether
 // it's ready as it is or has words (or photos) for them to add.
-function KitTile({ card, item, name, about, onPick }: { card: CardData; item: KitItem; name: string; about: string; onPick: () => void }) {
+function KitTile({ card, item, name, about, onPick }: { card: CardData; item: KitItem; name: string; about: string; onPick: (e: React.MouseEvent) => void }) {
   const { t } = useI18n();
   const screen = useMemo(() => item.make({ to: card.to, from: card.from }), [item, card.to, card.from]);
   // A photos screen without photos is skipped when the card plays, so it always needs some.
@@ -235,6 +238,8 @@ function KitTile({ card, item, name, about, onPick }: { card: CardData; item: Ki
 function WherePicker({ card, current, name, onChoose, onCancel }: { card: CardData; current: number; name: string; onChoose: (at: number) => void; onCancel: () => void }) {
   const { t } = useI18n();
   const s = t.studio;
+  // Opened by a tap, so the second tap of a double tap lands in here: it doesn't count.
+  const fresh = useFreshTap();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onCancel();
     window.addEventListener("keydown", onKey);
@@ -253,7 +258,7 @@ function WherePicker({ card, current, name, onChoose, onCancel }: { card: CardDa
       type="button"
       autoFocus={at === suggested}
       aria-label={at === 0 ? s.atStart : fmt(s.afterScreen, { n: at, name: nameOf(card.screens[at - 1]) })}
-      onClick={() => onChoose(at)}
+      onClick={(e) => fresh(e) && onChoose(at)}
       className={`flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed py-2.5 font-bold transition hover:border-brand hover:bg-brand-soft hover:text-on-brand-soft ${at === suggested ? "border-brand bg-brand-soft text-on-brand-soft" : "border-line text-foreground/70"}`}
     >
       <span aria-hidden className="text-lg leading-none">
@@ -263,7 +268,7 @@ function WherePicker({ card, current, name, onChoose, onCancel }: { card: CardDa
     </button>
   );
   return (
-    <div role="dialog" aria-modal="true" aria-labelledby="where-title" className="fixed inset-0 z-[70] overflow-y-auto bg-black/50" onClick={onCancel}>
+    <div role="dialog" aria-modal="true" aria-labelledby="where-title" className="fixed inset-0 z-[70] overflow-y-auto bg-black/50" onClick={(e) => fresh(e) && onCancel()}>
       <div className="flex min-h-full items-end justify-center p-4 sm:items-center">
         <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md rounded-3xl border-2 border-foreground bg-background p-5 shadow-2xl">
           <h2 id="where-title" className="font-brand text-2xl font-bold">
@@ -288,7 +293,7 @@ function WherePicker({ card, current, name, onChoose, onCancel }: { card: CardDa
               </Fragment>
             ))}
           </ol>
-          <button type="button" onClick={onCancel} className="mt-4 w-full rounded-full border-2 border-line py-3 font-semibold">
+          <button type="button" onClick={(e) => fresh(e) && onCancel()} className="mt-4 w-full rounded-full border-2 border-line py-3 font-semibold">
             {s.cancel}
           </button>
         </div>

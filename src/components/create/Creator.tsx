@@ -1078,11 +1078,13 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                   />
                 </div>
               )}
+              {/* Under the sheet of controls on a phone, so the second tap of a double tap on its
+                  Delete or Done can land here: that tap doesn't count (one-tap.ts). */}
               <div className="flex gap-3">
-                <button onClick={() => setShowPreview(true)} className="flex-1 rounded-full border-2 border-line py-3.5 font-semibold lg:hidden">
+                <button onClick={(e) => fresh(e) && setShowPreview(true)} className="flex-1 rounded-full border-2 border-line py-3.5 font-semibold lg:hidden">
                   {c.fullScreen}
                 </button>
-                <button ref={basketButton} onClick={() => publish()} disabled={saving} className="flex-[2] rounded-full bg-brand py-3.5 font-brand text-lg font-semibold text-on-brand shadow-lg disabled:opacity-50 lg:w-full">
+                <button ref={basketButton} onClick={(e) => fresh(e) && publish()} disabled={saving} className="flex-[2] rounded-full bg-brand py-3.5 font-brand text-lg font-semibold text-on-brand shadow-lg disabled:opacity-50 lg:w-full">
                   {saving ? c.adding : fmt(c.addToBasket, { price: formatMoney(tierPrice(cardTier(card), currency), currency) })}
                 </button>
               </div>
