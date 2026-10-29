@@ -28,7 +28,8 @@ type Field = { path: Path; value: string };
 // Words built into a screen (see lib/labels.ts) live at screens[i].labels[key].
 const labelOf = (path: Path): LabelKey | null => (path[0] === "screens" && path[2] === "labels" ? (path[3] as LabelKey) : null);
 
-const SKIP = new Set(["id", "type", "game", "effect", "photos", "style"]);
+// Words built into the screen (labels) are added after its own, below.
+const SKIP = new Set(["id", "type", "game", "effect", "photos", "style", "labels"]);
 
 // Every piece of text on one screen, plus the two names, with where each lives in the card.
 function textFields(card: CardData, screenId?: string, withEmpty = false): Field[] {
