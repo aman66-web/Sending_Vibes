@@ -29,6 +29,9 @@ export const bn: Dict = {
     help: "সাহায্য ও প্রশ্নোত্তর",
     privacy: "গোপনীয়তা",
     terms: "শর্তাবলী",
+    contact: "Contact us",
+    ask: "Questions, or a problem with a card? Email us at {email}",
+    company: "Envelette is a trading name of {name}, registered in England and Wales, company no. {number}. Registered office: {address}.",
     copyright: "© {year} Envelette। ‘না’ বোতামটা এখনও কাজ করে না।",
   },
 
@@ -75,6 +78,7 @@ export const bn: Dict = {
     christmas: "বড়দিন",
     mothersDay: "মা দিবস (ইউকে)",
     fathersDay: "বাবা দিবস",
+    bhaiDooj: "Bhai Dooj",
   },
 
   occasions: {
@@ -182,6 +186,21 @@ export const bn: Dict = {
       label: "বিদায়",
       tagline: "গেম আর শুভকামনা দিয়ে সহকর্মীকে বিদায় দিন।",
       intro: "সহকর্মীকে বিদায় দিন: টিম যা যা মিস করবে তার সবকিছু, বিদায়ী উপহারের স্লট মেশিন, আর অনেক অনেক শুভকামনা।",
+    },
+    graduation: {
+      label: "Graduation",
+      tagline: "Toss the cap, sit one last exam and hear how proud everyone is.",
+      intro: "For school, college and university graduates: shake the phone to toss the cap, sit one last exam they can't fail, then fireworks. Or tell them, with a hug to hold on to, how far they've come.",
+    },
+    retirement: {
+      label: "Retirement",
+      tagline: "Out of office, forever. A send-off with games and a big thank you.",
+      intro: "An out-of-office reply that never ends, a wheel to pick their first retirement project and a jar of everything you'll miss. For colleagues, parents and anyone hanging up their lanyard.",
+    },
+    newhome: {
+      label: "New home",
+      tagline: "Crack the door code, unpack a box and wish them well in the new place.",
+      intro: "A housewarming card they play: crack the front-door code, pick a moving box and unwrap a present, then pull wishes for the new place from a jar.",
     },
   },
 
@@ -301,8 +320,10 @@ export const bn: Dict = {
     waysTitle: "কার্ড বানানোর দুটি উপায়",
     waysIntro: "দুটোই শুরু হয় তাকে নিয়ে কয়েকটা ছোট প্রশ্ন দিয়ে, আর পাঠানোর আগে যেকোনো কিছু বদলাতে পারবেন।",
     reassure: "কোনো অ্যাপ নামাতে হবে না। কোনো অ্যাকাউন্ট লাগবে না। মাত্র দুই মিনিটের মতো।",
+    seasonCta: "See the cards",
     comingUp: "সামনে আসছে",
     comingUpIntro: "এখনই সেরে ফেলুন, মনে রাখার একটা ঝামেলা কমবে।",
+    comingUpSchedule: "Make it now and we'll email it on the day, at 9am (up to {days} days ahead).",
     allOccasions: "সব {n}টি উপলক্ষ →",
     featuresTitle: "এমন কার্ড যা শুধু পড়ার নয়, খেলারও",
     featuresIntro: "প্রতিটা কার্ড আসলে কয়েকটা স্ক্রিন, যেগুলো আপনি নিজের মতো জুড়ে দেন। নিচে কয়েকটা দেখুন। একবার চেষ্টা করেই দেখুন না।",
@@ -347,20 +368,60 @@ export const bn: Dict = {
     howLink: "অথবা WhatsApp-এর জন্য লিংকটা কপি করুন",
     pricingTitle: "এক তোড়া ফুলের চেয়েও সস্তা",
     pricingIntro: "প্রতি কার্ডে একটাই দাম। কোনো সাবস্ক্রিপশন নেই, বাতিল করারও কিছু নেই।",
-    tierCard: "রেডিমেড",
-    tierCardPoints: ["{n}টি ডিজাইনের যেকোনোটি", "প্রতিটা স্ক্রিনের প্রতিটা শব্দ বদলান", "আপনার সর্বোচ্চ 6টি ছবি", "সব গেম, কুইজ আর ইফেক্ট"],
-    tierAi: "কাস্টমাইজড",
-    tierAiPoints: ["আপনার উত্তর অনুযায়ী একদম নতুন করে বানানো", "সব গেম, কুইজ আর ইফেক্ট", "AI দিয়ে স্ক্রিন বানান ও বদলান", "স্ক্রিন যোগ করুন, বাদ দিন বা ক্রম বদলান"],
+    priceOne: "per card, whichever way you make it",
+    pricePoints: [
+      "Any of our {n} designs, or one made from scratch around your answers",
+      "Every game, quiz, tune and finale",
+      "Up to 6 of your photos",
+      "Play your whole card before you pay",
+      "We email it on the day you pick (up to {days} days ahead), or you send the link yourself",
+      "No postage: it reaches them in seconds, anywhere in the world",
+      "Sending several? Pay for them all at once",
+    ],
+    trust: {
+      secure: {
+        title: "Secure payment by Stripe",
+        body: "We never see or store your card details.",
+      },
+      play: {
+        title: "Play it before you pay",
+        body: "Try every screen first. You only pay when you're happy with it.",
+      },
+      fix: {
+        title: "Fixed or refunded",
+        body: "If your card won't open or something's broken, we'll fix it. If we can't, you get your money back.",
+      },
+    },
     faqTitle: "লোকজন যা জানতে চান",
     faqs: [
-      { q: "তাকে কি কোনো অ্যাপ নামাতে হবে?", a: "না। এটা একটা লিংক। সে ট্যাপ করলেই যেকোনো ফোন, ট্যাবলেট বা কম্পিউটারের ব্রাউজারে খুলে যায়।" },
+      {
+        q: "তাকে কি কোনো অ্যাপ নামাতে হবে?",
+        a: "না। এটা একটা লিংক। সে ট্যাপ করলেই যেকোনো ফোন, ট্যাবলেট বা কম্পিউটারের ব্রাউজারে খুলে যায়।",
+      },
       {
         q: "এতে কি গান বাজে?",
         a: "হ্যাঁ। প্রতিটা কার্ডে আছে সাউন্ড ইফেক্ট আর আপনার বেছে নেওয়া একটা সুর, যা খাম খুললেই বাজতে শুরু করে। সে কোনো চুপচাপ জায়গায় থাকলে, তার জন্য একটা মিউট বোতামও আছে।",
       },
-      { q: "এটা কি গোপন থাকে?", a: "শুধু যাদের কাছে লিংক আছে, তারাই কার্ড খুলতে পারে। লিংকগুলো লম্বা এলোমেলো কোড, আর কার্ড কোথাও তালিকায় থাকে না বা সার্চে আসে না।" },
-      { q: "আমি কি নিজের ছবি ব্যবহার করতে পারি?", a: "হ্যাঁ, সর্বোচ্চ 6টি। আপলোডের আগে আপনার ফোনেই ছবির সাইজ ছোট করা হয়, এতে ছবি কোথায় তোলা হয়েছে সেই তথ্যও মুছে যায়।" },
-      { q: "একটা বানাতে কতক্ষণ লাগে?", a: "কয়েক মিনিট। 6টি ছোট প্রশ্নের উত্তর দিন, চাইলে ছবি যোগ করুন, যা খুশি বদলান, তারপরই পেয়ে যাবেন আপনার লিংক।" },
+      {
+        q: "এটা কি গোপন থাকে?",
+        a: "শুধু যাদের কাছে লিংক আছে, তারাই কার্ড খুলতে পারে। লিংকগুলো লম্বা এলোমেলো কোড, আর কার্ড কোথাও তালিকায় থাকে না বা সার্চে আসে না।",
+      },
+      {
+        q: "আমি কি নিজের ছবি ব্যবহার করতে পারি?",
+        a: "হ্যাঁ, সর্বোচ্চ 6টি। আপলোডের আগে আপনার ফোনেই ছবির সাইজ ছোট করা হয়, এতে ছবি কোথায় তোলা হয়েছে সেই তথ্যও মুছে যায়।",
+      },
+      {
+        q: "একটা বানাতে কতক্ষণ লাগে?",
+        a: "A few minutes. Answer a few quick questions, mostly with a tap, add photos if you like, change anything you want, and you'll get your link.",
+      },
+      {
+        q: "Who's behind Envelette?",
+        a: "A small UK business. Envelette is a trading name of {company}, registered in England and Wales (company {number}). Email us any time at {email}.",
+      },
+      {
+        q: "What if something goes wrong?",
+        a: "If a card won't open or something on it is broken, email us at {email} and we'll fix it. If we can't, we'll refund you.",
+      },
       {
         q: "দাম কত?",
         a: "প্রতিটা কার্ড {price}, কাস্টমাইজড হোক বা রেডিমেড ডিজাইন। একবারই পেমেন্ট, কোনো সাবস্ক্রিপশন নেই।",
@@ -370,10 +431,13 @@ export const bn: Dict = {
     finalTitle: "চলুন, কারো দিনটা রাঙিয়ে দিন।",
     finalCta: "আপনার কার্ড বানান →",
     finalNote: "প্রতি কার্ড {price}। সাইন-আপ লাগবে না।",
+    stickyCta: "Make a card · {price}",
   },
 
   hero: {
     tryNo: "একবার ‘না’ চেপে দেখুন তো",
+    tapIt: "go on, have a go",
+    cardAria: "A real card you can play",
     onPhone: "আর ফোনে ↑",
     boxTitle: "ফাঁকা জায়গা পূরণ করুন",
     tryIt: "চেষ্টা করুন!",
@@ -438,11 +502,55 @@ export const bn: Dict = {
     vibe: "মুড",
     device: "ডিভাইস",
     all: "সব",
+    allOccasions: "সব উপলক্ষ",
+    anyVibe: "Any vibe",
+    whoFor: "Who it's for",
+    anyone: "Anyone",
+    who: {
+      partner: "জীবনসঙ্গী",
+      mum: "মা",
+      dad: "বাবা",
+      grandparent: "দাদু বা দিদা",
+      sibling: "Brother or sister",
+      child: "Child",
+      family: "Family",
+      friend: "বন্ধু",
+      colleague: "সহকর্মী",
+      teacher: "শিক্ষক",
+    },
+    easy: "Easy to play",
+    easyHint: "No fast tapping or typing, so anyone can play it.",
+    notEasy: "Has a game that needs quick fingers.",
+    inside: {
+      game: "1 game",
+      games: "{n} games",
+      photos: "photos",
+      message: "letter",
+      question: "runaway No",
+      quiz: "quiz",
+      scratch: "scratch card",
+      typeit: "secret password",
+      wheel: "spinning wheel",
+      coupons: "coupons",
+      reasons: "reasons jar",
+      slider: "love-o-meter",
+      timeline: "your story",
+      boxes: "mystery boxes",
+    },
     count: "{n}টি ডিজাইন",
     countOne: "একটি ডিজাইন",
     nothing: "এসবের সাথে মেলে এমন কিছু এখনও নেই",
+    nothingFor: "Nothing for “{q}” yet",
     clear: "ফিল্টার মুছুন",
+    near: "These come close",
+    scratchTitle: "We can make one just for them",
+    scratchBody: "Answer a few quick questions and we'll create a one-of-a-kind card around your answers.",
+    scratch: "✨ Make it from scratch",
+    notQuite: "Not quite what you're after?",
     previewAria: "প্রিভিউ: {name}",
+    useThis: "Use this design",
+    backToDesigns: "← Back to the designs",
+    details: "More about this design",
   },
 
   cardsPage: {
@@ -473,10 +581,36 @@ export const bn: Dict = {
       { title: "লিংক হিসেবে পাঠান", body: "WhatsApp, টেক্সট বা Instagram। যেকোনো ফোন বা কম্পিউটারের ব্রাউজারে খুলে যায়। কিছু নামাতে হবে না।" },
     ],
     more: "আরও উপলক্ষ",
+    ogPrice: "{price} a card · sent as a link",
+    writeIntro: "Not sure what to say? Borrow one of these and make it sound like you. You can change every word on the card before you send it.",
+    copy: "কপি করুন",
+    copied: "Copied ✓",
+    copyAria: "Copy the message: {who}",
+    whenQ: "When is {name} in {year}?",
+    whenA: "{name} is on {date}.",
+    whenApprox: "{name} is expected on {date}, though it depends on the moon and can move by a day.",
+    whenSend: "We can email your card so it arrives at 9am your time on the day. You can set that up to {days} days ahead.",
+    faqTitle: "লোকজন যা জানতে চান",
+    faqs: [
+      {
+        q: "What is an interactive e-card?",
+        a: "A card that opens from a link instead of an envelope. They tap to open it, then play through a few screens at their own pace: games, your photos, a quiz, a scratch card and more, ending with your message and a big finale.",
+      },
+      {
+        q: "Can it arrive on the day?",
+        a: "Yes. Choose to have us email it, pick the day and it arrives at 9am your time. You can set it up to {days} days ahead, or send the link yourself whenever you like.",
+      },
+      {
+        q: "How much does it cost?",
+        a: "{price} per card, paid once, with no subscription. You can play it all the way through before you pay.",
+      },
+    ],
   },
 
   product: {
     metaTitle: "{name} · {occasion} কার্ড · Envelette",
+    metaSuffix: "Personalise this {occasion} e-card and send it as a link.",
+    schemaName: "{name} – interactive {occasion} e-card",
     onPhone: "📱 ফোনে",
     onComputer: "💻 কম্পিউটারে",
     live: "এটা লাইভ, ট্যাপ করে দেখুন ↑",
@@ -489,6 +623,7 @@ export const bn: Dict = {
     yourName: "আপনার নাম",
     colours: "রং",
     customise: "এই কার্ডটা সাজান →",
+    stickyCta: "Customise this card · {price}",
     noSignup: "সাইন-আপ লাগবে না। দুই মিনিটের মতো লাগে।",
     inside: "ভেতরে যা আছে",
     canChange: "যা যা বদলাতে পারবেন",
@@ -538,13 +673,26 @@ export const bn: Dict = {
             q: "ইন্টারঅ্যাকটিভ কার্ড কী?",
             a: "এমন একটা কার্ড, যা খামের বদলে একটা লিংক থেকে খোলে। সে ট্যাপ করে কার্ডটা খোলে, তারপর নিজের মতো সময় নিয়ে কয়েকটা স্ক্রিন একে একে দেখে: এমন একটা প্রশ্ন যেখানে ‘না’ বোতাম পালিয়ে যায়, একটা মিনি গেম, আপনার ছবি, আপনাদের দুজনকে নিয়ে একটা কুইজ, একটা স্ক্র্যাচ কার্ড আর আরও অনেক কিছু, আর শেষে আপনার বার্তা আর জমকালো সমাপ্তি। এতে গান আর সাউন্ড ইফেক্টও আছে।",
           },
-          { q: "তাকে কি কোনো অ্যাপ নামাতে হবে?", a: "না। লিংকটা যেকোনো ফোন, ট্যাবলেট বা কম্পিউটারের ওয়েব ব্রাউজারে খুলে যায়। কিছু ইনস্টল করতে হয় না, আর তার কোনো অ্যাকাউন্টও লাগে না।" },
+          {
+            q: "তাকে কি কোনো অ্যাপ নামাতে হবে?",
+            a: "না। লিংকটা যেকোনো ফোন, ট্যাবলেট বা কম্পিউটারের ওয়েব ব্রাউজারে খুলে যায়। কিছু ইনস্টল করতে হয় না, আর তার কোনো অ্যাকাউন্টও লাগে না।",
+          },
           {
             q: "ফোন আর কম্পিউটার, দুটোতেই কি চলে?",
             a: "হ্যাঁ। প্রতিটা কার্ড যেকোনো ফোন, ট্যাবলেট বা কম্পিউটারে চলে। কার্ড বানানোর সময় প্রিভিউটা ফোন আর কম্পিউটারের মধ্যে বদলে দেখে নিতে পারবেন, দুটোতে কেমন দেখায়।",
           },
-          { q: "আমার কি অ্যাকাউন্ট লাগবে?", a: "কার্ড বানানোর ঠিক আগে Google বা আপনার ইমেইল দিয়ে সাইন আপ করবেন, যাতে কার্ডটা আপনার অ্যাকাউন্টে সেভ থাকে আর যেকোনো ডিভাইসে আবার খুঁজে পান। এটা ফ্রি, আর মাত্র কয়েক সেকেন্ড লাগে। যাকে পাঠাবেন, তার কোনো অ্যাকাউন্ট লাগবে না।" },
-          { q: "কোন কোন উপলক্ষের জন্য কার্ড আছে?", a: "{o}টি উপলক্ষ: জন্মদিন, ভ্যালেন্টাইনস ডে, দিওয়ালি, ঈদ আর বড়দিন থেকে শুরু করে ধন্যবাদ, ক্ষমা চাওয়া, সুস্থ হয়ে ওঠার শুভকামনা আর বিদায়ের কার্ড পর্যন্ত। সবগুলো দেখুন [উপলক্ষের পাতায়](/occasions)।" },
+          {
+            q: "আমার কি অ্যাকাউন্ট লাগবে?",
+            a: "কার্ড বানানোর ঠিক আগে Google বা আপনার ইমেইল দিয়ে সাইন আপ করবেন, যাতে কার্ডটা আপনার অ্যাকাউন্টে সেভ থাকে আর যেকোনো ডিভাইসে আবার খুঁজে পান। এটা ফ্রি, আর মাত্র কয়েক সেকেন্ড লাগে। যাকে পাঠাবেন, তার কোনো অ্যাকাউন্ট লাগবে না।",
+          },
+          {
+            q: "কোন কোন উপলক্ষের জন্য কার্ড আছে?",
+            a: "{o}টি উপলক্ষ: জন্মদিন, ভ্যালেন্টাইনস ডে, দিওয়ালি, ঈদ আর বড়দিন থেকে শুরু করে ধন্যবাদ, ক্ষমা চাওয়া, সুস্থ হয়ে ওঠার শুভকামনা আর বিদায়ের কার্ড পর্যন্ত। সবগুলো দেখুন [উপলক্ষের পাতায়](/occasions)।",
+          },
+          {
+            q: "Who runs Envelette, and how do I contact you?",
+            a: "Envelette is run by a small UK business, MARTZEY LTD (registered in England and Wales, company number 14466643). Email us at hello@envelette.com about anything: a question, a problem with a card or a refund.",
+          },
         ],
       },
       {
@@ -591,11 +739,30 @@ export const bn: Dict = {
       {
         title: "পেমেন্ট",
         items: [
-          { q: "একটা কার্ডের দাম কত?", a: "প্রতি কার্ড {price}, কাস্টমাইজড হোক বা রেডিমেড ডিজাইন। একবারই পেমেন্ট, কোনো সাবস্ক্রিপশন নেই, কোনো লুকানো খরচও নেই।" },
-          { q: "কীভাবে পেমেন্ট করব?", a: "ব্যাংক কার্ড দিয়ে, Stripe-এর নিরাপদ চেকআউটের মাধ্যমে। আপনার কার্ডের তথ্য আমরা কখনো দেখি না, সংরক্ষণও করি না।" },
-          { q: "একাধিক কার্ড কি কিনতে পারি?", a: "হ্যাঁ। যত খুশি কার্ড কার্টে যোগ করুন, আর একসাথে পেমেন্ট করুন। প্রতিটা কার্ড আলাদা আলাদা উপায়ে পাঠানো যায়।" },
-          { q: "কোনো ডিসকাউন্ট কোড আছে?", a: "যখন কোনো অফার চলে, তখন চেকআউট পাতায় কোডটা দিতে পারবেন।" },
-          { q: "আমি কি রসিদ পাব?", a: "হ্যাঁ। আমরা আপনাকে একটা রসিদ ইমেইল করি, তাতে আপনার অর্ডারের প্রতিটা কার্ডের লিংক থাকে, যাতে সবসময় আবার খুঁজে পান।" },
+          {
+            q: "একটা কার্ডের দাম কত?",
+            a: "প্রতি কার্ড {price}, কাস্টমাইজড হোক বা রেডিমেড ডিজাইন। একবারই পেমেন্ট, কোনো সাবস্ক্রিপশন নেই, কোনো লুকানো খরচও নেই।",
+          },
+          {
+            q: "কীভাবে পেমেন্ট করব?",
+            a: "ব্যাংক কার্ড দিয়ে, Stripe-এর নিরাপদ চেকআউটের মাধ্যমে। আপনার কার্ডের তথ্য আমরা কখনো দেখি না, সংরক্ষণও করি না।",
+          },
+          {
+            q: "Can I get a refund?",
+            a: "If your card doesn't work as it should, for example it won't open or something on it is broken, email us at hello@envelette.com and we'll fix it. If we can't, we'll refund you. Because cards are digital and delivered straight away, you can't cancel one just because you've changed your mind once it's been delivered. If you think you've been charged by mistake, email us and we'll sort it out. The details are in our [terms](/terms).",
+          },
+          {
+            q: "একাধিক কার্ড কি কিনতে পারি?",
+            a: "হ্যাঁ। যত খুশি কার্ড কার্টে যোগ করুন, আর একসাথে পেমেন্ট করুন। প্রতিটা কার্ড আলাদা আলাদা উপায়ে পাঠানো যায়।",
+          },
+          {
+            q: "কোনো ডিসকাউন্ট কোড আছে?",
+            a: "যখন কোনো অফার চলে, তখন চেকআউট পাতায় কোডটা দিতে পারবেন।",
+          },
+          {
+            q: "আমি কি রসিদ পাব?",
+            a: "হ্যাঁ। আমরা আপনাকে একটা রসিদ ইমেইল করি, তাতে আপনার অর্ডারের প্রতিটা কার্ডের লিংক থাকে, যাতে সবসময় আবার খুঁজে পান।",
+          },
         ],
       },
       {
@@ -695,6 +862,18 @@ export const bn: Dict = {
     body: "আমাদের কার্ডের ‘না’ বোতামের মতো, এটাকেও কোথাও খুঁজে পাওয়া যাচ্ছে না। কেউ আপনাকে কার্ড পাঠিয়ে থাকলে, লিংকটা পুরোটা কপি হয়েছে কি না দেখে নিন।",
     home: "হোমে ফিরুন",
     browse: "কার্ড দেখুন",
+    errors: {
+      title: "Sorry, that didn't work",
+      body: "Something went wrong on our side, not yours. Please try again. If it keeps happening, wait a few minutes and come back.",
+      retry: "আবার চেষ্টা করুন",
+      cardTitle: "Your card is safe",
+      cardBody: "It just didn't open properly this time. That can happen when the signal is weak. Tap the button to try again.",
+      cardLater: "Still not working? Wait a few minutes, then open the link again.",
+      saveInvalid: "That card doesn't look right. Check every field is filled in.",
+      saveScreen: "Something on screen {n} doesn't look right. Check everything on it is filled in, then try again.",
+      saveTooMany: "That's a lot of cards saved in a short time. Please wait a few minutes and try again.",
+      uploadTooMany: "That's a lot of photos in a short time. Please wait a few minutes and try again.",
+    },
   },
 
   chat: {
@@ -741,6 +920,7 @@ export const bn: Dict = {
     email: "আমার হয়ে {name}-কে ইমেইল করে দিন",
     emailHint: "কার্ডটা খোলার লিংকসহ আমরা তাকে একটা ইমেইল পাঠাব।",
     emailLabel: "{name}-এর ইমেইল ঠিকানা",
+    replyHint: "If {name} replies to the email, it comes straight to you.",
     when: "কখন পৌঁছাবে?",
     now: "পেমেন্ট করার সঙ্গে সঙ্গে",
     later: "আমার বেছে নেওয়া দিনে",
@@ -781,6 +961,33 @@ export const bn: Dict = {
       refresh: "আবার দেখুন",
       more: "আরেকটা কার্ড বানান",
       allCards: "আমার সব কার্ড দেখুন",
+      finishing: "Your payment has gone through. We're just getting your cards ready: tap Check again in a moment.",
+      checkFailed: "We couldn't check your order just now. If you've paid, don't worry: your cards are safe. Tap Check again in a moment.",
+      howTitle: "How to send it",
+      how: [
+        "Press the red Send button.",
+        "Choose WhatsApp, Messages or email, then pick who it's for.",
+        "Press send. That's it!",
+      ],
+      scheduledDone: "All done! We'll email it to {email} on {date}, at 9am. You don't need to do anything else.",
+      emailedDone: "All done! We've emailed it to {email}.",
+      sendYourself: "Or send the link yourself",
+      emailFailed: "We couldn't email it to {email}. Please send it to {name} yourself with the button below.",
+      emailRetrying: "We couldn't email it to {email} just yet. We'll keep trying, or you can send it to {name} yourself now.",
+      preview: "This is what {name} will see when you send it",
+      sameDesign: "Send this design to someone else",
+      nextTitle: "Anyone else to surprise?",
+      nextIntro: "These are coming up soon. A card only takes a few minutes.",
+      nextMake: "কার্ড বানান",
+    },
+    share: {
+      send: "Send it to {name}",
+      title: "{from} sent you a card 💌",
+      message: "{to}, I made you something 💌 Open it with the sound on:",
+      byEmail: "Send by email",
+      copy: "Copy the link",
+      watch: "Watch it first",
+      showLink: "Show the link",
     },
   },
 
@@ -798,12 +1005,42 @@ export const bn: Dict = {
     willEmail: "{date} তারিখে আমরা এটা {email}-এ ইমেইল করে দেব।",
     emailedNow: "আমরা এটা {email}-এ ইমেইল করে দিয়েছি।",
     sendYourself: "সুবিধামতো সময়ে এই লিংকটা {to}-কে পাঠিয়ে দিন।",
+    emailFailed: "We couldn't email it to {email}, so please send this link to {to} yourself.",
+    emailRetrying: "We couldn't email it to {email} just yet. We'll keep trying, or you can send this link to {to} yourself.",
     total: "মোট পরিশোধ: {amount}",
     help: "সাহায্য দরকার? {url} দেখুন",
     cardSubject: "{to}, {from} আপনাকে কিছু একটা পাঠিয়েছে",
+    subjects: {
+      valentine: "{to}, {from} has a question for you 💘",
+      birthday: "Happy birthday, {to}! {from} sent you a card 🎂",
+      diwali: "Happy Diwali, {to}! A card from {from} 🪔",
+      christmas: "Merry Christmas, {to}! A card from {from} 🎄",
+      eid: "Eid Mubarak, {to}! A card from {from} 🌙",
+      anniversary: "Happy anniversary, {to}! {from} made you something 💍",
+      sorry: "{to}, {from} has something to say",
+      thanks: "{to}, {from} wants to say thank you 🙏",
+      congrats: "Congratulations, {to}! {from} sent you a card 🏆",
+      halloween: "Happy Halloween, {to}! {from} sent you something spooky 🎃",
+      newyear: "Happy New Year, {to}! A card from {from} 🥂",
+      mothersday: "Happy Mother's Day, {to}! A card from {from} 💐",
+      fathersday: "Happy Father's Day, {to}! A card from {from} 👔",
+      rakhi: "Happy Raksha Bandhan, {to}! A card from {from} 🎀",
+      holi: "Happy Holi, {to}! A card from {from} 🌈",
+      newbaby: "{to}, {from} sent you something special 💌",
+      wedding: "{to}, {from} sent you something special 💌",
+      getwell: "Get well soon, {to}! {from} sent you a card 🌻",
+      missyou: "{to}, {from} misses you 🫶",
+      friendship: "{to}, {from} made you something 👯",
+      leaving: "Good luck, {to}! A card from {from} 👋",
+    },
+    fromName: "{from} via Envelette",
+    preheader: "An interactive card from {from}, made just for you. Open it with the sound on 🔊",
     cardTitle: "{from} আপনার জন্য একটা ইন্টারঅ্যাকটিভ কার্ড বানিয়েছে",
     cardBody: "{to}, কার্ডটা খুলতে নিচের বোতামে ট্যাপ করুন। সাউন্ড চালু রাখলে সবচেয়ে ভালো লাগবে।",
+    envelopeAlt: "A sealed envelope for {to} from {from}. Tap to open it.",
     cardButton: "আপনার কার্ড খুলুন",
+    linkHint: "Button not working? Copy this link into your web browser:",
+    replyNote: "Reply to this email and it goes straight to {from}.",
     cardFooter: "{from}-এর পক্ষ থেকে Envelette পাঠিয়েছে।",
     codeSubject: "আপনার Envelette কোড: {code}",
     codeTitle: "এই নিন আপনার কোড",
@@ -885,6 +1122,42 @@ export const bn: Dict = {
     textMessage: "টেক্সট মেসেজে পাঠান",
     whatsappMessage: "তোমার জন্য একটা জিনিস বানিয়েছি 💌 {url}",
     openCard: "কার্ডটা খুলুন",
+    startOverTitle: "Start a new card?",
+    startOverBody: "Your card for {name} will be thrown away, and it can't be brought back.",
+    startOverEditBody: "Your changes to the card for {name} will be thrown away. The card in your basket stays just as it was.",
+    startOverKeep: "No, keep my card",
+    startOverYes: "Yes, throw it away",
+    startDifferent: "Start a different card",
+    deleted: "Screen {n} · {name} deleted",
+    dismiss: "বন্ধ করুন",
+    carryOnTitle: "Welcome back! Carry on where you left off?",
+    carryOnDraft: "Carry on with your card for {name}",
+    carryOnDraftHint: "Just as you left it",
+    carryOnBasket: "Change your card for {name}",
+    carryOnBasketHint: "It's in your basket. You can still change anything.",
+    carryOnQuiz: "Carry on with the questions for {name}",
+    carryOnAnswers: "Carry on with your answers",
+    carryOnQuizHint: "Your answers so far are all still here",
+    startNew: "Start a new one",
+    cantOpen: "We can't open that card to change it on this device. It's still safe in your basket.",
+    toBasket: "🧺 Go to my basket",
+    changeCard: "✏️ Change this card",
+    tryAgain: "আবার চেষ্টা করুন",
+    askHelp: "Ask us for help",
+    fixScreen: "Go to screen {n} · {name}",
+    saveOffline: "We couldn't reach Envelette just now. Check you're online, then try again. Your card is safe here.",
+    basketFull: "Your basket is full: it holds {n} cards. Pay for those first, then add this one. Your card is safe here.",
+    code: {
+      steps: [
+        "Open your email and find the one from Envelette.",
+        "The code is in its title: “{subject}”.",
+        "Come back here and type it in, or paste it. You're signed in as soon as it's all there.",
+      ],
+      hidden: "······",
+      paste: "📋 Paste the code",
+      pasteHint: "To paste it, press and hold in the box above, then choose Paste.",
+      resent: "✓ We've sent you a new code.",
+    },
   },
 
   account: {
@@ -917,6 +1190,7 @@ export const bn: Dict = {
     empty: "এখনও কোনো কার্ড নেই",
     emptyHint: "সাইন ইন থাকা অবস্থায়, বা এই ইমেইল ঠিকানা দিয়ে যেসব কার্ড কিনবেন, সেগুলো এখানে দেখা যাবে।",
     bought: "{date} তারিখে কেনা",
+    makeAnother: "Make another for {name}",
     failed: "আপনার কার্ডগুলো লোড করা গেল না। দয়া করে পাতাটা রিফ্রেশ করুন।",
   },
 
@@ -924,8 +1198,10 @@ export const bn: Dict = {
     progress: "প্রশ্ন {n} (মোট {total}টি)",
     intro: "কয়েকটা ছোট প্রশ্নের উত্তর দিন, আর আমরা শুধু তার জন্য একটা কার্ড বানিয়ে দেব। পরে যেকোনো কিছু বদলাতে পারবেন।",
     next: "এগিয়ে যান",
+    skip: "Skip",
     back: "ফিরে যান",
     generate: "আমার কার্ড বানান",
+    makeFor: "Make {name}'s card",
     them: "সে",
     price: "কাস্টমাইজড কার্ড · {price}",
     readyIntro: "কয়েকটা ছোট প্রশ্নের উত্তর দিন, আর আমরা এই ডিজাইনে আপনার কথাগুলো লিখে দেব। পরে যেকোনো কিছু বদলাতে পারবেন।",
@@ -942,10 +1218,150 @@ export const bn: Dict = {
     surprise: "ঠিক করতে পারছেন না? আমাকে চমকে দিন",
     surpriseDescribe: "আমাকে চমকে দিন! পুরো কার্ডটা এমনভাবে ডিজাইন করুন, যেভাবে আপনার মনে হয় তার সবচেয়ে ভালো লাগবে।",
     surpriseSay: "আমাকে চমকে দিন! এমনভাবে লিখুন, যেভাবে আপনার মনে হয় তার সবচেয়ে ভালো লাগবে।",
-    moreChars: "আরেকটু লিখুন: আর {n}টি অক্ষর বাকি",
-    enough: "একদম ঠিক আছে",
     photosTitle: "আপনার আর {name}-এর কোনো ছবি আছে?",
     photosHint: "ঐচ্ছিক। সর্বোচ্চ 6টি যোগ করুন, সেগুলো সরাসরি কার্ডে চলে যাবে। পরে বদলাতে পারবেন।",
+    photosHintAdd: "Optional. Add up to 6 and we'll put them on a photo screen just before the ending. You can change them later.",
+    comingUp: "সামনে আসছে",
+    allOccasions: "সব উপলক্ষ",
+    suggested: "Suggested to suit the occasion. Tap to change.",
+    suggestedDesign: "This is how your design feels. Tap to change.",
+    moreFeelings: "More feelings",
+    maxFeelings: "You can pick up to {n}. Tap one to take it off first.",
+    chooseForMe: "Choose for me",
+    recommended: "recommended",
+    chooseForMeHint: "We'll pick the games and screens to suit {name}.",
+    orPick: "Or tap the ones you'd like:",
+    showAll: "Show all {n}",
+    showFewer: "Show fewer",
+    maxPicks: "That's {n}, the most you can pick. Tap one to take it off first.",
+    howLong: "How long?",
+    lengths: {
+      short: {
+        label: "Short and sweet",
+        detail: "About 5 screens",
+      },
+      medium: {
+        label: "Just right",
+        detail: "About 7 screens",
+      },
+      long: {
+        label: "The full works",
+        detail: "About 10 screens",
+      },
+    },
+    describeOwn: "Want something exact? Describe it in your own words",
+    feelings: {
+      funny: {
+        label: "মজার",
+        sample: "“You're my favourite. Don't tell the others.”",
+      },
+      heartfelt: {
+        label: "আন্তরিক",
+        sample: "“I'm so lucky to have you.”",
+      },
+      cute: {
+        label: "মিষ্টি",
+        sample: "“You make everything a little bit brighter.”",
+      },
+      romantic: {
+        label: "রোমান্টিক",
+        sample: "“Every day with you is my favourite day.”",
+      },
+      festive: {
+        label: "উৎসবের",
+        sample: "“Let the celebrations begin!”",
+      },
+      elegant: {
+        label: "Classic and elegant",
+        sample: "“With warmest wishes, today and always.”",
+      },
+      cheeky: {
+        label: "Cheeky",
+        sample: "“I got you a card. The real present is me.”",
+      },
+      nostalgic: {
+        label: "Nostalgic",
+        sample: "“Remember when we laughed until we cried?”",
+      },
+      gentle: {
+        label: "Calm and gentle",
+        sample: "“Thinking of you, and sending a big, soft hug.”",
+      },
+      blessings: {
+        label: "Full of blessings",
+        sample: "“May your home be filled with light and joy.”",
+      },
+    },
+    aboutStarters: {
+      valentine: ["We met ", "Loves ", "My nickname for them is ", "Our in-joke: "],
+      birthday: ["Turning ", "Loves ", "Always says ", "Nickname: "],
+      diwali: ["Loves ", "This Diwali we'll ", "Their favourite sweet is ", "From all of us at "],
+      christmas: ["Loves ", "Every Christmas we ", "Always says ", "Nickname: "],
+      eid: ["Loves ", "This Eid we'll ", "Their favourite dish is ", "From all of us at "],
+      anniversary: ["Together for ", "We met ", "Our song is ", "Our in-joke: "],
+      sorry: ["I'm sorry for ", "I promise to ", "Loves "],
+      thanks: ["Thank you for ", "You always ", "Loves "],
+      congrats: ["Well done on ", "We're so proud that ", "Loves "],
+      halloween: ["Loves ", "Scared of ", "Nickname: "],
+      newyear: ["This year we ", "Next year let's ", "Always says "],
+      mothersday: ["Mum always says ", "Mum's best dish is ", "Loves ", "Thank you for "],
+      fathersday: ["Dad always says ", "Dad's best joke is ", "Loves ", "Thank you for "],
+      rakhi: ["Always teases me about ", "When we were little, ", "I promise to ", "Loves "],
+      holi: ["Loves ", "Last Holi we ", "Nickname: "],
+      newbaby: ["The baby's name is ", "Born on ", "Big brother or sister: "],
+      wedding: ["The happy couple met ", "The wedding is at ", "We wish them "],
+      getwell: ["Getting better from ", "Loves ", "We miss them at "],
+      missyou: ["We last saw each other ", "I miss our ", "Can't wait to "],
+      friendship: ["We met ", "Our in-joke: ", "Loves ", "Nickname: "],
+      leaving: ["Off to ", "We'll miss ", "Always says ", "From everyone at "],
+      graduation: ["Graduating in ", "From ", "Next stop: ", "We're so proud of "],
+      retirement: ["Retiring after ", "Years at ", "Now there's time for ", "We'll miss "],
+      newhome: ["The new place is in ", "Moving in on ", "Can't wait to see ", "Favourite room: "],
+      other: ["Loves ", "Nickname: ", "Our in-joke: ", "A memory: "],
+    },
+    age: {
+      title: "{name} is…",
+      little: "Little (under 7)",
+      child: "A child",
+      teen: "A teenager",
+      adult: "A grown-up",
+      older: "Older (70+)",
+    },
+    gentle: "Keep the games gentle and easy",
+    gentleHint: "Slower, bigger and quick to win. Good for little ones, and anyone not used to phones.",
+    colour: {
+      title: "{name}'s favourite colour",
+      hint: "Optional. We'll use it for the buttons and the envelope.",
+    },
+    colours: {
+      red: "Red",
+      pink: "Pink",
+      purple: "Purple",
+      lilac: "Lilac",
+      navy: "Navy",
+      blue: "Blue",
+      teal: "Teal",
+      green: "Green",
+      yellow: "Yellow",
+      orange: "Orange",
+      gold: "Gold",
+      black: "Black",
+    },
+    recap: {
+      title: "Your card",
+      hint: "Check it's all right. Tap a line to change it.",
+      change: "বদলান",
+      names: "{to}-এর জন্য, {from}-এর পক্ষ থেকে",
+      weChoose: "We'll choose",
+      anyLook: "We'll choose the look",
+      anyScreens: "We'll choose the games and screens",
+      gentle: "Gentle, easy games",
+      colour: "Favourite colour: {colour}",
+      nothing: "Nothing added about them",
+      photos: "{n} photos",
+      onePhoto: "1 photo",
+      noPhotos: "No photos",
+    },
     relations: [
       "জীবনসঙ্গী",
       "পছন্দের মানুষ",
@@ -972,11 +1388,24 @@ export const bn: Dict = {
       relation: { title: "{name} আপনার কে?", hint: "একটায় ট্যাপ করুন, অথবা নিজে লিখুন।", placeholder: "অন্য কেউ? এখানে লিখুন" },
       occasion: { title: "উপলক্ষটা কী?", hint: "একটায় ট্যাপ করুন।", placeholder: "উপলক্ষটা লিখুন, যেমন: গ্র্যাজুয়েশন, অবসর, নতুন বাড়ি" },
       vibe: { title: "কার্ডটা কেমন অনুভূতির হবে?", hint: "যতগুলো খুশি বাছুন।", placeholder: "নিজের ভাষায় বলুন, যেমন: দুষ্টুমিভরা, পুরোনো দিনের স্মৃতিমাখা, একটু আবেগঘন" },
+      look: {
+        title: "Pick a look for {name}'s card",
+        hint: "Tap the one you like best, then choose the music. You can change both later.",
+      },
+      inside: {
+        title: "What should {name}'s card have?",
+        hint: "Leave it to us, or tap the games and screens you'd like.",
+      },
       describe: {
         title: "আপনার কার্ড ঠিক কেমন দেখতে হবে, তা বর্ণনা করুন",
         hint: "নিজের ভাষায় বলুন সে কী কী দেখবে: খোলার সময় থেকে শুরু করে, তারপর কী আসবে, এভাবে একে একে। নিচের বোতামগুলো লেখা শুরু করতে সাহায্য করবে। ঠিক করতে পারছেন না? “আমাকে চমকে দিন” ট্যাপ করুন, আমরাই ডিজাইন করে দেব। পরে যেকোনো কিছু বদলাতে পারবেন।",
         placeholder:
           "যেমন: খোলার সময় আমি একটা গাঢ় নীল খাম চাই, পেছনে তারা ঝিকমিক করছে। তারপর একটা স্ক্রিন, যেখানে জিজ্ঞেস করা হবে ‘তুমি কি আমার ভ্যালেন্টাইন হবে?’ আর ‘না’ বোতামটা পালিয়ে যাবে। তারপর একটা গেম, যেখানে সে ঝরে পড়া হার্ট ধরবে, তারপর আমাদের ছবি। শেষে আতশবাজি, আর একটা বার্তা যে আমি তাকে কতটা ভালোবাসি।",
+      },
+      about: {
+        title: "Tell us a little about {name}",
+        hint: "Optional, but it's what makes the card feel written just for them. Tap a button to start, or press the 🎤 on your keyboard to say it.",
+        placeholder: "e.g. Loves her garden and Strictly. Always says “pop the kettle on”. Turning 80 in May.",
       },
       say: {
         title: "আপনার কার্ডে কী লেখা থাকবে?",
@@ -997,7 +1426,29 @@ export const bn: Dict = {
     making: ["আপনার আইডিয়া পড়ছি…", "রং বাছছি…", "লেখাগুলো লিখছি…", "গেম বাছছি…", "শেষ ছোঁয়া দিচ্ছি…"],
     takesAMoment: "আধা মিনিটের মতো লাগে, আর পরে যেকোনো কিছু বদলাতে পারবেন।",
     makingTitle: "আপনার কার্ড বানানো হচ্ছে",
+    makingKeep: "This takes about half a minute. Please keep this page open.",
+    makingLonger: "This one's taking a little longer. Please keep this page open.",
     yourIdea: "আপনার আইডিয়া",
+    yourChoices: "What you chose",
+    chipFor: "For {name}",
+    chipFrom: "From {name}",
+    chipPhotos: "আপনার ছবি",
+    ideaFor: "Our idea for {name}",
+    ideaThinking: "Thinking up the big idea…",
+    makingRow: "{name}: {title}",
+    ready: "{name}'s card is ready!",
+    stop: "Stop making it",
+    stopSure: "Stop making your card? Your answers are kept.",
+    keepGoing: "Keep going",
+    stopYes: "Yes, stop",
+    makingFailed: "Your card didn't come through",
+    makingKept: "Your answers are all still here, so nothing is lost.",
+    tryAgain: "আবার চেষ্টা করুন",
+    backToAnswers: "← Back to your answers",
+    firstLookLine: "This is how {name} will see it",
+    happyTitle: "Happy with it?",
+    happyYes: "Yes, let's finish it",
+    happyChange: "✏️ Change something",
     examplesTitle: "আইডিয়া লাগবে? একটাতে ট্যাপ করে চেষ্টা করুন",
     examples: [
       "Olivia-র জন্য একটা ভ্যালেন্টাইনস ডে কার্ড। তিন বছর আগে এক পাব কুইজে আমাদের দেখা হয়েছিল। মিষ্টি করে বানান, সাথে এমন একটা প্রশ্ন, যাতে ও ‘না’ বলতেই পারবে না।",
@@ -1078,6 +1529,7 @@ export const bn: Dict = {
       busy: "এই মুহূর্তে আমাদের খুব ভিড়। দয়া করে এক মিনিট পরে আবার চেষ্টা করুন।",
       refused: "এই কার্ডটা আমরা বানাতে পারব না। অন্যভাবে বর্ণনা করে দেখুন।",
       failed: "কাজটা হলো না। আবার চেষ্টা করুন।",
+      connection: "The connection dropped before it finished. Please check you're online, then try again.",
       tooMany: "অল্প সময়ে অনেকগুলো কার্ড হয়ে গেল। দয়া করে একটু পরে আবার চেষ্টা করুন।",
       signIn: "দয়া করে আগে সাইন আপ করুন, তারপর আবার বোতামটা চাপুন।",
       limitCards: "আপনার {n}টি কার্ডের সবগুলোই বানানো হয়ে গেছে। প্রতিটা কার্ড কিনলে আরও {more}টি বানাতে পারবেন।",
@@ -1089,12 +1541,34 @@ export const bn: Dict = {
 
   // The card designer: like making a presentation, a screen at a time.
   studio: {
-    tabs: { text: "লেখা", upload: "আপলোড", screens: "স্ক্রিন", elements: "স্টিকার", ai: "AI দিয়ে বানান" },
+    tabs: {
+      words: "কথাগুলো", text: "লেখা", upload: "আপলোড", screens: "স্ক্রিন", elements: "স্টিকার", ai: "AI দিয়ে বানান" },
     howTitle: "কীভাবে আপনার কার্ড ডিজাইন করবেন",
     how: ["কার্ডের নিচের কোনো স্ক্রিনে ট্যাপ করে সেটা নিয়ে কাজ করুন।", "কার্ডের যেকোনো কিছুতে ট্যাপ করে বদলান: লেখা, রং, ছবি।", "এই বোতামগুলো থেকে লেখা, স্ক্রিন আর স্টিকার যোগ করুন।"],
     onScreen: "স্ক্রিন {n}-এ যোগ হচ্ছে: {name}",
     // Text
     addTitle: "আপনার কার্ডে যোগ করুন:",
+    intro: "Change the words in ✏️ Words, or tap anything on the card to change it.",
+    modes: {
+      edit: "✏️ Change it",
+      play: "▶ Watch it",
+    },
+    watchHint: "This is how they'll see it. Tap through it like they will. To change anything, tap ✏️ Change it.",
+    wordsOn: "Words on screen {n}: {name}",
+    wordsHint: "Type in any box and the card changes as you type.",
+    addedTexts: "Words you added",
+    addedText: "Your words {n}",
+    moreWords: "More words: buttons and little hints ({n})",
+    usually: "Normally “{words}”",
+    captionN: "Caption for photo {n}",
+    lineGroups: {
+      noLines: "What the No button says as it runs away",
+      wrongLines: "What it says after a wrong answer",
+      sliderLines: "What it says as the slider goes up",
+    },
+    askTitle: "Ask for a change",
+    askHow: "Say what you'd like in your own words, then press “Make the change”. It can write new words, change the colours, add a game or a whole new screen, or take screens out.",
+    askButton: "Make the change ✨",
     // Text
     addHeading: "একটা শিরোনাম যোগ করুন",
     addSubheading: "একটা উপশিরোনাম যোগ করুন",
@@ -1146,10 +1620,13 @@ export const bn: Dict = {
     screens: "স্ক্রিন",
     addScreen: "একটা স্ক্রিন যোগ করুন",
     duplicate: "আরেকটা বানান",
+    copyScreen: "Copy this screen",
     moveLeft: "বাঁয়ে সরান",
     moveRight: "ডানে সরান",
     deleteScreen: "স্ক্রিন বাদ দিন",
     screenSettings: "স্ক্রিনের সেটিংস",
+    moreActions: "বেশি",
+    closeActions: "বন্ধ করুন",
     lastScreen: "একটা কার্ডে অন্তত একটা স্ক্রিন থাকতে হবে।",
     tooManyScreens: "একটা কার্ডে সর্বোচ্চ {n}টি স্ক্রিন থাকতে পারে।",
     full: "এই স্ক্রিনে এ রকম আর কিছু রাখার জায়গা নেই।",
@@ -1163,6 +1640,7 @@ export const bn: Dict = {
     font: "ফন্ট",
     buttonColour: "বোতামের রং",
     envelopeColour: "খামের রং",
+    envelopeTitle: "The envelope",
     backgroundColour: "ব্যাকগ্রাউন্ডের রং",
     blends: "দুই রঙের মিশেল",
     smaller: "ছোট করুন",
@@ -1277,6 +1755,7 @@ export const bn: Dict = {
     questionLabel: "প্রশ্ন",
     answers: "উত্তর (সঠিকটায় টিক দিন)",
     answerCorrect: "উত্তর {n} সঠিক",
+    answerN: "Answer {n}",
     removeAnswer: "উত্তর বাদ দিন",
     addAnswer: "+ একটা উত্তর যোগ করুন",
     addQuestion: "+ একটা প্রশ্ন যোগ করুন",
@@ -1288,10 +1767,2179 @@ export const bn: Dict = {
     tooManyPhotos: "আপনি সর্বোচ্চ {n}টি ছবি যোগ করতে পারবেন।",
     uploadFailed: "ছবিটা যোগ করা গেল না। JPG বা PNG দিয়ে চেষ্টা করুন।",
   },
-  looks: {},
-  vary: {},
-  reply: {},
-  kit: {},
-  demo: {},
-  occasionSeo: {},
+  looks: {
+    title: "Pick a look for {name}'s card",
+    hint: "Tap the one you like best. You can still change the colours afterwards.",
+    suggested: "Suggested",
+    moreLooks: "Show {n} more looks",
+    names: {
+      classic: "Classic & elegant",
+      party: "Bright & playful",
+      cute: "Soft & cute",
+      garden: "Fresh garden",
+      midnight: "Midnight & stars",
+      blush: "Rose & blush",
+      blackgold: "কালো ও সোনালি",
+      jewel: "Jewel & gold",
+      crescent: "Moonlit emerald",
+      cosy: "Cosy Christmas",
+      evergreen: "Evergreen & gold",
+      sky: "Sky & clouds",
+      doodle: "Notebook doodles",
+      vintage: "Vintage letter",
+      minimal: "Clean & simple",
+      rainbow: "Rainbow colours",
+      velvet: "Red velvet",
+      spooky: "Spooky night",
+    },
+    music: "Music",
+    musicHint: "Tap one to hear a few seconds of it. Turn your sound up first.",
+    moreMusic: "More…",
+    playing: "Playing a little of {tune}. Tap it again to stop.",
+    preview: "How {name}'s card will look",
+    previewNoName: "How the card will look",
+  },
+  vary: {
+    button: "Try another look",
+    hint: "New colours, fonts and stickers. Your words and photos stay just as they are.",
+    look: "Look {n}",
+    again: "Tap again for another",
+  },
+  reply: {
+    title: "Tell {name} what you thought",
+    hint: "Tap one and we'll pass it on.",
+    reactions: {
+      love: "Loved it",
+      laugh: "Made me laugh",
+      tears: "Happy tears",
+      party: "Brilliant!",
+    },
+    noteLabel: "Add a few words if you like",
+    notePlaceholder: "Thank you so much…",
+    left: "{n} letters left",
+    send: "Send to {name}",
+    sending: "পাঠানো হচ্ছে…",
+    sent: "Sent! We've passed it on to {name}.",
+    full: "{name} has already had a few replies to this card, so this one can't be sent.",
+    tooMany: "অনেকবার চেষ্টা করা হয়েছে। দয়া করে কয়েক মিনিট অপেক্ষা করে আবার চেষ্টা করুন।",
+    failed: "That didn't send. Please try again.",
+    sendBack: "Send {name} a card back 💌",
+    makeOwn: "Or make one for someone else",
+    opened: "Opened {date} ✓",
+    email: {
+      openedSubject: "{to} has opened your card 💌",
+      openedTitle: "{to} has opened your card 💌",
+      openedBody: "The card you sent {to} has just been opened for the first time. We hope it made their day.",
+      openedNote: "We only tell you the first time a card is opened. We don't record who opened it or where.",
+      seeCards: "See my cards",
+      another: "আরেকটা কার্ড বানান",
+      replySubject: "{to} replied to your card {emoji}",
+      replyTitle: {
+        love: "{to} loved your card",
+        laugh: "Your card made {to} laugh",
+        tears: "Your card gave {to} happy tears",
+        party: "{to} thought your card was brilliant",
+      },
+      replySaid: "They added:",
+      replyNote: "{to} replied from the card itself. We never show them your email address.",
+    },
+  },
+  kit: {
+    searchLabel: "Search the screens",
+    searchPlaceholder: "Try “candles”, “quiz” or “sorry”",
+    clearSearch: "Clear the search",
+    filtersLabel: "Show screens for",
+    filters: {
+      card: "For this card",
+      birthday: "জন্মদিন",
+      love: "ভালোবাসা",
+      festive: "উৎসবের",
+      family: "Family",
+      fun: "মজা",
+      all: "All screens",
+    },
+    showAll: "Show all {n}",
+    showFewer: "Show fewer",
+    found: "{n} screens found",
+    foundOne: "1 screen found",
+    noMatch: "No screens match “{q}”. Try a different word, or clear the search.",
+    noneHere: "No screens for this yet. Try another button above.",
+    writeYours: "Add your own words",
+    addPhotos: "Add your photos",
+    ready: "Ready as it is",
+    items: {
+      intro: {
+        name: "Classic envelope",
+        about: "A wax-sealed envelope in your card's own colours",
+      },
+      "intro:midnight": {
+        name: "Midnight letter",
+        about: "Deep blue and starry, for something heartfelt",
+      },
+      "intro:party": {
+        name: "Party popper",
+        about: "Bright, bouncy and bursting with confetti",
+      },
+      "intro:kiss": {
+        name: "Love letter sealed with a kiss",
+        about: "Blush pink, with hearts as it opens",
+      },
+      "intro:golden": {
+        name: "Golden invitation",
+        about: "Black and gold, like a grand invitation",
+      },
+      "intro:spooky": {
+        name: "Spooky delivery",
+        about: "Bats, pumpkins and a creepy welcome",
+      },
+      "intro:lantern": {
+        name: "Festive lantern",
+        about: "Glowing lanterns and gold, for Diwali",
+      },
+      "intro:north-pole": {
+        name: "North Pole post",
+        about: "A special delivery from Santa's workshop",
+      },
+      "intro:eid-moon": {
+        name: "Eid moon",
+        about: "Crescent moon and stars, with Eid blessings",
+      },
+      "intro:stork": {
+        name: "Special delivery",
+        about: "Soft and sweet, for a new baby",
+      },
+      "intro:balloons": {
+        name: "Birthday balloons",
+        about: "Sky blue, with balloons floating up",
+      },
+      "intro:garden": {
+        name: "Spring garden",
+        about: "Flowers and butterflies, fresh and gentle",
+      },
+      "intro:top-secret": {
+        name: "Top secret",
+        about: "A classified mission, for their eyes only",
+      },
+      "intro:snowy": {
+        name: "Snowy winter",
+        about: "Frosty blue with falling snow",
+      },
+      "intro:holi": {
+        name: "হোলির রং",
+        about: "A splash of every colour",
+      },
+      "intro:new-year": {
+        name: "New Year countdown",
+        about: "Midnight, sparkles and a fresh start",
+      },
+      "intro:lace": {
+        name: "Wedding lace",
+        about: "Ivory and gold, for the happy couple",
+      },
+      "intro:sunshine": {
+        name: "Ray of sunshine",
+        about: "Warm and cheery, to brighten their day",
+      },
+      "intro:rakhi": {
+        name: "Rakhi thread",
+        about: "Warm colours for Raksha Bandhan",
+      },
+      "intro:dad": {
+        name: "Dad's delivery",
+        about: "Navy and gold, with a little dad joke",
+      },
+      "intro:sorry": {
+        name: "Peace offering",
+        about: "Soft and gentle, for saying sorry",
+      },
+      "intro:thanks": {
+        name: "Big thank you",
+        about: "Peachy and warm, wrapped up with thanks",
+      },
+      "intro:bon-voyage": {
+        name: "Bon voyage",
+        about: "For someone off on a new adventure",
+      },
+      message: {
+        name: "A little note",
+        about: "নিজে নিজে লেখা হয়ে যাওয়া একটা চিঠি",
+      },
+      "message:love-letter": {
+        name: "Love letter",
+        about: "Handwritten and romantic. You write the words.",
+      },
+      "message:birthday": {
+        name: "Birthday wishes",
+        about: "Bright and bouncy. You write the wishes.",
+      },
+      "message:birthday-poem": {
+        name: "Birthday poem",
+        about: "A sweet little poem, already written",
+      },
+      "message:roses": {
+        name: "Roses are red",
+        about: "The classic love poem, ready to send",
+      },
+      "message:thanks": {
+        name: "Thank you note",
+        about: "Warm and heartfelt. You write the thanks.",
+      },
+      "message:sorry": {
+        name: "Sorry note",
+        about: "Soft and sincere. You write the apology.",
+      },
+      "message:get-well": {
+        name: "Get well note",
+        about: "Sunny and cheerful. You write the wishes.",
+      },
+      "message:get-well-hug": {
+        name: "Get well hug",
+        about: "A warm get-well message, already written",
+      },
+      "message:proud": {
+        name: "Proud of you",
+        about: "For a big achievement. You say why.",
+      },
+      "message:christmas": {
+        name: "Christmas letter",
+        about: "Festive green with falling snow",
+      },
+      "message:christmas-wishes": {
+        name: "Christmas wishes",
+        about: "A cosy Christmas message, already written",
+      },
+      "message:diwali": {
+        name: "Diwali wishes",
+        about: "Glowing lanterns. You write the wishes.",
+      },
+      "message:diwali-blessings": {
+        name: "Diwali blessings",
+        about: "A joyful Diwali message, already written",
+      },
+      "message:eid": {
+        name: "Eid wishes",
+        about: "Moon and stars. You write the wishes.",
+      },
+      "message:new-year": {
+        name: "New Year note",
+        about: "Midnight sparkle for a fresh start",
+      },
+      "message:new-baby": {
+        name: "Welcome, little one",
+        about: "Soft and sweet, for a new arrival",
+      },
+      "message:mum": {
+        name: "Dear Mum",
+        about: "Flowers and handwriting, for Mum",
+      },
+      "message:dad": {
+        name: "Dear Dad",
+        about: "Smart navy, for Dad",
+      },
+      "message:friend": {
+        name: "প্রিয় বন্ধু",
+        about: "Fun and bright, for your favourite person",
+      },
+      "message:miss-you": {
+        name: "Missing you",
+        about: "Ocean blue, for someone far away",
+      },
+      "message:good-luck": {
+        name: "Good luck",
+        about: "For a new job, an exam or an adventure",
+      },
+      "message:anniversary": {
+        name: "Happy anniversary",
+        about: "Deep red and romantic, for your years together",
+      },
+      "message:typed": {
+        name: "Typewritten letter",
+        about: "Old-fashioned typing on brown paper",
+      },
+      photos: {
+        name: "Photo stack",
+        about: "A stack of your photos to flick through",
+      },
+      "photos:best-bits": {
+        name: "Our best bits",
+        about: "A film-reel look for your favourite snaps",
+      },
+      "photos:polaroid-wall": {
+        name: "Polaroid wall",
+        about: "Your photos pinned up on a cork board",
+      },
+      "photos:memory-lane": {
+        name: "Memory lane",
+        about: "Old-photo sepia, for looking back",
+      },
+      "photos:party": {
+        name: "Party pics",
+        about: "Loud, bright and full of confetti",
+      },
+      "photos:love": {
+        name: "You and me",
+        about: "Pink and romantic, for photos of you two",
+      },
+      "photos:family": {
+        name: "Family album",
+        about: "Warm ivory, for the whole family",
+      },
+      "photos:baby": {
+        name: "Tiny moments",
+        about: "Soft blue and pink, for baby photos",
+      },
+      "photos:christmas": {
+        name: "Christmas snaps",
+        about: "Festive green with falling snow",
+      },
+      "photos:diwali": {
+        name: "Diwali at home",
+        about: "Lanterns and gold, for Diwali photos",
+      },
+      "photos:adventures": {
+        name: "Our adventures",
+        about: "Travel-journal style, for trips together",
+      },
+      timeline: {
+        name: "Our story so far",
+        about: "আপনাদের গল্প, মুহূর্তে মুহূর্তে",
+      },
+      "timeline:our-story": {
+        name: "আমাদের গল্প",
+        about: "From the day you met to today",
+      },
+      "timeline:your-year": {
+        name: "Your year",
+        about: "Their year in moments, season by season",
+      },
+      "timeline:then-now": {
+        name: "Then and now",
+        about: "How things were, and how they are now",
+      },
+      "timeline:friends": {
+        name: "How we became friends",
+        about: "The story of a friendship",
+      },
+      "timeline:growing-up": {
+        name: "Growing up",
+        about: "From little one to all grown up",
+      },
+      "timeline:journey": {
+        name: "Your journey",
+        about: "From the first day to the next big thing",
+      },
+      reasons: {
+        name: "Reasons I love you",
+        about: "Notes they pull out of a jar. You write them.",
+      },
+      "reasons:admire": {
+        name: "Things I admire about you",
+        about: "A jar of stars, full of compliments",
+      },
+      "reasons:best-mum": {
+        name: "Why you're the best mum",
+        about: "Lovely reasons already written, plus one of yours",
+      },
+      "reasons:best-dad": {
+        name: "Why you're the best dad",
+        about: "Dad reasons already written, plus one of yours",
+      },
+      "reasons:best-friend": {
+        name: "Why you're my best friend",
+        about: "Friend reasons already written, plus one of yours",
+      },
+      "reasons:grandparent": {
+        name: "Why we love you so much",
+        about: "For a grandparent, with room for your own",
+      },
+      "reasons:miss": {
+        name: "Things I miss about you",
+        about: "For someone far away",
+      },
+      "reasons:forgive": {
+        name: "Reasons to forgive me",
+        about: "A cheeky way to say sorry",
+      },
+      "reasons:birthday": {
+        name: "Things to celebrate about you",
+        about: "A party jar of birthday notes",
+      },
+      coupons: {
+        name: "কুপন বই",
+        about: "Treats they can redeem. You write them.",
+      },
+      "coupons:hugs": {
+        name: "Hug coupons",
+        about: "Hugs whenever they want, ready to send",
+      },
+      "coupons:chores": {
+        name: "Chore pass",
+        about: "Washing-up, bins and hoovering: you'll do them",
+      },
+      "coupons:breakfast": {
+        name: "Breakfast in bed",
+        about: "Tea, toast and pancakes, brought up to them",
+      },
+      "coupons:date-night": {
+        name: "Date night coupons",
+        about: "Dinners, films and moonlit walks",
+      },
+      "coupons:birthday": {
+        name: "Birthday treats",
+        about: "Cake for breakfast, and more",
+      },
+      "coupons:pamper": {
+        name: "Pamper day",
+        about: "Bubble baths, foot rubs and naps",
+      },
+      "coupons:kids": {
+        name: "Coupons from the kids",
+        about: "Promises from the little ones",
+      },
+      "coupons:friend": {
+        name: "Friendship vouchers",
+        about: "Snacks, coffee and honest opinions",
+      },
+      question: {
+        name: "Your own question",
+        about: "Ask anything. The No button runs away.",
+      },
+      "question:valentine": {
+        name: "তুমি কি আমার ভ্যালেন্টাইন হবে?",
+        about: "‘না’ বোতাম পালিয়ে যায়। তাকে ‘হ্যাঁ’ বলতেই হবে।",
+      },
+      "question:favourite": {
+        name: "Am I your favourite?",
+        about: "There's only one right answer",
+      },
+      "question:surprise": {
+        name: "Ready for your surprise?",
+        about: "Builds up the excitement before a big reveal",
+      },
+      "question:forgive": {
+        name: "Forgive me?",
+        about: "For saying sorry. No isn't an option.",
+      },
+      "question:dinner": {
+        name: "Dinner on me?",
+        about: "Ask them out. They can't say no.",
+      },
+      "question:bff": {
+        name: "Best friends forever?",
+        about: "Make it official",
+      },
+      "question:bridesmaid": {
+        name: "Will you be my bridesmaid?",
+        about: "Ask your best friend the big question",
+      },
+      "question:still-love": {
+        name: "Do you still love me?",
+        about: "Romantic, with a cheeky runaway No",
+      },
+      "question:trip": {
+        name: "Fancy a trip away?",
+        about: "Reveal a surprise holiday",
+      },
+      "question:hug": {
+        name: "Can I have a hug?",
+        about: "Sweet and simple, with a runaway No",
+      },
+      quiz: {
+        name: "Your own quiz",
+        about: "Write your own questions and answers",
+      },
+      "quiz:know-me": {
+        name: "How well do you know me?",
+        about: "Three questions about you. You write the answers.",
+      },
+      "quiz:year": {
+        name: "Guess the year",
+        about: "When did it all happen? You write the years.",
+      },
+      "quiz:who-said": {
+        name: "Who said it?",
+        about: "Your famous sayings: was it you or them?",
+      },
+      "quiz:would-rather": {
+        name: "Would I rather…?",
+        about: "Guess which I'd pick. You tick the answers.",
+      },
+      "quiz:christmas": {
+        name: "Christmas cracker quiz",
+        about: "Festive questions, ready to play",
+      },
+      "quiz:birthday": {
+        name: "The birthday quiz",
+        about: "Silly birthday questions, ready to play",
+      },
+      "quiz:family": {
+        name: "Family trivia",
+        about: "Who's the best cook? Who's always late?",
+      },
+      "quiz:love": {
+        name: "Our love quiz",
+        about: "First dates, your song and who fell first",
+      },
+      scratch: {
+        name: "স্ক্র্যাচ কার্ড",
+        about: "Scratch off the silver to see a secret",
+      },
+      "scratch:gift": {
+        name: "Scratch to reveal your gift",
+        about: "Hide their present under the silver",
+      },
+      "scratch:fortune": {
+        name: "Fortune cookie",
+        about: "Scratch to read a fortune, ready to send",
+      },
+      "scratch:big-news": {
+        name: "Big news",
+        about: "Share an announcement. You write the news.",
+      },
+      "scratch:ticket": {
+        name: "Winning ticket",
+        about: "A lucky scratch card with your prize",
+      },
+      "scratch:baby-news": {
+        name: "Baby news",
+        about: "Gently reveal some happy news",
+      },
+      "scratch:save-date": {
+        name: "Save the date",
+        about: "Reveal the big day",
+      },
+      typeit: {
+        name: "গোপন পাসওয়ার্ড",
+        about: "They type the password to unlock it",
+      },
+      "typeit:crack-code": {
+        name: "Crack the code",
+        about: "A spy-style code for them to crack",
+      },
+      "typeit:magic-word": {
+        name: "Say the magic word",
+        about: "The magic word is \"please\". Ready to play.",
+      },
+      "typeit:pet-name": {
+        name: "My name for you",
+        about: "They type your pet name for them",
+      },
+      "typeit:our-song": {
+        name: "Name our song",
+        about: "They type the name of your song",
+      },
+      "typeit:santa": {
+        name: "Santa's secret code",
+        about: "Ho ho ho! Ready to play",
+      },
+      wheel: {
+        name: "Prize wheel",
+        about: "Spin to win. You write the prizes.",
+      },
+      "wheel:date-night": {
+        name: "Date night roulette",
+        about: "Spin to pick your next date",
+      },
+      "wheel:treat": {
+        name: "Spin for a treat",
+        about: "Chocolate, a cuppa or a day off",
+      },
+      "wheel:dinner": {
+        name: "What's for dinner?",
+        about: "Can't decide? Let the wheel choose.",
+      },
+      "wheel:birthday": {
+        name: "Birthday wheel of fortune",
+        about: "Spin for a birthday treat",
+      },
+      "wheel:rigged": {
+        name: "Rigged wheel",
+        about: "Always lands on the first slice. Shh!",
+      },
+      "wheel:christmas": {
+        name: "Festive spin",
+        about: "Mince pies, films and pudding",
+      },
+      "wheel:eid": {
+        name: "Eid treat wheel",
+        about: "Eidi, biryani and sweets",
+      },
+      boxes: {
+        name: "একটা বাক্স বাছুন",
+        about: "Three mystery boxes. You write the prizes.",
+      },
+      "boxes:present": {
+        name: "Pick a present",
+        about: "Three wrapped presents to choose from",
+      },
+      "boxes:mystery": {
+        name: "রহস্য বাক্স",
+        about: "Three treats hidden in boxes, ready to send",
+      },
+      "boxes:crackers": {
+        name: "Christmas crackers",
+        about: "Pull a cracker to see what's inside",
+      },
+      "boxes:love": {
+        name: "Love boxes",
+        about: "Kisses, dinners and cuddles",
+      },
+      "boxes:eidi": {
+        name: "Eidi boxes",
+        about: "Pick a box for their Eid gift",
+      },
+      "boxes:mithai": {
+        name: "Mithai boxes",
+        about: "Which Diwali sweet will they get?",
+      },
+      slider: {
+        name: "ভালোবাসা মিটার",
+        about: "A slider that only goes up. You write the question.",
+      },
+      "slider:love": {
+        name: "How much do I love you?",
+        about: "To the moon and back. It only goes up.",
+      },
+      "slider:missed": {
+        name: "How much I missed you",
+        about: "For someone coming home or far away",
+      },
+      "slider:sorry": {
+        name: "How sorry am I?",
+        about: "Really, really sorry",
+      },
+      "slider:excited": {
+        name: "How excited are you?",
+        about: "However they drag it, it goes up",
+      },
+      "slider:proud": {
+        name: "How proud am I?",
+        about: "Bursting with pride",
+      },
+      "slider:age": {
+        name: "How old do you feel?",
+        about: "A cheeky birthday slider",
+      },
+      "game:catch-hearts": {
+        name: "Catch the hearts",
+        about: "Tap the falling hearts, in your card's colours",
+      },
+      "game:catch-hearts:sweetheart": {
+        name: "Catch the hearts: sweetheart",
+        about: "Blush pink, with 12 hearts to catch",
+      },
+      "game:catch-hearts:gentle": {
+        name: "Catch the hearts: gentle",
+        about: "Big, slow hearts. Easy for anyone.",
+      },
+      "game:light-diyas": {
+        name: "প্রদীপ জ্বালানো",
+        about: "Tap each diya to light it",
+      },
+      "game:light-diyas:midnight": {
+        name: "Light the diyas: midnight",
+        about: "Deep blue and gold, with fireworks",
+      },
+      "game:light-diyas:marigold": {
+        name: "Light the diyas: marigold",
+        about: "Orange and pink, with 7 diyas",
+      },
+      "game:blow-candles": {
+        name: "ফুঁ দিয়ে মোমবাতি নেভানো",
+        about: "Make a wish, then tap the flames",
+      },
+      "game:blow-candles:pastel": {
+        name: "Blow out the candles: pastel",
+        about: "Soft colours and balloons",
+      },
+      "game:blow-candles:gold": {
+        name: "Blow out the candles: gold",
+        about: "Black and gold, for a big birthday",
+      },
+      "game:pop-balloons": {
+        name: "বেলুন ফাটানো",
+        about: "Pop them as they float up",
+      },
+      "game:pop-balloons:rainbow": {
+        name: "Pop the balloons: rainbow",
+        about: "15 quick balloons in every colour",
+      },
+      "game:pop-balloons:gentle": {
+        name: "Pop the balloons: gentle",
+        about: "6 big, slow balloons. Easy for anyone.",
+      },
+      "game:catch-snowflakes": {
+        name: "তুষারকণা ধরা",
+        about: "Catch the falling snow",
+      },
+      "game:catch-snowflakes:frosty": {
+        name: "Catch the snowflakes: frosty",
+        about: "Icy blue, with a snowman",
+      },
+      "game:catch-snowflakes:blizzard": {
+        name: "Catch the snowflakes: blizzard",
+        about: "15 fast flakes. A real challenge.",
+      },
+      "game:catch-stars": {
+        name: "তারা ধরা",
+        about: "Catch the falling stars",
+      },
+      "game:catch-stars:night-sky": {
+        name: "Catch the stars: night sky",
+        about: "Wish on stars in a midnight sky",
+      },
+      "game:catch-stars:gold-stars": {
+        name: "Catch the stars: gold stars",
+        about: "Gold stars for a job well done",
+      },
+      "game:memory-match": {
+        name: "জোড়া মেলানো",
+        about: "Find the matching pairs",
+      },
+      "game:memory-match:quick": {
+        name: "Memory match: quick",
+        about: "Just 4 pairs. Quick and easy.",
+      },
+      "game:memory-match:retro": {
+        name: "Memory match: retro",
+        about: "Old computer-game style",
+      },
+      "game:unwrap-gift": {
+        name: "উপহারের মোড়ক খোলা",
+        about: "Tap to tear off the paper",
+      },
+      "game:unwrap-gift:christmas": {
+        name: "Unwrap the present: Christmas",
+        about: "A present under the tree",
+      },
+      "game:unwrap-gift:birthday": {
+        name: "Unwrap the present: birthday",
+        about: "Party colours and confetti",
+      },
+      "game:shake-it": {
+        name: "Shake the phone",
+        about: "Shake to burst it open (best on a phone)",
+      },
+      "game:shake-it:champagne": {
+        name: "Shake the phone: champagne",
+        about: "Shake to pop the cork",
+      },
+      "game:shake-it:snow-globe": {
+        name: "Shake the phone: snow globe",
+        about: "Shake to make it snow",
+      },
+      "game:cursor-chase": {
+        name: "Chase the heart",
+        about: "It runs from the mouse (best on a computer)",
+      },
+      "game:cursor-chase:playful": {
+        name: "Chase the heart: hard to get",
+        about: "A quicker heart that plays hard to get",
+      },
+      "game:cursor-chase:slow": {
+        name: "Chase the heart: slow",
+        about: "A slow heart, caught 3 times",
+      },
+      "game:loves-me-not": {
+        name: "ভালোবাসে, ভালোবাসে না",
+        about: "Pluck the petals to find out",
+      },
+      "game:loves-me-not:meadow": {
+        name: "Loves me, loves me not: meadow",
+        about: "A daisy in a green meadow",
+      },
+      "game:loves-me-not:rose": {
+        name: "Loves me, loves me not: rose",
+        about: "Deep red and romantic, with 11 petals",
+      },
+      "game:whack-ghosts": {
+        name: "ভূত পেটানো",
+        about: "Tap the ghosts as they pop up",
+      },
+      "game:whack-ghosts:haunted": {
+        name: "Whack the ghosts: haunted house",
+        about: "Cobwebs, bats and candles",
+      },
+      "game:whack-ghosts:pumpkin": {
+        name: "Whack the ghosts: pumpkin patch",
+        about: "Bright orange, with faster ghosts",
+      },
+      "game:launch-fireworks": {
+        name: "আতশবাজি ফোটানো",
+        about: "Tap the sky to set them off",
+      },
+      "game:launch-fireworks:midnight": {
+        name: "Launch fireworks: midnight",
+        about: "Ring in the New Year",
+      },
+      "game:launch-fireworks:grand": {
+        name: "Launch fireworks: grand finale",
+        about: "12 fireworks in black and gold",
+      },
+      "game:release-lanterns": {
+        name: "Release the lanterns",
+        about: "Tap each one and make a wish",
+      },
+      "game:release-lanterns:wishes": {
+        name: "Release the lanterns: night of wishes",
+        about: "A starry blue night sky",
+      },
+      "game:release-lanterns:golden": {
+        name: "Release the lanterns: golden",
+        about: "Warm gold, for Diwali or Eid",
+      },
+      "game:bubble-wrap": {
+        name: "বাবল র‍্যাপ ফাটানো",
+        about: "So very satisfying",
+      },
+      "game:bubble-wrap:calm": {
+        name: "Pop the bubble wrap: calm",
+        about: "12 slow pops to breathe along to",
+      },
+      "game:bubble-wrap:stress": {
+        name: "Pop the bubble wrap: stress buster",
+        about: "30 bubbles to take it out on",
+      },
+      "game:pinata": {
+        name: "পিনিয়াটা ভাঙা",
+        about: "Tap it until it bursts",
+      },
+      "game:pinata:fiesta": {
+        name: "Smash the piñata: fiesta",
+        about: "Bright party colours and 10 whacks",
+      },
+      "game:pinata:quick": {
+        name: "Smash the piñata: quick",
+        about: "Just 4 taps. Easy for little ones.",
+      },
+      "game:grow-flower": {
+        name: "ফুল ফোটানো",
+        about: "Water it until it blooms",
+      },
+      "game:grow-flower:mum": {
+        name: "Grow a flower: for Mum",
+        about: "Pink blossom for Mother's Day",
+      },
+      "game:grow-flower:get-well": {
+        name: "Grow a flower: sunflower",
+        about: "Sunny yellow, to say get well soon",
+      },
+      "game:throw-colours": {
+        name: "Throw colours",
+        about: "Splash colour everywhere, for Holi",
+      },
+      "game:throw-colours:rainbow": {
+        name: "Throw colours: rainbow",
+        about: "A white page and 20 splashes",
+      },
+      "game:throw-colours:gulal": {
+        name: "Throw colours: gulal",
+        about: "Pinks and purples for Holi",
+      },
+      "game:slot-machine": {
+        name: "স্লট মেশিনে জ্যাকপট",
+        about: "Pull the lever for the jackpot",
+      },
+      "game:slot-machine:vegas": {
+        name: "Slot machine: Vegas",
+        about: "Black, red and gold, high-roller style",
+      },
+      "game:slot-machine:christmas": {
+        name: "Slot machine: Christmas",
+        about: "A festive jackpot",
+      },
+      "game:hold-hug": {
+        name: "Send a hug",
+        about: "চেপে ধরে আলিঙ্গন পাঠানো",
+      },
+      "game:hold-hug:cosy": {
+        name: "Send a hug: warm and cosy",
+        about: "Soft peach, for when they need it",
+      },
+      "game:hold-hug:bear": {
+        name: "Send a hug: bear hug",
+        about: "A big, playful squeeze",
+      },
+      "game:catch-candy": {
+        name: "ক্যান্ডি ধরা",
+        about: "ঝরে পড়া ক্যান্ডি ধরা",
+      },
+      "game:catch-candy:trick-treat": {
+        name: "Catch the sweets: trick or treat",
+        about: "Spooky sweets for Halloween",
+      },
+      "game:catch-candy:sweet-shop": {
+        name: "Catch the sweets: sweet shop",
+        about: "Pastel pinks, with 12 sweets",
+      },
+      finale: {
+        name: "Fireworks finale",
+        about: "Fireworks, and your big message",
+      },
+      "finale:hearts": {
+        name: "Hearts finale",
+        about: "A shower of hearts and \"I love you\"",
+      },
+      "finale:confetti": {
+        name: "Confetti finale",
+        about: "Three cheers, with confetti",
+      },
+      "finale:birthday": {
+        name: "Birthday confetti",
+        about: "Happy birthday, with confetti",
+      },
+      "finale:balloons": {
+        name: "Balloons finale",
+        about: "Balloons floating up and away",
+      },
+      "finale:gold": {
+        name: "Gold finale",
+        about: "Sparkles in black and gold",
+      },
+      "finale:lanterns": {
+        name: "Lanterns finale",
+        about: "Glowing lanterns rising",
+      },
+      "finale:diwali": {
+        name: "Diwali fireworks",
+        about: "Fireworks over a midnight sky",
+      },
+      "finale:snow": {
+        name: "Snowy finale",
+        about: "Merry Christmas, in falling snow",
+      },
+      "finale:eid": {
+        name: "Eid finale",
+        about: "Stars and Eid blessings",
+      },
+      "finale:new-year": {
+        name: "New Year fireworks",
+        about: "Fireworks at midnight",
+      },
+      "finale:holi": {
+        name: "Holi finale",
+        about: "Colour everywhere",
+      },
+      "finale:spooky": {
+        name: "Spooky finale",
+        about: "Bats and ghosts. Mwahaha!",
+      },
+      "finale:petals": {
+        name: "Petals finale",
+        about: "Falling petals, soft and lovely",
+      },
+      "finale:mum": {
+        name: "Mother's Day finale",
+        about: "Petals and love for Mum",
+      },
+      "finale:dad": {
+        name: "Father's Day finale",
+        about: "Confetti for the best dad",
+      },
+      "finale:rakhi": {
+        name: "Rakhi finale",
+        about: "Sparkles for Raksha Bandhan",
+      },
+      "finale:sorry": {
+        name: "Sorry finale",
+        about: "Gentle petals and a heartfelt sorry",
+      },
+      "finale:stars": {
+        name: "Starry finale",
+        about: "A sky full of stars",
+      },
+      "finale:bubbles": {
+        name: "Bubbles finale",
+        about: "Floating bubbles and big hugs",
+      },
+      "finale:farewell": {
+        name: "Farewell finale",
+        about: "Good luck, with confetti",
+      },
+    },
+  },
+  demo: {
+    metaTitle: "{name}: full-screen demo · Envelette",
+    back: "← ফিরে যান",
+    make: "Make this card · {price}",
+    note: "This is a sample. Yours will have your own names, words and photos.",
+  },
+  occasionSeo: {
+    valentine: {
+      title: "Valentine's e-cards where the No button runs away · Envelette",
+      description: "Ask them to be your Valentine with an interactive e-card: a No button they can't press, your photos, a love letter that writes itself and a shower of hearts.",
+      heading: "Interactive **Valentine's** e-cards",
+      aboutTitle: "A Valentine's card they can't say no to",
+      about: [
+        "The famous one: they open the envelope, read \"Will you be my Valentine?\" and try to press No. It runs away every time, and the Yes button grows. Then come your photos, a little game and a love letter that writes itself out as they watch, ending in a shower of hearts.",
+        "Prefer something softer? There are slow, romantic designs with falling petals and a jar of reasons you love them, and playful ones with a date-night wheel and coupons. Because it's a digital card, it arrives the moment you send it, by WhatsApp, text or email, or we can email it for 9am on the 14th.",
+      ],
+      writeTitle: "What to write in a Valentine's card",
+      ideas: [
+        {
+          who: "For your partner",
+          text: "Every year I look for a card that says it properly, and every year I end up writing the same thing: I'd choose you again, every single time.",
+        },
+        {
+          who: "For someone new",
+          text: "I know it's early days, but I couldn't let the 14th go by without telling you that you've made this winter a lot brighter.",
+        },
+        {
+          who: "For your husband or wife",
+          text: "Years in, and you still make me laugh at breakfast. Happy Valentine's Day to my favourite person to grow old with.",
+        },
+        {
+          who: "Long distance",
+          text: "Miles apart, but you're the first person I think of every morning. Counting down to the day I can say this in person.",
+        },
+        {
+          who: "Something funny",
+          text: "Roses are red, this button is too. You can't press No, so it's me and you.",
+        },
+        {
+          who: "For your best friend",
+          text: "Happy Galentine's to the friend who's been my plus-one through every disaster. There's no one I'd rather be single, taken or confused with.",
+        },
+      ],
+      faqTitle: "Valentine's e-card questions",
+      faqs: [
+        {
+          q: "Can they really not press No?",
+          a: "They can try. The No button runs away whenever they go to press it, and the Yes button grows each time they miss. You can change the question to anything you like, from \"Will you be my Valentine?\" to \"Dinner on Friday?\"",
+        },
+        {
+          q: "Can I send it so it arrives on Valentine's Day?",
+          a: "Yes. Choose to have us email it, pick 14 February and it arrives at 9am your time. You can set it up to {days} days ahead, so you can sort it in January and forget about it. Or send the link yourself whenever you like.",
+        },
+        {
+          q: "এটা কি গোপন থাকে?",
+          a: "Only people with the link can open it. Links are long random codes, and cards are never listed or searchable, so your love letter stays between the two of you.",
+        },
+        {
+          q: "How much is a Valentine's e-card?",
+          a: "{price} per card, paid once. You can play your card all the way through before you pay, games and all, so you know exactly what they'll get.",
+        },
+      ],
+    },
+    birthday: {
+      title: "Interactive birthday e-cards they can play · Envelette",
+      description: "A birthday e-card they actually play: blow out the candles, smash a piñata, flick through your photos and finish in confetti. Made in minutes, sent as a link.",
+      heading: "Interactive **birthday** e-cards",
+      aboutTitle: "A birthday card that's more like a party",
+      about: [
+        "Instead of a card that's read once and put on the mantelpiece, they get a little party on their phone: candles to blow out, balloons to pop or a piñata to whack, then your photos, your message and a confetti finale, with Happy Birthday playing along.",
+        "Some designs are funny, with gentle teasing about their age or a quiz you write about them; some are simply warm, for parents, partners and best friends. It's a digital birthday card, so it reaches a grandchild across the country or a friend abroad just as easily. Have it emailed at 9am your time on the day, or send the link yourself.",
+      ],
+      writeTitle: "What to write in a birthday card",
+      ideas: [
+        {
+          who: "For Mum or Dad",
+          text: "Happy birthday to the person who taught me everything, including how to blow out candles without setting off the smoke alarm. I love you more every year.",
+        },
+        {
+          who: "For Nan or Grandad",
+          text: "Happy birthday! Thank you for the biscuits, the stories and for always being on my side. I hope today is as lovely as you are.",
+        },
+        {
+          who: "For a best friend",
+          text: "Another year of being brilliant. Thank you for every voice note, every terrible idea and every time you were right. Happy birthday.",
+        },
+        {
+          who: "For a partner",
+          text: "Happy birthday to my favourite person. I'd say I got you something amazing, but honestly, I'm the present. (There's cake too.)",
+        },
+        {
+          who: "For a big birthday",
+          text: "Forty looks good on you. Here's to the best decade yet, and to never admitting how many candles were on the cake.",
+        },
+        {
+          who: "For a colleague",
+          text: "Happy birthday from all of us! Thank you for the laughs, the tea rounds and putting up with the office playlist. Have a brilliant day.",
+        },
+      ],
+      faqTitle: "Birthday e-card questions",
+      faqs: [
+        {
+          q: "Can I schedule a birthday e-card to arrive on the day?",
+          a: "Yes. Choose to have us email it, pick their birthday and it arrives at 9am your time. You can set it up to {days} days ahead, which is handy for birthdays you'd otherwise remember at 10pm.",
+        },
+        {
+          q: "Can I add a quiz about them?",
+          a: "Yes. Several designs have a quiz, and you write the questions and answers yourself, so it can be about their first car, their worst haircut or how well they know you. You can add a quiz screen to any design, too.",
+        },
+        {
+          q: "Can a few of us send it together?",
+          a: "One person puts the card together, but it can be from as many people as you like: write \"All of us\" in the From line and add photos and messages from everyone. Then share the link in the group chat or have us email it.",
+        },
+        {
+          q: "Will it work on their phone?",
+          a: "Yes. It opens in the web browser on any phone, tablet or computer, with nothing to download and no account to make. If they're not keen on technology, all they do is tap the link, then the envelope.",
+        },
+      ],
+    },
+    diwali: {
+      title: "Diwali e-cards: light the diyas, then fireworks · Envelette",
+      description: "Send Diwali wishes with an interactive e-card: they light the diyas, release sky lanterns and fill the sky with fireworks. Reaches family anywhere, instantly.",
+      heading: "Interactive **Diwali** e-cards",
+      aboutTitle: "A festival of lights on their phone",
+      about: [
+        "A Diwali e-card from Envelette is something to do, not just read. They light the diyas one by one, release glowing sky lanterns or set off their own fireworks, then see your family photos and read your Diwali wishes. Some designs are playful, like a mithai quiz with only one right answer, and some are gentle and graceful, made for parents and elders.",
+        "It's a digital card, so it reaches family in India, Canada, the US or down the road at the same moment, with no postage and no waiting. Send the link on WhatsApp, share it in the family group, or have us email it at 9am your time on Diwali itself.",
+      ],
+      writeTitle: "What to write in a Diwali card",
+      ideas: [
+        {
+          who: "For Mum and Dad",
+          text: "Happy Diwali! Thank you for every Diwali you made special, from the rangoli to the mithai. May this year bring you health, happiness and lots of light.",
+        },
+        {
+          who: "For family abroad",
+          text: "We'll be lighting the diyas here and thinking of you there. Wishing you all a Diwali full of light, laughter and far too many sweets.",
+        },
+        {
+          who: "For elders",
+          text: "Wishing you a blessed and joyful Diwali. May Lakshmi Ji bring peace, good health and prosperity to your home this year.",
+        },
+        {
+          who: "For friends",
+          text: "Happy Diwali! May your year be as bright as your diyas and as sweet as the box of kaju katli you're definitely not sharing.",
+        },
+        {
+          who: "For colleagues",
+          text: "Wishing you and your family a very happy Diwali. Thank you for brightening up the team all year, and enjoy the celebrations.",
+        },
+        {
+          who: "For your other half",
+          text: "Every Diwali with you feels brighter. Thank you for being my light all year round. Happy Diwali, my love.",
+        },
+      ],
+      faqTitle: "Diwali e-card questions",
+      faqs: [
+        {
+          q: "Can I send a Diwali card to family in India or abroad?",
+          a: "Yes. It's sent as a link, so it reaches anyone, anywhere, the moment you send it, with no postage. It costs {price}, and you can pay in your own currency.",
+        },
+        {
+          q: "Can I write my wishes in Hindi, Gujarati or Punjabi?",
+          a: "Yes. Type your words in any language and they'll show on the card just as you wrote them. If you answer our questions in your language, we'll write the card in it too. The buttons on the card stay in English.",
+        },
+        {
+          q: "Is there a design for parents and elders?",
+          a: "Yes. [Diwali Blessings](/cards/diwali-blessings) is a graceful, heartfelt card with your family photos, made with parents and elders in mind, and [Lanterns of Light](/cards/lanterns-of-light) is a calm one with sky lanterns and fireworks. For friends who love their sweets, try [Mithai Mayhem](/cards/mithai-mayhem).",
+        },
+        {
+          q: "Can one card go to the whole family?",
+          a: "Yes. Anyone with the link can open it, so you can share one card in the family WhatsApp group. If you'd rather each person had their own, with their name on the envelope, make one for each.",
+        },
+      ],
+    },
+    christmas: {
+      title: "Interactive Christmas e-cards for family near and far · Envelette",
+      description: "A Christmas e-card that feels like a present: they unwrap it, catch the snow and read your message as Jingle Bells plays. No stamps, no last posting date.",
+      heading: "Interactive **Christmas** e-cards",
+      aboutTitle: "A Christmas card that feels like a present",
+      about: [
+        "They unwrap a present with their finger, catch falling snowflakes and pull your reasons from a jar, with Jingle Bells playing and a gentle snowfall to finish. For the jokers there's Naughty or Nice?, where the Naughty button runs away, and Secret Santa, where every present turns out to be socks.",
+        "There's no last posting date for an e-card. It reaches family abroad instantly, nothing gets lost in the Christmas post, and you can have it emailed at 9am your time on Christmas morning. Make a few at once, add them all to your basket and send each one its own way.",
+      ],
+      writeTitle: "What to write in a Christmas card",
+      ideas: [
+        {
+          who: "For family",
+          text: "Merry Christmas to the people who make it feel like Christmas. Wishing you a cosy day, a full table and a very lazy Boxing Day.",
+        },
+        {
+          who: "For family abroad",
+          text: "It doesn't feel quite like Christmas without you here. We'll raise a glass to you on the day, and we're counting down to the next time we're all together.",
+        },
+        {
+          who: "For grandchildren",
+          text: "Merry Christmas, my darlings! I hope Father Christmas brings everything on your list, and that you leave him an extra mince pie from me.",
+        },
+        {
+          who: "For a partner",
+          text: "My favourite part of Christmas is still you. Thank you for this year, for every terrible cracker joke and for putting up with my singing.",
+        },
+        {
+          who: "For friends",
+          text: "Merry Christmas! Here's to mince pies for breakfast, the Christmas jumper you swear is ironic and a much calmer new year.",
+        },
+        {
+          who: "For neighbours",
+          text: "Wishing you a very merry Christmas and a happy new year. Thank you for being such good neighbours. Enjoy every minute of the break.",
+        },
+      ],
+      faqTitle: "Christmas e-card questions",
+      faqs: [
+        {
+          q: "Will it arrive in time for Christmas?",
+          a: "Always. An e-card is sent as a link, so it arrives the moment you send it, wherever they live. Or choose to have us email it, pick the 25th, and it arrives at 9am your time on Christmas morning. You can set that up to {days} days ahead.",
+        },
+        {
+          q: "Can I send Christmas cards to lots of people?",
+          a: "Yes. Make a card for each person, add them all to your basket and pay once. Each card can be emailed on its own day or sent as a link, and every link is in your receipt email too.",
+        },
+        {
+          q: "Does it play Christmas music?",
+          a: "Yes. The Christmas designs play Jingle Bells when they open the envelope, with sound effects for the games. There's a mute button in the corner if they're somewhere quiet.",
+        },
+        {
+          q: "Can I add our family photos?",
+          a: "Yes, up to 6, each with a caption if you like. They're resized on your phone before upload, which also removes the hidden location data phones add to photos.",
+        },
+      ],
+    },
+    eid: {
+      title: "Eid Mubarak e-cards: interactive Eid cards · Envelette",
+      description: "Send Eid Mubarak wishes with an interactive e-card: catch the stars under the crescent moon, share family photos and your wishes. Reaches family anywhere.",
+      heading: "Interactive **Eid** e-cards",
+      aboutTitle: "Eid wishes, with a little bit of magic",
+      about: [
+        "Under a crescent moon, they catch the stars, receive an Eid hug they press and hold, or spin the wheel to choose the Eid feast. Then come your family photos and your wishes, ending in a sky full of stars. There's a gentle, elegant design for parents and elders, and a cheeky one asking for Eidi where the No button runs away.",
+        "Because it's an e-card, it reaches family in Pakistan, Bangladesh, the Gulf or the next street at the same moment, with no postage. It works for Eid al-Fitr and Eid al-Adha alike, and you can send the link the moment Eid is announced.",
+      ],
+      writeTitle: "What to write in an Eid card",
+      ideas: [
+        {
+          who: "For family",
+          text: "Eid Mubarak! May Allah accept your fasts and prayers and fill your home with peace, happiness and plenty of good food.",
+        },
+        {
+          who: "For parents",
+          text: "Eid Mubarak, Ammi and Abbu. Thank you for every Eid you made special for us. May this one bring you health, joy and lots of time together.",
+        },
+        {
+          who: "For elders",
+          text: "Wishing you a blessed Eid. May this day bring you peace, good health and happiness, and may we celebrate many more together.",
+        },
+        {
+          who: "For friends",
+          text: "Eid Mubarak! Wishing you a day full of food, family and absolutely no one asking when you're getting married.",
+        },
+        {
+          who: "For family abroad",
+          text: "We'll miss you at the table this Eid. Sending you all our love and duas from here. Eid Mubarak!",
+        },
+        {
+          who: "Asking for Eidi",
+          text: "Eid Mubarak! I've been very good this year, so I'm sure you'll agree my Eidi should reflect that.",
+        },
+      ],
+      faqTitle: "Eid e-card questions",
+      faqs: [
+        {
+          q: "Can I use it for Eid al-Fitr and Eid al-Adha?",
+          a: "Yes. Every Eid design works for both. Write \"Eid Mubarak\" or your own words, and change any line to fit the Eid you're celebrating.",
+        },
+        {
+          q: "Eid depends on the moon. Can I still send it on the day?",
+          a: "Yes. Make it in advance, keep the link and send it yourself on WhatsApp or by text the moment Eid is announced. Your link is also in your receipt email, so it's easy to find on the day.",
+        },
+        {
+          q: "Can I write it in Urdu, Arabic or Bengali?",
+          a: "Yes. Type your words in any language and they'll show on the card just as you wrote them. If you answer our questions in your language, we'll write the card in it too. The buttons on the card stay in English.",
+        },
+        {
+          q: "Can I send it to family abroad?",
+          a: "Yes. It's a link, so it reaches anyone, anywhere, straight away and with no postage. One card can be shared in the family group, or you can make one for each person with their own name on it.",
+        },
+      ],
+    },
+    anniversary: {
+      title: "Anniversary e-cards with your story and photos · Envelette",
+      description: "Tell your story moment by moment with an interactive anniversary e-card: your photos, a quiz about your firsts, love coupons and a love letter.",
+      heading: "Interactive **anniversary** e-cards",
+      aboutTitle: "Your story so far, in a card",
+      about: [
+        "An anniversary e-card can hold more than a paper one. Tell your story moment by moment, from the day you met to today, add your favourite photos, set a quiz about your firsts or give them a book of love coupons. Then finish with a letter that writes itself out as they watch.",
+        "There's something for every year: understated and elegant for a milestone, cute and a little cheesy for a first anniversary, and one made for a computer where they type a secret password to unlock a wall of your photos. Change any word, and play it through before you pay.",
+      ],
+      writeTitle: "What to write in an anniversary card",
+      ideas: [
+        {
+          who: "First anniversary",
+          text: "One year down, and somehow you're even better than I thought. Thank you for the best year of my life. Here's to all the rest.",
+        },
+        {
+          who: "For your husband or wife",
+          text: "Happy anniversary. After all these years, you're still the one I want to tell everything to first. I'd still choose you, every time.",
+        },
+        {
+          who: "For a big anniversary",
+          text: "Twenty-five years, two houses, one very spoilt dog and a lot of laughing. Happy anniversary to my best friend.",
+        },
+        {
+          who: "Something funny",
+          text: "Happy anniversary to the only person who'd put up with me this long. Your prize is another year of me. Congratulations?",
+        },
+        {
+          who: "For your parents",
+          text: "Happy anniversary, Mum and Dad. Thank you for showing us what a lifetime of love looks like. We're so proud of you both.",
+        },
+        {
+          who: "Long distance",
+          text: "Another year of loving you across the miles, and every one of them is worth it. Happy anniversary, and see you very soon.",
+        },
+      ],
+      faqTitle: "Anniversary e-card questions",
+      faqs: [
+        {
+          q: "Can I tell our story with dates and photos?",
+          a: "Yes. The timeline screen shows your moments one at a time, each with its own date and a few words, and you can add up to 6 photos with captions. If a design doesn't have a timeline, you can add one.",
+        },
+        {
+          q: "What are love coupons?",
+          a: "A book of coupons they tap to redeem: breakfast in bed, a foot rub, you pick the film. You write your own, so they can be as sweet or as cheeky as you like.",
+        },
+        {
+          q: "Can I send it so it arrives on our anniversary?",
+          a: "Yes. Choose to have us email it, pick the date and it arrives at 9am your time. You can set it up to {days} days ahead.",
+        },
+        {
+          q: "Can they keep it?",
+          a: "Yes. The link keeps working, so they can open it again whenever they like, and there's a \"Play it again\" button at the end.",
+        },
+      ],
+    },
+    sorry: {
+      title: "Sorry e-cards they can't say no to · Envelette",
+      description: "Say sorry with an interactive e-card: a No button that runs away, a hug they press and hold, and coupons to make it up to them. Funny or sincere.",
+      heading: "Interactive **sorry** e-cards",
+      aboutTitle: "An apology that's hard to ignore",
+      about: [
+        "Sometimes sorry is easier to show than to say. A sorry e-card can be light-hearted, with a \"Will you forgive me?\" where the No button runs away and coupons to make it up to them, or completely sincere, with honest words and a few happier memories. You choose the tone, and every word is yours to change.",
+        "It arrives the moment you send it, so you're not waiting days for the post to do the talking. Send the link on WhatsApp or by text, or have us email it, and they can open it in their own time on any phone or computer.",
+      ],
+      writeTitle: "What to write in a sorry card",
+      ideas: [
+        {
+          who: "For a partner",
+          text: "I'm sorry. I was wrong, and I hate that I upset you. You matter more to me than being right, and I'll do better.",
+        },
+        {
+          who: "For small crimes",
+          text: "I'm sorry I ate your leftovers. In my defence, they were delicious. Please accept this card, and a fresh portion, as a peace offering.",
+        },
+        {
+          who: "For a friend",
+          text: "I've been a rubbish friend lately and I'm sorry. I miss you. Can I take you for a coffee and say it properly?",
+        },
+        {
+          who: "For family",
+          text: "I'm sorry for what I said. I didn't mean it, and I've felt awful ever since. I love you, and I hope we can talk soon.",
+        },
+        {
+          who: "For forgetting a date",
+          text: "I forgot, and there's no good excuse. I'm sorry. Let me make it up to you, starting with dinner: my treat, your choice.",
+        },
+        {
+          who: "Short and simple",
+          text: "No excuses, just sorry. I hope you can forgive me.",
+        },
+      ],
+      faqTitle: "Sorry card questions",
+      faqs: [
+        {
+          q: "Can it be serious rather than jokey?",
+          a: "Yes. [I'm Really Sorry](/cards/im-really-sorry) is a sincere design with no jokes, just your words and a few photos. You can also change the words on any design, so a playful one can become heartfelt and the other way round.",
+        },
+        {
+          q: "Can they say no?",
+          a: "On the playful designs, the No button runs away, so forgiveness is the only option (on the card, at least). If that feels too cheeky for what happened, choose a design without a question.",
+        },
+        {
+          q: "Will they know it's from me?",
+          a: "Yes. Your name is on the envelope and in the card. If we email it for you, the email says it's from you, with a button to open it.",
+        },
+        {
+          q: "এটা কি গোপন থাকে?",
+          a: "Yes. Only people with the link can open it, and cards are never listed or searchable, so what you say stays between you.",
+        },
+      ],
+    },
+    thanks: {
+      title: "Thank-you e-cards for teachers, nurses and friends · Envelette",
+      description: "Say thank you with an interactive e-card: they water a flower until it blooms, see your photos and read your message. For teachers, nurses, neighbours and friends.",
+      heading: "Interactive **thank-you** e-cards",
+      aboutTitle: "Thank you, said properly",
+      about: [
+        "A thank-you e-card is a lovely way to tell someone they made a difference. They water a little plant until it blooms, flick through a gallery of photos or play a memory game, then read your message, finishing in confetti or petals. It works just as well for a teacher at the end of term as for a neighbour who fed the cat.",
+        "For a group thank-you, Gallery of Thanks has room for up to 6 photos: one card from the whole class, ward or team. Send it as a link in the group chat, or have us email it for you on the day you choose.",
+      ],
+      writeTitle: "What to write in a thank-you card",
+      ideas: [
+        {
+          who: "For a teacher",
+          text: "Thank you for a brilliant year. You made learning fun, believed in our little one and never ran out of patience. We'll miss you!",
+        },
+        {
+          who: "For a nurse or carer",
+          text: "Thank you for your kindness, your patience and your care when we needed it most. You made a hard time so much easier, and we'll never forget it.",
+        },
+        {
+          who: "For a neighbour",
+          text: "Thank you for keeping an eye on the house, taking in the parcels and feeding the cat. We're lucky to live next door to you.",
+        },
+        {
+          who: "For a friend",
+          text: "Thank you for turning up when it mattered. I don't say it enough, but I'm so grateful for you.",
+        },
+        {
+          who: "For a colleague",
+          text: "Thank you for all your help with this. I couldn't have done it without you, and the biscuits are on me next week.",
+        },
+        {
+          who: "For a host",
+          text: "Thank you for having us. The food, the company and the late-night chats were exactly what we needed. Next time, it's our turn.",
+        },
+      ],
+      faqTitle: "Thank-you card questions",
+      faqs: [
+        {
+          q: "Can a whole class or team send one card?",
+          a: "Yes. One person makes it, and it can be from everyone: put \"Everyone in Year 6\" in the From line, add group photos and write messages from the whole group. Then share the link or have us email it.",
+        },
+        {
+          q: "Is it a good thank-you for a teacher?",
+          a: "Teachers get a lot of mugs. A card they can play, with photos from the year and words from your child, is something different that they can keep and open again. They don't need to download anything.",
+        },
+        {
+          q: "Can you email it to them?",
+          a: "Yes. Give us their email address in your basket and we'll send it with a button to open it, straight away or at 9am your time on a day you pick, up to {days} days ahead.",
+        },
+        {
+          q: "How much does a thank-you e-card cost?",
+          a: "{price} per card, paid once, with no subscription. Less than a box of chocolates, and it won't melt.",
+        },
+      ],
+    },
+    congrats: {
+      title: "Congratulations e-cards for big wins · Envelette",
+      description: "Congratulations e-cards for new jobs, exams, graduations and promotions: pop the balloons, pull the jackpot and tell them just how proud you are.",
+      heading: "Interactive **congrats** e-cards",
+      aboutTitle: "For big wins, and all the others",
+      about: [
+        "New job, exam results, a graduation, a promotion or finally passing their driving test: a congratulations e-card lets them celebrate properly. They pop the balloons, pull a slot machine for the jackpot or take a (very easy) genius test, then try to rate how proud you are on a slider that only goes up.",
+        "It takes a few minutes to make and you get the link as soon as you've paid, so it can be with them while the news is still fresh. Add photos of the big day, change every word, and play it through before you pay.",
+      ],
+      writeTitle: "What to write in a congratulations card",
+      ideas: [
+        {
+          who: "New job",
+          text: "Congratulations on the new job! They're lucky to have you. Go and show them how it's done (and find out where the good biscuits are).",
+        },
+        {
+          who: "Exam results",
+          text: "You worked so hard for this and it shows. Congratulations on your results, we're all so proud of you.",
+        },
+        {
+          who: "Graduation",
+          text: "Congratulations, graduate! All those late nights paid off. We can't wait to see what you do next.",
+        },
+        {
+          who: "Promotion",
+          text: "Congratulations on the promotion! Nobody deserves it more. Drinks are on you, obviously.",
+        },
+        {
+          who: "Driving test",
+          text: "You passed! Congratulations. The roads will never be the same. Please don't ask to borrow the car just yet.",
+        },
+        {
+          who: "From the family",
+          text: "Whatever you do next, we'll be cheering you on. We're so proud of you. Congratulations, from all of us.",
+        },
+      ],
+      faqTitle: "Congratulations e-card questions",
+      faqs: [
+        {
+          q: "Which occasions are these for?",
+          a: "Anything worth celebrating: new jobs, promotions, exams, graduations, driving tests and big wins of every kind. You can change every word, so the card says exactly what they achieved.",
+        },
+        {
+          q: "Can I add photos of the big day?",
+          a: "Yes, up to 6, each with a caption. If a design has no photos screen, you can add one at no extra cost.",
+        },
+        {
+          q: "How quickly can I send it?",
+          a: "Straight away. It takes a few minutes to make, and you get the link as soon as you've paid. Send it on WhatsApp or by text, or have us email it.",
+        },
+        {
+          q: "Do they need an app to open it?",
+          a: "No. It opens in their web browser on any phone, tablet or computer, and they don't need an account either.",
+        },
+      ],
+    },
+    halloween: {
+      title: "Halloween e-cards: trick or treat, ghosts and sweets · Envelette",
+      description: "A Halloween e-card with a Trick button that runs away, ghosts to whack, sweets to catch and spooky music. Silly, only a little bit scary, sent as a link.",
+      heading: "Interactive **Halloween** e-cards",
+      aboutTitle: "Spooky, silly and only a little bit scary",
+      about: [
+        "\"Trick or treat?\" they're asked, and the Trick button runs away. Then they whack the ghosts, catch falling sweets and finish in a swirl of bats and ghosts, with spooky music playing. There's a cute one for your other half, too, and a haunted house for laptops where they type the password to get in.",
+        "A Halloween e-card is perfect for nieces, nephews and grandchildren who live too far away to trick-or-treat at your door. Send it as a link on the 31st, or have us email it at 9am your time.",
+      ],
+      writeTitle: "What to write in a Halloween card",
+      ideas: [
+        {
+          who: "For children",
+          text: "Happy Halloween! I hope you get loads of sweets and only get a little bit scared. Save me a chocolate!",
+        },
+        {
+          who: "For grandchildren",
+          text: "Happy Halloween from Grandma and Grandad! We can't wait to see your costume. Don't eat all your sweets at once.",
+        },
+        {
+          who: "For your other half",
+          text: "Happy Halloween to my favourite boo. You're the only one I'd share my sweets with. Mostly.",
+        },
+        {
+          who: "For friends",
+          text: "Happy Halloween! Here's to too many sweets, a terrifying film and someone screaming when the doorbell goes. Probably you.",
+        },
+        {
+          who: "Something spooky",
+          text: "Something's watching you... It's us, wishing you a happy Halloween. Mwahaha.",
+        },
+        {
+          who: "For the office",
+          text: "Happy Halloween, team! The scariest thing this week is the inbox. Treats are in the kitchen.",
+        },
+      ],
+      faqTitle: "Halloween e-card questions",
+      faqs: [
+        {
+          q: "Is it too scary for children?",
+          a: "No. The Halloween cards are silly rather than frightening: cartoon ghosts, bats and sweets, with music that's more fun than fright. If it's too much, the sound can be turned off with the button in the corner.",
+        },
+        {
+          q: "Can I send it to the grandchildren?",
+          a: "Yes. It's a link, so it reaches them anywhere, straight away. Send it to a parent's phone on WhatsApp or have us email it, and they can play it together on a phone, tablet or computer.",
+        },
+        {
+          q: "এতে কি সাউন্ড আছে?",
+          a: "Yes. Halloween designs play spooky music when they open the envelope, with sound effects for the games, and there's a mute button in the corner.",
+        },
+        {
+          q: "When should I send it?",
+          a: "Any time in the run-up, or on the day itself. Choose to have us email it, pick the 31st and it arrives at 9am your time, well before the trick-or-treating starts.",
+        },
+      ],
+    },
+    newyear: {
+      title: "Happy New Year e-cards with fireworks · Envelette",
+      description: "Wish them a happy New Year with an interactive e-card: midnight fireworks they launch themselves, a resolution wheel and a look back at your year together.",
+      heading: "Interactive **New Year** e-cards",
+      aboutTitle: "Fireworks at midnight, wherever they are",
+      about: [
+        "They launch their own midnight fireworks, spin a wheel for their New Year's resolution (it's rigged, so you choose) or shake their phone like a bottle of bubbly until the cork pops. For a quieter card, look back on your year month by month with your photos and a jar of the best bits.",
+        "A New Year e-card is ideal for friends and family in other time zones: send the link at your midnight or at theirs, or have us email it at 9am your time on New Year's Day. It reaches them instantly, wherever they're celebrating.",
+      ],
+      writeTitle: "What to write in a New Year card",
+      ideas: [
+        {
+          who: "For family",
+          text: "Happy New Year! Thank you for every laugh this year. Here's to health, happiness and more time together in the next one.",
+        },
+        {
+          who: "For friends",
+          text: "Happy New Year! Same plan as always: big resolutions on the 1st, cheese board by the 3rd. Wouldn't have it any other way.",
+        },
+        {
+          who: "For a partner",
+          text: "Another year with you, and it was my favourite yet. Happy New Year. I can't wait to see what the next one brings us.",
+        },
+        {
+          who: "For someone far away",
+          text: "We'll raise a glass to you at midnight. Happy New Year from all of us, and here's to seeing much more of you this year.",
+        },
+        {
+          who: "For colleagues",
+          text: "Happy New Year to the best team. Thank you for all your hard work, and here's to an even better year ahead.",
+        },
+        {
+          who: "Looking back",
+          text: "What a year. Thank you for being part of all the best bits. Happy New Year, and here's to the next twelve months.",
+        },
+      ],
+      faqTitle: "New Year e-card questions",
+      faqs: [
+        {
+          q: "Can it arrive at midnight?",
+          a: "We can email it at 9am your time on the day you choose, so New Year's Day works perfectly. For midnight on the dot, get the link after paying and send it yourself on WhatsApp or by text as the clock strikes twelve.",
+        },
+        {
+          q: "Can it look back on our year?",
+          a: "Yes. [Our Year in Review](/cards/year-in-review) shows your best moments month by month, with up to 6 photos and a jar of highlights. Every moment and caption is yours to write.",
+        },
+        {
+          q: "Is the resolution wheel really rigged?",
+          a: "If you want it to be. You can choose where the wheel lands, so their resolution can be \"more holidays\" or \"ring your mother more\". Or leave it to chance.",
+        },
+        {
+          q: "Can I send one to everyone?",
+          a: "Yes. Anyone with the link can open it, so one card can go in the group chat. Or make a few, add them to your basket and pay for them together.",
+        },
+      ],
+    },
+    mothersday: {
+      title: "Mother's Day e-cards: grow Mum a flower · Envelette",
+      description: "A Mother's Day e-card she'll keep opening: she grows a flower, reads your message, sees your photos and gets a coupon book to use all year.",
+      heading: "Interactive **Mother's Day** e-cards",
+      aboutTitle: "For the mum who has everything (except this)",
+      about: [
+        "She waters a little plant until it blooms, reads your message and sees your photos together. Or she gets a coupon book she can actually use all year, a hug she presses and holds to receive, or a quiz about who her favourite child is (with only one right answer).",
+        "A Mother's Day e-card is perfect if you live far away, or if Mum keeps everything on her phone. It's a link, so she just taps it, with nothing to download. Have us email it at 9am your time on Mothering Sunday, or send it on WhatsApp the night before so it's waiting when she wakes up.",
+      ],
+      writeTitle: "What to write in a Mother's Day card",
+      ideas: [
+        {
+          who: "For Mum",
+          text: "Happy Mother's Day, Mum. Thank you for everything you've done, everything you still do and every time you pretended my cooking was nice.",
+        },
+        {
+          who: "আন্তরিক",
+          text: "Mum, you've been my biggest fan, my safe place and my best advice. I don't say it enough: thank you, and I love you.",
+        },
+        {
+          who: "Something funny",
+          text: "Happy Mother's Day to the woman who still knows when I'm fibbing. Just so you know, I'm your favourite. This card proves it.",
+        },
+        {
+          who: "From far away",
+          text: "I wish I could be there to bring you breakfast in bed. For now, here's a card, a big hug and a coupon for when I'm home.",
+        },
+        {
+          who: "For a new mum",
+          text: "Happy first Mother's Day! You're already an amazing mum. We hope today involves a nap, a hot cup of tea and lots of cuddles.",
+        },
+        {
+          who: "For Gran",
+          text: "Happy Mother's Day, Gran. Thank you for the cuddles, the stories and always keeping the biscuit tin full.",
+        },
+      ],
+      faqTitle: "Mother's Day e-card questions",
+      faqs: [
+        {
+          q: "Will Mum be able to open it?",
+          a: "Yes. She taps the link and it opens in her web browser on any phone, tablet or computer, with nothing to download and no account to make. Then she taps the envelope, the music starts and the card plays one screen at a time.",
+        },
+        {
+          q: "Can I make her a coupon book?",
+          a: "Yes. [Mum's Coupon Book](/cards/mums-coupon-book) has coupons she can cash in all year, and you write your own: a Sunday roast, a day out, the washing-up for a week. She taps each one to redeem it.",
+        },
+        {
+          q: "Is this for UK Mother's Day?",
+          a: "It works for any Mother's Day, wherever you are. The date we show is Mothering Sunday in the UK, but you can send your card whenever you like, or have us email it on the day you pick.",
+        },
+        {
+          q: "Can I add old family photos?",
+          a: "Yes, up to 6, each with a caption. Take a photo of an old print with your phone and add it like any other picture.",
+        },
+      ],
+    },
+    fathersday: {
+      title: "Father's Day e-cards with dad jokes · Envelette",
+      description: "A Father's Day e-card with a quiz of terrible dad jokes, your photos and a proper thank you. Made in minutes and sent to Dad as a link.",
+      heading: "Interactive **Father's Day** e-cards",
+      aboutTitle: "For Dad (and his jokes)",
+      about: [
+        "A quiz of terrible dad jokes he'll pretend not to love, a slider that won't let you call his jokes unfunny and three mystery presents that all turn out to be ties. If you'd rather go heartfelt, tell the story of growing up with Dad, moment by moment, with your photos and a proper thank you.",
+        "A Father's Day e-card works for dads who are always on their phone and dads who aren't: he taps the link and it opens, with nothing to download. Have us email it at 9am your time on the day, or send it on WhatsApp.",
+      ],
+      writeTitle: "What to write in a Father's Day card",
+      ideas: [
+        {
+          who: "For Dad",
+          text: "Happy Father's Day, Dad. Thank you for the lifts, the advice, the terrible jokes and for always being there. I love you.",
+        },
+        {
+          who: "Something funny",
+          text: "Happy Father's Day to the man who taught me everything I know. Not the jokes, though. Those are all yours.",
+        },
+        {
+          who: "আন্তরিক",
+          text: "Dad, you showed me how to be kind, how to work hard and how to laugh at myself. I'm so proud to be your kid.",
+        },
+        {
+          who: "From far away",
+          text: "Wish I could be there to buy you a pint. Have one for me, and happy Father's Day from miles away.",
+        },
+        {
+          who: "For a new dad",
+          text: "Happy first Father's Day! You're a natural. We hope today involves a lie-in (we know it won't).",
+        },
+        {
+          who: "For Grandad",
+          text: "Happy Father's Day, Grandad. Thank you for the stories, the sweets and the best advice. You're one of a kind.",
+        },
+      ],
+      faqTitle: "Father's Day e-card questions",
+      faqs: [
+        {
+          q: "Can I write my own dad jokes?",
+          a: "Please do. [The Dad Joke Quiz](/cards/dad-joke-quiz) comes with some truly awful ones, and you can swap any question or answer for his own favourites.",
+        },
+        {
+          q: "Is there a more sentimental one?",
+          a: "Yes. [Best Dad Ever](/cards/best-dad-ever) tells the story of growing up with Dad, moment by moment, with your photos and a heartfelt thank you. You can change every word.",
+        },
+        {
+          q: "Is this for UK Father's Day?",
+          a: "It works for any Father's Day. The date we show is the third Sunday in June, which is Father's Day in the UK, the US and many other countries, but you can send your card whenever you like.",
+        },
+        {
+          q: "Will Dad need to download anything?",
+          a: "No. He taps the link and it opens in his web browser on any phone, tablet or computer. No app and no account.",
+        },
+      ],
+    },
+    rakhi: {
+      title: "Raksha Bandhan e-cards for brothers and sisters · Envelette",
+      description: "Raksha Bandhan e-cards for your brother or sister: a promise they can't refuse, gift coupons they owe you and your photos growing up. Sent anywhere, instantly.",
+      heading: "Interactive **Raksha Bandhan** e-cards",
+      aboutTitle: "For your brother or sister, wherever they are",
+      about: [
+        "A Raksha Bandhan e-card full of the things siblings do best: a promise where \"No\" isn't an option, a book of rakhi gifts they owe you, a quiz to settle who Mum loves most and a slot machine for your rakhi present. Add photos of the two of you growing up and finish with a shower of sparkles.",
+        "If you can't tie a rakhi in person this year, a digital card gets your love there on the day, wherever they live. Send the link on WhatsApp, share it in the family group or have us email it at 9am your time.",
+      ],
+      writeTitle: "What to write in a Raksha Bandhan card",
+      ideas: [
+        {
+          who: "For a brother",
+          text: "Happy Raksha Bandhan, bhaiya. Thank you for always looking out for me, even when I drove you mad. Now, about my gift...",
+        },
+        {
+          who: "For a sister",
+          text: "Happy Rakhi, didi. You've been my protector, my partner in crime and my best friend. I promise to always be there for you.",
+        },
+        {
+          who: "From far away",
+          text: "I can't tie your rakhi this year, so this card will have to do. Consider it tied, with all my love. Happy Raksha Bandhan.",
+        },
+        {
+          who: "Something funny",
+          text: "Happy Raksha Bandhan! The rakhi's tied, so you now owe me a present. I accept cash, chocolate and compliments.",
+        },
+        {
+          who: "For a younger brother",
+          text: "To my little brother, who's somehow taller than me now: happy Rakhi. I'll always have your back, even if I have to look up to do it.",
+        },
+        {
+          who: "আন্তরিক",
+          text: "Thank you for every fight, every secret and every time you took my side. Happy Raksha Bandhan. I'm so lucky you're mine.",
+        },
+      ],
+      faqTitle: "Raksha Bandhan e-card questions",
+      faqs: [
+        {
+          q: "Can I send a rakhi card to my brother abroad?",
+          a: "Yes. It's sent as a link, so it reaches them anywhere in the world the moment you send it, with no postage. It costs {price}, and you can pay in your own currency.",
+        },
+        {
+          q: "Is it for brothers or sisters?",
+          a: "Both. The Raksha Bandhan cards work for brothers, sisters and cousins, and you can change every word to fit whoever you're sending it to.",
+        },
+        {
+          q: "Can I tell them which gift I want?",
+          a: "That's what [The Rakhi Promise](/cards/rakhi-promise) is for: a book of rakhi gift coupons they owe you, which you write yourself. [Sibling Rivalry](/cards/sibling-rivalry) has a slot machine that lands on your rakhi present.",
+        },
+        {
+          q: "Can the rest of the family see it?",
+          a: "If you like. Anyone with the link can open it, so you can share it in the family group as well as sending it to them.",
+        },
+      ],
+    },
+    holi: {
+      title: "Happy Holi e-cards: throw colours, no stains · Envelette",
+      description: "Send Holi wishes with an interactive e-card: they splash colour across the screen with a finger, spin for their colour and see your photos. No stains.",
+      heading: "Interactive **Holi** e-cards",
+      aboutTitle: "All the colour, none of the stains",
+      about: [
+        "They splash colour all over the screen with a finger, spin a wheel to find out their colour and try to say no to Holi (the button runs away). Then come your Holi photos and wishes, finishing in an explosion of colour.",
+        "A Holi e-card is the next best thing to being there, for family in India or friends who can't make the party. Send the link on WhatsApp the moment the colours start, or have us email it at 9am your time on the day.",
+      ],
+      writeTitle: "What to write in a Holi card",
+      ideas: [
+        {
+          who: "For family",
+          text: "Happy Holi! Wishing you a day full of colour, laughter, gujiya and absolutely no white clothes.",
+        },
+        {
+          who: "For friends",
+          text: "Happy Holi! I'd throw a bucket of colour at you if I could, so this card will have to do. Bura na mano, Holi hai!",
+        },
+        {
+          who: "From far away",
+          text: "Wish I was there to cover you in colour. Happy Holi from all of us, and have a brilliant day.",
+        },
+        {
+          who: "For a partner",
+          text: "You make every day more colourful. Happy Holi, my love.",
+        },
+        {
+          who: "For colleagues",
+          text: "Wishing you and your family a happy and colourful Holi. Enjoy the celebrations!",
+        },
+        {
+          who: "For elders",
+          text: "Wishing you a joyful Holi full of colour, good health and happiness. Sending love and respect from all of us.",
+        },
+      ],
+      faqTitle: "Holi e-card questions",
+      faqs: [
+        {
+          q: "How does the colour game work?",
+          a: "They splash colour all over the screen with a finger, or with the mouse on a computer. It's best on a phone, and there's nothing to clean up afterwards.",
+        },
+        {
+          q: "Can I send it to family in India?",
+          a: "Yes. It's a link, so it reaches them instantly, anywhere, with no postage. Send it on WhatsApp or by email, and it opens in their browser with nothing to download.",
+        },
+        {
+          q: "Can I add our Holi photos?",
+          a: "Yes, up to 6, each with a caption. Last year's colourful photos are perfect.",
+        },
+        {
+          q: "How much is a Holi e-card?",
+          a: "{price} per card, paid once. You can play it right through before you pay, so you'll know exactly what they'll see.",
+        },
+      ],
+    },
+    newbaby: {
+      title: "New baby e-cards and scratch-to-reveal announcements · Envelette",
+      description: "Welcome a new baby with a lullaby e-card, or share big news with a scratch card they reveal with a finger: a pregnancy announcement or a gender reveal.",
+      heading: "Interactive **new baby** e-cards",
+      aboutTitle: "Welcome the little one, or share the big news",
+      about: [
+        "For new parents, there's a soft lullaby, wishes for the baby pulled one by one from a jar and a warm welcome message. For parents-to-be, there are scratch cards: a pregnancy announcement they scratch off with a finger, or a gender reveal where they guess first and then scratch to find out.",
+        "Big news travels fast as a digital card. Grandparents-to-be, aunties and friends abroad all find out the moment you send it, and they can open it again whenever they like. Send one to each person, or share one link in the family group.",
+      ],
+      writeTitle: "What to write in a new baby card",
+      ideas: [
+        {
+          who: "For new parents",
+          text: "Congratulations on your beautiful new arrival! Wishing you all the love in the world, and at least a few hours' sleep.",
+        },
+        {
+          who: "Welcome to the world",
+          text: "Welcome to the world, little one! You're already so loved. Congratulations to the proud new parents.",
+        },
+        {
+          who: "From grandparents",
+          text: "Our hearts are full. Welcome to the family, little one. We can't wait for all the cuddles (and the spoiling).",
+        },
+        {
+          who: "Something funny",
+          text: "Congratulations! Your days of lie-ins are officially over, but trust us, it's worth it.",
+        },
+        {
+          who: "Announcing a pregnancy",
+          text: "We have some news... We're having a baby! It's due in the spring, and we couldn't wait to tell you.",
+        },
+        {
+          who: "For a gender reveal",
+          text: "Pink or blue? Make your guess, then scratch to find out. We're so excited to share this with you.",
+        },
+      ],
+      faqTitle: "New baby e-card questions",
+      faqs: [
+        {
+          q: "How does scratch to reveal work?",
+          a: "A silver panel covers your news, and they scratch it away with a finger, just like a scratch card. It works with a mouse on a computer too, but it's best on a phone.",
+        },
+        {
+          q: "Can I announce our pregnancy to the grandparents?",
+          a: "Yes, that's what [We Have Big News](/cards/big-news) is for. They answer a question, scratch off the panel and find out. You can change every word, so it says exactly what you want.",
+        },
+        {
+          q: "Can I keep it secret until the day?",
+          a: "Yes. Make it now and have us email it at 9am your time on the day you choose, up to {days} days ahead. Or keep the link and send it yourself when you're ready.",
+        },
+        {
+          q: "Can I add a scan photo or baby photos?",
+          a: "Yes, up to 6 photos, each with a caption. They're resized on your phone before upload, and the hidden location data is removed.",
+        },
+      ],
+    },
+    wedding: {
+      title: "Wedding and proposal e-cards · Envelette",
+      description: "Interactive wedding e-cards: propose with a No button that runs away, ask your bridesmaids, or toast the happy couple with photos and confetti.",
+      heading: "Interactive **wedding** e-cards",
+      aboutTitle: "From \"Will you?\" to \"I do\"",
+      about: [
+        "Propose with your story so far, your photos and then the question, with a No button that runs away. Ask your best friend to be a bridesmaid, with a book of bridesmaid perks to sweeten the deal. Or, as a guest, toast the happy couple with their photos, a quiz about the big day and a shower of confetti.",
+        "A wedding e-card is perfect when you can't be there, or when the present is off the list and you want your words to arrive on the day. Have us email it at 9am your time on the wedding morning, or send the link to the couple yourself.",
+      ],
+      writeTitle: "What to write in a wedding card",
+      ideas: [
+        {
+          who: "For the happy couple",
+          text: "Congratulations on your wedding! Wishing you a lifetime of love, laughter and someone else doing the washing-up.",
+        },
+        {
+          who: "আন্তরিক",
+          text: "Watching you two together is a joy. May your marriage be full of adventure, kindness and the kind of love that grows every year.",
+        },
+        {
+          who: "If you can't be there",
+          text: "We're so sorry to miss your big day, but we'll be raising a glass to you from here. Congratulations to you both.",
+        },
+        {
+          who: "Asking a bridesmaid",
+          text: "You've been by my side through everything, so it had to be you. Will you be my bridesmaid? (The No button doesn't work, sorry.)",
+        },
+        {
+          who: "A proposal",
+          text: "From our first date to today, every moment has led here. I love you more than I can say. Will you marry me?",
+        },
+        {
+          who: "From family",
+          text: "We're so proud of you both. Welcome to the family, and congratulations on a beautiful day.",
+        },
+      ],
+      faqTitle: "Wedding e-card questions",
+      faqs: [
+        {
+          q: "Can I propose with a card?",
+          a: "Yes. [Will You Marry Me?](/cards/will-you-marry-me) tells your story moment by moment, shows your photos and then asks the question. The No button runs away, so there's only one answer. Ring not included.",
+        },
+        {
+          q: "Can I send one if I can't make the wedding?",
+          a: "Of course. [To the Happy Couple](/cards/to-the-happy-couple) has their photos, a quiz about the big day and a toast in confetti. Have us email it at 9am your time on the wedding day, so it's there with all the other cards.",
+        },
+        {
+          q: "Can I ask my bridesmaids with it?",
+          a: "Yes. [Will You Be My Bridesmaid?](/cards/be-my-bridesmaid) asks the question (No runs away) and comes with a book of bridesmaid perks you write yourself. Make one for each bridesmaid, with her own name on the envelope.",
+        },
+        {
+          q: "Can I use our wedding photos?",
+          a: "Yes, up to 6, each with a caption. They're resized on your phone before upload, which also removes hidden location data.",
+        },
+      ],
+    },
+    getwell: {
+      title: "Get well soon e-cards with a hug they can hold · Envelette",
+      description: "A get well soon e-card with a hug they press and hold, prescriptions for naps and ice cream, and bubble wrap to pop. Cheers up anyone stuck on the sofa.",
+      heading: "Interactive **get well soon** e-cards",
+      aboutTitle: "A little cheer for the sofa",
+      about: [
+        "A hug they press and hold to receive, a prescription pad from \"Dr You\" with orders for naps and ice cream, and a sheet of bubble wrap to pop while they're stuck in bed. Then a warm message and a gentle finish of floating bubbles.",
+        "A get well soon e-card arrives straight away, which matters when someone's poorly. They can open it in bed on their phone, with nothing to download, and play it again whenever they need cheering up.",
+      ],
+      writeTitle: "What to write in a get well soon card",
+      ideas: [
+        {
+          who: "For a friend",
+          text: "Sorry to hear you're under the weather. Doctor's orders: rest, tea, terrible telly and no checking work emails. Get well soon!",
+        },
+        {
+          who: "After an operation",
+          text: "Thinking of you and hoping you feel a little better every day. Take it slowly, and shout if you need anything at all.",
+        },
+        {
+          who: "For family",
+          text: "Sending you the biggest hug and lots of love. We miss you being up and about, so hurry up and get better (but not too fast).",
+        },
+        {
+          who: "For a colleague",
+          text: "Get well soon from all of us. The office is far too quiet without you. Take all the time you need.",
+        },
+        {
+          who: "Something funny",
+          text: "Heard you're poorly. I'd bring soup, but you've tasted my cooking. Have this card instead. Get well soon!",
+        },
+        {
+          who: "For a child",
+          text: "Get well soon, superstar! Lots of rest, lots of cuddles and maybe some ice cream. We love you.",
+        },
+      ],
+      faqTitle: "Get well soon card questions",
+      faqs: [
+        {
+          q: "Is it right for someone who's quite unwell?",
+          a: "Yes. [Get Well Soon](/cards/get-well-soon) is gentle and warm, with a hug they press and hold and a kind message. You can change every word, so it's right for them, whether it's a cold or something more serious.",
+        },
+        {
+          q: "Can they open it in hospital?",
+          a: "If they have their phone and an internet connection, yes. It opens in the web browser with nothing to download, and there's a mute button for quiet wards.",
+        },
+        {
+          q: "Can I send it straight away?",
+          a: "Yes. It takes a few minutes to make, and you get the link as soon as you've paid. Send it on WhatsApp or by text, or we can email it for you.",
+        },
+        {
+          q: "How much is it?",
+          a: "{price} per card, paid once. Cheaper than a bunch of flowers, and it won't wilt.",
+        },
+      ],
+    },
+    missyou: {
+      title: "Miss you e-cards for long distance · Envelette",
+      description: "Miss you e-cards for long distance: a hug they press and hold, a jar of things you miss about them and coupons for when you're together again.",
+      heading: "Interactive **miss you** e-cards",
+      aboutTitle: "For when the miles feel long",
+      about: [
+        "For long distance of every kind: a partner on the other side of the world, a child away at university or a best friend who moved away. They press and hold to receive a hug from you, pull notes from a jar of things you miss about them and see your photos together, or count the days on a slider that only goes up.",
+        "Because it's an e-card, it gets there the moment you send it, whatever the time difference. Send it on WhatsApp, by text or by email, and they can open it again whenever they're missing you.",
+      ],
+      writeTitle: "What to write in a miss you card",
+      ideas: [
+        {
+          who: "For a partner",
+          text: "The flat is far too quiet without you. Counting down the days until I can hug you properly. I miss you so much.",
+        },
+        {
+          who: "For a child at university",
+          text: "The house is very tidy and very quiet. We miss you loads. Eat a vegetable, ring your mum and come home soon.",
+        },
+        {
+          who: "For a best friend",
+          text: "Nobody else gets my jokes. Come back, or at least ring me more. Miss you, always.",
+        },
+        {
+          who: "For family abroad",
+          text: "Every time something good happens, you're the first person I want to tell. Missing you from here, and sending all our love.",
+        },
+        {
+          who: "For grandparents",
+          text: "We miss you lots and can't wait to see you again. Here's a big hug to keep until we do.",
+        },
+        {
+          who: "Short and sweet",
+          text: "Just thinking of you. That's all. Miss you.",
+        },
+      ],
+      faqTitle: "Miss you card questions",
+      faqs: [
+        {
+          q: "How does the hug work?",
+          a: "They press and hold their finger on the screen, or the mouse button on a computer, to receive your hug. It's a small, warm moment from far away.",
+        },
+        {
+          q: "Does it work across time zones?",
+          a: "Yes. It's a link, so it reaches them the moment you send it, wherever they are. If we email it on a day you choose, it arrives at 9am your time, so pick a day that suits their morning too.",
+        },
+        {
+          q: "Can I write what we'll do when we're together again?",
+          a: "Yes. [Counting the Days](/cards/counting-the-days) comes with coupons for everything you'll do when you're together again, and you write your own: the first takeaway, the long walk, the lie-in.",
+        },
+        {
+          q: "Can they keep it?",
+          a: "Yes. Cards stay at their link, so they can open it again whenever they miss you. There's a \"Play it again\" button at the end, too.",
+        },
+      ],
+    },
+    friendship: {
+      title: "Best friend e-cards with a bestie quiz · Envelette",
+      description: "Best friend e-cards with a bestie quiz, friendship coupons and a gallery of your most iconic photos together. For your favourite person to text.",
+      heading: "Interactive **best friend** e-cards",
+      aboutTitle: "For your favourite person to text",
+      about: [
+        "A bestie quiz to prove how well they know you, a slider rating what a good friend you are (it only goes up), a book of best-friend coupons for 2am chats and emergency snacks, and a gallery of your most iconic photos together. Silly, sweet, or both.",
+        "Send a best friend e-card for a birthday, a hard week or no reason at all. It arrives as a link on WhatsApp or by text, opens in their browser and can be played again every time they need reminding how much you love them.",
+      ],
+      writeTitle: "What to write in a best friend card",
+      ideas: [
+        {
+          who: "Just because",
+          text: "No reason, I just wanted to say you're the best. Thank you for being my person.",
+        },
+        {
+          who: "Something funny",
+          text: "You know far too much. That's why we have to stay friends forever.",
+        },
+        {
+          who: "আন্তরিক",
+          text: "Through every bad haircut, break-up and brilliant night out, you've been there. I'm so lucky to have you.",
+        },
+        {
+          who: "After a hard week",
+          text: "I know things have been tough. I'm always here: for chats, for chocolate, for sitting in silence. Love you.",
+        },
+        {
+          who: "Friends for years",
+          text: "Twenty years of friendship and you still make me laugh until I cry. Here's to twenty more.",
+        },
+        {
+          who: "For a new friend",
+          text: "Funny how quickly you became one of my favourite people. I'm so glad we met.",
+        },
+      ],
+      faqTitle: "Best friend card questions",
+      faqs: [
+        {
+          q: "Can I write the quiz questions myself?",
+          a: "Yes. [The Bestie Quiz](/cards/bestie-quiz) comes with questions to get you started, and you can swap any of them for your own inside jokes. Only they'll get the answers right.",
+        },
+        {
+          q: "Is it just for birthdays?",
+          a: "Not at all. Send one for a birthday, to say thank you, to cheer them up or just because. Change every word to fit the moment.",
+        },
+        {
+          q: "What are friendship coupons?",
+          a: "A book of coupons they tap to redeem: a 2am chat, emergency snacks, a film night. You write your own, so they can be as daft as your friendship.",
+        },
+        {
+          q: "Can I send it to a group of friends?",
+          a: "Yes. Anyone with the link can open it, so you can share one card in the group chat. Or make one for each friend, with their own name on the envelope.",
+        },
+      ],
+    },
+    leaving: {
+      title: "Leaving e-cards for colleagues · Envelette",
+      description: "Leaving e-cards for a colleague who's moving on: everything the team will miss, your photos and good luck wishes. Easy to share in the team chat.",
+      heading: "Interactive **leaving** e-cards",
+      aboutTitle: "A proper send-off",
+      about: [
+        "When a colleague moves on, give them a card they'll actually remember: everything the team will miss about them, photos from work, a leaving-present slot machine and good luck wishes from everyone. There's a funny one, too, that flatly refuses to accept they're leaving.",
+        "A leaving e-card is easy for remote and hybrid teams: one person makes it, puts the team's name in the From line and shares the link in the team chat, so everyone can see it. Or have us email it to them on their last day, at 9am your time.",
+      ],
+      writeTitle: "What to write in a leaving card",
+      ideas: [
+        {
+          who: "For a colleague",
+          text: "It won't be the same without you. Thank you for the help, the laughs and the tea. Good luck with everything, and keep in touch!",
+        },
+        {
+          who: "For a manager",
+          text: "Thank you for being such a brilliant manager. You backed us, taught us loads and made work a better place. You'll be missed.",
+        },
+        {
+          who: "Something funny",
+          text: "We've decided you're not allowed to leave. If you insist, at least tell us where you hid the good biscuits.",
+        },
+        {
+          who: "For a retirement",
+          text: "Congratulations on your retirement! Enjoy the lie-ins, the garden and never setting an alarm again. You've earned every minute.",
+        },
+        {
+          who: "Moving abroad",
+          text: "Good luck on your big adventure. Send photos, find the best coffee and remember us when you're famous.",
+        },
+        {
+          who: "From the team",
+          text: "From all of us: thank you for everything you've brought to the team. Wherever you go next, they're lucky to have you.",
+        },
+      ],
+      faqTitle: "Leaving card questions",
+      faqs: [
+        {
+          q: "Can the whole team sign it?",
+          a: "One person puts it together, and it's from everyone: write the team's name in the From line, add photos from work and messages from the team on the screens. Then share the link in the team chat.",
+        },
+        {
+          q: "Is it suitable for work?",
+          a: "Yes. [Sad to See You Go](/cards/sad-to-see-you-go) is warm and professional, and you can change every word to suit your workplace. [You Can't Leave](/cards/you-cant-leave) is for teams who like a laugh.",
+        },
+        {
+          q: "Can it arrive on their last day?",
+          a: "Yes. Choose to have us email it, pick their last day and it arrives at 9am your time. You can set it up to {days} days ahead.",
+        },
+        {
+          q: "Do they need to download anything?",
+          a: "No. It opens in the web browser on any phone or computer, so it works on a work laptop too.",
+        },
+      ],
+    },
+  },
 };
