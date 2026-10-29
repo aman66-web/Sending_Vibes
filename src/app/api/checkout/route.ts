@@ -3,11 +3,13 @@ import type Stripe from "stripe";
 import { z } from "zod";
 import { DEFAULT_LOCALE, LOCALE_COOKIE, fmt, isLive, type Locale } from "@/i18n/config";
 import { DICTS } from "@/i18n/dictionaries";
+import { alertOwner } from "@/lib/alert";
 import { currentAccount } from "@/lib/auth";
 import { MAX_BASKET, MAX_SCHEDULE_DAYS } from "@/lib/basket";
 import { emailReady } from "@/lib/email";
 import { createOrder, ordersReady, setOrderSession, type OrderItem } from "@/lib/orders";
 import { cardTier } from "@/lib/catalog";
+import { errorFields } from "@/lib/log";
 import { CURRENCY_COOKIE, DEFAULT_CURRENCY, isCurrency, type Tier } from "@/lib/pricing";
 import { getCard } from "@/lib/storage";
 import { cardLineItem, stripe } from "@/lib/stripe";
@@ -121,6 +123,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ url: session.url });
   } catch (e) {
     console.error("Checkout failed", e);
+    await alertOwner("Checkout failed", errorFields(e));
     return fail(errors.failed, 500);
   }
 }

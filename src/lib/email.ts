@@ -12,7 +12,8 @@ export function emailReady() {
   return Boolean(process.env.RESEND_API_KEY && process.env.EMAIL_FROM);
 }
 
-const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+// The pieces every email is built from, shared with lib/notify.ts so they all look alike.
+export const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
 const cardUrl = (order: Order, item: OrderItem) => `${order.site}/c/${item.cardId}`;
 
@@ -23,20 +24,21 @@ function sendDay(order: Order, item: OrderItem) {
 }
 
 // `preheader` is the line inboxes show after the subject; it's hidden in the email itself.
-function layout(locale: Locale, body: string, preheader = "") {
+export function layout(locale: Locale, body: string, preheader = "") {
   const dir = LANGUAGES[locale].dir;
   return `<!doctype html><html lang="${LANGUAGES[locale].tag}" dir="${dir}"><body style="margin:0;background:#f3ecdf;font-family:Helvetica,Arial,sans-serif;color:#1f1b16">
 ${preheader ? `<div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all">${esc(preheader)}${"&#847;&zwnj;&nbsp;".repeat(30)}</div>` : ""}
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3ecdf"><tr><td align="center" style="padding:32px 16px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#fbf7ef;border:2px solid #1f1b16;border-radius:18px">
-<tr><td style="height:6px;border-radius:16px 16px 0 0;background:repeating-linear-gradient(-45deg,#d8432f 0 10px,#fbf7ef 10px 20px,#2b5aa6 20px 30px,#fbf7ef 30px 40px)"></td></tr>
+<tr><td style="height:6px;border-radius:16px 16px 0 0;background:repeating-linear-gradient(-45deg,#c23a27 0 10px,#fbf7ef 10px 20px,#2b5aa6 20px 30px,#fbf7ef 30px 40px)"></td></tr>
 <tr><td style="padding:28px 28px 8px;font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:bold">Envelette</td></tr>
 <tr><td style="padding:8px 28px 28px;font-size:16px;line-height:1.55">${body}</td></tr>
 </table></td></tr></table></body></html>`;
 }
 
-const button = (href: string, label: string) =>
-  `<a href="${esc(href)}" style="display:inline-block;background:#d8432f;color:#ffffff;text-decoration:none;font-size:18px;font-weight:bold;padding:16px 30px;border-radius:999px;border:2px solid #1f1b16">${esc(label)}</a>`;
+// The site's postbox red (globals.css), or paper for a quieter second button.
+export const button = (href: string, label: string, quiet = false) =>
+  `<a href="${esc(href)}" style="display:inline-block;margin:0 4px 10px;background:${quiet ? "#fbf7ef" : "#c23a27"};color:${quiet ? "#1f1b16" : "#ffffff"};text-decoration:none;font-size:18px;font-weight:bold;padding:16px 30px;border-radius:999px;border:2px solid #1f1b16">${esc(label)}</a>`;
 
 const smallButton = (href: string, label: string, background: string, color: string) =>
   `<a href="${esc(href)}" style="display:inline-block;margin:0 6px 6px 0;background:${background};color:${color};text-decoration:none;font-size:15px;font-weight:bold;padding:10px 18px;border-radius:999px;border:2px solid #1f1b16">${esc(label)}</a>`;

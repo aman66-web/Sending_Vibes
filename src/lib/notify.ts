@@ -1,9 +1,9 @@
 import "server-only";
 import { Resend } from "resend";
-import { LANGUAGES, fmt, type Locale } from "@/i18n/config";
+import { fmt, type Locale } from "@/i18n/config";
 import { DICTS } from "@/i18n/dictionaries";
 import type { Account } from "./auth";
-import { emailReady } from "./email";
+import { button, emailReady, esc, layout } from "./email";
 import { getOrder, type Order, type OrderItem } from "./orders";
 import { REACTION_EMOJI, type Reaction } from "./reply";
 import { paidOrderFor } from "./storage";
@@ -33,23 +33,7 @@ function words(locale: Locale) {
   return { ...en, ...theirs, replyTitle: { ...en.replyTitle, ...theirs?.replyTitle } };
 }
 
-// The same look as the order emails (lib/email.ts).
-const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
-
-function layout(locale: Locale, body: string) {
-  const { tag, dir } = LANGUAGES[locale];
-  return `<!doctype html><html lang="${tag}" dir="${dir}"><body style="margin:0;background:#f3ecdf;font-family:Helvetica,Arial,sans-serif;color:#1f1b16">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3ecdf"><tr><td align="center" style="padding:32px 16px">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#fbf7ef;border:2px solid #1f1b16;border-radius:18px">
-<tr><td style="height:6px;border-radius:16px 16px 0 0;background:repeating-linear-gradient(-45deg,#d8432f 0 10px,#fbf7ef 10px 20px,#2b5aa6 20px 30px,#fbf7ef 30px 40px)"></td></tr>
-<tr><td style="padding:28px 28px 8px;font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:bold">Envelette</td></tr>
-<tr><td style="padding:8px 28px 28px;font-size:16px;line-height:1.55">${body}</td></tr>
-</table></td></tr></table></body></html>`;
-}
-
-const button = (href: string, label: string, quiet = false) =>
-  `<a href="${esc(href)}" style="display:inline-block;margin:0 8px 10px 0;background:${quiet ? "#fbf7ef" : "#d8432f"};color:${quiet ? "#1f1b16" : "#ffffff"};text-decoration:none;font-weight:bold;padding:12px 22px;border-radius:999px;border:2px solid #1f1b16">${esc(label)}</a>`;
-
+// Built from the same pieces as the order emails (lib/email.ts).
 const heading = (text: string) => `<h1 style="margin:0 0 8px;font-family:Georgia,'Times New Roman',serif;font-size:26px;line-height:1.2">${esc(text)}</h1>`;
 
 // A key stops Resend sending the same email twice if a retry follows a failure.
@@ -87,7 +71,7 @@ export async function sendReplyEmail(order: Order, item: OrderItem, reply: { rea
   const note = fmt(t.replyNote, { to: item.to });
   const said = reply.message
     ? `<p style="margin:0 0 6px;color:#5b5247">${esc(t.replySaid)}</p>
-<blockquote style="margin:0 0 22px;padding:14px 18px;background:#ffffff;border-left:4px solid #d8432f;border-radius:8px;font-family:Georgia,'Times New Roman',serif;font-size:18px;white-space:pre-line">${esc(reply.message)}</blockquote>`
+<blockquote style="margin:0 0 22px;padding:14px 18px;background:#ffffff;border-left:4px solid #c23a27;border-radius:8px;font-family:Georgia,'Times New Roman',serif;font-size:18px;white-space:pre-line">${esc(reply.message)}</blockquote>`
     : "";
   const html = layout(
     order.locale,

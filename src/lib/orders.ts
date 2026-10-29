@@ -5,6 +5,7 @@ import { customAlphabet } from "nanoid";
 import type Stripe from "stripe";
 import type { Locale } from "@/i18n/config";
 import type { Occasion, ThemeName } from "./card";
+import { alertOwner } from "./alert";
 import { nothingLeft, pending, type EmailResult } from "./delivery";
 import { emailReady, sendOrderEmails } from "./email";
 import type { Currency, Tier } from "./pricing";
@@ -242,10 +243,14 @@ function finished(order: Order) {
 }
 
 // This attempt's failures are logged with the order, so the owner can see who to help.
-function report(id: string, sent: Awaited<ReturnType<typeof sendOrderEmails>>) {
+// One Resend refuses for good also emails the owner, since nothing will try it again;
+// the rest are retried, and the webhook's alert covers them if that keeps failing.
+async function report(id: string, sent: Awaited<ReturnType<typeof sendOrderEmails>>) {
   const failed = [...Object.entries(sent.cards).map(([card, result]) => [`card ${card}`, result] as const), ["receipt", sent.receipt] as const];
   for (const [what, result] of failed) {
-    if (result && !result.ok) console.error(`Order ${id}: ${what} couldn't be emailed (${result.retry ? "will retry" : "gave up"}): ${result.error}`);
+    if (!result || result.ok) continue;
+    console.error(`Order ${id}: ${what} couldn't be emailed (${result.retry ? "will retry" : "gave up"}): ${result.error}`);
+    if (!result.retry) await alertOwner("An order email couldn't be sent", { order: id, email: what, error: result.error });
   }
 }
 
@@ -257,7 +262,7 @@ async function sendEmails(claimed: Order, strict: boolean): Promise<Order> {
   const sent = await sendOrderEmails(order, todo);
   const items = order.items.map((i) => ({ ...i, ...(sent.cards[i.cardId] ? { cardEmail: sent.cards[i.cardId] } : {}), ...(sent.receipt ? { receipt: sent.receipt } : {}) }));
   const again = !nothingLeft(pending({ ...order, items }));
-  report(order.id, sent);
+  await report(order.id, sent);
   try {
     await saveDelivery(order.id, items, again);
   } catch (e) {
