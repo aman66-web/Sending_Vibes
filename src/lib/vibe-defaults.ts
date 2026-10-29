@@ -11,7 +11,7 @@ export const FEELINGS = [...TONES, "elegant", "cheeky", "nostalgic", "gentle", "
 export type Feeling = (typeof FEELINGS)[number];
 
 // "Full of blessings" is only offered where it fits.
-const BLESSINGS: Occasion[] = ["diwali", "eid", "rakhi", "newbaby", "wedding", "christmas"];
+const BLESSINGS: Occasion[] = ["diwali", "eid", "rakhi", "newbaby", "wedding", "christmas", "newhome"];
 export const feelingsFor = (occasion: Occasion | ""): Feeling[] => FEELINGS.filter((f) => f !== "blessings" || (occasion && BLESSINGS.includes(occasion)));
 
 // Who is opening it (lib/brief.ts has the same list).

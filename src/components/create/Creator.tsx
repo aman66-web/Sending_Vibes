@@ -436,9 +436,10 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
 
   const makeFromQuiz = () => {
     const prompt = quizPrompt(answers, t, { design: Boolean(design) });
+    // The names carry over to "describe it in your own words"; the prompt itself is for the
+    // writer, so it isn't put in that box.
     setTo(answers.to.trim());
     setFrom(answers.from.trim());
-    setIdea(prompt);
     makeCard(prompt, { to: answers.to, from: answers.from }, "quiz", { photos: answers.photos, captions: answers.captions }, design?.slug, briefFrom(answers, { design: Boolean(design) }));
   };
 
