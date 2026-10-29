@@ -578,11 +578,8 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
 
   // Words typed straight onto the preview.
   const editWords = (path: Path, value: string) => setCard((c) => c && setAt(c, path, value));
-  // Photos swapped, added or taken out by tapping them on the preview.
-  const editScreen = (index: number, update: (screen: Screen) => Screen) =>
-    setCard((c) => c && { ...c, screens: c.screens.map((s, j) => (j === index ? update(s) : s)) });
-  // The same for the Words tab, by the screen's id, so a photo still uploading lands on its own
-  // screen even if the screens are moved about meanwhile.
+  // Anything else on one screen (its look, photos, the Words tab's boxes), by the screen's id,
+  // so a photo still uploading lands on its own screen even if the screens are moved about meanwhile.
   const editScreenById = (id: string, update: (screen: Screen) => Screen) =>
     setCard((c) => c && { ...c, screens: c.screens.map((s) => (s.id === id ? update(s) : s)) });
   // What a typed change did, shown over the card for a few seconds as it lands.
@@ -1028,7 +1025,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
               {/* Its own layer: stickers on the card stay under the bar at the bottom of a phone, and
                   the controls for what's selected can hang over the screens strip. */}
               <div ref={cardBox} className="relative z-10 order-2 scroll-mt-4 lg:order-none">
-                <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onScreen={editScreen} onBegin={remember} pick={pick} openSettings={settings} onNewLook={(next) => change(() => next)}>
+                <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onScreen={editScreenById} onBegin={remember} pick={pick} openSettings={settings} stage={stageShown} onNewLook={(next) => change(() => next)}>
                   {!wide && shown === "computer" ? (
                     // On a phone, the card laid out as on a laptop and shrunk to fit.
                     <BrowserFrame className="aspect-[16/10]">
@@ -1160,7 +1157,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       {showPreview && card && (
         <div className="fixed inset-0 z-50 flex flex-col bg-background lg:hidden">
           <div className="relative min-h-0 flex-1">
-            <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onScreen={editScreen} onBegin={remember} pick={pick} onNewLook={(next) => change(() => next)} className="h-full">
+            <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onScreen={editScreenById} onBegin={remember} pick={pick} stage={stageShown} onNewLook={(next) => change(() => next)} className="h-full">
               <CardPlayer card={card} preview sound editing={wordMode === "edit"} focusScreenId={selected} focusNonce={nudge} focusStage={focusStage} onScreenChange={setViewing} />
             </EditableCard>
             <button onClick={() => setShowPreview(false)} className="absolute start-4 top-4 z-50 rounded-full bg-black/70 px-4 py-2 text-sm font-semibold text-white">

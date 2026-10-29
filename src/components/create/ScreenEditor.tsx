@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { fmt } from "@/i18n/config";
 import { useI18n } from "@/i18n/client";
 import type { Screen } from "@/lib/card";
+import { blankMouse, selectBlank } from "./blank-focus";
 import { uploadPhoto } from "./image";
 
 const MAX_PHOTOS = 6;
@@ -224,6 +225,8 @@ function ListField({
             placeholder={placeholder}
             dir="auto"
             aria-label={`${label} ${i + 1}`}
+            onFocus={selectBlank}
+            {...blankMouse}
             onChange={(e) => onChange((list) => list.map((x, j) => (j === i ? e.target.value : x)))}
             className={`min-w-0 flex-1 ${BOX}`}
           />
@@ -259,6 +262,8 @@ function TimelineField({ screen, onChange }: { screen: TimelineScreen; onChange:
             maxLength={40}
             placeholder={e.when}
             aria-label={fmt(e.momentDate, { n: i + 1 })}
+            onFocus={selectBlank}
+            {...blankMouse}
             onChange={(e) => update((list) => list.map((x, j) => (j === i ? { ...x, when: e.target.value } : x)))}
             dir="auto"
             className={`w-32 shrink-0 ${BOX}`}
@@ -268,6 +273,8 @@ function TimelineField({ screen, onChange }: { screen: TimelineScreen; onChange:
             maxLength={160}
             placeholder={e.what}
             aria-label={fmt(e.moment, { n: i + 1 })}
+            onFocus={selectBlank}
+            {...blankMouse}
             onChange={(e) => update((list) => list.map((x, j) => (j === i ? { ...x, what: e.target.value } : x)))}
             dir="auto"
             className={`min-w-0 flex-1 ${BOX}`}
@@ -331,6 +338,8 @@ function QuizField({ screen, onChange }: { screen: QuizScreen; onChange: Update 
                   maxLength={60}
                   dir="auto"
                   aria-label={`${fmt(e.questionN, { n: qi + 1 })}: ${fmt(e.answerN, { n: oi + 1 })}`}
+                  onFocus={selectBlank}
+                  {...blankMouse}
                   onChange={(e) => setQuestion(qi, { options: q.options.map((o, j) => (j === oi ? e.target.value : o)) })}
                   className={`min-w-0 flex-1 ${BOX}`}
                 />
@@ -389,7 +398,8 @@ export function PhotoField({ screen, onChange }: { screen: PhotosScreen; onChang
     for (const file of picked) {
       try {
         const url = await uploadPhoto(file);
-        update((s) => ({ ...s, photos: [...s.photos, url], captions: [...s.captions, ""] }));
+        // One caption per photo, kept in line with the photos, and never more than fit.
+        update((s) => (s.photos.length >= MAX_PHOTOS ? s : { ...s, photos: [...s.photos, url], captions: [...s.photos.map((_, j) => s.captions[j] ?? ""), ""] }));
       } catch {
         setError(e.uploadFailed);
       } finally {
@@ -399,8 +409,9 @@ export function PhotoField({ screen, onChange }: { screen: PhotosScreen; onChang
     if (input.current) input.current.value = "";
   };
 
+  // How each photo sits in its frame goes with it, so the others keep their own.
   const remove = (i: number) =>
-    update((s) => ({ ...s, photos: s.photos.filter((_, j) => j !== i), captions: s.captions.filter((_, j) => j !== i) }));
+    update((s) => ({ ...s, photos: s.photos.filter((_, j) => j !== i), captions: s.captions.filter((_, j) => j !== i), crops: s.crops?.filter((_, j) => j !== i) }));
   const caption = (i: number, v: string) =>
     update((s) => ({ ...s, captions: s.photos.map((_, j) => (j === i ? v : (s.captions[j] ?? ""))) }));
 
@@ -476,9 +487,9 @@ export function Field({
     <label className="block">
       <span className={LABEL}>{label}</span>
       {rows ? (
-        <textarea value={value} maxLength={max} rows={rows} placeholder={placeholder} dir="auto" onChange={(e) => onChange(e.target.value)} className={`${cls} leading-relaxed`} />
+        <textarea value={value} maxLength={max} rows={rows} placeholder={placeholder} dir="auto" onFocus={selectBlank} {...blankMouse} onChange={(e) => onChange(e.target.value)} className={`${cls} leading-relaxed`} />
       ) : (
-        <input value={value} maxLength={max} placeholder={placeholder} dir="auto" onChange={(e) => onChange(e.target.value)} className={cls} />
+        <input value={value} maxLength={max} placeholder={placeholder} dir="auto" onFocus={selectBlank} {...blankMouse} onChange={(e) => onChange(e.target.value)} className={cls} />
       )}
     </label>
   );

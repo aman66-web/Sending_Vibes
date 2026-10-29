@@ -5,12 +5,13 @@ import { createPortal } from "react-dom";
 import { useI18n } from "@/i18n/client";
 import { fmt } from "@/i18n/config";
 import { DIRECTIONS, FONTS, FRAMES, TRANSITIONS, type CardData, type Crop, type Font, type Screen, type ScreenStyle, type Tune } from "@/lib/card";
-import { CATCHING, USUAL_GOAL } from "@/components/card/tune";
+import { CATCHING, GOAL_MAX, USUAL_GOAL } from "@/components/card/tune";
+import { hasGoal } from "@/lib/games";
 import { FONT_VARS } from "@/lib/screen-style";
 import { LISTS, TEXTS, fill, isList, labelList, labelsOn, type LabelKey, type ListKey } from "@/lib/labels";
 import type { Dict } from "@/i18n/en";
 import { uploadPhoto } from "./image";
-import { isBlank } from "@/lib/blanks";
+import { blankMouse, selectBlank } from "./blank-focus";
 import { NewLookButton } from "./NewLook";
 import { useFreshTap } from "./one-tap";
 import { useWide } from "./use-wide";
@@ -31,12 +32,15 @@ const SKIP = new Set(["id", "type", "game", "effect", "photos", "style"]);
 
 // Every piece of text on one screen, plus the two names, with where each lives in the card.
 function textFields(card: CardData, screenId?: string, withEmpty = false): Field[] {
-  const out: Field[] = [
+  const out: Field[] = [];
+  // The names come after the screen's own words, so a quiz answer that is a name ("Lily")
+  // is that answer when tapped, not the card's To name.
+  const names: Field[] = [
     { path: ["to"], value: card.to },
     { path: ["from"], value: card.from },
   ];
   const i = card.screens.findIndex((s) => s.id === screenId);
-  if (i < 0) return out;
+  if (i < 0) return names;
   const walk = (value: unknown, path: Path) => {
     if (typeof value === "string") {
       if (value.trim() || withEmpty) out.push({ path, value });
@@ -48,6 +52,7 @@ function textFields(card: CardData, screenId?: string, withEmpty = false): Field
   };
   const screen = card.screens[i];
   walk(screen, ["screens", i]);
+  out.push(...names);
   // Then the words built into the screen, after its own so those win a tie.
   for (const key of labelsOn(screen)) {
     if (isList(key)) labelList(screen.labels, key).forEach((line, j) => out.push({ path: ["screens", i, "labels", key, j], value: line }));
@@ -55,32 +60,6 @@ function textFields(card: CardData, screenId?: string, withEmpty = false): Field
   }
   return out;
 }
-
-// Tapping into words that still say what goes there ("Type your question here") selects
-// them, so typing replaces them.
-type WordBox = HTMLInputElement | HTMLTextAreaElement;
-const selectBlank = (e: React.FocusEvent<WordBox>) => {
-  const el = e.currentTarget;
-  if (!isBlank(el.value)) return;
-  // Just the first line, so a message keeps its sign-off. Again a moment later, as iOS
-  // drops a selection made while it's still focusing.
-  const line = el.value.indexOf("\n");
-  const pick = () => el.setSelectionRange(0, line < 0 ? el.value.length : line);
-  pick();
-  setTimeout(pick, 0);
-};
-// A click that focuses a box selects on mousedown, then the mouseup puts the caret where
-// it was clicked (Safari, and Chrome sometimes). Keep the selection for that one click.
-let focusingByMouse = false;
-const blankMouse = {
-  onMouseDown: (e: React.MouseEvent<WordBox>) => {
-    focusingByMouse = document.activeElement !== e.currentTarget;
-  },
-  onMouseUp: (e: React.MouseEvent<WordBox>) => {
-    if (focusingByMouse && isBlank(e.currentTarget.value)) e.preventDefault();
-    focusingByMouse = false;
-  },
-};
 
 const labelValue = (own: unknown, usual: string) => (typeof own === "string" && own.trim() ? own : usual);
 
@@ -249,13 +228,18 @@ type Props = {
   enabled: boolean;
   onChange: (path: Path, value: string) => void;
   // Anything else on a screen: its look, its stickers, text and photos, a photos screen's photos.
-  onScreen: (index: number, update: (screen: Screen) => Screen) => void;
+  // By the screen's id, so a change that finishes later (a photo uploading) still lands on its
+  // own screen if the screens are moved about meanwhile.
+  onScreen: (id: string, update: (screen: Screen) => Screen) => void;
   // About to change something, so Undo can bring it back.
   onBegin?: () => void;
   // Selects something just added from the panel, like "text:2".
   pick?: { key: string; nonce: number };
   // Changing this opens the screen's own settings, as if its background were tapped.
   openSettings?: number;
+  // The moment of the screen on show (see lib/stages.ts), so a tapped quiz answer is the
+  // question on show's, even when another question has the same words.
+  stage?: number;
   // A new look for the whole card (Try another look, in the screen's colours); the caller
   // keeps the old one for Undo.
   onNewLook?: (card: CardData) => void;
@@ -263,7 +247,7 @@ type Props = {
   children: React.ReactNode;
 };
 
-export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBegin, pick, openSettings = 0, onNewLook, className = "", children }: Props) {
+export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBegin, pick, openSettings = 0, stage = 0, onNewLook, className = "", children }: Props) {
   const { t } = useI18n();
   const x = t.custom;
   const s = t.studio;
@@ -292,6 +276,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
   const [photoError, setPhotoError] = useState<string | null>(null);
   const screenIndex = card.screens.findIndex((sc) => sc.id === screenId);
   const screen = card.screens[screenIndex];
+  const here = screen?.id ?? "";
   const style = screen?.style ?? {};
   // On a phone the controls come up from the bottom of the screen, so the card stays in view above them.
   const sheet = !useWide();
@@ -328,7 +313,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
   };
   const restyle = (update: (st: ScreenStyle) => ScreenStyle) => {
     begin();
-    onScreen(screenIndex, (sc) => ({ ...sc, style: update(sc.style ?? {}) }));
+    onScreen(here, (sc) => ({ ...sc, style: update(sc.style ?? {}) }));
   };
   // How the screen plays (style.tune); a setting back at its usual value is dropped.
   const tune = style.tune ?? {};
@@ -337,8 +322,11 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
       const next = Object.fromEntries(Object.entries({ ...st.tune, ...change }).filter(([, v]) => v !== undefined));
       return { ...st, tune: Object.keys(next).length ? next : undefined };
     });
-  const usualGoal = screen?.type === "game" ? (USUAL_GOAL as Partial<Record<string, number>>)[screen.game] : undefined;
-  const goal = usualGoal === undefined ? undefined : (tune.goal ?? usualGoal);
+  const goalGame = screen?.type === "game" && hasGoal(screen.game) ? screen.game : null;
+  const usualGoal = goalGame ? USUAL_GOAL[goalGame] : undefined;
+  // The most the game will show (lib/games.ts), so the number here is the one they'll play.
+  const goalMax = goalGame ? GOAL_MAX[goalGame] : 40;
+  const goal = usualGoal === undefined ? undefined : Math.min(tune.goal ?? usualGoal, goalMax);
   const listOf = (deco: Deco) => (deco === "sticker" ? "stickers" : deco === "text" ? "texts" : "images") as "stickers" | "texts" | "images";
   const changeItem = (deco: Deco, index: number, update: (item: Record<string, unknown>) => Record<string, unknown> | null) =>
     restyle((st) => {
@@ -358,6 +346,8 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
     if (!el) return null;
     const below = document.elementsFromPoint(clientX, clientY).filter((e) => e !== layer.current && el.contains(e) && !e.closest("[data-edit-ui]"));
     const fields = textFields(card, screenId);
+    // The quiz question on show: the first one, or the first after a wrong answer, then the others in turn.
+    const asked = screen?.type === "quiz" ? Math.min(stage <= 1 ? 0 : stage - 1, screen.questions.length - 1) : -1;
     for (const e of below) {
       const deco = e.closest("[data-deco]");
       if (deco) {
@@ -369,8 +359,21 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
         const index = photo.getAttribute("data-photo");
         return { kind: "photo", index: index === "new" ? "new" : Number(index), el: photo };
       }
+      if (screen?.type === "quiz" && asked >= 0) {
+        // An answer button says which answer it is; its words may be the same as another's.
+        const option = e.closest("[data-quiz-option]");
+        const k = Number(option?.getAttribute("data-quiz-option"));
+        const value = screen.questions[asked]?.options[k];
+        if (option && value !== undefined) return { kind: "words", field: { path: ["screens", screenIndex, "questions", asked, "options", k], value }, el: option };
+      }
       const found = findField(e, el, fields);
-      if (found) return { kind: "words", ...found };
+      if (found) {
+        // A question with the same words as another ("Type something one of you said") is the one on show.
+        const [, , list, q, key] = found.field.path;
+        if (screen?.type === "quiz" && list === "questions" && key === "question" && q !== asked && screen.questions[asked] && norm(screen.questions[asked].question) === norm(found.field.value))
+          return { kind: "words", field: { path: ["screens", screenIndex, "questions", asked, "question"], value: screen.questions[asked].question }, el: found.el };
+        return { kind: "words", ...found };
+      }
       const envelope = e.closest("[data-envelope]");
       if (envelope) return { kind: "envelope", el: envelope };
     }
@@ -408,7 +411,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
     const nudge = (v: unknown) => Math.min(95, Number(v ?? 50) + 6);
     begun.current = false;
     onBegin?.();
-    onScreen(screenIndex, (sc) => {
+    onScreen(here, (sc) => {
       const st = sc.style ?? {};
       const key = listOf(deco);
       return { ...sc, style: { ...st, [key]: [...((st[key] as unknown[] | undefined) ?? []), { ...structuredClone(item), x: nudge(item.x), y: nudge(item.y) }] } };
@@ -552,7 +555,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
     if (g.mode === "move") {
       const nx = clamp(g.start.x + (dx / g.card.width) * 100, 0, 100);
       const ny = clamp(g.start.y + (dy / g.card.height) * 100, 0, 100);
-      onScreen(screenIndex, (sc) => {
+      onScreen(here, (sc) => {
         const st = sc.style ?? {};
         const key = listOf(g.deco);
         const list = [...((st[key] as { x: number; y: number }[] | undefined) ?? [])];
@@ -573,7 +576,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
       const [min, max] = SIZE[g.deco];
       const size = clamp(Math.round(g.start.size * factor * 10) / 10, min, max);
       const scale = size / g.start.size;
-      onScreen(screenIndex, (sc) => {
+      onScreen(here, (sc) => {
         const st = sc.style ?? {};
         const key = listOf(g.deco);
         const list = [...((st[key] as { size: number }[] | undefined) ?? [])];
@@ -636,7 +639,6 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
     // Copied first: clearing the input (so the same photo can be picked again) empties its list.
     const chosen = Array.from(list ?? []);
     if (!chosen.length || !screen) return;
-    const index = screenIndex;
     const replace = replacing;
     if (files.current) files.current.value = "";
     // Replacing a photo placed on the screen.
@@ -645,7 +647,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
       try {
         const url = await uploadPhoto(chosen[0]);
         begin();
-        onScreen(index, (sc) => ({ ...sc, style: { ...sc.style, images: (sc.style?.images ?? []).map((img, j) => (j === replace.index ? { ...img, src: url, crop: undefined } : img)) } }));
+        onScreen(here, (sc) => ({ ...sc, style: { ...sc.style, images: (sc.style?.images ?? []).map((img, j) => (j === replace.index ? { ...img, src: url, crop: undefined } : img)) } }));
       } catch {
         setPhotoError(t.editor.uploadFailed);
       } finally {
@@ -663,7 +665,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
       try {
         const url = await uploadPhoto(file);
         onBegin?.();
-        onScreen(index, (sc) => {
+        onScreen(here, (sc) => {
           if (sc.type !== "photos") return sc;
           // A new photo starts whole in its frame.
           if (replace && replace.index < sc.photos.length) return { ...sc, photos: sc.photos.map((p, j) => (j === replace.index ? url : p)), crops: sc.crops?.map((c, j) => (j === replace.index ? null : c)) };
@@ -680,7 +682,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
 
   const removePhoto = (i: number) => {
     onBegin?.();
-    onScreen(screenIndex, (sc) =>
+    onScreen(here, (sc) =>
       sc.type === "photos" ? { ...sc, photos: sc.photos.filter((_, j) => j !== i), captions: sc.captions.filter((_, j) => j !== i), crops: sc.crops?.filter((_, j) => j !== i) } : sc,
     );
     select(null);
@@ -1068,7 +1070,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
             crop={screen.crops?.[open.index] ?? undefined}
             onCrop={(crop) => {
               begin();
-              onScreen(screenIndex, (sc) =>
+              onScreen(here, (sc) =>
                 sc.type === "photos" ? { ...sc, crops: sc.photos.map((_, j) => (j === open.index ? (crop ?? null) : (sc.crops?.[j] ?? null))) } : sc,
               );
             }}
@@ -1203,7 +1205,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
                 −
               </button>
               <span className="w-8 text-center text-lg font-bold tabular-nums">{goal}</span>
-              <button type="button" aria-label={s.more} disabled={goal >= 40} onClick={() => retune({ goal: goal + 1 })} className="grid h-11 w-11 place-items-center rounded-full border-2 border-line text-xl font-bold disabled:opacity-35">
+              <button type="button" aria-label={s.more} disabled={goal >= goalMax} onClick={() => retune({ goal: Math.min(goalMax, goal + 1) })} className="grid h-11 w-11 place-items-center rounded-full border-2 border-line text-xl font-bold disabled:opacity-35">
                 +
               </button>
             </div>
