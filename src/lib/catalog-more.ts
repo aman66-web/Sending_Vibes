@@ -816,7 +816,7 @@ export const MORE_DESIGNS: Template[] = [
     headline: "A birthday party in a card",
     blurb: "For children: blow out the candles, pop the balloons, pick a surprise and see their photos. Big, easy taps for little fingers.",
     screens: (to, from) => {
-      const grape = { background: ["#9b7de0", "#5b3fa8"], gradient: "glow", pattern: "dots", text: "#fffaf0", accent: "#ffd23f" } satisfies ScreenStyle;
+      const grape = { background: ["#7c64b3", "#5b3fa8"], gradient: "glow", pattern: "dots", text: "#fffaf0", accent: "#ffd23f" } satisfies ScreenStyle;
       const ink = "#1d2340";
       const type = { heading: "rounded", body: "rounded" } satisfies ScreenStyle;
       return [
