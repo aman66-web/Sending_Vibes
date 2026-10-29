@@ -205,6 +205,12 @@ export function StudioPanel({ card, screenIndex, tab, setTab, change, editScreen
                 step();
                 editScreen(screen.id, update);
               }}
+              // A photo landing is a step of its own, apart from a box being typed in meanwhile.
+              onUploaded={(update) => {
+                remember();
+                begun.current = false;
+                editScreen(screen.id, update);
+              }}
             />
             {texts.length > 0 && (
               <div className="space-y-3 border-t-2 border-line pt-4">

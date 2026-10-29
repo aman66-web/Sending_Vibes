@@ -13,7 +13,9 @@ const MAX_PHOTOS = 6;
 // one never overwrite each other or edits made in the meantime.
 type Update = (update: (prev: Screen) => Screen) => void;
 // keepDesign: a ready-made design keeps its games and finale as they are, so only the words show.
-type Props = { screen: Screen; onChange: Update; keepDesign?: boolean };
+// onUploaded: a photo that has finished uploading (onChange if left out), which can land while
+// another box is being typed in.
+type Props = { screen: Screen; onChange: Update; keepDesign?: boolean; onUploaded?: Update };
 
 // Big, labelled boxes that are easy to tap and read, at 16px or more so iPhones don't zoom in.
 const BOX = "rounded-xl border-2 border-line bg-panel px-3 py-3 text-lg outline-none focus:border-brand focus:ring-2 focus:ring-brand/20";
@@ -23,7 +25,7 @@ const ADD = "min-h-11 rounded-full border-2 border-line px-4 py-2 text-base font
 // The ✕ that takes one out.
 const REMOVE = "grid h-11 w-11 shrink-0 place-items-center rounded-full text-lg opacity-75 transition hover:bg-brand-soft hover:opacity-100";
 
-export function ScreenEditor({ screen, onChange, keepDesign = false }: Props) {
+export function ScreenEditor({ screen, onChange, keepDesign = false, onUploaded }: Props) {
   const { t } = useI18n();
   const e = t.editor;
   // Each field edit produces a new screen of the same type.
@@ -55,7 +57,7 @@ export function ScreenEditor({ screen, onChange, keepDesign = false }: Props) {
       return (
         <>
           <Field label={e.title} value={screen.title} max={120} onChange={(v) => set("title", v)} />
-          <PhotoField screen={screen} onChange={onChange} />
+          <PhotoField screen={screen} onChange={onChange} onUploaded={onUploaded} />
         </>
       );
     case "message":
@@ -383,7 +385,7 @@ type PhotosScreen = Extract<Screen, { type: "photos" }>;
 
 // `onBusy` hears photos start uploading (+n) and finish (-1), so nothing moves on without
 // them. As changes rather than a total, uploads carry on counting after the field is gone.
-export function PhotoField({ screen, onChange, onBusy }: { screen: PhotosScreen; onChange: Update; onBusy?: (change: number) => void }) {
+export function PhotoField({ screen, onChange, onBusy, onUploaded = onChange }: { screen: PhotosScreen; onChange: Update; onBusy?: (change: number) => void; onUploaded?: Update }) {
   const e = useI18n().t.editor;
   const input = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(0);
@@ -392,7 +394,7 @@ export function PhotoField({ screen, onChange, onBusy }: { screen: PhotosScreen;
     onBusy?.(change);
   };
   const [error, setError] = useState<string | null>(null);
-  const update = (fn: (s: PhotosScreen) => PhotosScreen) => onChange((prev) => (prev.type === "photos" ? fn(prev) : prev));
+  const update = (fn: (s: PhotosScreen) => PhotosScreen, to = onChange) => to((prev) => (prev.type === "photos" ? fn(prev) : prev));
 
   const add = async (files: FileList | null) => {
     if (!files?.length) return;
@@ -405,7 +407,7 @@ export function PhotoField({ screen, onChange, onBusy }: { screen: PhotosScreen;
       try {
         const url = await uploadPhoto(file);
         // One caption per photo, kept in line with the photos, and never more than fit.
-        update((s) => (s.photos.length >= MAX_PHOTOS ? s : { ...s, photos: [...s.photos, url], captions: [...s.photos.map((_, j) => s.captions[j] ?? ""), ""] }));
+        update((s) => (s.photos.length >= MAX_PHOTOS ? s : { ...s, photos: [...s.photos, url], captions: [...s.photos.map((_, j) => s.captions[j] ?? ""), ""] }), onUploaded);
       } catch {
         setError(e.uploadFailed);
       } finally {
