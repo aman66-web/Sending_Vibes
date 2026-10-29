@@ -16,7 +16,13 @@ export type Recipient = {
   text: Dict["reply"];
   // Whether a thank-you can reach the sender (their card came from an order with an email address).
   canReply: boolean;
+  // The buyer, signed in, looking at their own card.
+  own?: boolean;
 };
+
+// "?me" on the address: the buyer's own look at their card (its "Watch it" links).
+const noop = () => () => {};
+const ownLook = () => new URLSearchParams(window.location.search).has("me");
 
 // Which cards this browser has already said thank you for, so coming back to the card
 // shows that rather than asking again.
@@ -51,7 +57,7 @@ function onSentChange(callback: () => void) {
 
 // Under the finale: a one-tap thank-you to the sender, with a few words if they like, and
 // a big button to send them a card back with both names already filled in.
-export function ReplyPanel({ card, cardId, text, canReply }: Recipient & { card: CardData }) {
+export function ReplyPanel({ card, cardId, text, canReply, own = false }: Recipient & { card: CardData }) {
   const sfx = useSfx();
   const id = useId();
   const name = card.from;
@@ -62,6 +68,7 @@ export function ReplyPanel({ card, cardId, text, canReply }: Recipient & { card:
   const [justSent, setJustSent] = useState<Reaction | "">("");
   const remembered = useSyncExternalStore<Reaction | "">(onSentChange, () => sentFor(cardId), () => "");
   const sent = justSent || remembered;
+  const me = useSyncExternalStore(noop, ownLook, () => false);
   // The Send button goes once it's sent, so the confirmation takes its focus and is read out.
   // Only just now: coming back to a card already thanked for doesn't move anyone's focus.
   const confirmation = useRef<HTMLParagraphElement>(null);
@@ -85,7 +92,9 @@ export function ReplyPanel({ card, cardId, text, canReply }: Recipient & { card:
         rememberSent(cardId, reaction);
         sfx("chime");
       } else {
-        setError(res.status === 409 ? fmt(text.full, { name }) : res.status === 429 ? text.tooMany : text.failed);
+        setError(
+          res.status === 409 ? fmt(text.full, { name }) : res.status === 429 ? text.tooMany : res.status === 403 ? fmt(text.ownView, { name: card.to }) : text.failed,
+        );
       }
     } catch {
       setError(text.failed);
@@ -93,6 +102,15 @@ export function ReplyPanel({ card, cardId, text, canReply }: Recipient & { card:
       setSending(false);
     }
   };
+
+  // The buyer can't thank themselves or send themselves one back: just say what the person it's for will see.
+  if (own || me) {
+    return (
+      <p className="mt-2 w-full max-w-sm animate-screen-in rounded-2xl bg-[var(--c-surface)] p-5 text-lg ring-1 ring-current/10 backdrop-blur [animation-delay:900ms]">
+        {fmt(text.ownView, { name: card.to })}
+      </p>
+    );
+  }
 
   return (
     // Comes in once the finale has had its moment.

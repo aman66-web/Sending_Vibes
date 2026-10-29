@@ -1,7 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
+import { currentAccount } from "@/lib/auth";
 import { emailReady } from "@/lib/email";
-import { sendReplyEmail, senderOf } from "@/lib/notify";
+import { isBuyer, sendReplyEmail, senderOf } from "@/lib/notify";
 import { DAY, MINUTE, allow, clientNetwork } from "@/lib/rate-limit";
 import { NOTE_MAX, REACTIONS, REPLIES_PER_CARD } from "@/lib/reply";
 import { countReplies, saveReply } from "@/lib/storage";
@@ -37,6 +38,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   try {
     const sender = await senderOf(id);
     if (!sender?.order.buyerEmail || !emailReady()) return fail("not-found", 404);
+    // The buyer can't thank themselves: a card still waiting to be emailed hasn't reached
+    // anyone yet, and a signed-in buyer is looking at their own card.
+    if (sender.item.sendAt && Date.parse(sender.item.sendAt) > Date.now()) return fail("own", 403);
+    const account = await currentAccount().catch(() => null);
+    if (account && isBuyer(sender.order, account)) return fail("own", 403);
     // A few a day for any card, and a few in all once replies are kept (migration 0007).
     if (!(await allow("reply-card", id, PER_CARD)) || (await countReplies(id)) >= REPLIES_PER_CARD) return fail("full", 409);
     const reply = { reaction: parsed.data.reaction, message: parsed.data.message || undefined };
