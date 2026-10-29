@@ -7,6 +7,7 @@ import { getI18n } from "@/i18n/server";
 import { formatDay, nextDate, whenLabel } from "@/lib/calendar";
 import { OCCASIONS } from "@/lib/card";
 import { TEMPLATES } from "@/lib/catalog";
+import { occasionOrder } from "@/lib/search";
 import { occasions } from "@/lib/templates";
 
 export const revalidate = 3600;
@@ -19,10 +20,8 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function OccasionsPage() {
   const { locale, t } = await getI18n();
   const { tag } = LANGUAGES[locale];
-  // Soonest first, then the ones without a fixed date.
-  const sorted = [...OCCASIONS]
-    .map((o) => ({ o, next: nextDate(o) }))
-    .sort((a, b) => (a.next?.days ?? 9999) - (b.next?.days ?? 9999));
+  // What's coming up first, with birthdays near the top (see lib/search.ts).
+  const sorted = occasionOrder().map((o) => ({ o, next: nextDate(o) }));
   return (
     <div className="grain min-h-dvh overflow-x-clip bg-cream text-ink">
       <SiteHeader />

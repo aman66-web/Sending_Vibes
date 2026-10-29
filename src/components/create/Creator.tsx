@@ -10,9 +10,8 @@ import { PhoneFrame } from "@/components/PhoneFrame";
 import { MAX_BASKET, addToBasket, inBasket, readMade, replaceInBasket, saveMade, type Made } from "@/lib/basket";
 import { OCCASIONS, type CardData, type Occasion, type Screen, type ScreenType, type ThemeName } from "@/lib/card";
 import { stagesOf } from "@/lib/stages";
-import { ProductThumb } from "@/components/catalog/ProductThumb";
-import { TEMPLATES, cardTier, getTemplate, toneInfo } from "@/lib/catalog";
-import { occasions } from "@/lib/templates";
+import { DesignPicker } from "@/components/catalog/DesignPicker";
+import { cardTier, getTemplate } from "@/lib/catalog";
 import { formatMoney, tierPrice } from "@/lib/pricing";
 import { themes } from "@/lib/themes";
 import { fmt } from "@/i18n/config";
@@ -277,10 +276,12 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   };
 
   // From the designs to the questions. The design sets the occasion (so it isn't asked)
-  // and suggests its own feeling, unless they've already picked one.
-  const toQuestions = () => {
-    const tpl = getTemplate(templateSlug);
+  // and suggests its own feeling, unless they've already picked one. A design used straight
+  // from its preview comes as `slug`.
+  const toQuestions = (slug = templateSlug) => {
+    const tpl = getTemplate(slug);
     if (!tpl) return;
+    setTemplateSlug(tpl.slug);
     setAnswers((a) => withSuggestions({ ...a, occasion: tpl.occasion, occasionOther: "" }, t.quiz.relations, tpl));
     setQuestion(0);
     setStep("quiz");
@@ -939,63 +940,17 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       )}
 
       {step === "pick" && (
-        <section className="mx-auto max-w-6xl px-4 pb-32 pt-10">
-          <button onClick={() => setStep("choose")} className="text-sm font-semibold opacity-70">
-            {x.back}
-          </button>
-          <h1 className="mt-4 font-brand text-4xl font-bold sm:text-5xl">{c.pickTitle}</h1>
-          <p className="mt-2 max-w-2xl opacity-70">{c.pickIntro}</p>
-          <div className="mt-6 flex flex-wrap gap-2">
-            {(["all", ...OCCASIONS] as const).map((o) => (
-              <button
-                key={o}
-                onClick={() => setPickOccasion(o)}
-                aria-pressed={pickOccasion === o}
-                className={`rounded-full border-2 px-3.5 py-1.5 text-sm font-semibold transition ${pickOccasion === o ? "border-brand bg-brand text-white" : "border-line bg-panel hover:border-brand"}`}
-              >
-                {o === "all" ? x.allOccasions : `${occasions[o].emoji} ${t.occasions[o].label}`}
-              </button>
-            ))}
-          </div>
-          <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {TEMPLATES.filter((tpl) => pickOccasion === "all" || tpl.occasion === pickOccasion).map((tpl) => {
-              const on = tpl.slug === templateSlug;
-              return (
-                <div
-                  key={tpl.slug}
-                  className={`relative overflow-hidden rounded-3xl border-2 bg-panel shadow-sm transition ${on ? "border-brand ring-4 ring-brand/20" : "border-line hover:-translate-y-1 hover:border-brand hover:shadow-md"}`}
-                >
-                  <button onClick={() => setTemplateSlug(tpl.slug)} aria-pressed={on} className="block w-full text-start">
-                    <ProductThumb template={tpl} />
-                    <div className="p-3">
-                      <p className="font-brand font-bold leading-tight">{tpl.name}</p>
-                      <p className="mt-1 text-xs opacity-70">
-                        {occasions[tpl.occasion].emoji} {t.occasions[tpl.occasion].label} · {toneInfo[tpl.tone].emoji} {t.tones[tpl.tone]}
-                      </p>
-                    </div>
-                  </button>
-                  {on && <span className="pointer-events-none absolute start-3 top-3 rounded-full bg-brand px-2.5 py-1 text-xs font-bold text-white">✓ {c.chosen}</span>}
-                  <a href={`/cards/${tpl.slug}`} target="_blank" rel="noreferrer" className="block border-t border-line px-3 py-2 text-xs font-semibold text-brand">
-                    {c.previewIt}
-                  </a>
-                </div>
-              );
-            })}
-          </div>
-          {/* Always in reach while scrolling the designs. Kept to the left, clear of the chat button. */}
-          <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-background/95 px-4 py-3 backdrop-blur">
-            <div className="mx-auto flex max-w-6xl items-center gap-4">
-              <button
-                onClick={toQuestions}
-                disabled={!getTemplate(templateSlug)}
-                className="shrink-0 rounded-full bg-brand px-6 py-3 font-brand text-lg font-semibold text-white shadow-lg disabled:opacity-40"
-              >
-                {c.pickNext} →
-              </button>
-              <p className="min-w-0 truncate text-sm font-semibold opacity-70">{getTemplate(templateSlug)?.name ?? c.pickHint}</p>
-            </div>
-          </div>
-        </section>
+        <DesignPicker
+          occasion={pickOccasion}
+          onOccasion={setPickOccasion}
+          chosen={templateSlug}
+          onChoose={setTemplateSlug}
+          onNext={toQuestions}
+          onBack={() => setStep("choose")}
+          onScratch={() => chooseWay("custom")}
+          to={answers.to.trim() || undefined}
+          from={answers.from.trim() || undefined}
+        />
       )}
 
       {step === "edit" && card && (
