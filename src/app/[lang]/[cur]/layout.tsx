@@ -73,13 +73,16 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const { locale, currency, t } = await getI18n();
+  // Everything but the server-only occasion words (see ClientDict).
+  const { occasionSeo, ...clientT } = t;
+  void occasionSeo;
   const { tag, dir } = LANGUAGES[locale];
   return (
     <html lang={tag} dir={dir}>
       <body className={`${fonts} antialiased`}>
         {/* Who runs the site, for search results. */}
         <JsonLd data={siteData()} />
-        <I18nProvider locale={locale} currency={currency} t={t}>
+        <I18nProvider locale={locale} currency={currency} t={clientT}>
           {children}
           {/* The chat only shows once the Claude API key has been added. */}
           {process.env.ANTHROPIC_API_KEY ? <ChatWidget /> : null}

@@ -8,7 +8,7 @@ import { DIRECTIONS, FONTS, FRAMES, TRANSITIONS, type CardData, type Crop, type 
 import { CATCHING, USUAL_GOAL } from "@/components/card/tune";
 import { FONT_VARS } from "@/lib/screen-style";
 import { LISTS, TEXTS, fill, isList, labelList, labelsOn, type LabelKey, type ListKey } from "@/lib/labels";
-import type { Dict } from "@/i18n/en";
+import type { ClientDict } from "@/i18n/en";
 import { uploadPhoto } from "./image";
 import { isBlank } from "@/lib/blanks";
 import { NewLookButton } from "./NewLook";
@@ -1348,7 +1348,7 @@ function SizeButtons({ smaller, bigger, onSize }: { smaller: string; bigger: str
 }
 
 // What a box in the list of words is, in the words the Words tab uses for it.
-function fieldName(screen: Screen, path: Path, t: Dict): string {
+function fieldName(screen: Screen, path: Path, t: ClientDict): string {
   const e = t.editor;
   const label = labelOf(path);
   if (label) return isList(label) ? `${t.studio.lineGroups[label]} ${Number(path[4]) + 1}` : fmt(t.studio.usually, { words: fill(TEXTS[label], { i: 1, n: 3, moves: 4 }) });
