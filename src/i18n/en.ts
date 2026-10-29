@@ -185,6 +185,21 @@ export const en = {
       tagline: "Send off a colleague with games and good wishes.",
       intro: "Send off a colleague with everything the team will miss, a leaving-present slot machine and a lot of good luck.",
     },
+    graduation: {
+      label: "Graduation",
+      tagline: "Toss the cap, sit one last exam and hear how proud everyone is.",
+      intro: "For school, college and university graduates: shake the phone to toss the cap, sit one last exam they can't fail, then fireworks. Or tell them, with a hug to hold on to, how far they've come.",
+    },
+    retirement: {
+      label: "Retirement",
+      tagline: "Out of office, forever. A send-off with games and a big thank you.",
+      intro: "An out-of-office reply that never ends, a wheel to pick their first retirement project and a jar of everything you'll miss. For colleagues, parents and anyone hanging up their lanyard.",
+    },
+    newhome: {
+      label: "New home",
+      tagline: "Crack the door code, unpack a box and wish them well in the new place.",
+      intro: "A housewarming card they play: crack the front-door code, pick a moving box and unwrap a present, then pull wishes for the new place from a jar.",
+    },
   },
 
   tones: {
