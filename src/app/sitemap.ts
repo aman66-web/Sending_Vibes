@@ -13,6 +13,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE}/create`, priority: 0.8 },
     { url: `${BASE}/help`, priority: 0.5 },
     { url: `${BASE}/privacy`, priority: 0.3 },
+    { url: `${BASE}/terms`, priority: 0.3 },
     ...TEMPLATES.map((t) => ({ url: `${BASE}/cards/${t.slug}`, priority: 0.7 })),
   ];
 }

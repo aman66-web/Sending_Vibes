@@ -30,6 +30,7 @@ export const en = {
     pricing: "Pricing",
     help: "Help & FAQ",
     privacy: "Privacy",
+    terms: "Terms",
     copyright: "© {year} Envelette. The No button still doesn't work.",
   },
 
@@ -37,9 +38,11 @@ export const en = {
     worldwide: "Delivered instantly by link, anywhere in the world.",
     worldwideShort: "Delivered instantly, anywhere in the world",
     currency: "Currency",
+    commonCurrencies: "Most common",
+    allCurrencies: "All currencies",
     abroad: {
       q: "Can I send a card to someone abroad?",
-      a: "Yes. Cards are delivered instantly as a link, so they reach anyone, anywhere in the world, with no postage and no waiting. A card costs {gbp} in the UK and {usd} everywhere else.",
+      a: "Yes. Cards are delivered instantly as a link, so they reach anyone, anywhere in the world, with no postage and no waiting. A card costs {price}, and you can pay in your own currency.",
     },
     perCard: "per card",
     designs: "{n} designs",
@@ -749,7 +752,7 @@ export const en = {
     line: "Interactive cards × {n}",
     total: "Total",
     delivery: "Delivered by link, anywhere in the world",
-    consent: "I'd like my cards straight away, and I understand that once they're delivered I lose my 14-day right to cancel.",
+    consent: "I agree to the [terms and conditions](/terms).\nThat includes getting my cards straight away, so I can't cancel once they've been delivered.",
     pay: "Pay {amount}",
     paying: "Opening secure checkout…",
     secure: "Secure payment by Stripe. We never see your card details.",
@@ -764,7 +767,7 @@ export const en = {
       badEmail: "That email address doesn't look right.",
       needDate: "Pick the day it should arrive.",
       tooFar: "Pick a day within the next {days} days.",
-      consent: "Tick the box to confirm you'd like your cards straight away.",
+      consent: "Tick the box to agree to the terms and conditions.",
     },
     thanks: {
       metaTitle: "Thank you · Envelette",
@@ -857,6 +860,11 @@ export const en = {
     fullScreen: "⛶ Full screen",
     closePreview: "Close preview",
     needNames: "Add both names first.",
+    toWriteTitle: "Some words still need writing",
+    toWriteIntro: "These screens still say what to type there. Tap one to write your own words.",
+    toWriteScreen: "Screen {n} · {name}",
+    toWriteBack: "Go back and write them",
+    toWriteAnyway: "Add to basket anyway",
     failed: "Something went wrong. Please try again.",
     hints: {
       message: "A note that types itself out",
@@ -1106,6 +1114,7 @@ export const en = {
     atStart: "At the very start",
     afterScreen: "After screen {n}: {name}",
     youAreHere: "You're here",
+    putHere: "Put it here",
     cancel: "Cancel",
     groups: { start: "Openings", words: "Messages & photos", fun: "Questions & surprises", games: "Mini games", end: "Endings" },
     kit: {

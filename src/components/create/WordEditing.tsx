@@ -9,6 +9,7 @@ import { CATCHING, USUAL_GOAL } from "@/components/card/tune";
 import { FONT_VARS } from "@/lib/screen-style";
 import { LISTS, TEXTS, isList, labelList, labelsOn, type LabelKey, type ListKey } from "@/lib/labels";
 import { uploadPhoto } from "./image";
+import { isBlank } from "@/lib/blanks";
 import { useWide } from "./use-wide";
 
 // Click the words on the live preview to change them, like editing a design.
@@ -51,6 +52,32 @@ function textFields(card: CardData, screenId?: string, withEmpty = false): Field
   }
   return out;
 }
+
+// Tapping into words that still say what goes there ("Type your question here") selects
+// them, so typing replaces them.
+type WordBox = HTMLInputElement | HTMLTextAreaElement;
+const selectBlank = (e: React.FocusEvent<WordBox>) => {
+  const el = e.currentTarget;
+  if (!isBlank(el.value)) return;
+  // Just the first line, so a message keeps its sign-off. Again a moment later, as iOS
+  // drops a selection made while it's still focusing.
+  const line = el.value.indexOf("\n");
+  const pick = () => el.setSelectionRange(0, line < 0 ? el.value.length : line);
+  pick();
+  setTimeout(pick, 0);
+};
+// A click that focuses a box selects on mousedown, then the mouseup puts the caret where
+// it was clicked (Safari, and Chrome sometimes). Keep the selection for that one click.
+let focusingByMouse = false;
+const blankMouse = {
+  onMouseDown: (e: React.MouseEvent<WordBox>) => {
+    focusingByMouse = document.activeElement !== e.currentTarget;
+  },
+  onMouseUp: (e: React.MouseEvent<WordBox>) => {
+    if (focusingByMouse && isBlank(e.currentTarget.value)) e.preventDefault();
+    focusingByMouse = false;
+  },
+};
 
 const labelValue = (own: unknown, usual: string) => (typeof own === "string" && own.trim() ? own : usual);
 
@@ -170,12 +197,25 @@ type Gesture = {
   box: Box;
   centre?: { x: number; y: number };
   moved: boolean;
+  // The finger, pen or mouse doing it; any other is ignored. A finger or pen needs to
+  // move further before it counts, so a tap's wobble doesn't nudge anything.
+  pointerId: number;
+  touchy: boolean;
 };
+
+// Where a gesture began, from the event that began it.
+type Begin = { x: number; y: number; pointerId: number; touchy: boolean; target: Element };
+const beginOf = (e: React.PointerEvent): Begin => ({ x: e.clientX, y: e.clientY, pointerId: e.pointerId, touchy: e.pointerType !== "mouse", target: e.currentTarget as Element });
 
 type DistributiveOmit<T, K extends keyof T> = T extends unknown ? Omit<T, K> : never;
 
 // The most photos a photos screen holds (see lib/card.ts).
 const MAX_PHOTOS = 6;
+// How far a finger can wander and still count as a tap, not a swipe.
+const TAP_SLOP = 10;
+// How long a finger rests on what's selected before moving it drags it rather than
+// scrolling the page.
+const HOLD_MS = 150;
 
 // Colours to pick from, and two-colour blends for backgrounds.
 const PALETTE = ["#1f1b16", "#ffffff", "#f6efe0", "#e23d3d", "#ff6fae", "#c026d3", "#8b5cf6", "#2563eb", "#38bdf8", "#16a34a", "#facc15", "#f97316", "#d4af37", "#14213d"];
@@ -191,6 +231,8 @@ const SWAPS = ["❤️", "💖", "⭐", "✨", "🎈", "🎉", "🌸", "🌈", "
 const SIZE: Record<Deco, [number, number]> = { sticker: [4, 40], text: [2, 20], image: [10, 90] };
 // The most of each a screen holds (see lib/card.ts).
 const MOST: Record<Deco, number> = { sticker: 10, text: 8, image: 6 };
+// How far something's turned, as people read it: "30°", or "−15°" for anticlockwise.
+const degrees = (deg: number) => `${deg < 0 ? "−" : ""}${Math.abs(deg)}°`;
 // An angle between -180 and 180 degrees, whole, and exactly straight when within 4 degrees of it.
 const straight = (deg: number) => {
   const d = Math.round((((deg % 360) + 540) % 360) - 180);
@@ -225,6 +267,14 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
   const [hover, setHover] = useState<Box | null>(null);
   const [open, setOpen] = useState<Selected | null>(null);
   const gesture = useRef<Gesture | null>(null);
+  // Where a touch or click on the card began, so lifting it picks something only if it was a tap.
+  const tap = useRef<{ id: number; x: number; y: number } | null>(null);
+  // A finger resting on what's selected: once it has rested HOLD_MS, moving drags it.
+  const hold = useRef<{ deco: Deco; index: number; el: Element; begin: Begin; ready: boolean; timer: number } | null>(null);
+  // The click that follows a drag or a press on an item isn't a tap on the card.
+  const skipClick = useRef(false);
+  // While the turning handle is dragged, the angle shows beside it.
+  const [turning, setTurning] = useState(false);
   // Each selection is one step for Undo, however many changes are made while it's open.
   const begun = useRef(false);
   // Which photo the chosen file replaces (a photos screen's, or a placed one), or null to add them.
@@ -452,7 +502,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
   });
 
   // Dragging a sticker, text box or photo moves it; dragging the corner handle resizes it.
-  const startGesture = (mode: Gesture["mode"], deco: Deco, index: number, e: React.PointerEvent, el: Element) => {
+  const startGesture = (mode: Gesture["mode"], deco: Deco, index: number, begin: Begin, el: Element) => {
     const item = (style[listOf(deco)] as { x: number; y: number; size: number; rotate?: number }[] | undefined)?.[index];
     const cardBox = el.closest("[data-deco-layer]")?.getBoundingClientRect();
     if (!item || !cardBox) return false;
@@ -461,29 +511,35 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
       mode,
       deco,
       index,
-      x: e.clientX,
-      y: e.clientY,
+      x: begin.x,
+      y: begin.y,
       start: { x: item.x, y: item.y, size: item.size, rotate: item.rotate ?? 0 },
       card: cardBox,
       box: boxOf(el),
       centre: { x: r.left + r.width / 2, y: r.top + r.height / 2 },
       moved: false,
+      pointerId: begin.pointerId,
+      touchy: begin.touchy,
     };
-    (e.currentTarget as Element).setPointerCapture(e.pointerId);
+    try {
+      begin.target.setPointerCapture(begin.pointerId);
+    } catch {}
     return true;
   };
   const moveGesture = (e: React.PointerEvent) => {
     const g = gesture.current;
     if (!g) return false;
+    if (e.pointerId !== g.pointerId) return true;
     const dx = e.clientX - g.x;
     const dy = e.clientY - g.y;
-    if (!g.moved && Math.hypot(dx, dy) < 4) return true;
+    if (!g.moved && Math.hypot(dx, dy) < (g.touchy ? TAP_SLOP : 4)) return true;
     if (!g.moved) {
       g.moved = true;
       setHover(null);
       // Selected while it moves, so its box follows it.
       select({ kind: "deco", deco: g.deco, index: g.index, box: g.box });
       begin();
+      if (g.mode === "rotate") setTurning(true);
     }
     const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
     if (g.mode === "move") {
@@ -523,9 +579,11 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
     }
     return true;
   };
-  const endGesture = () => {
+  const endGesture = (e?: React.PointerEvent) => {
     const g = gesture.current;
+    if (g && e && e.pointerId !== g.pointerId) return true;
     gesture.current = null;
+    setTurning(false);
     if (!g) return false;
     if (g.moved) remeasure(g.deco, g.index);
     else {
@@ -534,6 +592,32 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
     }
     return true;
   };
+  // The browser took the touch over (to scroll the page, say): stop, keeping any move made so far.
+  const cancelGesture = (e?: React.PointerEvent) => {
+    const g = gesture.current;
+    if (g && e && e.pointerId !== g.pointerId) return;
+    gesture.current = null;
+    tap.current = null;
+    letGo();
+    setTurning(false);
+    if (g?.moved) remeasure(g.deco, g.index);
+  };
+  const letGo = () => {
+    if (hold.current) clearTimeout(hold.current.timer);
+    hold.current = null;
+  };
+
+  // While a finger drags something (or rests on it, ready to), the page mustn't scroll.
+  // React's touch listeners can't stop that, so this one is the browser's own.
+  useEffect(() => {
+    const el = layer.current;
+    if (!el) return;
+    const stop = (e: TouchEvent) => {
+      if (hold.current?.ready || gesture.current?.touchy) e.preventDefault();
+    };
+    el.addEventListener("touchmove", stop, { passive: false });
+    return () => el.removeEventListener("touchmove", stop);
+  }, [enabled]);
 
   const pickPhotos = (replace: { deco: boolean; index: number } | null) => {
     setReplacing(replace);
@@ -639,23 +723,62 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
       {children}
       <input ref={files} type="file" accept="image/*" multiple className="hidden" onChange={(e) => addPhotos(e.target.files)} />
       {enabled && (
+        // A finger swiping across the card scrolls the page; only a tap picks what's under it
+        // (the browser's click, which it doesn't send for a swipe, or for a touch that stops
+        // the page scrolling). By finger, what's selected drags after resting on it a moment;
+        // a mouse can drag a sticker, text box or photo straight away.
         <div
           ref={layer}
-          className="absolute inset-0 z-[45] cursor-pointer touch-none"
+          className="absolute inset-0 z-[45] cursor-pointer touch-manipulation select-none [-webkit-touch-callout:none]"
           onPointerDown={(e) => {
+            // A second finger while one is busy is ignored.
+            if (gesture.current || hold.current) return;
+            skipClick.current = false;
+            tap.current = { id: e.pointerId, x: e.clientX, y: e.clientY };
             const hit = under(e.clientX, e.clientY);
-            if (hit?.kind === "deco" && startGesture("move", hit.deco, hit.index, e, hit.el)) return;
-            gesture.current = null;
+            if (hit?.kind !== "deco") return;
+            const begin = beginOf(e);
+            if (!begin.touchy) {
+              skipClick.current = startGesture("move", hit.deco, hit.index, begin, hit.el);
+              return;
+            }
+            // Only what's selected, and only what's really under the finger.
+            if (open?.kind !== "deco" || open.deco !== hit.deco || open.index !== hit.index) return;
+            const timer = window.setTimeout(() => {
+              if (hold.current) hold.current.ready = true;
+            }, HOLD_MS);
+            hold.current = { deco: hit.deco, index: hit.index, el: hit.el, begin, ready: false, timer };
           }}
           onPointerMove={(e) => {
-            if (moveGesture(e)) return;
+            const h = hold.current;
+            if (h && e.pointerId === h.begin.pointerId) {
+              // Moving before it has rested is a swipe: leave it to the page.
+              if (!h.ready) {
+                if (Math.hypot(e.clientX - h.begin.x, e.clientY - h.begin.y) > TAP_SLOP) letGo();
+                return;
+              }
+              letGo();
+              skipClick.current = startGesture("move", h.deco, h.index, h.begin, h.el);
+            }
+            if (moveGesture(e) || e.pointerType !== "mouse") return;
             const hit = under(e.clientX, e.clientY);
             setHover(hit && hit.kind !== "background" ? boxOf(hit.el) : null);
           }}
           onPointerUp={(e) => {
-            if (endGesture()) return;
+            letGo();
+            if (gesture.current) endGesture(e);
+          }}
+          onClick={(e) => {
+            const down = tap.current;
+            tap.current = null;
+            if (skipClick.current) {
+              skipClick.current = false;
+              return;
+            }
+            if (down && Math.hypot(e.clientX - down.x, e.clientY - down.y) > TAP_SLOP) return;
             selectHit(under(e.clientX, e.clientY));
           }}
+          onPointerCancel={cancelGesture}
           onPointerLeave={() => setHover(null)}
           onWheel={(e) => {
             // Let long screens still scroll underneath.
@@ -691,10 +814,11 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
           onPointerDown={(e) => {
             e.stopPropagation();
             const el = decoEl(open.deco, open.index);
-            if (el) startGesture("resize", open.deco, open.index, e, el);
+            if (el && !gesture.current) startGesture("resize", open.deco, open.index, beginOf(e), el);
           }}
           onPointerMove={(e) => moveGesture(e)}
-          onPointerUp={() => endGesture()}
+          onPointerUp={(e) => endGesture(e)}
+          onPointerCancel={cancelGesture}
         />
       )}
       {/* A round handle above it (below it, at the very top) to turn it, like a design app. */}
@@ -711,17 +835,33 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
           role="slider"
           aria-label={s.turn}
           aria-valuenow={Number(item?.rotate ?? 0)}
+          aria-valuetext={degrees(Number(item?.rotate ?? 0))}
           className="absolute z-[48] grid h-8 w-8 cursor-grab touch-none place-items-center rounded-full border-2 border-brand bg-white text-lg font-bold text-brand shadow-lg active:cursor-grabbing"
           style={{ left: open.box.left + open.box.width / 2 - 16, top: turnBelow ? open.box.top + open.box.height + 12 : open.box.top - 44 }}
           onPointerDown={(e) => {
             e.stopPropagation();
             const el = decoEl(open.deco, open.index);
-            if (el) startGesture("rotate", open.deco, open.index, e, el);
+            if (el && !gesture.current) startGesture("rotate", open.deco, open.index, beginOf(e), el);
           }}
           onPointerMove={(e) => moveGesture(e)}
-          onPointerUp={() => endGesture()}
+          onPointerUp={(e) => endGesture(e)}
+          onPointerCancel={cancelGesture}
         >
           ↻
+        </span>
+      )}
+      {enabled && open?.kind === "deco" && turning && (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute z-[49] whitespace-nowrap rounded-full bg-foreground px-2.5 py-1 text-sm font-bold tabular-nums text-background shadow-lg"
+          style={{
+            top: (turnBelow ? open.box.top + open.box.height + 12 : open.box.top - 44) + 4,
+            ...(open.box.left + open.box.width / 2 + 90 > open.area.width
+              ? { left: open.box.left + open.box.width / 2 - 24, transform: "translateX(-100%)" }
+              : { left: open.box.left + open.box.width / 2 + 24 }),
+          }}
+        >
+          {degrees(Number(item?.rotate ?? 0))}
         </span>
       )}
       {enabled && clip && (
@@ -844,6 +984,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
                 {icon}
               </button>
             ))}
+            <span className="min-w-[4ch] text-center text-sm font-bold tabular-nums">{degrees(Number(item.rotate ?? 0))}</span>
             {Number(item.rotate ?? 0) !== 0 && (
               <button
                 type="button"
@@ -925,11 +1066,13 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
             <div className="max-h-48 space-y-1.5 overflow-y-auto">
               {lines.map((line, j) => (
                 <input
-                  key={j}
+                  key={`${list.join(".")}:${j}`}
                   autoFocus={!sheet && j === list.at(-1)}
                   dir="auto"
                   value={getAt(card, [...list.slice(0, 4), j]) || line}
                   maxLength={80}
+                  onFocus={selectBlank}
+                  {...blankMouse}
                   onChange={(e) => edit([...list.slice(0, 4), j], e.target.value)}
                   className="w-full rounded-xl border border-line bg-background px-3 py-1.5 text-sm outline-none focus:border-brand"
                 />
@@ -937,20 +1080,26 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
             </div>
           ) : long ? (
             <textarea
+              key={open.path.join(".")}
               autoFocus={!sheet}
               rows={4}
               dir="auto"
               value={value}
               maxLength={limitFor(card, open.path)}
+              onFocus={selectBlank}
+              {...blankMouse}
               onChange={(e) => edit(open.path, e.target.value)}
               className="w-full resize-y rounded-xl border border-line bg-background px-3 py-2 text-sm outline-none focus:border-brand"
             />
           ) : (
             <input
+              key={open.path.join(".")}
               autoFocus={!sheet}
               dir="auto"
               value={value}
               maxLength={limitFor(card, open.path)}
+              onFocus={selectBlank}
+              {...blankMouse}
               onChange={(e) => edit(open.path, e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && close()}
               className="w-full rounded-xl border border-line bg-background px-3 py-2 text-sm outline-none focus:border-brand"
@@ -1194,6 +1343,8 @@ export function AllWords({ card, screenId, onChange }: { card: CardData; screenI
               value,
               "aria-label": name,
               maxLength: limitFor(card, f.path),
+              onFocus: selectBlank,
+              ...blankMouse,
               onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => onChange(f.path, e.target.value),
               className: "w-full rounded-xl border border-line bg-background px-3 py-1.5 outline-none focus:border-brand",
             };

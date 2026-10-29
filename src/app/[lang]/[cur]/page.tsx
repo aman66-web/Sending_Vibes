@@ -404,7 +404,7 @@ export default async function Home() {
                 {f.q}
                 <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border-2 border-ink font-sans text-xl font-bold leading-none transition group-open:rotate-45 group-open:bg-hot group-open:text-white">+</span>
               </summary>
-              <p className="mt-3 text-ink/75">{fmt(f.a, { price, aiPrice, gbp: priceOf("card", "gbp"), usd: priceOf("card", "usd") })}</p>
+              <p className="mt-3 text-ink/75">{fmt(f.a, { price, aiPrice })}</p>
             </details>
           ))}
         </div>

@@ -71,6 +71,19 @@ SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
 
 No secret key is needed. The `cards` table can't be read or listed directly; a card can only be fetched by its exact ID through `get_card`. Photo uploads are insert-only, so existing photos can't be overwritten or listed.
 
+## Signing in with Google
+
+Switch Google on in Supabase (Authentication → Sign In / Providers). By default Google sends people back through Supabase, so Google's sign-in page says "continue to <project>.supabase.co". To have it name the site instead:
+
+1. In Google Cloud Console, open the OAuth client Supabase uses and add `https://<your domain>/api/auth/google/return` under **Authorised redirect URIs**.
+2. Set the same client's ID (not its secret) on Vercel, for Production, then redeploy:
+
+```
+GOOGLE_CLIENT_ID=<id>.apps.googleusercontent.com
+```
+
+Google then posts the sign-in straight back to `/api/auth/google/return`, which hands it to Supabase with `signInWithIdToken`.
+
 ## Languages
 
 The site (not the cards) can be shown in English, Hindi, Punjabi, Gujarati, Bengali, Urdu, Arabic, Polish, Spanish and French, picked with the globe button in the header.

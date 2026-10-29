@@ -6,7 +6,7 @@ import { ProductView } from "@/components/catalog/ProductView";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { TEMPLATES, getTemplate } from "@/lib/catalog";
-import { PRICES } from "@/lib/pricing";
+import { plainAmount, tierPrice } from "@/lib/pricing";
 import { occasions } from "@/lib/templates";
 import { fmt } from "@/i18n/config";
 import { getI18n } from "@/i18n/server";
@@ -39,7 +39,7 @@ export default async function ProductPage({ params }: Props) {
     name: `${t.name}: interactive ${occasions[t.occasion].label} card`,
     description: t.blurb,
     brand: { "@type": "Brand", name: "Envelette" },
-    offers: { "@type": "Offer", price: (PRICES.card / 100).toFixed(2), priceCurrency: currency.toUpperCase(), availability: "https://schema.org/InStock" },
+    offers: { "@type": "Offer", price: plainAmount(tierPrice("premade", currency), currency), priceCurrency: currency.toUpperCase(), availability: "https://schema.org/InStock" },
   };
 
   return (

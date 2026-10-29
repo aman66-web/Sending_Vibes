@@ -22,10 +22,11 @@ import { TwoWays } from "@/components/TwoWays";
 import { NO_ANSWERS, Quiz, quizPrompt, type Answers } from "./Quiz";
 import { Field } from "./ScreenEditor";
 import { openChat } from "@/components/open-chat";
-import { AtPhoneSize } from "./AtPhoneSize";
+import { AtComputerSize, AtPhoneSize } from "./AtPhoneSize";
 import { STUDIO_TABS, ScreenStrip, StudioPanel, type Tab } from "./Studio";
 import { useWide } from "./use-wide";
 import { AllWords, EditableCard, setAt, type Path } from "./WordEditing";
+import { stageFor, stillToWrite } from "@/lib/blanks";
 
 const DRAFT_KEY = "sv-draft-v1";
 const MODE_KEY = "sv-draft-mode";
@@ -138,6 +139,16 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   const [card, setCard] = useState<CardData | null>(draft);
   const [selected, setSelected] = useState<string | undefined>(draft?.screens[0]?.id);
   const [showPreview, setShowPreview] = useState(false);
+  // The full-screen preview on a phone covers the page, which mustn't scroll behind it.
+  useEffect(() => {
+    if (!showPreview) return;
+    const html = document.documentElement;
+    const was = html.style.overflow;
+    html.style.overflow = "hidden";
+    return () => {
+      html.style.overflow = was;
+    };
+  }, [showPreview]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Making a card by typing, and changing one by typing.
@@ -158,8 +169,8 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   const making = useRef<AbortController | null>(null);
   // The live preview: on a phone or a computer, which screen it's showing, and a nudge
   // that makes it jump back to a screen after that screen changes.
-  // The computer view comes first; the phone is a tap away.
-  const [view, setView] = useState<"phone" | "computer">("computer");
+  // It starts as the device they're on (see `shown` below); the other is a tap away.
+  const [view, setView] = useState<"phone" | "computer" | null>(null);
   const [viewing, setViewing] = useState<string | undefined>();
   const [nudge, setNudge] = useState(0);
   const [screenAsk, setScreenAsk] = useState("");
@@ -174,6 +185,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   // press Preview mode to see the card react as it will for them.
   const [wordMode, setWordMode] = useState<"edit" | "play">("edit");
   const wide = useWide();
+  const shown = view ?? (wide ? "computer" : "phone");
   const [pickOccasion, setPickOccasion] = useState<Occasion | "all">(initialOccasion ?? "all");
   const design = mode === "premade" ? getTemplate(templateSlug) : undefined;
   const ideaBox = useRef<HTMLTextAreaElement>(null);
@@ -427,9 +439,17 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     setBusy(null);
   };
 
-  const publish = async () => {
+  // Screens still saying what to write there ("Type your question here"), checked before
+  // the card goes in the basket.
+  // Whether that reminder is up. What it lists is worked out from the card as it is now, so
+  // a change landing while it's open (an AI change, say) can't leave it out of date.
+  const [askToWrite, setAskToWrite] = useState(false);
+  const basketButton = useRef<HTMLButtonElement>(null);
+  const publish = async (anyway = false) => {
     if (!card) return;
     if (!card.to.trim() || !card.from.trim()) return setError(c.needNames);
+    if (!anyway && stillToWrite(card).length) return setAskToWrite(true);
+    setAskToWrite(false);
     setSaving(true);
     setError(null);
     try {
@@ -756,8 +776,8 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
               <button onClick={() => setShowPreview(true)} className="flex-1 rounded-full border-2 border-line py-3.5 font-semibold lg:hidden">
                 {c.fullScreen}
               </button>
-              <button onClick={publish} disabled={saving} className="flex-[2] rounded-full bg-brand py-3.5 font-brand text-lg font-semibold text-white shadow-lg disabled:opacity-50 lg:w-full">
-                {saving ? c.adding : fmt(c.addToBasket, { price: formatMoney(tierPrice(cardTier(card)), currency) })}
+              <button ref={basketButton} onClick={() => publish()} disabled={saving} className="flex-[2] rounded-full bg-brand py-3.5 font-brand text-lg font-semibold text-white shadow-lg disabled:opacity-50 lg:w-full">
+                {saving ? c.adding : fmt(c.addToBasket, { price: formatMoney(tierPrice(cardTier(card), currency), currency) })}
               </button>
             </div>
             {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
@@ -770,6 +790,10 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
               <div className="order-1 flex flex-wrap items-center justify-between gap-2 lg:order-none">
                 <div className="flex flex-wrap items-center gap-2">
                   <ModeSwitch wordMode={wordMode} setWordMode={setWordMode} />
+                  {/* On a phone, as icons so it fits beside the mode switch. */}
+                  <div className="lg:hidden">
+                    <DeviceSwitch view={shown} setView={setView} compact />
+                  </div>
                   {/* Only while designing, so in Preview mode the card sits higher on a phone. */}
                   {wordMode === "edit" && (
                     <>
@@ -783,19 +807,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                   )}
                 </div>
                 <div className="hidden items-center gap-2 lg:flex">
-                <div role="tablist" aria-label={c.preview} className="flex w-fit gap-1 rounded-full border border-line bg-panel p-1">
-                {(["computer", "phone"] as const).map((v) => (
-                  <button
-                    key={v}
-                    role="tab"
-                    aria-selected={view === v}
-                    onClick={() => setView(v)}
-                    className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${view === v ? "bg-foreground text-background" : "opacity-70 hover:opacity-100"}`}
-                  >
-                    {v === "phone" ? t.product.onPhone : t.product.onComputer}
-                  </button>
-                ))}
-                </div>
+                <DeviceSwitch view={shown} setView={setView} />
                 <button type="button" onClick={() => setBigView(true)} className="rounded-full border-2 border-foreground/80 px-4 py-1.5 text-sm font-bold">
                   {c.fullScreen}
                 </button>
@@ -830,14 +842,24 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                   the controls for what's selected can hang over the screens strip. */}
               <div ref={cardBox} className="relative z-10 order-2 scroll-mt-4 lg:order-none">
                 <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onScreen={editScreen} onBegin={remember} pick={pick} openSettings={settings}>
-                  {!wide ? (
-                    // On a phone, the card as it'll look on their phone, without a frame around it.
-                    <div className="h-[min(68dvh,620px)] overflow-hidden rounded-3xl border-2 border-line">
+                  {!wide && shown === "computer" ? (
+                    // On a phone, the card laid out as on a laptop and shrunk to fit.
+                    <BrowserFrame className="aspect-[16/10]">
                       {!showPreview && (
-                        <CardPlayer key="here" card={card} preview sound editing={wordMode === "edit"} focusScreenId={selected} focusNonce={nudge} focusStage={focusStage} onScreenChange={setViewing} />
+                        <AtComputerSize>
+                          <CardPlayer key="here-computer" card={card} preview sound editing={wordMode === "edit"} focusScreenId={selected} focusNonce={nudge} focusStage={focusStage} onScreenChange={setViewing} />
+                        </AtComputerSize>
+                      )}
+                    </BrowserFrame>
+                  ) : !wide ? (
+                    // On a phone, the card as it'll look on their phone, without a frame around it. It
+                    // grows to fit a long screen rather than scrolling inside, so swipes scroll the page.
+                    <div className="flex min-h-[min(68dvh,620px)] flex-col overflow-hidden rounded-3xl border-2 border-line">
+                      {!showPreview && (
+                        <CardPlayer key="here" card={card} preview grow sound editing={wordMode === "edit"} focusScreenId={selected} focusNonce={nudge} focusStage={focusStage} onScreenChange={setViewing} />
                       )}
                     </div>
-                  ) : view === "phone" ? (
+                  ) : shown === "phone" ? (
                     <PhoneFrame className="mx-auto h-[600px] w-[290px]" notch="h-5 w-20">
                       <AtPhoneSize>
                         <CardPlayer key="phone" card={card} preview sound editing={wordMode === "edit"} focusScreenId={selected} focusNonce={nudge} focusStage={focusStage} onScreenChange={setViewing} />
@@ -892,6 +914,24 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
         />
       )}
 
+      {askToWrite && card && stillToWrite(card).length > 0 && (
+        <StillToWrite
+          card={card}
+          onClose={() => {
+            setAskToWrite(false);
+            requestAnimationFrame(() => basketButton.current?.focus());
+          }}
+          onAnyway={() => publish(true)}
+          onGo={(id, stage) => {
+            setAskToWrite(false);
+            setShowPreview(false);
+            setWordMode("edit");
+            goToScreen(id, stage);
+            requestAnimationFrame(() => cardBox.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+          }}
+        />
+      )}
+
       {bigView && card && <FullScreenView card={card} startAt={viewing} closeLabel={c.closePreview} onClose={() => setBigView(false)} />}
 
       {showPreview && card && (
@@ -927,6 +967,89 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
         </div>
       )}
 
+    </div>
+  );
+}
+
+// Before the basket: the screens whose words still say what to write there, to go and
+// write them, or add the card anyway.
+function StillToWrite({ card, onGo, onAnyway, onClose }: { card: CardData; onGo: (id: string, stage: number) => void; onAnyway: () => void; onClose: () => void }) {
+  const { t } = useI18n();
+  const c = t.create;
+  const panel = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") return onClose();
+      // Tab stays within the reminder.
+      const buttons = panel.current?.querySelectorAll<HTMLButtonElement>("button");
+      if (e.key !== "Tab" || !buttons?.length) return;
+      const first = buttons[0];
+      const last = buttons[buttons.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+  const blanks = stillToWrite(card);
+  // One row per screen, with the first couple of its unwritten bits.
+  const screens = [...new Set(blanks.map((b) => b.index))];
+  // A second tap of a double-tap lands on whatever has just opened under the finger; it
+  // mustn't close this or add the card anyway.
+  const once = (act: () => void) => (e: React.MouseEvent) => e.detail < 2 && act();
+  return (
+    <div role="dialog" aria-modal="true" aria-labelledby="to-write-title" className="fixed inset-0 z-[70] overflow-y-auto bg-black/50" onClick={once(onClose)}>
+      <div className="flex min-h-full items-end justify-center p-4 sm:items-center">
+        <div ref={panel} onClick={(e) => e.stopPropagation()} className="w-full max-w-md rounded-3xl border-2 border-foreground bg-background p-5 shadow-2xl">
+          <h2 id="to-write-title" className="font-brand text-2xl font-bold">
+            {c.toWriteTitle}
+          </h2>
+          <p className="mt-1 opacity-75">{c.toWriteIntro}</p>
+          <div className="mt-4 space-y-2">
+            {screens.map((index) => {
+              const screen = card.screens[index];
+              const name = screen.type === "game" ? t.labels.games[screen.game] : t.labels.screens[screen.type];
+              const own = blanks.filter((b) => b.index === index);
+              const words = own.map((b) => `“${b.text}”`);
+              return (
+                <button
+                  key={screen.id}
+                  type="button"
+                  autoFocus={index === screens[0]}
+                  // To the moment its first blank shows (a box picked, a note out of the jar).
+                  onClick={once(() => onGo(screen.id, stageFor(screen, own[0].path)))}
+                  className="flex w-full items-center gap-3 rounded-2xl border-2 border-line px-4 py-3 text-start transition hover:border-brand"
+                >
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-semibold">{fmt(c.toWriteScreen, { n: index + 1, name })}</span>
+                    <span className="block truncate text-sm opacity-65">
+                      {words.slice(0, 2).join(", ")}
+                      {words.length > 2 ? "…" : ""}
+                    </span>
+                  </span>
+                  <span aria-hidden className="text-xl text-brand">
+                    ✎
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          {/* On a phone, Go back is at the bottom, where the Add to basket button was. */}
+          <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row-reverse">
+            <button type="button" onClick={once(onClose)} className="flex-1 rounded-full bg-brand py-3 font-semibold text-white">
+              {c.toWriteBack}
+            </button>
+            <button type="button" onClick={once(onAnyway)} className="flex-1 rounded-full border-2 border-line py-3 font-semibold">
+              {c.toWriteAnyway}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -1073,11 +1196,41 @@ function ModeSwitch({ wordMode, setWordMode }: { wordMode: "edit" | "play"; setW
           role="tab"
           aria-selected={wordMode === m}
           onClick={() => setWordMode(m)}
-          className={`rounded-full px-4 py-2 text-sm font-bold transition ${wordMode === m ? "bg-foreground text-background" : "opacity-70 hover:opacity-100"}`}
+          // A little narrower on a phone, so the 📱/💻 switch fits beside it.
+          className={`rounded-full px-2.5 py-2 text-sm font-bold transition sm:px-4 ${wordMode === m ? "bg-foreground text-background" : "opacity-70 hover:opacity-100"}`}
         >
           {m === "edit" ? x.editWords : x.play}
         </button>
       ))}
+    </div>
+  );
+}
+
+// The card as it'll look on a phone or on a computer. Compact is just the icons, with the
+// words for screen readers and on hover.
+function DeviceSwitch({ view, setView, compact = false }: { view: "phone" | "computer"; setView: (view: "phone" | "computer") => void; compact?: boolean }) {
+  const { t } = useI18n();
+  return (
+    <div role="tablist" aria-label={t.create.preview} className={`flex w-fit gap-1 rounded-full bg-panel p-1 ${compact ? "border-2 border-foreground/80" : "border border-line"}`}>
+      {(["computer", "phone"] as const).map((v) => {
+        const label = v === "phone" ? t.product.onPhone : t.product.onComputer;
+        // The labels start with their icon, e.g. "📱 On a phone".
+        const [icon, ...words] = label.split(" ");
+        return (
+          <button
+            key={v}
+            role="tab"
+            aria-selected={view === v}
+            aria-label={compact ? words.join(" ") : undefined}
+            title={compact ? words.join(" ") : undefined}
+            onClick={() => setView(v)}
+            // Compact, it's as tall as the mode switch beside it.
+            className={`rounded-full text-sm font-semibold transition ${compact ? "grid h-9 w-8 place-items-center text-base leading-none" : "px-4 py-1.5"} ${view === v ? "bg-foreground text-background" : "opacity-70 hover:opacity-100"}`}
+          >
+            {compact ? icon : label}
+          </button>
+        );
+      })}
     </div>
   );
 }

@@ -50,6 +50,9 @@ export async function SiteFooter() {
             <li>
               <Link href="/privacy" className="transition hover:text-cream">{t.footer.privacy}</Link>
             </li>
+            <li>
+              <Link href="/terms" className="transition hover:text-cream">{t.footer.terms}</Link>
+            </li>
           </ul>
         </div>
       </div>

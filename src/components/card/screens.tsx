@@ -567,7 +567,8 @@ export function TypeItScreen({ screen, onNext, stage = 0 }: ScreenProps<"typeit"
       {solved && <Burst />}
       <h2 className="font-display text-3xl font-semibold leading-tight">{screen.title}</h2>
       <p className="text-[var(--c-muted)]">{solved ? screen.winText : screen.instructions}</p>
-      <div className={`flex flex-wrap justify-center gap-1.5 ${wrongNow ? "animate-shake" : ""}`} aria-hidden>
+      {/* The tiles show it a letter at a time (or not yet), so the editor reads it from here. */}
+      <div className={`flex flex-wrap justify-center gap-1.5 ${wrongNow ? "animate-shake" : ""}`} aria-hidden data-text={screen.phrase}>
         {target.split("").map((ch, i) =>
           ch === " " ? (
             <span key={i} className="w-4" />

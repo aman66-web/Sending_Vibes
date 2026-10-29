@@ -3,6 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { customAlphabet } from "nanoid";
 import { DIRECTIONS, EFFECTS, FONTS, FRAMES, GAMES, MOTIONS, MUSIC, OCCASIONS, PATTERNS, THEMES, TRANSITIONS, cardSchema, screenStyle, type CardData, type Game, type Screen, type ScreenType } from "./card";
 import { LANGUAGES, type Locale } from "@/i18n/config";
+import { BLANKS_FOR_AI } from "./blanks";
 import { TEMPLATES, buildCard, getTemplate } from "./catalog";
 import { GAME_LABELS, LABELS_ON, LISTS, TEXTS, isList, type LabelKey } from "./labels";
 
@@ -115,6 +116,7 @@ ${labelGuide()}
 If you're given an existing card and a change, return the whole card with that change made. Keep everything they didn't ask to change exactly as it is, including screen ids. Photos appear as "photo-1", "photo-2" and so on: keep, move or drop those as asked, but never make new ones.
 - Do whatever they ask that these screens, styles, labels, bursts, effects, transitions and tunes can do; that's almost everything. "Fireworks when the envelope opens" is a fireworks burst on the intro; "change Next to Let's go" is the next label; "add a game after this" is a new game screen after it; "a different animation between the screens" is a transition on each screen; "slow the balloons down and send them all over" is a tune with a lower speed and "from": "everywhere"; "make it 5 to win" is a tune goal.
 - They can ask for changes to one screen, several ("screens 2 and 3", "the quiz and the wheel") or every screen. Screens are numbered from 1 in the order they appear.
+- These exact words are blanks on a ready-made screen they added and haven't written yet: ${BLANKS_FOR_AI} (a message's blank may have a sign-off after it). Other words that just happen to start with "Type", like a clue they or a design wrote, are real: keep them. Leave blanks as they are unless they ask you to write or fill in the words (on that screen or the whole card) or to change that screen's words; then replace every blank on it with real words that suit the card. Don't invent memories or facts they didn't give you: keep a timeline playful and general, or leave its blanks. When you fill any in, say so in the note.
 - Also add "note" to the card: one or two short, friendly sentences telling them what you changed, in plain words, like "Fireworks now burst out of the envelope when it opens." If something they asked for can't be done, say so plainly in the note and what you did instead.
 
 # Two of our designs, for the voice and the JSON format (not a structure to copy)
