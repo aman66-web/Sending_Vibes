@@ -95,6 +95,24 @@ export function park(draft: Draft) {
   writeParked([draft, ...others]);
 }
 
+// Whether a set-aside change is to this basket card (or to an earlier copy of it, before it
+// was changed and saved again under a new id).
+const changes = (draft: Draft, id: string) => Boolean(draft.editing && (draft.editing === id || readMade(draft.editing)?.id === id));
+
+// The set-aside change to a basket card, if there is one, to carry on with rather than the
+// card as it went in.
+function parkedChange(id: string) {
+  return readParked().find((d) => changes(d, id));
+}
+
+// Takes set-aside changes to a basket card out of the list: they've been carried on with,
+// saved or thrown away, so they mustn't come back later as a second copy of the card.
+export function forgetChanges(id: string) {
+  const list = readParked();
+  const rest = list.filter((d) => !changes(d, id));
+  if (rest.length !== list.length) writeParked(rest);
+}
+
 // Forgets the card that was being made or changed. The card most recently set aside for it,
 // if there is one, becomes the draft again and is returned so it can be offered.
 export function dropDraft(): Draft | null {
@@ -103,9 +121,12 @@ export function dropDraft(): Draft | null {
     localStorage.removeItem(MODE_KEY);
     localStorage.removeItem(EDIT_KEY);
   } catch {}
-  const [back, ...rest] = readParked();
-  if (!back) return null;
+  // A change to a basket card that has since been changed and saved again is out of date:
+  // bringing it back would add a second copy of the card.
+  const usable = readParked().filter((d) => !d.editing || (readMade(d.editing)?.id ?? d.editing) === d.editing);
+  const [back, ...rest] = usable;
   writeParked(rest);
+  if (!back) return null;
   // A change to a basket card that's since been paid for or taken out is just a card now.
   const draft = back.editing && !inBasket(back.editing) ? { card: back.card, mode: back.mode } : back;
   saveDraft(draft);
@@ -136,7 +157,7 @@ export function clearQuiz() {
 }
 
 // Whether there's anything in the questions worth offering back.
-const started = (q: SavedQuiz) => q.question > 0 || Boolean(q.answers.to.trim() || q.answers.describe.trim() || q.idea.trim());
+export const started = (q: SavedQuiz) => q.question > 0 || Boolean(q.answers.to.trim() || q.answers.describe.trim() || q.idea.trim());
 
 export function markAdded(id: string) {
   try {
@@ -169,6 +190,8 @@ export type Begin = {
   quiz?: SavedQuiz;
   // An unfinished card to set aside once the opened one is saved over it.
   park?: Draft;
+  // The set-aside change being opened, to take out of that list once it's the draft.
+  take?: Draft;
   waiting: Waiting;
 };
 
@@ -183,10 +206,13 @@ export function resumeFrom({ edit, resume, fresh, search }: { edit?: string; res
     if (!made) return { waiting: { cantOpen: true, ...(draft ? { draft } : {}) } };
     // Already being changed (the page reloaded, or Back from the basket): carry on with that.
     if (draft?.editing === made.id) return { open: draft, waiting: {} };
-    return { open: { card: made.card, mode: made.mode, editing: made.id }, ...(draft ? { park: draft } : {}), waiting: {} };
+    const parked = parkedChange(made.id);
+    const open = parked ? { ...parked, editing: made.id } : { card: made.card, mode: made.mode, editing: made.id };
+    return { open, ...(draft ? { park: draft } : {}), ...(parked ? { take: parked } : {}), waiting: {} };
   }
   const added = loadAdded() ?? undefined;
   if (quiz && (resume || quiz.search === search)) return { quiz, waiting: { draft: draft ?? undefined, added } };
-  if (draft && !fresh && !added) return { open: draft, waiting: {} };
+  // Questions started since the card was left are newer work: both are offered instead.
+  if (draft && !fresh && !added && !(quiz && started(quiz))) return { open: draft, waiting: {} };
   return { waiting: { draft: draft ?? undefined, quiz: quiz && started(quiz) ? quiz : undefined, added } };
 }

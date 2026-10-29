@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CardPlayer } from "@/components/card/CardPlayer";
 import { Motif } from "@/components/card/motifs";
@@ -37,7 +37,7 @@ import { CarryOn } from "./CarryOn";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { ErrorNotice, canRetry } from "./ErrorNotice";
 import { UndoToast } from "./UndoToast";
-import { clearAdded, clearQuiz, dropDraft, markAdded, park, resumeFrom, saveDraft, saveQuiz, type Draft, type SavedQuiz, type Waiting } from "./drafts";
+import { clearAdded, clearQuiz, dropDraft, forgetChanges, loadQuiz, markAdded, park, resumeFrom, saveDraft, saveQuiz, started, type Draft, type SavedQuiz, type Waiting } from "./drafts";
 
 // The designs shown next to each example description, in the same order as t.custom.examples.
 const EXAMPLE_SLUGS = ["be-my-valentine", "birthday-bash", "festival-of-lights", "naughty-or-nice", "please-forgive-me", "for-the-best-mum"];
@@ -113,6 +113,8 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   // An unfinished card that would otherwise be written over by the next one: it's set
   // aside instead, and offered again once that one's done.
   const keep = useRef<Draft | null>(begin.park ?? begin.waiting.draft ?? null);
+  // A set-aside change to a basket card that's been opened again, to take out of that list.
+  const taken = useRef(begin.take ? begin.open?.editing : undefined);
   // A design picked elsewhere goes straight to the questions; an occasion opens the designs
   // for it, unless it came with a personalised start (then it's filled in on the questions).
   const [step, setStep] = useState<Step>(
@@ -138,8 +140,9 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     };
   }, [showPreview]);
   const [saving, setSaving] = useState(false);
-  // Why the card couldn't go in the basket, and the screen to fix if the server said which.
-  const [error, setError] = useState<{ text: string; screen?: number; retry?: boolean } | null>(null);
+  // Why the card couldn't go in the basket, and the screen to fix if the server said which
+  // (with the screens' order then, since the message names it by its number).
+  const [error, setError] = useState<{ text: string; screenId?: string; order?: string; retry?: boolean } | null>(null);
   // Making a card by typing, and changing one by typing.
   const [idea, setIdea] = useState(saved?.idea ?? "");
   const [ask, setAsk] = useState("");
@@ -262,6 +265,10 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       keep.current = null;
     }
     saveDraft({ card, mode, editing: editingId });
+    if (taken.current) {
+      forgetChanges(taken.current);
+      taken.current = undefined;
+    }
     // From now on a reload comes back to this card, whatever the link first asked for, and
     // the card put in the basket earlier is no longer the one to offer.
     if (window.location.search) window.history.replaceState(null, "", window.location.pathname);
@@ -294,9 +301,10 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   const startOver = () => {
     setConfirmStart(false);
     const back = dropDraft();
-    clearQuiz();
+    // Questions started meanwhile are newer work, offered rather than thrown away with this card.
+    const quiz = loadQuiz();
     keep.current = back;
-    setWaiting(back ? { draft: back } : {});
+    setWaiting({ ...(back ? { draft: back } : {}), ...(quiz && started(quiz) ? { quiz } : {}) });
     setEditingId(undefined);
     setDeleted(null);
     setError(null);
@@ -509,22 +517,31 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   // The same card asked for again, after it didn't come through.
   const makeAgain = () => job && makeCard(job.prompt, job.names, job.source, job.album, job.template, job.brief);
 
+  // The card as it is now, for undo steps begun by something that finishes later (a photo
+  // uploading, a typed change coming back), which would otherwise keep the card from when it started.
+  const cardNow = useRef(card);
+  useLayoutEffect(() => {
+    cardNow.current = card;
+  });
   const remember = () => {
-    if (!card) return;
-    setPast((p) => [...p.slice(-39), card]);
+    const now = cardNow.current;
+    if (!now) return;
+    setPast((p) => [...p.slice(-39), now]);
     setFuture([]);
   };
   const undoLast = () => {
     const prev = past.at(-1);
-    if (!prev || !card) return;
-    setFuture((f) => [card, ...f]);
+    const now = cardNow.current;
+    if (!prev || !now) return;
+    setFuture((f) => [now, ...f]);
     setPast(past.slice(0, -1));
     setCard(prev);
   };
   const redoNext = () => {
     const next = future[0];
-    if (!next || !card) return;
-    setPast((p) => [...p, card]);
+    const now = cardNow.current;
+    if (!next || !now) return;
+    setPast((p) => [...p, now]);
     setFuture(future.slice(1));
     setCard(next);
   };
@@ -578,6 +595,15 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
 
   // Words typed straight onto the preview.
   const editWords = (path: Path, value: string) => setCard((c) => c && setAt(c, path, value));
+  // In the phone preview's list of words, each box is one step for Undo, as in the Words tab.
+  const listBegun = useRef(false);
+  const editListWords = (path: Path, value: string) => {
+    if (!listBegun.current) {
+      listBegun.current = true;
+      remember();
+    }
+    editWords(path, value);
+  };
   // Photos swapped, added or taken out by tapping them on the preview.
   const editScreen = (index: number, update: (screen: Screen) => Screen) =>
     setCard((c) => c && { ...c, screens: c.screens.map((s, j) => (j === index ? update(s) : s)) });
@@ -587,6 +613,8 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     setCard((c) => c && { ...c, screens: c.screens.map((s) => (s.id === id ? update(s) : s)) });
   // What a typed change did, shown over the card for a few seconds as it lands.
   const [landed, setLanded] = useState<string | null>(null);
+  // A typed change that came back after the card had been changed by hand, so it wasn't used.
+  const [aiHeld, setAiHeld] = useState(false);
   const fresh = useFreshTap();
   // The moment within a screen the arrows last went to (see lib/stages.ts).
   const [moment, setMoment] = useState<{ id: string; stage: number } | null>(null);
@@ -601,9 +629,11 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   // A change to the whole card, or (with focus) to the screen showing in the preview.
   const changeByTyping = async (prompt = ask, focus?: string) => {
     if (!card || prompt.trim().length < 3) return setAiError(x.errors.describe);
+    const sent = card;
     setBusy("change");
     setAiError(null);
     setAiDone(false);
+    setAiHeld(false);
     setLanded(null);
     // On a phone the typing box is below the card: bring the card up to watch the change land.
     if (!wide && !showPreview) cardBox.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -611,8 +641,14 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     setMode("custom");
     try {
       const { card: changed, note, left } = await callAi({ prompt: prompt.trim(), card, focus }, { to: card.to, from: card.from });
-      setAiNote(note ?? null);
       if (left !== undefined) setChangesLeft(left);
+      // They changed the card while it was being worked on: their changes stay, and they're told.
+      if (cardNow.current !== sent) {
+        setAiHeld(true);
+        setBusy(null);
+        return;
+      }
+      setAiNote(note ?? null);
       remember();
       setCard(changed);
       if (!focus || prompt === ask) setAsk("");
@@ -639,14 +675,17 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   const [askToWrite, setAskToWrite] = useState(false);
   const basketButton = useRef<HTMLButtonElement>(null);
   // Straight to the screen the server said has something missing, ready to change it.
-  const fixScreen = (index: number) => {
-    const screen = card?.screens[index];
+  const fixScreen = (id: string) => {
     setError(null);
-    if (!screen) return;
     setShowPreview(false);
     setWordMode("edit");
-    goToScreen(screen.id);
+    goToScreen(id);
     requestAnimationFrame(() => cardBox.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+  };
+  const screenOrder = (of: CardData) => of.screens.map((sc) => sc.id).join(" ");
+  const fixFor = (id?: string) => {
+    const at = card && id ? card.screens.findIndex((sc) => sc.id === id) : -1;
+    return card && id && at >= 0 ? { label: fmt(c.fixScreen, { n: at + 1, name: screenName(card.screens[at]) }), onClick: () => fixScreen(id) } : undefined;
   };
   const publish = async (anyway = false) => {
     if (!card) return;
@@ -668,8 +707,8 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       json = await res.json().catch(() => ({}));
       if (!res.ok || typeof json.id !== "string") {
         // The server may say which screen has the problem, to go straight there.
-        const screen = typeof json.screen === "number" && Number.isInteger(json.screen) && json.screen >= 0 && json.screen < ready.screens.length ? json.screen : undefined;
-        setError({ text: json.error ?? c.failed, screen, retry: res.ok || res.status >= 500 });
+        const screen = typeof json.screen === "number" && Number.isInteger(json.screen) && json.screen >= 0 && json.screen < ready.screens.length ? ready.screens[json.screen] : undefined;
+        setError({ text: json.error ?? c.failed, ...(screen ? { screenId: screen.id, order: screenOrder(ready) } : {}), retry: res.ok || res.status >= 500 });
         return setSaving(false);
       }
     } catch {
@@ -682,8 +721,10 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     const item = { id, to: ready.to, from: ready.from, occasion: ready.occasion, theme: ready.theme, template: ready.template, tier: cardTier(ready), delivery: "self" as const };
     if (editingId) replaceInBasket(editingId, item);
     else addToBasket(item);
-    // A copy stays in this browser, so it can be changed from the basket.
+    // A copy stays in this browser, so it can be changed from the basket. Any change to it
+    // that was set aside is done with now.
     saveMade(id, ready, mode, editingId);
+    if (editingId) forgetChanges(id);
     // A full basket (or full storage) can't take it: the card stays here rather than vanishing.
     if (!inBasket(id)) {
       setError({ text: fmt(c.basketFull, { n: MAX_BASKET }) });
@@ -755,6 +796,11 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
               {aiDone && (
                 <p role="status" className="rounded-xl bg-emerald-50 px-3 py-2.5 text-base font-semibold text-emerald-900 ring-1 ring-emerald-200">
                   ✓ {aiNote || x.changed}
+                </p>
+              )}
+              {aiHeld && !showPreview && (
+                <p role="status" className="rounded-xl bg-background px-3 py-2.5 text-base font-semibold ring-1 ring-line">
+                  {c.changedMeanwhile}
                 </p>
               )}
               {/* On a phone's full-screen preview it shows there instead. */}
@@ -957,7 +1003,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
 
       {step === "edit" && card && (
         <div className="mx-auto grid max-w-7xl gap-8 px-4 py-6 sm:px-6 lg:grid-cols-[380px_minmax(0,1fr)]">
-          <div className={`min-w-0 space-y-6 lg:pb-10 ${error ? "pb-64" : "pb-28"}`}>
+          <div className={`min-w-0 space-y-6 lg:pb-10 ${error && (!error.order || error.order === screenOrder(card)) ? "pb-64" : "pb-28"}`}>
             {/* On a phone the welcome has said this and the card comes first, so it's only for screen readers there. */}
             <div className="sr-only lg:not-sr-only">
               <h1 className="font-brand text-3xl font-bold">{c.editTitle}</h1>
@@ -974,14 +1020,16 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
 
             <div className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-background/95 p-4 backdrop-blur lg:static lg:border-0 lg:bg-transparent lg:p-0">
               {/* Right above the button they pressed: in the bar along the bottom of a phone, in the column on a computer. */}
-              {error && (
+              {/* A problem with a screen, named by its number, no longer fits once the screens are
+                  moved or deleted: Add to basket again says what's wrong now. */}
+              {error && (!error.order || error.order === screenOrder(card)) && (
                 <div className="mb-3">
                   <ErrorNotice
                     compact={!wide}
                     message={error.text}
                     onClose={() => setError(null)}
                     onRetry={error.retry ? () => publish(true) : undefined}
-                    fix={error.screen !== undefined && card.screens[error.screen] ? { label: fmt(c.fixScreen, { n: error.screen + 1, name: screenName(card.screens[error.screen]) }), onClick: () => fixScreen(error.screen!) } : undefined}
+                    fix={fixFor(error.screenId)}
                   />
                 </div>
               )}
@@ -1177,7 +1225,16 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
           <div className="space-y-3 border-t border-line p-3">
             <ModeSwitch wordMode={wordMode} setWordMode={setWordMode} />
             <PreviewControls card={card} viewing={viewing} stage={stageShown} onGo={goToScreen} wordMode={wordMode} />
-            {wordMode === "edit" && <AllWords card={card} screenId={viewing} onChange={editWords} />}
+            {wordMode === "edit" && (
+              <div onFocusCapture={() => (listBegun.current = false)} onBlurCapture={() => (listBegun.current = false)}>
+                <AllWords card={card} screenId={viewing} onChange={editListWords} />
+              </div>
+            )}
+            {aiHeld && (
+              <p role="status" className="rounded-xl bg-panel px-3 py-2.5 text-base font-semibold ring-1 ring-line">
+                {c.changedMeanwhile}
+              </p>
+            )}
             {aiError && (
               <ErrorNotice compact message={aiError} onClose={() => setAiError(null)} onRetry={canRetry(aiError, t) && screenAsk.trim().length >= 3 ? () => changeByTyping(screenAsk, viewing) : undefined} />
             )}
