@@ -60,6 +60,9 @@ export const TEXTS = {
   hugHolding: "Keep holding…",
   hugLetGo: "Don't let go!",
   hugDone: "Hug delivered!",
+  // Games (games job)
+  // On a phone the heart hops about instead of running from a mouse.
+  chaseTouchTip: "Tip: tap it before it hops away",
 };
 
 export const LISTS = {
@@ -102,7 +105,7 @@ export const GAME_LABELS: Partial<Record<Game, LabelKey[]>> = {
   "light-diyas": ["diyaTap"],
   "memory-match": ["memoryScore"],
   "shake-it": ["shakeStart", "shaking", "shakeTap"],
-  "cursor-chase": ["chaseScore", "chaseTip"],
+  "cursor-chase": ["chaseScore", "chaseTip", "chaseTouchTip"],
   "loves-me-not": ["petalStart", "lovesMe", "lovesMeNot", "petalsLeft", "petalsDone"],
   "whack-ghosts": ["boo"],
   "launch-fireworks": ["skyTap"],
