@@ -225,6 +225,33 @@ expect(json(ai) === aiFrozen, "AI card: the card passed in isn't changed");
   expect(json(relooked.screens[0].style?.stickers?.filter((s) => !isOurSticker(s))) === json(placed.screens[0].style?.stickers), "stickers they added or dragged are kept");
 }
 
+// Anything they do to one of our stickers makes it theirs, so a new look keeps it: a new
+// emoji, a turn, a new motion, a copy put down (6 across and down, as the editor does), a
+// drag or a resize (both rounded to one place).
+{
+  const design = buildCard(TEMPLATES[0], "Lily", "Sam");
+  const opened = restyle(design, "edits", { gentle: true, favourite: null });
+  const at = opened.screens.findIndex((s) => s.style?.stickers?.some(isOurSticker));
+  const ours = opened.screens[at].style!.stickers!.find(isOurSticker)!;
+  const round = (v: number) => Math.round(v * 10) / 10;
+  const edits: [string, typeof ours][] = [
+    ["a new emoji", { ...ours, emoji: ours.emoji === "👑" ? "🌈" : "👑" }],
+    ["a turn", { ...ours, rotate: (ours.rotate ?? 0) + 15 }],
+    ["a new motion", { ...ours, motion: ours.motion === "spin" ? "bounce" : "spin" }],
+    ["a copy put down", { ...ours, x: Math.min(95, ours.x + 6), y: Math.min(95, ours.y + 6) }],
+    ["a drag", { ...ours, x: round(ours.x + 2.37), y: round(ours.y - 1.21) }],
+    ["a resize", { ...ours, size: round(ours.size * 1.2) }],
+  ];
+  for (const [what, edited] of edits) {
+    expect(!isOurSticker(edited), `after ${what}, a sticker is theirs`);
+    const theirsNow: CardData = { ...opened, screens: opened.screens.map((s, i) => (i === at ? { ...s, style: { ...s.style, stickers: [...(s.style?.stickers ?? []), edited] } } : s)) };
+    for (const seed of ["e1", "e2"]) {
+      const next = restyle(theirsNow, seed);
+      expect(next.screens[at].style?.stickers?.some((st) => json(st) === json(edited)) === true, `after ${what}, a new look keeps the sticker (${seed})`);
+    }
+  }
+}
+
 console.log(`${checks - failures}/${checks} checks passed`);
 if (failures) {
   console.error(`${failures} failed`);

@@ -454,12 +454,27 @@ const SPOTS: Spot[] = [
 const WORDY = new Set<Screen["type"]>(["message", "reasons", "quiz", "timeline", "coupons"]);
 const MOTION_PICKS = ["float", "sway", "float", "sway", "pulse", "none"] as const;
 
-// Our own stickers carry a mark: every position and size has a second decimal place. A sticker
-// they've dragged or resized (rounded to one place), added, or that the AI put there doesn't,
-// so a new look only ever takes away its own (and a design's, once it's been varied).
-const marked = (v: number) => Math.round(v * 100) % 10 !== 0;
-const mark = (rand: Rand, v: number) => (Math.round(v * 10) * 10 + 1 + Math.floor(rand() * 9)) / 100;
-export const isOurSticker = (s: Sticker) => marked(s.x) && marked(s.y) && marked(s.size);
+// Our own stickers carry a seal: the second decimal places of the position and size are a
+// checksum of everything else about the sticker (its emoji, turn, motion, and where it is to
+// one place). Anything they do to one breaks it: dragging, resizing, turning it, a new emoji,
+// a copy put down somewhere else. So does a sticker they or the AI added. A new look only ever
+// takes away its own (and a design's, once it's been varied), never one of theirs.
+function sealFor(s: Sticker, tenths: number[]) {
+  let h = 2166136261;
+  for (const ch of `${s.emoji}|${s.rotate ?? 0}|${s.motion ?? "none"}|${tenths.join("|")}`) h = Math.imul(h ^ ch.codePointAt(0)!, 16777619);
+  h >>>= 0;
+  return [1 + (h % 9), 1 + (Math.floor(h / 9) % 9), 1 + (Math.floor(h / 81) % 9)];
+}
+function seal(s: Sticker): Sticker {
+  const tenths = [s.x, s.y, Math.min(39.9, s.size)].map((v) => Math.round(v * 10));
+  const [x, y, size] = sealFor(s, tenths).map((d, i) => (tenths[i] * 10 + d) / 100);
+  return { ...s, x, y, size };
+}
+export function isOurSticker(s: Sticker) {
+  const hundredths = [s.x, s.y, s.size].map((v) => Math.round(v * 100));
+  const want = sealFor(s, hundredths.map((h) => Math.floor(h / 10)));
+  return hundredths.every((h, i) => h % 10 === want[i]);
+}
 // Near an edge, clear of the words, and out of the sound button's corner.
 const safeSpot = (s: { x: number; y: number }) => (s.x < 15 || s.x > 85 || s.y < 14 || s.y > 86) && !(s.x > 75 && s.y < 22) && s.x >= 1 && s.x <= 99 && s.y >= 1 && s.y <= 99;
 
@@ -637,14 +652,16 @@ function planStickers(rand: Rand, card: CardData, kinds: number, wanted: (s: Scr
     const offset = Math.floor(rand() * set.length);
     plan.set(
       i,
-      free.slice(0, count).map((spot, k) => ({
-        emoji: set[(offset + k) % set.length],
-        x: mark(rand, between(rand, spot.x)),
-        y: mark(rand, between(rand, spot.y)),
-        size: mark(rand, between(rand, spot.size)),
-        rotate: Math.round(between(rand, [-18, 18])),
-        motion: pick(rand, MOTION_PICKS),
-      })),
+      free.slice(0, count).map((spot, k) =>
+        seal({
+          emoji: set[(offset + k) % set.length],
+          x: between(rand, spot.x),
+          y: between(rand, spot.y),
+          size: between(rand, spot.size),
+          rotate: Math.round(between(rand, [-18, 18])),
+          motion: pick(rand, MOTION_PICKS),
+        }),
+      ),
     );
   });
   return plan;
@@ -726,8 +743,8 @@ function gentleLook(card: CardData, rand: Rand, tone: Tone | undefined, keep: Ke
     const at = safeSpot(moved) ? moved : st;
     const size = Math.min(40, Math.max(4, st.size * between(rand, [0.9, 1.12])));
     const turned = Math.max(-180, Math.min(180, (st.rotate ?? 0) + Math.round(between(rand, [-8, 8]))));
-    const varied = { ...st, emoji: swapped.get(st.emoji) ?? st.emoji, x: mark(rand, at.x), y: mark(rand, at.y), size: mark(rand, size), rotate: turned };
-    // One that isn't near an edge (or can't be marked as ours there) is left as the design has it.
+    const varied = seal({ ...st, emoji: swapped.get(st.emoji) ?? st.emoji, x: at.x, y: at.y, size, rotate: turned });
+    // One that isn't near an edge (or can't be sealed as ours there) is left as the design has it.
     return safeSpot(varied) ? varied : st;
   };
   // Screens with no stickers of the design's get a few of ours: the envelope, the finale and

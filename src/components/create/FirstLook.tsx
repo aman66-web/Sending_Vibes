@@ -21,11 +21,13 @@ type Props = {
   onNewLook: (card: CardData) => void;
   // Puts the last look back, once they've tried another.
   onUndo?: () => void;
+  // Their favourite colour, kept by every new look (see NewLook.tsx).
+  favourite?: string | null;
 };
 
 const FOCUSABLE = "button, a[href], input, textarea, select, [tabindex]:not([tabindex='-1'])";
 
-export function FirstLook({ card, onFinish, onEdit, onNewLook, onUndo }: Props) {
+export function FirstLook({ card, onFinish, onEdit, onNewLook, onUndo, favourite }: Props) {
   const { t } = useI18n();
   const x = t.custom;
   const box = useRef<HTMLDivElement>(null);
@@ -103,7 +105,7 @@ export function FirstLook({ card, onFinish, onEdit, onNewLook, onUndo }: Props) 
             <button type="button" onClick={onEdit} className={second}>
               {x.happyChange}
             </button>
-            <NewLookButton card={card} onChange={onNewLook} className={second} />
+            <NewLookButton card={card} onChange={onNewLook} favourite={favourite} className={second} />
           </div>
         </div>
       </div>

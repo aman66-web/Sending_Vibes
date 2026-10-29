@@ -527,6 +527,9 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   };
   // The same card asked for again, after it didn't come through.
   const makeAgain = () => job && makeCard(job.prompt, job.names, job.source, job.album, job.template, job.brief);
+  // Their favourite colour from the questions, which every new look keeps (null if they didn't
+  // pick one). Not known for a card made on an earlier visit.
+  const favourite = job?.brief ? (job.brief.accent ?? null) : undefined;
 
   const remember = () => {
     if (!card) return;
@@ -1061,7 +1064,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
               {/* Its own layer: stickers on the card stay under the bar at the bottom of a phone, and
                   the controls for what's selected can hang over the screens strip. */}
               <div ref={cardBox} className="relative z-10 order-2 scroll-mt-4 lg:order-none">
-                <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onScreen={editScreenById} onBegin={remember} pick={pick} openSettings={settings} stage={stageShown} onNewLook={(next) => change(() => next)}>
+                <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onScreen={editScreenById} onBegin={remember} pick={pick} openSettings={settings} stage={stageShown} onNewLook={(next) => change(() => next)} favourite={favourite}>
                   {!wide && shown === "computer" ? (
                     // On a phone, the card laid out as on a laptop and shrunk to fit.
                     <BrowserFrame className="aspect-[16/10]">
@@ -1145,6 +1148,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
             setCard(restyled);
           }}
           onUndo={past.length ? undoLast : undefined}
+          favourite={favourite}
         />
       )}
 
@@ -1193,7 +1197,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       {showPreview && card && (
         <div className="fixed inset-0 z-50 flex flex-col bg-background lg:hidden">
           <div className="relative min-h-0 flex-1">
-            <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onScreen={editScreenById} onBegin={remember} pick={pick} stage={stageShown} onNewLook={(next) => change(() => next)} className="h-full">
+            <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onScreen={editScreenById} onBegin={remember} pick={pick} stage={stageShown} onNewLook={(next) => change(() => next)} favourite={favourite} className="h-full">
               <CardPlayer card={card} preview sound editing={wordMode === "edit"} focusScreenId={selected} focusNonce={nudge} focusStage={focusStage} onScreenChange={setViewing} />
             </EditableCard>
             <button onClick={() => setShowPreview(false)} className="absolute start-4 top-4 z-50 rounded-full bg-black/70 px-4 py-2 text-sm font-semibold text-white">
