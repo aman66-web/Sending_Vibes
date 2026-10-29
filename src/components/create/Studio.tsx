@@ -167,7 +167,10 @@ export function StudioPanel({ card, screenIndex, tab, setTab, change, editScreen
             role="tab"
             aria-selected={tab === key}
             aria-controls="studio-panel"
-            onClick={() => {
+            // The second tap of a double-tap on something just above (a screen being put in
+            // place, say) mustn't switch the tab under the finger.
+            onClick={(e) => {
+              if (!fresh(e)) return;
               setTab(key);
               setNote(null);
             }}
