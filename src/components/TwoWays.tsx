@@ -73,7 +73,9 @@ export function TwoWays({ onPick }: { onPick?: (way: Way) => void }) {
             </div>
           </>
         );
-        const className = `group sheet relative flex flex-col overflow-hidden text-start text-ink transition hover:-translate-y-1 ${w.featured ? "bg-sun/25" : ""}`;
+        // The featured one's yellow is mixed into cream rather than see-through, so in dark mode
+        // the page behind doesn't turn it dark under its (always dark) words.
+        const className = `group sheet relative flex flex-col overflow-hidden text-start text-ink transition hover:-translate-y-1 ${w.featured ? "bg-[color-mix(in_srgb,var(--color-sun)_25%,var(--color-cream))]" : ""}`;
         return onPick ? (
           <button key={w.way} onClick={() => onPick(w.way)} className={className}>
             {inside}
