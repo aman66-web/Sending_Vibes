@@ -186,8 +186,12 @@ export function MakingScreen({ to, from, brief, template, theme, typed, photos, 
         <p className="text-xs font-bold uppercase tracking-wide opacity-75">{x.yourChoices}</p>
         <div className="mt-2 flex items-center gap-4">
           {front ? (
-            <div className="w-24 shrink-0 overflow-hidden rounded-md shadow-sm sm:w-32">
-              <ProductThumb template={front} />
+            // The front is laid out for a shop tile, so it's drawn at a tile's width and shrunk
+            // to fit: at this size its words would spill off it.
+            <div className="aspect-[4/5] w-24 shrink-0 overflow-hidden rounded-md shadow-sm sm:w-32">
+              <div className="w-44 origin-top-left scale-[0.5455] sm:scale-[0.7273]">
+                <ProductThumb template={front} />
+              </div>
             </div>
           ) : (
             <VibePreview to={to} from={from} occasion={brief?.occasion ?? ""} look={brief?.look ?? ""} className="w-24 shrink-0 sm:w-32" />
