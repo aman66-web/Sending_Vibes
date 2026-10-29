@@ -73,6 +73,8 @@ export const TEXTS = {
   couponMessage: "🎟️ I'm cashing in: {coupons}",
   screenBroken: "Sorry, this part of the card didn't load.",
   screenSkip: "Skip this screen",
+  // Envelope and finale (card-moments)
+  soundHint: "Best with the sound on 🔊",
 };
 
 export const LISTS = {
@@ -94,7 +96,7 @@ export const isList = (key: string): key is ListKey => key in LISTS;
 
 // Which of them each kind of screen shows, and on a game screen, each game.
 export const LABELS_ON: Record<ScreenType, LabelKey[]> = {
-  intro: ["gotMail", "tapEnvelope"],
+  intro: ["gotMail", "tapEnvelope", "soundHint"],
   question: ["next", "noLines"],
   photos: ["next", "photosTap"],
   message: ["next", "messageSkip"],
