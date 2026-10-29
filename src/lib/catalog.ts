@@ -1,5 +1,6 @@
 import type { CardData, Effect, Layout, Music, Occasion, Screen, ThemeName } from "./card";
 import type { Tier } from "./pricing";
+import * as B from "./design-styles-b";
 import { MORE_DESIGNS } from "./catalog-more";
 import { OCCASION_DESIGNS } from "./catalog-occasions";
 import { BLANK, arcade, bloom, blush, bout, candle, crown, dusk, fizz, flight, gallery, garden, golden, groan, gulal, hush, lilac, lullaby, memo, oak, reveal, splash, stick, sunny, thread, ticket, voyage, zine } from "./design-styles-c";
@@ -667,15 +668,20 @@ export const TEMPLATES: Template[] = [
     ambient: "stars",
     emoji: "🌙",
     headline: "Eid Mubarak!",
-    blurb: "Catch the stars under the crescent moon, then share your Eid wishes and photos.",
+    blurb: "Catch the stars under the crescent moon, scratch the silver for an Eid wish, then your photos and Eid wishes.",
     featured: true,
-    screens: (to, from) => [
-      intro(`Eid Mubarak, ${to}`, `${from} sent you some Eid joy.`, "Open"),
-      game("catch-stars", "Catch the stars", "Catch 10 falling stars", "Your Eid is written in the stars"),
-      photos("Eid with the family"),
-      message("Eid Mubarak", `Wishing you and your family a joyful Eid full of peace, blessings and far too much food.\n\n${from}`),
-      finale("Eid Mubarak!", "May this Eid bring you happiness and peace.", "stars"),
-    ],
+    screens: (to, from) =>
+      B.dress(B.EID_MUBARAK, [
+        { ...intro(`Eid Mubarak, ${to}`, `${from} sent you some Eid joy.`, "See the stars"), labels: { gotMail: "An Eid card for you" } },
+        game("catch-stars", "Catch the stars", "Catch 10 falling stars", "Your Eid is written in the stars"),
+        scratch("A wish under the moon", "Scratch the silver to find your Eid wish", "May every dua you make be answered, and every day after Eid feel just as bright."),
+        photos("Eid with the family"),
+        message(
+          "Eid Mubarak",
+          `Wishing you and your family a joyful Eid, full of peace, blessings and far too much food.\n\nThank you for being such a bright part of my life. Eid is always better with you in it.\n\n${from}`,
+        ),
+        { ...finale("Eid Mubarak!", "May this Eid bring you happiness and peace.", "stars"), labels: { playAgain: "See the stars again" } },
+      ]),
     demo: { to: "Aisha", from: "Omar", photos: [P.crescent, P.lights, P.fireworks] },
   },
   {
@@ -683,20 +689,32 @@ export const TEMPLATES: Template[] = [
     name: "Eid Blessings",
     occasion: "eid",
     tone: "heartfelt",
-    theme: "gold",
+    theme: "ivory",
     ambient: "stars",
     emoji: "🤲",
     headline: "Duas for you this Eid",
-    blurb: "An elegant Eid card for family and elders, with heartfelt duas and family photos.",
-    screens: (to, from) => [
-      intro(`Eid Mubarak, ${to}`, "With love and duas.", "Open"),
-      message(
-        "My duas for you",
-        `May Allah accept your prayers and fasts, fill your home with barakah and keep you and your loved ones in good health.\n\nThank you for always being there.\n\n${from}`,
-      ),
-      photos("Our family"),
-      finale("Eid Mubarak", "Today and always.", "stars"),
-    ],
+    blurb: "An elegant Eid card for family and elders: a garden of blessings to water, a jar of reasons Eid isn't Eid without them, family photos and heartfelt duas.",
+    screens: (to, from) =>
+      B.dress(B.EID_BLESSINGS, [
+        { ...intro(`Eid Mubarak, ${to}`, "Something for you, with love and duas.", "Read my duas"), labels: { gotMail: "Eid Mubarak" } },
+        game("grow-flower", "A garden of blessings", "Water the plant until it blooms", "May your home bloom with barakah"),
+        {
+          ...reasons("Why Eid isn't Eid without you", "Tap the jar, one at a time", [
+            "The way you make everyone feel at home",
+            "Your duas, which follow us everywhere",
+            "The stories you tell about Eids long ago",
+            "How there's always room for one more at your table",
+            "Your hugs at the door",
+          ]),
+          labels: { jarEmpty: "And so many more." },
+        },
+        photos("Our family"),
+        message(
+          "My duas for you",
+          `May Allah accept your prayers and good deeds, fill your home with barakah and keep you and your loved ones in good health.\n\nThank you for always being there.\n\n${from}`,
+        ),
+        finale("Eid Mubarak", "Today and always.", "stars"),
+      ]),
     demo: { to: "Ammi", from: "Omar", photos: [P.crescent, P.lights, P.coffee] },
   },
   {
@@ -704,44 +722,72 @@ export const TEMPLATES: Template[] = [
     name: "Eidi, Please",
     occasion: "eid",
     tone: "funny",
-    theme: "crescent",
+    theme: "mint",
     ambient: "stars",
     emoji: "💸",
     headline: "Where's my Eidi?",
-    blurb: "A polite (not polite) request for Eidi. The No button runs away, so they don't really have a choice.",
-    screens: (to, from) => [
-      intro(`Eid Mubarak, ${to}!`, `${from} has one small question.`, "Uh oh"),
-      question("Will you be giving me Eidi this year?", "Of course", "No", "Wonderful. Bank transfers are accepted."),
-      quiz(
-        "Eidi calculator",
-        [
-          q("How much Eidi is appropriate?", ["£5", "£10", "Whatever's in your wallet"], 2),
-          q("Who is your favourite?", ["Everyone equally", "Hard to say", from], 2),
-        ],
-        "Calculation complete. Please pay promptly.",
-      ),
-      finale("Eid Mubarak!", "(I'm only half joking about the Eidi.)", "stars"),
-    ],
-    demo: { to: "Khala", from: "Omar" },
+    blurb: "A polite (not polite) request for Eidi. The No button runs away, the Eidi calculator does the maths, and there's a proper thank-you at the end.",
+    screens: (to, from) =>
+      B.dress(B.EIDI_PLEASE, [
+        intro(`Eid Mubarak, ${to}!`, `${from} has one small question.`, "Uh oh"),
+        {
+          ...question("Will you be giving me Eidi this year?", "Of course", "No", "Wonderful. Bank transfers are accepted."),
+          labels: { noLines: ["Eidi is tradition", "Check your pockets", "The aunties are watching", "That's not very Eid of you", "I've been very good", "Even a fiver is fine", "Wrong button"] },
+        },
+        {
+          ...quiz(
+            "Eidi calculator",
+            [
+              q("How much Eidi is appropriate?", ["£5", "£10", "Whatever's in your wallet"], 2),
+              q("Who is your favourite?", ["Everyone equally", "Hard to say", from], 2),
+            ],
+            "Calculation complete. Please pay promptly.",
+          ),
+          labels: { wrongLines: ["Recalculating…", "That's not a lot of Eidi.", "Try a bigger number.", "Hmm, no."], quizPerfect: "Full marks. Payment due today." },
+        },
+        photos("Exhibit A: why I deserve Eidi"),
+        message(
+          "Jokes aside",
+          `Eidi or no Eidi, you're one of my favourite people to celebrate with. Thank you for the duas, the sweets and the notes slipped into my hand when no one was looking.\n\nEid Mubarak.\n${from}`,
+        ),
+        finale("Eid Mubarak!", "(I'm only half joking about the Eidi.)", "stars"),
+      ]),
+    demo: {
+      to: "Khala",
+      from: "Omar",
+      photos: [
+        { ...P.balloons, caption: "Very well behaved" },
+        { ...P.cake, caption: "Shared my sweets (once)" },
+        { ...P.crescent, caption: "Eid best, as always" },
+      ],
+    },
   },
   {
     slug: "eid-hugs-and-feasts",
     name: "Eid Hugs & Feasts",
     occasion: "eid",
     tone: "cute",
-    theme: "crescent",
+    theme: "sunset",
     ambient: "stars",
     emoji: "🤗",
     headline: "Your Eid hug is waiting",
-    blurb: "An Eid hug they press and hold to receive, then a spin of the wheel to choose the Eid feast.",
-    screens: (to, from) => [
-      intro(`Eid Mubarak, ${to}!`, `${from} can't be there for an Eid hug, so here's the next best thing.`, "Open"),
-      game("hold-hug", "Your Eid hug", "Press and hold to receive it", "Eid hug delivered"),
-      wheel("Spin for the Eid feast", "Whatever it lands on, I'm bringing it", ["Biryani", "Sheer khurma", "Kebabs", "Samosas", "Dates", "Baklava"], "Feast secured"),
-      message("Eid Mubarak", `May Allah fill your home with peace, your table with food and your heart with happiness.\n\n${from}`),
-      finale("Eid Mubarak!", "Save me some sheer khurma.", "stars"),
-    ],
-    demo: { to: "Ammi", from: "Omar" },
+    blurb: "An Eid hug they press and hold to receive, a spin of the wheel to choose the Eid feast, and the moments you're missing.",
+    screens: (to, from) =>
+      B.dress(B.EID_HUGS_AND_FEASTS, [
+        intro(`Eid Mubarak, ${to}!`, `${from} can't be there for an Eid hug, so here's the next best thing.`, "Get my hug"),
+        game("hold-hug", "Your Eid hug", "Press and hold to receive it", "Eid hug delivered"),
+        {
+          ...wheel("Spin for the Eid feast", "Whatever it lands on, I'm bringing it", ["Biryani", "Sheer khurma", "Kebabs", "Samosas", "Dates", "Baklava"], "Feast secured"),
+          labels: { spin: "Spin for the feast" },
+        },
+        photos("Missing moments like these"),
+        message(
+          "Eid Mubarak",
+          `May Allah fill your home with peace, your table with food and your heart with happiness.\n\nI'm sorry I can't be there this year. Save me a seat and a plate, and I'll be there the moment I can.\n\n${from}`,
+        ),
+        finale("Eid Mubarak!", "Save me some sheer khurma.", "stars"),
+      ]),
+    demo: { to: "Ammi", from: "Omar", photos: [P.crescent, P.teacup, P.cake] },
   },
   {
     slug: "eid-family-gallery",
@@ -753,14 +799,28 @@ export const TEMPLATES: Template[] = [
     ambient: "stars",
     emoji: "🖼️",
     headline: "Eid memories, all in one place",
-    blurb: "Built for a big screen: a wall of family photos from Eid, a memory game and your heartfelt wishes.",
-    screens: (to, from) => [
-      intro(`Eid Mubarak, ${to}`, `${from} put together our Eid memories.`, "Open the gallery"),
-      photos("Our Eid memories"),
-      game("memory-match", "A little Eid game", "Find all the matching pairs", "Mashallah, perfect memory"),
-      message("Eid Mubarak", `Wishing you and the whole family a blessed Eid, full of love, laughter and good food.\n\n${from}`),
-      finale("Eid Mubarak", "From our family to yours.", "stars"),
-    ],
+    blurb: "Built for a big screen: a wall of family photos from Eid, a memory game, a jar of Eid moments and your heartfelt wishes.",
+    screens: (to, from) =>
+      B.dress(B.EID_FAMILY_GALLERY, [
+        intro(`Eid Mubarak, ${to}`, `${from} put together our Eid memories.`, "Open the gallery"),
+        photos("Our Eid memories"),
+        game("memory-match", "A little Eid game", "Find all the matching pairs", "Mashallah, perfect memory"),
+        {
+          ...reasons("What makes our Eid", "Tap the jar for a memory", [
+            "Getting ready together on Eid morning",
+            "Everyone talking at once at dinner",
+            "The race for the last samosa",
+            "Eidi envelopes and big hugs",
+            "The family photo that takes twenty tries",
+          ]),
+          labels: { jarCount: "Memory {i} of {n}", jarEmpty: "And many more Eids to come." },
+        },
+        message(
+          "Eid Mubarak",
+          `Wishing you and the whole family a blessed Eid, full of love, laughter and good food.\n\nLooking back at these, I realise how lucky we are to have each other.\n\n${from}`,
+        ),
+        finale("Eid Mubarak", "From our family to yours.", "stars"),
+      ]),
     demo: { to: "Ammi", from: "Omar", photos: [P.crescent, P.lights, P.coffee, P.cake, P.bouquet, P.toast] },
   },
 
@@ -774,22 +834,30 @@ export const TEMPLATES: Template[] = [
     ambient: "petals",
     emoji: "💍",
     headline: "Another year of us",
-    blurb: "Your story so far: photos, a quiz about your firsts, and a love letter.",
+    blurb: "Your story so far, like a storybook: photos, a quiz about your firsts, a love letter and one last question with a No that runs away.",
     featured: true,
-    screens: (to, from) => [
-      intro(`Happy anniversary, ${to}`, `${from} wrote down our story.`, "Read it"),
-      photos("Chapter one"),
-      quiz(
-        "Our firsts",
-        [
-          q("Where was our first date?", ["Coffee", "Dinner", "The cinema"], 0),
-          q(`Who said "I love you" first?`, [to, from, "We both did"], 1),
-        ],
-        "Still paying attention. I love that.",
-      ),
-      message("Happy anniversary", `Another year of laughing at the same jokes and stealing the covers. I'd choose you again in every version of my life.\n\n${from}`),
-      finale("Happy Anniversary", "Here's to the next chapter.", "petals"),
-    ],
+    screens: (to, from) =>
+      B.dress(B.OUR_STORY, [
+        intro(`Happy anniversary, ${to}`, `${from} wrote down our story.`, "Read it"),
+        photos("Chapter one"),
+        {
+          ...quiz(
+            "Our firsts",
+            [
+              q("Where was our first date?", ["Coffee", "Dinner", "The cinema"], 0),
+              q(`Who said "I love you" first?`, [to, from, "We both did"], 1),
+            ],
+            "Still paying attention. I love that.",
+          ),
+          labels: { wrongLines: ["Wrong chapter!", "Did you skip a page?", "Hmm. Read it again.", "Plot hole!"] },
+        },
+        message("Happy anniversary", `Another year of laughing at the same jokes and stealing the covers. I'd choose you again in every version of my life.\n\n${from}`),
+        {
+          ...question("Shall we keep writing it together?", "Always", "No", "Then let's turn the page."),
+          labels: { noLines: ["Plot twist?", "Wrong ending", "That's not how it ends", "Turn the page", "Read it again", "Try the other button"] },
+        },
+        { ...finale("Happy Anniversary", "Here's to the next chapter.", "petals"), labels: { playAgain: "Read it again" } },
+      ]),
     demo: { to: "Olivia", from: "Sam", photos: [P.toast, P.sunset, P.coffee] },
   },
   {
@@ -797,17 +865,32 @@ export const TEMPLATES: Template[] = [
     name: "I'd Still Choose You",
     occasion: "anniversary",
     tone: "heartfelt",
-    theme: "gold",
+    theme: "ivory",
     ambient: "sparkles",
     emoji: "🥂",
     headline: "I'd still choose you",
-    blurb: "Understated and elegant. A letter, your photos, and a toast to the years ahead.",
-    screens: (to, from) => [
-      intro(`To ${to}`, "Happy anniversary. Open this when you have a minute.", "Open"),
-      message("Every time", `If I could go back to the day we met, I'd do it all again. The good days, the hard days, all of it. Because all of it led here.\n\n${from}`),
-      photos("Us"),
-      finale("Happy Anniversary", "To us.", "sparkles"),
-    ],
+    blurb: "Understated and elegant. A letter, a jar of reasons, your photos and a toast to the years ahead.",
+    screens: (to, from) =>
+      B.dress(B.STILL_CHOOSE_YOU, [
+        intro(`To ${to}`, "Happy anniversary. Open this when you have a minute.", "I have a minute"),
+        message("Every time", `If I could go back to the day we met, I'd do it all again. The good days, the hard days, all of it. Because all of it led here.\n\n${from}`),
+        {
+          ...reasons("Why I'd choose you again", "Tap the jar", [
+            "You make an ordinary Tuesday feel like ours",
+            "You hold my hand without thinking about it",
+            "You're the first person I want to tell everything",
+            "You make me braver",
+            "Home is wherever you are",
+          ]),
+          labels: { jarEmpty: "And a thousand more." },
+        },
+        photos("Us"),
+        {
+          ...slider("Would I choose you again?", "Probably", "Every time", "Every time. In every version of my life."),
+          labels: { sliderLines: ["Only probably? Keep going…", "Definitely…", "Without a doubt…", "Nearly there…"] },
+        },
+        finale("Happy Anniversary", "To us.", "sparkles"),
+      ]),
     demo: { to: "Olivia", from: "Sam", photos: [P.toast, P.sunset, P.lights] },
   },
   {
@@ -820,14 +903,31 @@ export const TEMPLATES: Template[] = [
     ambient: "sparkles",
     emoji: "⌨️",
     headline: "Type the secret password",
-    blurb: "Built for a computer: they type the secret password on the keyboard to unlock a full gallery wall of your photos.",
-    screens: (to, from) => [
-      intro(`${to}, this card is locked`, `Only ${from}'s favourite person knows the password.`, "Unlock it"),
-      typeit("Enter the password", "Three little words. You know them.", "I love you", "Access granted"),
-      photos("Our gallery"),
-      message("Happy anniversary", `Every one of these pictures is a day I'm glad I spent with you.\n\n${from}`),
-      finale("Happy Anniversary", "Password changes next year. Hint: it won't.", "sparkles"),
-    ],
+    blurb: "Built for a computer: they pass a security check, type the secret password on the keyboard and unlock a full gallery wall of your photos.",
+    screens: (to, from) =>
+      B.dress(B.SECRET_PASSWORD, [
+        intro(`${to}, this card is locked`, `Only ${from}'s favourite person knows the password.`, "Unlock it"),
+        {
+          ...quiz(
+            "Security check",
+            [
+              q("Security question: who sent you this card?", [`Someone called ${from}`, "A secret admirer", "The bank"], 0),
+              q(`How much does ${from} love you?`, ["A bit", "Quite a lot", "More than words can say"], 2),
+            ],
+            "Identity confirmed. Welcome back.",
+          ),
+          labels: {
+            wrongLines: ["Access denied.", "Hmm. Suspicious.", "Try again, agent.", "Impostor alert!"],
+            quizPerfect: "Not one wrong answer. Very secure.",
+            quizMissedOne: "One wrong answer. We'll let it slide.",
+            quizMissed: "{n} wrong answers. Suspicious, but you're in.",
+          },
+        },
+        { ...typeit("Enter the password", "Three little words. You know them.", "I love you", "Access granted"), labels: { typeStart: "Type the password…" } },
+        photos("Our gallery"),
+        message("Happy anniversary", `Every one of these pictures is a day I'm glad I spent with you. Thank you for all of them, and for all the ones we haven't taken yet.\n\n${from}`),
+        finale("Happy Anniversary", "Password changes next year. Hint: it won't.", "sparkles"),
+      ]),
     demo: { to: "Olivia", from: "Sam", photos: [P.toast, P.sunset, P.coffee, P.lights, P.balloons, P.fireworks] },
   },
   {
@@ -839,14 +939,19 @@ export const TEMPLATES: Template[] = [
     ambient: "hearts",
     emoji: "🃏",
     headline: "Match our memories",
-    blurb: "A sweet memory-match game, your photos and a little note. Cute, not cheesy (well, slightly cheesy).",
-    screens: (to, from) => [
-      intro(`Happy anniversary, ${to}!`, `${from} made you a little game.`, "Let's play"),
-      game("memory-match", "Memory lane", "Find all the matching pairs", "Perfect match. Like us"),
-      photos("The real memories"),
-      message("P.S.", `I'd play this game with you forever (and still let you win).\n\n${from}`),
-      finale("Happy Anniversary", "Many more matches to come.", "hearts"),
-    ],
+    blurb: "A sweet memory-match game, your photos, a mystery box for your next date and a little note. Cute, not cheesy (well, slightly cheesy).",
+    screens: (to, from) =>
+      B.dress(B.MEMORY_LANE, [
+        intro(`Happy anniversary, ${to}!`, `${from} made you a little game.`, "Let's play"),
+        game("memory-match", "Memory lane", "Find all the matching pairs", "Perfect match. Like us."),
+        photos("The real memories"),
+        {
+          ...boxes("What's our next memory?", "Pick a box. Whatever's inside, we're doing it.", ["A picnic in the park", "A weekend away", "Breakfast in bed"]),
+          labels: { boxesPicked: "Our next memory…" },
+        },
+        message("P.S.", `I'd play this game with you forever (and still let you win).\n\nThank you for every memory so far. My favourite place to be is anywhere with you.\n\n${from}`),
+        finale("Happy Anniversary", "Many more matches to come.", "hearts"),
+      ]),
     demo: { to: "Olivia", from: "Sam", photos: [P.coffee, P.sunset, P.toast] },
   },
 
@@ -855,24 +960,33 @@ export const TEMPLATES: Template[] = [
     name: "Our Timeline",
     occasion: "anniversary",
     tone: "romantic",
-    theme: "gold",
+    theme: "ivory",
     ambient: "sparkles",
     emoji: "🗓️",
     headline: "Every chapter of us",
-    blurb: "Your story told moment by moment, from the day you met to today, then your photos and a jar of reasons.",
-    screens: (to, from) => [
-      intro(`Happy anniversary, ${to}`, `${from} wrote down our story. Every chapter of it.`, "Read our story"),
-      timeline("Our story so far", [
-        at("The beginning", "We met, and I couldn't stop smiling"),
-        at("First date", "I was so nervous I forgot my wallet"),
-        at("Our first trip", "Lost, sunburnt and completely happy"),
-        at("Moving in", "Too many cushions. Your idea."),
-        at("Today", "Still my favourite person in the world"),
+    blurb: "Your story told moment by moment, like a travel journal, from the day you met to today, then your photos, a jar of reasons and a letter.",
+    screens: (to, from) =>
+      B.dress(B.OUR_TIMELINE, [
+        intro(`Happy anniversary, ${to}`, `${from} wrote down our story. Every chapter of it.`, "Read our story"),
+        {
+          ...timeline("Our story so far", [
+            at("The beginning", "We met, and I couldn't stop smiling"),
+            at("First date", "I was so nervous I forgot my wallet"),
+            at("Our first trip", "Lost, sunburnt and completely happy"),
+            at("Moving in", "Too many cushions. Your idea."),
+            at("Today", "Still my favourite person in the world"),
+          ]),
+          labels: { timelineMore: "Next chapter… ({i}/{n})" },
+        },
+        photos("Our favourite chapters"),
+        reasons("Why I'd do it all again", "Tap the jar", ["You make me laugh every day", "You're my safe place", "We're a really good team", "You still give me butterflies"]),
+        {
+          ...slider("How much do I love you now?", "Loads", "More than ever", "More than the day we met. And still going."),
+          labels: { sliderLines: ["Only that much?", "More…", "Even more…", "Nearly…"] },
+        },
+        message("Every chapter with you", `Looking back at all of it, the only thing I'd change is meeting you sooner.\n\nThank you for every chapter so far. I can't wait to see what we write next.\n\n${from}`),
+        finale("Happy anniversary", "Here's to every chapter still to come.", "petals"),
       ]),
-      photos("Our favourite chapters"),
-      reasons("Why I'd do it all again", "Tap the jar", ["You make me laugh every day", "You're my safe place", "We're a really good team", "You still give me butterflies"]),
-      finale("Happy anniversary", "Here's to every chapter still to come.", "petals"),
-    ],
     demo: { to: "Olivia", from: "Sam", photos: [P.toast, P.sunset, P.coffee] },
   },
   {
@@ -880,25 +994,34 @@ export const TEMPLATES: Template[] = [
     name: "Love Coupons",
     occasion: "anniversary",
     tone: "cute",
-    theme: "rose",
+    theme: "sunset",
     ambient: "hearts",
     emoji: "🎟️",
     headline: "Coupons, redeemable forever",
-    blurb: "A book of love coupons they can cash in whenever they like, plus a prize wheel that's secretly rigged to land on a kiss.",
-    screens: (to, from) => [
-      intro(`Happy anniversary, ${to}`, `${from} made you something you can cash in whenever you like.`, "Ooh"),
-      coupons("Your love coupons", "Tap to redeem. No expiry date.", [
-        "One back massage",
-        "Breakfast in bed",
-        "A night off cooking",
-        "You win the next argument",
-        "Movie night, your pick",
-        "One big hug, on demand",
+    blurb: "A book of love coupons they can cash in whenever they like, a prize wheel that's secretly rigged to land on a kiss, your photos and a love note.",
+    screens: (to, from) =>
+      B.dress(B.LOVE_COUPONS, [
+        intro(`Happy anniversary, ${to}`, `${from} made you something you can cash in whenever you like.`, "Ooh"),
+        {
+          ...coupons("Your love coupons", "Tap to redeem. No expiry date.", [
+            "One back massage",
+            "Breakfast in bed",
+            "A night off cooking",
+            "You win the next argument",
+            "Movie night, your pick",
+            "One big hug, on demand",
+          ]),
+          labels: { coupon: "Love coupon", couponClaim: "Screenshot this and show me to claim it" },
+        },
+        {
+          ...wheel("Bonus prize!", "Spin to see what else you've won", ["A kiss", "A hug", "A cuddle", "A dance", "A kiss", "A surprise"], "You won a kiss", 0),
+          labels: { spinAgain: "Spin again (it's still a kiss)" },
+        },
+        photos("Proof we're good together"),
+        message("No expiry date", `Every one of these coupons is a promise, and so is this: I'll keep choosing you, every day, for as long as you'll have me.\n\nHappy anniversary.\n${from}`),
+        finale("Happy anniversary!", `Love you always, ${from}`, "hearts"),
       ]),
-      wheel("Bonus prize!", "Spin to see what else you've won", ["A kiss", "A hug", "A cuddle", "A dance", "A kiss", "A surprise"], "You won a kiss", 0),
-      finale("Happy anniversary!", `Love you always, ${from}`, "hearts"),
-    ],
-    demo: { to: "Olivia", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam", photos: [P.coffee, P.sunset, P.toast] },
   },
 
   // ---------- Sorry ----------
@@ -911,32 +1034,50 @@ export const TEMPLATES: Template[] = [
     ambient: "hearts",
     emoji: "🥺",
     headline: "Do you forgive me?",
-    blurb: "An apology where the No button refuses to cooperate. Ideal for small crimes like eating their leftovers.",
+    blurb: "An apology where the No button refuses to cooperate and the forgiveness meter only goes up. Ideal for small crimes like eating their leftovers.",
     featured: true,
-    screens: (to, from) => [
-      intro(`${to}, I messed up`, `${from} is very, very sorry.`, "Go on…"),
-      question("Do you forgive me?", "Yes, fine", "No", "Thank you! I promise I've learnt my lesson. Probably."),
-      message("My official apology", `I'm sorry. You were right, I was wrong, and I'll never do it again (I will try very hard not to do it again).\n\nForgive me? ${from}`),
-      finale("Friends again?", "I'll buy the snacks.", "hearts"),
-    ],
-    demo: { to: "Olivia", from: "Sam" },
+    screens: (to, from) =>
+      B.dress(B.PLEASE_FORGIVE_ME, [
+        intro(`${to}, I messed up`, `${from} is very, very sorry.`, "Go on…"),
+        {
+          ...question("Do you forgive me?", "Yes, fine", "No", "Thank you! I promise I've learnt my lesson. Probably."),
+          labels: { noLines: ["I said sorry!", "I'll do the washing up", "Pretty please?", "Look at my sad face", "I brought snacks", "Forgiveness is free", "Wrong button"] },
+        },
+        {
+          ...slider("How much do you forgive me?", "A tiny bit", "Completely", "Fully forgiven. You're too kind."),
+          labels: { sliderLines: ["That's not much…", "Keep going…", "Nearly forgiven…", "So close…"] },
+        },
+        photos("Evidence of happier times"),
+        message(
+          "My official apology",
+          `I'm sorry. You were right, I was wrong, and I'll never do it again (I will try very hard not to do it again).\n\nJokes aside, I hate it when we're not okay. You mean a lot to me.\n\nForgive me? ${from}`,
+        ),
+        finale("Friends again?", "I'll buy the snacks.", "hearts"),
+      ]),
+    demo: { to: "Olivia", from: "Sam", photos: [P.friends, P.coffee, P.sunset] },
   },
   {
     slug: "im-really-sorry",
     name: "I'm Really Sorry",
     occasion: "sorry",
     tone: "heartfelt",
-    theme: "lavender",
+    theme: "sky",
     ambient: "petals",
     emoji: "🌷",
     headline: "I'm sorry",
-    blurb: "A sincere apology for when it matters. No jokes, just honest words and a few happier memories.",
-    screens: (to, from) => [
-      intro(`${to}`, "I owe you an apology, and I wanted to do it properly.", "Open"),
-      message("I'm sorry", `I know I hurt you, and I'm truly sorry. You didn't deserve that. I'm going to do better, because you matter to me more than being right.\n\n${from}`),
-      photos("Remember these?"),
-      finale("I'm sorry", "Whenever you're ready to talk, I'm here.", "petals"),
-    ],
+    blurb: "A sincere apology for when it matters. No jokes: honest words, what you'll do differently, a few happier memories and lanterns to light.",
+    screens: (to, from) =>
+      B.dress(B.IM_REALLY_SORRY, [
+        intro(`${to}`, "I owe you an apology, and I wanted to do it properly.", "Read it"),
+        message("I'm sorry", `I know I hurt you, and I'm truly sorry. You didn't deserve that. I'm going to do better, because you matter to me more than being right.\n\n${from}`),
+        {
+          ...reasons("What I'll do differently", "Tap the jar, one at a time", ["Listen before I answer", "Say sorry sooner", "Think about how my words land", "Make proper time for us"]),
+          labels: { jarCount: "Promise {i} of {n}", jarEmpty: "I mean every one of them." },
+        },
+        photos("Remember these?"),
+        { ...game("release-lanterns", "A little light", "Tap each lantern to send it up into the sky", "Thank you for hearing me out"), labels: { lanternTap: "Tap each lantern to let it go" } },
+        { ...finale("I'm sorry", "Whenever you're ready to talk, I'm here.", "petals"), labels: { playAgain: "Read it again" } },
+      ]),
     demo: { to: "Olivia", from: "Sam", photos: [P.bouquet, P.coffee, P.sunset] },
   },
   {
@@ -948,14 +1089,17 @@ export const TEMPLATES: Template[] = [
     ambient: "hearts",
     emoji: "🎟️",
     headline: "An apology, under the scratch card",
-    blurb: "They scratch away the silver panel to find your apology (and a peace offering).",
-    screens: (to, from) => [
-      intro(`${to}, special delivery`, `${from} hid something under this scratch card.`, "Show me"),
-      scratch("Scratch for a surprise", "Scratch the silver panel", "I'm sorry. Dinner's on me."),
-      question("Deal?", "Deal", "No", "Yay! Booking the table now."),
-      finale("Thank you for forgiving me", "You're the best.", "hearts"),
-    ],
-    demo: { to: "Olivia", from: "Sam" },
+    blurb: "They scratch away the silver panel to find your apology (and a peace offering), then a deal they can't refuse and a proper sorry.",
+    screens: (to, from) =>
+      B.dress(B.SCRATCH_MY_APOLOGY, [
+        intro(`${to}, special delivery`, `${from} hid something under this scratch card.`, "Show me"),
+        scratch("Scratch for a surprise", "Scratch the silver panel", "I'm sorry. Dinner's on me."),
+        { ...question("Deal?", "Deal", "No", "Yay! Booking the table now."), labels: { noLines: ["Dessert too?", "Fine, two desserts", "And I'll get the taxi", "Final offer…", "Pretty please?"] } },
+        photos("Us, before I messed up"),
+        message("I mean it", `Dinner's just the start. I'm sorry for what I did. You deserved better, and I'm going to do better.\n\n${from}`),
+        finale("Thank you for forgiving me", "You're the best.", "hearts"),
+      ]),
+    demo: { to: "Olivia", from: "Sam", photos: [P.coffee, P.friends, P.sunset] },
   },
 
   {
@@ -963,24 +1107,30 @@ export const TEMPLATES: Template[] = [
     name: "Can We Hug It Out?",
     occasion: "sorry",
     tone: "cute",
-    theme: "lavender",
+    theme: "rose",
     ambient: "hearts",
     emoji: "🤗",
     headline: "Sorry. Hug?",
-    blurb: "An apology with a runaway No button, a press-and-hold hug and a book of make-it-up-to-you coupons.",
-    screens: (to, from) => [
-      intro(`${to}, I'm sorry`, `${from} knows they messed up. Please hear me out.`, "Okay…"),
-      question("Can you forgive me?", "Yes, fine", "No", "Thank you. Really."),
-      game("hold-hug", "Then let's hug it out", "Press and hold to send a hug", "Hug received. All better?"),
-      coupons("Making it up to you", "Redeem these whenever you like", [
-        "I'll do the washing up for a week",
-        "Your choice of takeaway",
-        "I'll admit you were right",
-        "One grovelling apology, on demand",
+    blurb: "An apology with a runaway No button, a press-and-hold hug, a book of make-it-up-to-you coupons and a proper sorry.",
+    screens: (to, from) =>
+      B.dress(B.HUG_IT_OUT, [
+        intro(`${to}, I'm sorry`, "I know I messed up. Please hear me out.", "Okay…"),
+        {
+          ...question("Can you forgive me?", "Yes, fine", "No", "Thank you. Really."),
+          labels: { noLines: ["Hug first, then decide", "Please?", "I'm really sorry", "I'll put the kettle on", "Don't make me beg", "Okay, I'm begging"] },
+        },
+        game("hold-hug", "Then let's hug it out", "Press and hold to send a hug", "Hug received. All better?"),
+        coupons("Making it up to you", "Redeem these whenever you like", [
+          "I'll do the washing up for a week",
+          "Your choice of takeaway",
+          "I'll admit you were right",
+          "One grovelling apology, on demand",
+        ]),
+        photos("Us, on a better day"),
+        message("Properly sorry", `I hate it when we fall out. I'm sorry for my part in it, and I'm going to listen more and talk less.\n\nLove, ${from}`),
+        finale("Hugs fix everything", `Sorry again. Love, ${from}`, "hearts"),
       ]),
-      finale("Friends again?", `Sorry again. Love, ${from}`, "hearts"),
-    ],
-    demo: { to: "Olivia", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam", photos: [P.friends, P.teacup, P.sunset] },
   },
 
   // ---------- Thank you ----------
@@ -989,18 +1139,30 @@ export const TEMPLATES: Template[] = [
     name: "Thank You So Much",
     occasion: "thanks",
     tone: "heartfelt",
-    theme: "mint",
+    theme: "ivory",
     ambient: "sparkles",
     emoji: "🙏",
     headline: "Thank you, truly",
-    blurb: "A warm thank-you for teachers, friends, colleagues or anyone who went above and beyond.",
+    blurb: "A warm thank-you for teachers, friends, colleagues or anyone who went above and beyond: stars to catch, a jar of thank-yous, your photos and a heartfelt note.",
     featured: true,
-    screens: (to, from) => [
-      intro(`${to}, this is for you`, `${from} wanted to say something.`, "Open"),
-      message("Thank you", `Thank you for everything you've done. You went above and beyond, and it didn't go unnoticed. I'm so grateful.\n\n${from}`),
-      photos("Some good times"),
-      finale("Thank you!", "You're one of the good ones.", "sparkles"),
-    ],
+    screens: (to, from) =>
+      B.dress(B.THANK_YOU_SO_MUCH, [
+        intro(`${to}, this is for you`, `${from} wanted to say something.`, "See what it is"),
+        game("catch-stars", "A star for every kindness", "Catch the falling stars, one for every kind thing you did", "You're a star. Officially."),
+        {
+          ...reasons("Never forgotten", "Tap the jar", [
+            "How patient you were",
+            "The extra time you gave without being asked",
+            "The way you made everyone feel welcome",
+            "Your encouragement when it mattered most",
+            "Every kind word",
+          ]),
+          labels: { jarCount: "Thank you {i} of {n}", jarEmpty: "And that's only the start." },
+        },
+        photos("Some good times"),
+        message("Thank you", `Thank you for everything you've done. You went above and beyond, and it didn't go unnoticed. I'm so grateful.\n\n${from}`),
+        finale("Thank you!", "You're one of the good ones.", "sparkles"),
+      ]),
     demo: { to: "Ms Patel", from: "Class 4B", photos: [P.bouquet, P.coffee, P.balloons] },
   },
   {
@@ -1013,14 +1175,19 @@ export const TEMPLATES: Template[] = [
     ambient: "sparkles",
     emoji: "🖼️",
     headline: "A whole wall of thank yous",
-    blurb: "Built for a big screen: a gallery wall of up to six photos, a memory game and a big thank-you. Great for group cards.",
-    screens: (to, from) => [
-      intro(`Thank you, ${to}!`, `From ${from}. We made you a gallery.`, "Open the gallery"),
-      photos(`The ${to} appreciation gallery`),
-      game("memory-match", "A little game", "Find all the matching pairs", "Thank you for being a perfect match"),
-      message("From all of us", `We couldn't have done it without you. Thank you for your time, your patience and your kindness.\n\n${from}`),
-      finale("THANK YOU!", "You're appreciated more than you know.", "confetti"),
-    ],
+    blurb: "Built for a big screen: a gallery wall of up to six photos, a memory game, a gratitude meter and a big thank-you. Great for group cards.",
+    screens: (to, from) =>
+      B.dress(B.GALLERY_OF_THANKS, [
+        intro(`Thank you, ${to}!`, `From ${from}. We made you a gallery.`, "Open the gallery"),
+        photos(`The ${to} appreciation gallery`),
+        game("memory-match", "A little game", "Find all the matching pairs", "Thank you for being a perfect match"),
+        {
+          ...slider("How grateful are we?", "Very", "Beyond words", "Off the scale. Thank you!"),
+          labels: { sliderLines: ["Only that much?", "More than that…", "Much more…", "Nearly there…"] },
+        },
+        message("From all of us", `We couldn't have done it without you. Thank you for your time, your patience and your kindness.\n\n${from}`),
+        finale("THANK YOU!", "You're appreciated more than you know.", "confetti"),
+      ]),
     demo: { to: "Ms Patel", from: "Class 4B", photos: [P.bouquet, P.balloons, P.coffee, P.cake, P.sunset, P.grad] },
   },
 
@@ -1033,14 +1200,20 @@ export const TEMPLATES: Template[] = [
     ambient: "petals",
     emoji: "🌷",
     headline: "I grew you a thank you",
-    blurb: "They water a little plant until it blooms, then read your thank-you message. Lovely for teachers, nurses and neighbours.",
-    screens: (to, from) => [
-      intro(`Thank you, ${to}`, `${from} planted something for you.`, "Let's see"),
-      game("grow-flower", "Help it grow", "Water the plant until it blooms", "A thank you, in full bloom"),
-      message("Thank you", `What you did meant more than you know. Thank you for your kindness, your time and your patience.\n\nWith thanks, ${from}`),
-      finale("Thanks a bunch!", "You're one in a million.", "petals"),
-    ],
-    demo: { to: "Ms Patel", from: "Class 4B" },
+    blurb: "They water a little plant until it blooms, pick a bouquet, see your photos and read your thank-you message. Lovely for teachers, nurses and neighbours.",
+    screens: (to, from) =>
+      B.dress(B.THANKS_A_BUNCH, [
+        intro(`Thank you, ${to}`, `${from} planted something for you.`, "Let's see"),
+        game("grow-flower", "Help it grow", "Water the plant until it blooms", "A thank you, in full bloom"),
+        {
+          ...boxes("Pick a bouquet", "Choose a box. Every one is for you.", ["Sunflowers, for sunny days", "Tulips, for your kindness", "Roses, for being wonderful"]),
+          labels: { boxesPicked: "Your bouquet…" },
+        },
+        photos("Some blooming lovely memories"),
+        message("Thank you", `What you did meant more than you know. Thank you for your kindness, your time and your patience.\n\nWith thanks, ${from}`),
+        finale("Thanks a bunch!", "You're one in a million.", "petals"),
+      ]),
+    demo: { to: "Ms Patel", from: "Class 4B", photos: [P.bouquet, P.teacup, P.coffee] },
   },
 
   // ---------- Congrats ----------
@@ -1053,15 +1226,17 @@ export const TEMPLATES: Template[] = [
     ambient: "confetti",
     emoji: "🏆",
     headline: "You did it!",
-    blurb: "For graduations, new jobs, passed exams and big wins. Pop the balloons, then fireworks.",
+    blurb: "For graduations, new jobs, passed exams and big wins. Pop the balloons, pick a prize, then fireworks.",
     featured: true,
-    screens: (to, from) => [
-      intro(`Congratulations, ${to}!`, `${from} is so proud of you.`, "Celebrate"),
-      game("pop-balloons", "Victory balloons", "Pop 10 balloons to celebrate", "Woohoo!"),
-      photos("Look at you go"),
-      message("So proud of you", `All that hard work paid off. You deserve every bit of this.\n\nCongratulations!\n${from}`),
-      finale(`Congrats, ${to}!`, "Onwards and upwards.", "fireworks"),
-    ],
+    screens: (to, from) =>
+      B.dress(B.YOU_DID_IT, [
+        intro(`Congratulations, ${to}!`, `${from} is so proud of you.`, "Celebrate"),
+        game("pop-balloons", "Victory balloons", "Pop 10 balloons to celebrate", "Woohoo!"),
+        photos("Look at you go"),
+        { ...boxes("Pick your prize", "You've earned one. Choose a box.", ["A celebration dinner", "Bragging rights for life", "A massive hug"]), labels: { boxesPicked: "You've won…" } },
+        message("So proud of you", `All that hard work paid off. You deserve every bit of this.\n\nCongratulations!\n${from}`),
+        { ...finale(`Congrats, ${to}!`, "This is only the beginning.", "fireworks"), labels: { playAgain: "Celebrate again" } },
+      ]),
     demo: { to: "Olivia", from: "Sam", photos: [P.grad, P.balloons, P.cake] },
   },
   {
@@ -1069,26 +1244,35 @@ export const TEMPLATES: Template[] = [
     name: "Big Brain Energy",
     occasion: "congrats",
     tone: "funny",
-    theme: "party",
+    theme: "noel",
     ambient: "stars",
     emoji: "🤓",
     headline: "Are you a genius?",
-    blurb: "Congratulations, with a side of teasing. A genius test, a star-catching game and confetti.",
-    screens: (to, from) => [
-      intro(`Well well well, ${to}`, `${from} heard the news.`, "What news?"),
-      question("Are you, in fact, a genius?", "Yes, I am", "No", "Correct. Humble too."),
-      quiz(
-        "Genius test",
-        [
-          q("What's 2 + 2?", ["4", "22", "Fish"], 0),
-          q("Who's the cleverest person here?", [to, from, "The dog"], 0),
-        ],
-        "Genius confirmed. We're all very impressed.",
-      ),
-      game("catch-stars", "Gold stars for you", "Catch 10 gold stars", "Gold stars all round"),
-      finale(`Congratulations, ${to}!`, "Don't let it go to your head (too late).", "confetti"),
-    ],
-    demo: { to: "Olivia", from: "Sam" },
+    blurb: "Congratulations, with a side of teasing. A genius test, a star-catching game, your photos, a proper well done and confetti.",
+    screens: (to, from) =>
+      B.dress(B.BIG_BRAIN_ENERGY, [
+        intro(`Well well well, ${to}`, `${from} heard the news.`, "What news?"),
+        {
+          ...question("Are you, in fact, a genius?", "Yes, I am", "No", "Correct. Humble too."),
+          labels: { noLines: ["A genius would say yes", "Modesty detected", "Our records disagree", "Wrong, genius", "Think about it (you're clever)", "Even the dog says yes"] },
+        },
+        {
+          ...quiz(
+            "Genius test",
+            [
+              q("What's 2 + 2?", ["4", "22", "Fish"], 0),
+              q("Who's the cleverest person here?", [to, from, "The dog"], 0),
+            ],
+            "Genius confirmed. We're all very impressed.",
+          ),
+          labels: { wrongLines: ["A genius? Really?", "Recalculating…", "Even the dog knew that.", "Hmm. Recount."], quizPerfect: "Full marks. Big brain confirmed." },
+        },
+        game("catch-stars", "Gold stars for you", "Catch 10 gold stars", "Gold stars all round"),
+        photos("Exhibit A: the genius at work"),
+        message("Jokes aside", `I'm genuinely so proud of you. You worked hard for this and you deserve every bit of it.\n\n${from}`),
+        finale(`Congratulations, ${to}!`, "Don't let it go to your head (too late).", "confetti"),
+      ]),
+    demo: { to: "Olivia", from: "Sam", photos: [P.grad, P.desk, P.coffee] },
   },
   {
     slug: "you-hit-the-jackpot",
@@ -1099,15 +1283,20 @@ export const TEMPLATES: Template[] = [
     ambient: "stars",
     emoji: "🎰",
     headline: "Winner winner!",
-    blurb: "For promotions, new jobs and big wins. They pull a slot machine for the jackpot, then try (and fail) to rate how proud you are.",
-    screens: (to, from) => [
-      intro(`Big news, ${to}!`, `${from} heard you've been winning at life.`, "Spin to win"),
-      game("slot-machine", "Pull for the jackpot", "Pull the lever. Third time lucky?", "JACKPOT! Just like you"),
-      slider(`How proud is ${from} of you?`, "A bit", "Ridiculously", "Ridiculously proud. Officially."),
-      message("Congratulations!", `You worked so hard for this and you absolutely deserve it. Drinks are on you, though.\n\n${from}`),
-      finale(`Congrats, ${to}!`, "Onwards and upwards.", "fireworks"),
-    ],
-    demo: { to: "Olivia", from: "Sam" },
+    blurb: "For promotions, new jobs and big wins. They pull a slot machine for the jackpot, try (and fail) to rate how proud you are, then see the winner, pictured.",
+    screens: (to, from) =>
+      B.dress(B.YOU_HIT_THE_JACKPOT, [
+        intro(`Big news, ${to}!`, `${from} heard you've been winning at life.`, "Spin to win"),
+        game("slot-machine", "Pull for the jackpot", "Pull the lever. Third time lucky?", "JACKPOT! Just like you"),
+        {
+          ...slider(`How proud is ${from} of you?`, "A bit", "Ridiculously", "Ridiculously proud. Officially."),
+          labels: { sliderLines: ["A bit? Really?", "More than that…", "Way more…", "Off the charts…"] },
+        },
+        photos("The winner, pictured"),
+        message("Congratulations!", `You worked so hard for this and you absolutely deserve it. Drinks are on you, though.\n\n${from}`),
+        finale(`Congrats, ${to}!`, "Onwards and upwards.", "fireworks"),
+      ]),
+    demo: { to: "Olivia", from: "Sam", photos: [P.toast, P.desk, P.balloons] },
   },
   // ---------- Halloween ----------
   {
@@ -1119,34 +1308,45 @@ export const TEMPLATES: Template[] = [
     ambient: "spooky",
     emoji: "🎃",
     headline: "Trick or treat?",
-    blurb: "They try to pick 'trick' but the button runs away. Then they whack some ghosts and catch a bag of sweets.",
+    blurb: "They try to pick 'trick' but the button runs away. Then they whack some ghosts, catch a bag of sweets and see your spookiest photos.",
     featured: true,
-    screens: (to, from) => [
-      intro(`Happy Halloween, ${to}`, `${from} is at your door. Knock knock.`, "Open the door…"),
-      question("Trick or treat?", "Treat", "Trick", "Good choice. Nobody wants my tricks."),
-      game("whack-ghosts", "Ghosts in the garden!", "Whack 8 ghosts before they get you", "The ghosts have fled"),
-      game("catch-candy", "Fill your sweet bag", "Catch 10 falling sweets", "That's a lot of sugar", "game2"),
-      finale("Happy Halloween!", `Boo! Love, ${from}`, "spooky"),
-    ],
-    demo: { to: "Olivia", from: "Sam" },
+    screens: (to, from) =>
+      B.dress(B.TRICK_OR_TREAT, [
+        { ...intro(`Happy Halloween, ${to}`, `${from} is at your door. Knock knock.`, "Open the door…"), labels: { tapEnvelope: "Tap the envelope… if you dare" } },
+        {
+          ...question("Trick or treat?", "Treat", "Trick", "Good choice. Nobody wants my tricks."),
+          labels: { noLines: ["Too scared?", "BOO!", "This button is haunted", "The ghosts say treat", "Nice try", "Treats only", "Spooky, isn't it?"] },
+        },
+        game("whack-ghosts", "Ghosts in the garden!", "Whack the ghosts before they get you", "The ghosts have fled"),
+        game("catch-candy", "Fill your sweet bag", "Catch the falling sweets", "That's a lot of sugar", "game2"),
+        photos("Our spookiest photos"),
+        message("Happy Halloween", `Thanks for being my favourite partner in crime, on the spooky days and all the others.\n\n${from}`),
+        { ...finale("Happy Halloween!", `Boo! Love, ${from}`, "spooky"), labels: { playAgain: "Haunt me again" } },
+      ]),
+    demo: { to: "Olivia", from: "Sam", photos: [P.pumpkin, P.lights, P.friends] },
   },
   {
     slug: "boo-i-love-you",
     name: "Boo, I Love You",
     occasion: "halloween",
     tone: "cute",
-    theme: "spooky",
+    theme: "lavender",
     ambient: "spooky",
     emoji: "👻",
     headline: "You're my boo",
-    blurb: "A cute Halloween card for your other half: a jar of reasons they're your boo, your spookiest photos and a ghost hunt.",
-    screens: (to, from) => [
-      intro(`${to}, you're my boo`, `${from} has something spooky (and soppy) for you.`, "Eek, open it"),
-      reasons("Reasons you're my boo", "Tap the jar… if you dare", ["You hold my hand in scary films", "You eat all the sweets with me", "Your costume ideas", "You're cute even as a zombie", "You never ghost me"]),
-      photos("Our spookiest moments"),
-      game("whack-ghosts", "Protect our house", "Whack 8 ghosts", "Our house is safe. My hero"),
-      finale("Happy Halloween, boo", `Love, ${from} (your favourite ghoul)`, "spooky"),
-    ],
+    blurb: "A cute Halloween card for your other half: a jar of reasons they're your boo, your spookiest photos, a ghost hunt and a soppy note.",
+    screens: (to, from) =>
+      B.dress(B.BOO_I_LOVE_YOU, [
+        intro(`${to}, you're my boo`, `${from} has something spooky (and soppy) for you.`, "Eek, open it"),
+        {
+          ...reasons("Reasons you're my boo", "Tap the jar… if you dare", ["You hold my hand in scary films", "You eat all the sweets with me", "Your costume ideas", "You're cute even as a zombie", "You never ghost me"]),
+          labels: { jarCount: "Spooky reason {i} of {n}", jarEmpty: "That's all of them… for now." },
+        },
+        photos("Our spookiest moments"),
+        game("whack-ghosts", "Protect our house", "Whack the ghosts", "Our house is safe. My hero"),
+        message("My favourite boo", `Scary films, too many sweets and me hiding behind a cushion. There's no one I'd rather be spooked with.\n\nLove, ${from}`),
+        finale("Happy Halloween, boo", `Love, ${from} (your favourite ghoul)`, "spooky"),
+      ]),
     demo: { to: "Olivia", from: "Sam", photos: [P.pumpkin, P.lights, P.coffee] },
   },
   {
@@ -1159,14 +1359,22 @@ export const TEMPLATES: Template[] = [
     ambient: "spooky",
     emoji: "🏚️",
     headline: "Say the magic word to get in",
-    blurb: "Built for a laptop. They type the password to enter the haunted house, see a creepy photo wall and fight off the ghosts.",
-    screens: (to, from) => [
-      intro(`${to}, the haunted house awaits`, `${from} dares you to come inside.`, "Enter… if you dare"),
-      typeit("The door is locked", "Hint: what does a ghost say?", "Boo", "The door creaks open…"),
-      photos("The portrait gallery"),
-      game("whack-ghosts", "Ghosts everywhere!", "Whack 8 ghosts to escape", "You escaped! Barely."),
-      finale("Happy Halloween!", `You survived. ${from} is impressed.`, "spooky"),
-    ],
+    blurb: "Built for a laptop. They type the magic word to enter the haunted house, see a creepy photo wall and fight off the ghosts.",
+    screens: (to, from) =>
+      B.dress(B.HAUNTED_HOUSE, [
+        intro(`${to}, the haunted house awaits`, `${from} dares you to come inside.`, "Enter… if you dare"),
+        {
+          ...typeit("The door is locked", "Say the magic word. What does a ghost say? It starts with B.", "Boo", "The door creaks open…"),
+          labels: { typeStart: "Type the magic word…", next: "Step inside" },
+        },
+        { ...photos("The portrait gallery"), labels: { next: "Go deeper…" } },
+        { ...game("whack-ghosts", "Ghosts everywhere!", "Whack the ghosts to escape", "You escaped! Barely."), labels: { next: "Run!" } },
+        message(
+          "You made it out",
+          `Happy Halloween! Thanks for being brave enough to come in, and for being the best person to hide behind when things go bump in the night.\n\n${from}`,
+        ),
+        finale("Happy Halloween!", `You survived. ${from} is impressed.`, "spooky"),
+      ]),
     demo: { to: "Olivia", from: "Sam", photos: [P.pumpkin, P.lights, P.fireworks, P.coffee, P.sunset, P.balloons] },
   },
 
@@ -1180,34 +1388,51 @@ export const TEMPLATES: Template[] = [
     ambient: "sparkles",
     emoji: "🥂",
     headline: "3, 2, 1… Happy New Year!",
-    blurb: "They launch their own midnight fireworks, then spin the wheel for a New Year's resolution (it's rigged).",
+    blurb: "They launch their own midnight fireworks, spin the wheel for a New Year's resolution (it's rigged), then look back at the year's best bits.",
     featured: true,
-    screens: (to, from) => [
-      intro(`Happy New Year, ${to}!`, `${from} saved you a spot for the countdown.`, "Start the countdown"),
-      game("launch-fireworks", "It's midnight!", "Tap the sky to launch 6 fireworks", "Happy New Year!"),
-      wheel("Spin for your resolution", "Whatever it lands on, you have to do it", ["Drink more water", "Go to the gym", "Read more books", "Spend more time with me", "Learn to cook", "Sleep more"], "Great resolution. I'll hold you to it", 3),
-      message("Here's to the new year", `Thank you for being part of my year. Here's to more laughs, more adventures and fewer early mornings.\n\nCheers, ${from}`),
-      finale("Happy New Year!", "Same again next year?", "fireworks"),
-    ],
-    demo: { to: "Olivia", from: "Sam" },
+    screens: (to, from) =>
+      B.dress(B.HAPPY_NEW_YEAR, [
+        intro(`Happy New Year, ${to}!`, `${from} saved you a spot for the countdown.`, "Start the countdown"),
+        game("launch-fireworks", "It's midnight!", "Tap the sky to launch 6 fireworks", "Happy New Year!"),
+        {
+          ...wheel(
+            "Spin for your resolution",
+            "Whatever it lands on, you have to do it",
+            ["Drink more water", "Go to the gym", "Read more books", "Spend more time with me", "Learn to cook", "Sleep more"],
+            "Great resolution. I'll hold you to it",
+            3,
+          ),
+          labels: { spinAgain: "Spin again (it'll still be me)" },
+        },
+        photos("The best bits of this year"),
+        message("Here's to the new year", `Thank you for being part of my year. Here's to more laughs, more adventures and fewer early mornings.\n\nCheers, ${from}`),
+        finale("Happy New Year!", "Same again next year?", "fireworks"),
+      ]),
+    demo: { to: "Olivia", from: "Sam", photos: [P.newyear, P.toast, P.friends] },
   },
   {
     slug: "year-in-review",
     name: "Our Year in Review",
     occasion: "newyear",
     tone: "heartfelt",
-    theme: "gold",
+    theme: "sky",
     ambient: "sparkles",
     emoji: "📅",
     headline: "What a year it's been",
-    blurb: "The best moments of the year, month by month, with your photos and a jar of highlights.",
-    screens: (to, from) => [
-      intro(`Happy New Year, ${to}`, `${from} looked back at the year. You're in all the best bits.`, "Let's look back"),
-      timeline("Our year", [at("Winter", "Cosy nights in and too much hot chocolate"), at("Spring", "That trip we nearly didn't take"), at("Summer", "Sunburn, ice cream and long evenings"), at("Autumn", "Rainy walks and good films"), at("Now", "Ready for whatever comes next, with you")]),
-      photos("Some highlights"),
-      reasons("Best bits of the year", "Tap the jar", ["Every time you made me laugh", "Our late-night chats", "You being there when it mattered", "All the food we ate"]),
-      finale("Happy New Year", "Here's to the next one.", "fireworks"),
-    ],
+    blurb: "The best moments of the year, season by season, with your photos, a jar of highlights, a peek at next year's plan and a letter.",
+    screens: (to, from) =>
+      B.dress(B.YEAR_IN_REVIEW, [
+        intro(`Happy New Year, ${to}`, `${from} looked back at the year. You're in all the best bits.`, "Let's look back"),
+        timeline("Our year", [at("Winter", "Cosy nights in and too much hot chocolate"), at("Spring", "That trip we nearly didn't take"), at("Summer", "Sunburn, ice cream and long evenings"), at("Autumn", "Rainy walks and good films"), at("Now", "Ready for whatever comes next, with you")]),
+        photos("Some highlights"),
+        { ...reasons("Best bits of the year", "Tap the jar", ["Every time you made me laugh", "Our late-night chats", "You being there when it mattered", "All the food we ate"]), labels: { jarCount: "Highlight {i} of {n}" } },
+        { ...scratch("Next year's plan", "Scratch the silver to see what's next", "More adventures, more laughs and more time with you."), labels: { scratchDone: "That's the plan!" } },
+        message(
+          "Thank you for this year",
+          `Whatever this year threw at us, you made it better. Thank you for every laugh, every late night and every ordinary day that turned out to be the best bit.\n\n${from}`,
+        ),
+        finale("Happy New Year", "Here's to the next one.", "fireworks"),
+      ]),
     demo: { to: "Olivia", from: "Sam", photos: [P.clock, P.newyear, P.toast] },
   },
   {
