@@ -57,7 +57,7 @@ export const MORE_DESIGNS: Template[] = [
             effect: "sparkles",
             burst: "sparkles",
             transition: "fade",
-            stickers: [stick("✨", 8, 10, 8, "pulse"), stick("🪔", 10, 89, 11, "pulse"), stick("🪔", 90, 88, 11, "pulse")],
+            stickers: [stick("✨", 8, 12, 8, "pulse"), stick("🪔", 10, 89, 11, "pulse"), stick("🪔", 90, 88, 11, "pulse")],
           },
           { gotMail: "A little light for you" },
         ),
@@ -68,7 +68,7 @@ export const MORE_DESIGNS: Template[] = [
           effect: "stars",
           burst: "sparkles",
           transition: "rise",
-          stickers: [stick("✨", 8, 10, 8, "pulse"), stick("🌟", 90, 88, 9, "pulse")],
+          stickers: [stick("✨", 8, 12, 8, "pulse"), stick("🌟", 90, 88, 9, "pulse")],
         }),
         dress(photos("Our Bandi Chhor Divas"), {
           ...paper,
@@ -89,7 +89,7 @@ export const MORE_DESIGNS: Template[] = [
             body: "storybook",
             burst: "sparkles",
             transition: "zoom",
-            stickers: [stick("✨", 8, 10, 9, "pulse"), stick("🪔", 10, 89, 11, "sway"), stick("✨", 90, 88, 9, "pulse")],
+            stickers: [stick("✨", 8, 12, 9, "pulse"), stick("🪔", 10, 89, 11, "sway"), stick("✨", 90, 88, 9, "pulse")],
           },
           { scratchDone: "My wish for you" },
         ),
@@ -100,7 +100,7 @@ export const MORE_DESIGNS: Template[] = [
           effect: "stars",
           burst: "fireworks",
           transition: "zoom",
-          stickers: [stick("🎆", 8, 10, 9, "pulse"), stick("🎇", 90, 88, 10, "pulse")],
+          stickers: [stick("🎆", 8, 12, 9, "pulse"), stick("🎇", 90, 88, 10, "pulse")],
         }),
         dress(
           message(
@@ -115,7 +115,7 @@ export const MORE_DESIGNS: Template[] = [
           gradient: "glow",
           effect: "stars",
           transition: "zoom",
-          stickers: [stick("✨", 8, 10, 8, "pulse"), stick("🪔", 10, 89, 11, "pulse"), stick("🪔", 90, 88, 11, "pulse")],
+          stickers: [stick("✨", 8, 12, 8, "pulse"), stick("🪔", 10, 89, 11, "pulse"), stick("🪔", 90, 88, 11, "pulse")],
         }),
       ];
     },
@@ -145,7 +145,7 @@ export const MORE_DESIGNS: Template[] = [
             effect: "sparkles",
             burst: "confetti",
             transition: "fade",
-            stickers: [stick("🪔", 8, 10, 9, "pulse"), stick("🌼", 10, 89, 11, "sway"), stick("🌼", 90, 88, 11, "sway", 20)],
+            stickers: [stick("🪔", 8, 12, 9, "pulse"), stick("🌼", 10, 89, 11, "sway"), stick("🌼", 90, 88, 11, "sway", 20)],
           },
           { gotMail: "Nutan varshabhinandan" },
         ),
@@ -158,7 +158,7 @@ export const MORE_DESIGNS: Template[] = [
           effect: "stars",
           burst: "lanterns",
           transition: "rise",
-          stickers: [stick("✨", 8, 10, 8, "pulse"), stick("🏮", 90, 88, 10, "sway")],
+          stickers: [stick("✨", 8, 12, 8, "pulse"), stick("🏮", 90, 88, 10, "sway")],
         }),
         dress(
           wheel("Spin for your new year", "Wherever it stops, it's coming your way", ["Good health", "Success at work", "Family time", "A holiday", "Big laughs", "Sweet surprises"], "Consider it done. Saal Mubarak!"),
@@ -171,7 +171,7 @@ export const MORE_DESIGNS: Template[] = [
             accent: "#b5172c",
             burst: "confetti",
             transition: "bounce",
-            stickers: [stick("🎉", 8, 10, 9, "bounce"), stick("🍬", 10, 89, 10, "sway"), stick("🌼", 90, 88, 10, "spin")],
+            stickers: [stick("🎉", 8, 12, 9, "bounce"), stick("🍬", 10, 89, 10, "sway"), stick("🌼", 90, 88, 10, "spin")],
           },
         ),
         dress(photos("Diwali with the family"), {
@@ -207,7 +207,7 @@ export const MORE_DESIGNS: Template[] = [
           ...type,
           effect: "stars",
           transition: "zoom",
-          stickers: [stick("🎆", 8, 10, 9, "pulse"), stick("🪔", 10, 89, 11, "pulse"), stick("🎆", 90, 88, 10, "pulse")],
+          stickers: [stick("🎆", 8, 12, 9, "pulse"), stick("🪔", 10, 89, 11, "pulse"), stick("🎆", 90, 88, 10, "pulse")],
         }),
       ];
     },
@@ -238,7 +238,7 @@ export const MORE_DESIGNS: Template[] = [
             effect: "sparkles",
             burst: "petals",
             transition: "fade",
-            stickers: [stick("🌼", 8, 10, 10, "sway"), stick("🪔", 10, 89, 11, "pulse"), stick("🌼", 90, 88, 11, "sway", 25)],
+            stickers: [stick("🌼", 8, 13, 10, "sway"), stick("🪔", 10, 89, 11, "pulse"), stick("🌼", 90, 88, 11, "sway", 25)],
           },
           { gotMail: "For my brother" },
         ),
@@ -252,7 +252,7 @@ export const MORE_DESIGNS: Template[] = [
           burst: "petals",
           transition: "rise",
           tune: { goal: 3 },
-          stickers: [stick("🌼", 8, 10, 9, "sway"), stick("🌼", 90, 88, 10, "sway", 30)],
+          stickers: [stick("🌼", 8, 12, 9, "sway"), stick("🌼", 90, 88, 10, "sway", 30)],
         }),
         dress(
           reasons("Why I'm lucky you're my brother", "Tap the jar for each one", [
@@ -271,7 +271,7 @@ export const MORE_DESIGNS: Template[] = [
             effect: "petals",
             burst: "petals",
             transition: "bounce",
-            stickers: [stick("🍬", 8, 10, 9, "bounce"), stick("🌼", 10, 89, 10, "sway"), stick("💛", 90, 88, 9, "pulse")],
+            stickers: [stick("🍬", 8, 12, 9, "bounce"), stick("🌼", 10, 89, 10, "sway"), stick("💛", 90, 88, 9, "pulse")],
           },
         ),
         dress(
@@ -285,7 +285,7 @@ export const MORE_DESIGNS: Template[] = [
             accent: "#8e0b20",
             burst: "confetti",
             transition: "slide",
-            stickers: [stick("🎁", 8, 10, 10, "bounce"), stick("🛍️", 90, 88, 10, "sway")],
+            stickers: [stick("🎁", 8, 13, 10, "bounce"), stick("🛍️", 90, 88, 10, "sway")],
           },
           { couponClaim: "Screenshot it as proof. No take-backs." },
         ),
@@ -297,7 +297,7 @@ export const MORE_DESIGNS: Template[] = [
           accent: "#f6c445",
           effect: "sparkles",
           transition: "zoom",
-          stickers: [stick("✨", 8, 10, 8, "pulse"), stick("🌼", 90, 88, 10, "sway")],
+          stickers: [stick("✨", 8, 12, 8, "pulse"), stick("🌼", 90, 88, 10, "sway")],
         }),
         dress(
           message(
@@ -311,7 +311,7 @@ export const MORE_DESIGNS: Template[] = [
           ...type,
           effect: "petals",
           transition: "zoom",
-          stickers: [stick("🌼", 8, 10, 10, "sway"), stick("🪔", 10, 89, 11, "pulse"), stick("🌼", 90, 88, 11, "sway", 25)],
+          stickers: [stick("🌼", 8, 13, 10, "sway"), stick("🪔", 10, 89, 11, "pulse"), stick("🌼", 90, 88, 11, "sway", 25)],
         }),
       ];
     },
@@ -368,7 +368,7 @@ export const MORE_DESIGNS: Template[] = [
           burst: "sparkles",
           transition: "fade",
           tune: { goal: 3 },
-          stickers: [stick("✨", 8, 10, 9, "pulse"), stick("🪔", 90, 88, 11, "pulse")],
+          stickers: [stick("✨", 8, 12, 9, "pulse"), stick("🪔", 90, 88, 11, "pulse")],
         }),
         dress(photos("The family this Diwali"), {
           ...paper,
@@ -394,7 +394,7 @@ export const MORE_DESIGNS: Template[] = [
             effect: "lanterns",
             burst: "sparkles",
             transition: "fade",
-            stickers: [stick("💛", 8, 10, 9, "pulse"), stick("🪔", 90, 88, 11, "pulse")],
+            stickers: [stick("💛", 8, 12, 9, "pulse"), stick("🪔", 90, 88, 11, "pulse")],
           },
         ),
         dress(
@@ -410,7 +410,7 @@ export const MORE_DESIGNS: Template[] = [
           ...type,
           effect: "lanterns",
           transition: "fade",
-          stickers: [stick("✨", 8, 10, 8, "pulse"), stick("🪔", 10, 89, 12, "pulse"), stick("🪔", 90, 88, 12, "pulse")],
+          stickers: [stick("✨", 8, 12, 8, "pulse"), stick("🪔", 10, 89, 12, "pulse"), stick("🪔", 90, 88, 12, "pulse")],
         }),
       ];
     },
@@ -444,7 +444,7 @@ export const MORE_DESIGNS: Template[] = [
             effect: "snow",
             burst: "stars",
             transition: "drop",
-            stickers: [stick("⭐", 8, 10, 8, "pulse"), stick("🦌", 10, 89, 11, "bounce"), stick("🎅", 90, 88, 12, "sway")],
+            stickers: [stick("⭐", 8, 12, 8, "pulse"), stick("🦌", 10, 89, 11, "bounce"), stick("🎅", 90, 88, 12, "sway")],
           },
           { gotMail: "North Pole Post" },
         ),
@@ -457,7 +457,7 @@ export const MORE_DESIGNS: Template[] = [
             effect: "snow",
             burst: "stars",
             transition: "zoom",
-            stickers: [stick("📜", 8, 10, 9, "sway"), stick("⭐", 90, 88, 10, "spin")],
+            stickers: [stick("📜", 8, 12, 9, "sway"), stick("⭐", 90, 88, 10, "spin")],
           },
           { scratchDone: "Hooray!" },
         ),
@@ -470,7 +470,7 @@ export const MORE_DESIGNS: Template[] = [
           burst: "snow",
           transition: "rise",
           tune: { speed: 0.8, size: 1.4 },
-          stickers: [stick("❄️", 8, 10, 8, "spin"), stick("🛷", 10, 89, 11, "sway")],
+          stickers: [stick("❄️", 8, 12, 8, "spin"), stick("🛷", 10, 89, 11, "sway")],
         }),
         dress(photos("Santa's favourite photos of you"), {
           ...type,
@@ -480,7 +480,7 @@ export const MORE_DESIGNS: Template[] = [
           accent: "#f2c14e",
           effect: "snow",
           transition: "slide",
-          stickers: [stick("⭐", 8, 10, 8, "pulse"), stick("🎄", 10, 89, 12, "sway"), stick("🎁", 90, 88, 11, "bounce")],
+          stickers: [stick("⭐", 8, 12, 8, "pulse"), stick("🎄", 10, 89, 12, "sway"), stick("🎁", 90, 88, 11, "bounce")],
         }),
         dress(
           message(
@@ -496,7 +496,7 @@ export const MORE_DESIGNS: Template[] = [
             body: "storybook",
             effect: "sparkles",
             transition: "fade",
-            stickers: [stick("❄️", 8, 10, 8, "spin"), stick("🎅", 90, 88, 12, "sway")],
+            stickers: [stick("❄️", 8, 12, 8, "spin"), stick("🎅", 90, 88, 12, "sway")],
           },
           { next: "Thank you, Santa!" },
         ),
@@ -505,7 +505,7 @@ export const MORE_DESIGNS: Template[] = [
           ...type,
           effect: "snow",
           transition: "zoom",
-          stickers: [stick("⭐", 8, 10, 8, "pulse"), stick("🎅", 10, 89, 12, "bounce"), stick("🦌", 90, 88, 12, "bounce")],
+          stickers: [stick("⭐", 8, 12, 8, "pulse"), stick("🎅", 10, 89, 12, "bounce"), stick("🦌", 90, 88, 12, "bounce")],
         }),
       ];
     },
@@ -535,7 +535,7 @@ export const MORE_DESIGNS: Template[] = [
           effect: "snow",
           burst: "snow",
           transition: "fade",
-          stickers: [stick("❄️", 8, 10, 8, "spin"), stick("🎄", 10, 89, 12, "sway"), stick("🧣", 90, 88, 11, "sway")],
+          stickers: [stick("❄️", 8, 12, 8, "spin"), stick("🎄", 10, 89, 12, "sway"), stick("🧣", 90, 88, 11, "sway")],
         }),
         dress(
           game("hold-hug", "A Christmas hug from all of us", "Press and hold the heart. No rush.", "Hug delivered. Can you feel it?"),
@@ -555,7 +555,7 @@ export const MORE_DESIGNS: Template[] = [
           ...type,
           effect: "snow",
           transition: "fade",
-          stickers: [stick("✨", 8, 10, 8, "pulse"), stick("🎄", 10, 89, 11, "sway")],
+          stickers: [stick("✨", 8, 12, 8, "pulse"), stick("🎄", 10, 89, 11, "sway")],
         }),
         dress(
           reasons("Why you're the best", "Tap the jar for each one", [
@@ -589,7 +589,7 @@ export const MORE_DESIGNS: Template[] = [
           ...type,
           effect: "snow",
           transition: "fade",
-          stickers: [stick("⭐", 8, 10, 8, "pulse"), stick("🎄", 10, 89, 12, "sway"), stick("🎁", 90, 88, 11, "float")],
+          stickers: [stick("⭐", 8, 12, 8, "pulse"), stick("🎄", 10, 89, 12, "sway"), stick("🎁", 90, 88, 11, "float")],
         }),
       ];
     },
@@ -621,7 +621,7 @@ export const MORE_DESIGNS: Template[] = [
             effect: "snow",
             burst: "snow",
             transition: "fade",
-            stickers: [stick("❄️", 8, 10, 8, "spin"), stick("📮", 10, 89, 11, "sway"), stick("🎄", 90, 88, 11, "sway")],
+            stickers: [stick("❄️", 8, 12, 8, "spin"), stick("📮", 10, 89, 11, "sway"), stick("🎄", 90, 88, 11, "sway")],
           },
           { gotMail: "The family news" },
         ),
@@ -640,7 +640,7 @@ export const MORE_DESIGNS: Template[] = [
             pattern: "grid",
             effect: "sparkles",
             transition: "slide",
-            stickers: [stick("📰", 8, 10, 9, "sway"), stick("✏️", 90, 88, 9, "sway")],
+            stickers: [stick("📰", 8, 12, 9, "sway"), stick("✏️", 90, 88, 9, "sway")],
           },
           { timelineMore: "What happened next… ({i}/{n})" },
         ),
@@ -664,7 +664,7 @@ export const MORE_DESIGNS: Template[] = [
             accent: "#b23a3a",
             burst: "hearts",
             transition: "rise",
-            stickers: [stick("❤️", 8, 10, 8, "pulse"), stick("🏠", 90, 88, 10, "float")],
+            stickers: [stick("❤️", 8, 12, 8, "pulse"), stick("🏠", 90, 88, 10, "float")],
           },
           { sliderLines: ["Only that much?", "Keep going…", "That's more like it.", "Nearly there…"] },
         ),
@@ -680,7 +680,7 @@ export const MORE_DESIGNS: Template[] = [
           ...type,
           effect: "snow",
           transition: "zoom",
-          stickers: [stick("⭐", 8, 10, 8, "pulse"), stick("🎄", 10, 89, 12, "sway"), stick("🎁", 90, 88, 11, "float")],
+          stickers: [stick("⭐", 8, 12, 8, "pulse"), stick("🎄", 10, 89, 12, "sway"), stick("🎁", 90, 88, 11, "float")],
         }),
       ];
     },
@@ -713,7 +713,7 @@ export const MORE_DESIGNS: Template[] = [
             effect: "sparkles",
             burst: "confetti",
             transition: "fade",
-            stickers: [stick("✨", 8, 10, 8, "pulse"), stick("🥂", 10, 89, 11, "sway"), stick("🎈", 90, 88, 11, "float")],
+            stickers: [stick("✨", 8, 12, 8, "pulse"), stick("🥂", 10, 89, 11, "sway"), stick("🎈", 90, 88, 11, "float")],
           },
           { gotMail: "A birthday to remember" },
         ),
@@ -743,7 +743,7 @@ export const MORE_DESIGNS: Template[] = [
             accent: "#d4af37",
             effect: "stars",
             transition: "slide",
-            stickers: [stick("✨", 8, 10, 8, "pulse"), stick("🕰️", 90, 88, 10, "sway")],
+            stickers: [stick("✨", 8, 12, 8, "pulse"), stick("🕰️", 90, 88, 10, "sway")],
           },
         ),
         dress(
@@ -766,7 +766,7 @@ export const MORE_DESIGNS: Template[] = [
             effect: "petals",
             burst: "confetti",
             transition: "rise",
-            stickers: [stick("💛", 8, 10, 8, "pulse"), stick("🌹", 90, 88, 10, "sway")],
+            stickers: [stick("💛", 8, 12, 8, "pulse"), stick("🌹", 90, 88, 10, "sway")],
           },
         ),
         dress(photos("Through the years"), {
@@ -798,7 +798,7 @@ export const MORE_DESIGNS: Template[] = [
           body: "modern",
           effect: "stars",
           transition: "zoom",
-          stickers: [stick("🎆", 8, 10, 9, "pulse"), stick("🥂", 10, 89, 12, "sway"), stick("🎈", 90, 88, 12, "float")],
+          stickers: [stick("🎆", 8, 12, 9, "pulse"), stick("🥂", 10, 89, 12, "sway"), stick("🎈", 90, 88, 12, "float")],
         }),
       ];
     },
@@ -829,7 +829,7 @@ export const MORE_DESIGNS: Template[] = [
             effect: "balloons",
             burst: "balloons",
             transition: "bounce",
-            stickers: [stick("⭐", 8, 10, 9, "spin"), stick("🎈", 10, 89, 12, "float"), stick("🧸", 90, 88, 12, "bounce")],
+            stickers: [stick("⭐", 8, 12, 9, "spin"), stick("🎈", 10, 89, 12, "float"), stick("🧸", 90, 88, 12, "bounce")],
           },
           { gotMail: "A party for you!" },
         ),
@@ -855,7 +855,7 @@ export const MORE_DESIGNS: Template[] = [
           burst: "balloons",
           transition: "rise",
           tune: { goal: 8, speed: 0.75, size: 1.4 },
-          stickers: [stick("☀️", 8, 10, 10, "spin"), stick("☁️", 90, 88, 11, "float")],
+          stickers: [stick("☀️", 8, 13, 10, "spin"), stick("☁️", 90, 88, 11, "float")],
         }),
         dress(boxes("Pick a surprise", "Which box will you open?", ["A birthday crown for the whole day", "The very first slice of cake", "The biggest hug in the world"]), {
           ...type,
@@ -876,7 +876,7 @@ export const MORE_DESIGNS: Template[] = [
           accent: "#5b3fa8",
           effect: "balloons",
           transition: "slide",
-          stickers: [stick("⭐", 8, 10, 9, "spin"), stick("🧸", 90, 88, 11, "bounce")],
+          stickers: [stick("⭐", 8, 12, 9, "spin"), stick("🧸", 90, 88, 11, "bounce")],
         }),
         dress(
           message(
@@ -899,7 +899,7 @@ export const MORE_DESIGNS: Template[] = [
           ...type,
           effect: "balloons",
           transition: "bounce",
-          stickers: [stick("🎉", 8, 10, 10, "bounce"), stick("🎈", 10, 89, 12, "float"), stick("🧸", 90, 88, 12, "bounce")],
+          stickers: [stick("🎉", 8, 13, 10, "bounce"), stick("🎈", 10, 89, 12, "float"), stick("🧸", 90, 88, 12, "bounce")],
         }),
       ];
     },

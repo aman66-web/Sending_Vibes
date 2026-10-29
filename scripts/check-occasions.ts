@@ -14,6 +14,7 @@ import { OCCASIONS, cardSchema, type Occasion, type Screen } from "../src/lib/ca
 import { OCCASION_MUSIC, TEMPLATES, buildCard, cardTier, type Template } from "../src/lib/catalog";
 import { OCCASION_DESIGNS } from "../src/lib/catalog-occasions";
 import { contrast } from "../src/lib/screen-style";
+import { buttonWords, underButtons } from "./card-chrome";
 import { occasions } from "../src/lib/templates";
 import { OCCASION_ICONS } from "../src/components/card/sprites";
 
@@ -147,11 +148,15 @@ function checkDesign(t: Template) {
     if (text < 4.5) fail(`${at} text is ${text.toFixed(1)}:1 on its background`);
     const accent = Math.min(...style.background.map((b) => contrast(style.accent!, b)));
     if (accent < 3) fail(`${at} accent is ${accent.toFixed(1)}:1 on its background`);
+    // The words on the buttons (Next, Spin) are everyday-sized, so they need 4.5:1 on the button.
+    if (buttonWords(style.accent) < 4.5) fail(`${at} button words on ${style.accent} are only ${buttonWords(style.accent).toFixed(2)}:1`);
     if (s.type === "intro" && !style.envelope) fail(`${at} has no envelope colour`);
     for (const st of style.stickers ?? []) {
       const nearEdge = st.x < 15 || st.x > 85 || st.y < 14 || st.y > 86;
       const soundButton = st.x > 75 && st.y < 20;
       if (!nearEdge || soundButton) fail(`${at} sticker ${st.emoji} at ${st.x},${st.y} could cover the words or the sound button`);
+      const hidden = underButtons(st, s === screens[0]);
+      if (hidden) fail(`${at} sticker ${st.emoji} at ${st.x},${st.y} is ${hidden}`);
     }
     if (s.type === "wheel") for (const o of s.options) if (o.length > 16) fail(`${at} wheel slice "${o}" is cut short on the wheel`);
     for (const words of wordsOn(s)) {

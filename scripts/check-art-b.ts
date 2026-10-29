@@ -1,6 +1,6 @@
 // Checks designs 27 to 52 in src/lib/catalog.ts (Eid Mubarak to Our Year in Review) and
 // their looks in src/lib/design-styles-b.ts: each builds into a valid card, meets the
-// house standard, keeps its stickers clear of the words and the sound button, and stays
+// house standard, keeps its stickers clear of the words and the card's own buttons, and stays
 // readable. Run it with: npx jiti scripts/check-art-b.ts
 
 import { cardSchema, type Screen, type ScreenStyle } from "../src/lib/card";
@@ -9,6 +9,7 @@ import * as B from "../src/lib/design-styles-b";
 import { LISTS, TEXTS, isList, labelsOn } from "../src/lib/labels";
 import { contrast, screenLook } from "../src/lib/screen-style";
 import { themes } from "../src/lib/themes";
+import { buttonWords, underButtons } from "./card-chrome";
 
 const SLUGS = [
   "eid-mubarak",
@@ -41,7 +42,8 @@ const SLUGS = [
 
 // Screens they play with, rather than read.
 const PLAYED = new Set<Screen["type"]>(["question", "game", "quiz", "scratch", "typeit", "wheel", "coupons", "reasons", "slider", "boxes"]);
-// Screens whose panels, buttons or lists run the full width: stickers only in the corners.
+// Screens whose panels, buttons or lists run the full width: stickers only in the corners
+// (the top ones just below the card's own buttons).
 const BUSY = new Set<Screen["type"]>(["game", "quiz", "scratch", "typeit", "wheel", "coupons", "boxes", "timeline", "slider"]);
 const HEX = /^#[0-9a-f]{6}$/i;
 
@@ -65,7 +67,7 @@ function mix(a: string, b: string, amount: number) {
 
 const placeholders = (s: string) => new Set([...s.matchAll(/\{(\w+)\}/g)].map((m) => m[1]));
 
-function checkStyle(slug: string, theme: keyof typeof themes, screen: Screen) {
+function checkStyle(slug: string, theme: keyof typeof themes, screen: Screen, first: boolean) {
   const where = `${slug} ${screen.id}`;
   const style: ScreenStyle | undefined = screen.style;
   if (!style) return fail(where, "has no style");
@@ -84,22 +86,26 @@ function checkStyle(slug: string, theme: keyof typeof themes, screen: Screen) {
   if (worst(text) < 7) fail(where, `text ${text} only ${worst(text).toFixed(1)}:1 on its background`);
   if (worst(mix(text, background[0], 0.28)) < 4.5) fail(where, "instructions (the muted text) aren't readable enough");
   if (worst(accent) < 3) fail(where, `buttons ${accent} only ${worst(accent).toFixed(1)}:1 on their background`);
+  if (buttonWords(accent) < 4.5) fail(where, `the words on its buttons (${accent}) are only ${buttonWords(accent).toFixed(2)}:1`);
   // The screen is drawn with exactly the colours chosen, none swapped for readability.
   const look = screenLook(themes[theme], style);
   if (look.theme.text !== text || look.theme.accent !== accent) fail(where, "screen-style.ts swapped its colours, so they don't read well");
+  if (contrast(look.theme.accent, look.theme.accentText) < 4.5) fail(where, "button words don't read on the button as drawn");
 
   if (envelope) {
     if (screen.type !== "intro") fail(where, "only the intro has an envelope");
     else if (worst(envelope) < 1.8) fail(where, `envelope ${envelope} disappears into the background`);
   } else if (screen.type === "intro") fail(where, "the intro should colour its envelope");
 
-  // Stickers: 2 to 6, near the edges, never by the sound button, corners only on busy screens.
+  // Stickers: 2 to 6, near the edges, never under the sound or Back buttons, corners only on busy screens.
   if (stickers.length < 2 || stickers.length > 6) fail(where, `has ${stickers.length} stickers (2 to 6)`);
   for (const s of stickers) {
     const at = `${s.emoji} at ${s.x},${s.y}`;
     if (!(s.x < 15 || s.x > 85 || s.y < 14 || s.y > 86)) fail(where, `${at} is over the words`);
     if (s.x > 70 && s.y < 20) fail(where, `${at} covers the sound button`);
-    if (BUSY.has(screen.type) && !(s.y < 14 || s.y > 86)) fail(where, `${at} is on the edge of a busy screen`);
+    const hidden = underButtons(s, first);
+    if (hidden) fail(where, `${at} is ${hidden}`);
+    if (BUSY.has(screen.type) && !(s.y < 18 || s.y > 86)) fail(where, `${at} is on the edge of a busy screen`);
     if (s.size < 6 || s.size > 16) fail(where, `${at} is size ${s.size} (6 to 16)`);
   }
 
@@ -148,7 +154,7 @@ for (const t of mine) {
   if (!look) fail(t.slug, "has no look in design-styles-b.ts");
   else for (const id of Object.keys(look)) if (!ids.includes(id)) fail(t.slug, `look for "${id}", which isn't one of its screens`);
   for (const s of screens) {
-    checkStyle(t.slug, t.theme, s);
+    checkStyle(t.slug, t.theme, s, s === screens[0]);
     checkLabels(t.slug, s);
   }
 

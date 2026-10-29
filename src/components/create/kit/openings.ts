@@ -98,7 +98,7 @@ export const OPENINGS: KitItem[] = [
     title: `TOP SECRET: for ${to} only`,
     subtitle: "This message will self-destruct… only joking. Read on.",
     button: "Accept the mission",
-    style: { ...LOOK.film, envelope: "#e8cf98", heading: "typewriter", body: "typewriter", accent: "#e63946", burst: "none", transition: "zoom", stickers: corners(["🔒", "🕵️", "❗"], 8) },
+    style: { ...LOOK.film, envelope: "#e8cf98", heading: "typewriter", body: "typewriter", accent: "#d43440", burst: "none", transition: "zoom", stickers: corners(["🔒", "🕵️", "❗"], 8) },
     labels: { gotMail: "Classified", tapEnvelope: "Tap to break the seal. For your eyes only." },
   })),
 

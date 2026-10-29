@@ -11,11 +11,12 @@ import type { Labels } from "./labels";
 export { BLANK } from "./blanks";
 
 // Where stickers sit: the corners and the top edge, clear of the words in the middle, the
-// progress dots at the top and the sound button in the top right corner. The sides are for
-// the envelope screen, where the envelope leaves room either side.
+// progress dots at the top and the card's own buttons: Back in the top left (from the second
+// screen on) and sound in the top right. So the top spots sit just below Back and beside it.
+// The sides are for the envelope screen, where the envelope leaves room either side.
 const SPOTS = {
-  tl: [9, 9],
-  tc: [25, 6],
+  tl: [9, 15],
+  tc: [30, 13],
   bl: [9, 91],
   br: [91, 91],
   lt: [5, 34],

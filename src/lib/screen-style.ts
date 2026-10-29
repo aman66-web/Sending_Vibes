@@ -4,7 +4,8 @@ import type { Theme } from "./themes";
 // Turns a screen's own look (colours, fonts, pattern) into the colours and CSS the card
 // is drawn with, starting from the card's theme. Whatever colours the AI picks, the
 // words stay readable: text that's too close to its background is swapped for dark or
-// light ink, and so is a button colour that would disappear.
+// light ink, and so is a button colour that would disappear. A button whose own words
+// wouldn't read on it is taken a shade darker or lighter.
 
 const INK = "#1f1b16";
 const PAPER = "#fdfbf6";
@@ -46,6 +47,21 @@ const worst = (colour: string, backgrounds: string[]) => Math.min(...backgrounds
 // Dark ink or light paper, whichever reads better on these colours.
 export function readableOn(backgrounds: string[]) {
   return worst(INK, backgrounds) >= worst(PAPER, backgrounds) ? INK : PAPER;
+}
+
+// A button colour its own words read on at 4.5:1, as they're everyday-sized. A mid-tone
+// neither ink reaches (often the AI's) is taken a shade darker or lighter, whichever stands
+// out more from the background. Our own designs pass as written (scripts/check-art-*.ts).
+function legibleAccent(accent: string, against: string[]) {
+  const reads = (c: string) => contrast(c, readableOn([c])) >= READABLE;
+  if (reads(accent)) return accent;
+  // Never so far towards the background that the button stops standing out.
+  const standsOut = (c: string) => worst(c, against) >= Math.min(2, worst(accent, against));
+  for (const amount of [0.04, 0.08, 0.12, 0.16, 0.2, 0.25, 0.3, 0.4, 0.5]) {
+    const shades = [mix(accent, "#000000", amount), mix(accent, "#ffffff", amount)].filter((c) => reads(c) && standsOut(c));
+    if (shades.length) return shades.sort((a, b) => worst(b, against) - worst(a, against))[0];
+  }
+  return accent;
 }
 
 function gradient(colours: string[], kind: ScreenStyle["gradient"]) {
@@ -127,11 +143,11 @@ export function screenLook(base: Theme, style: ScreenStyle | undefined): ScreenL
   if (style.accent) {
     // A button that's nearly the background colour is no use; fall back to the text colour.
     const accent = worst(style.accent, against) >= 2 ? style.accent : theme.text;
-    theme.accent = accent;
-    theme.accentText = readableOn([accent]);
+    theme.accent = legibleAccent(accent, against);
+    theme.accentText = readableOn([theme.accent]);
   } else if (backgrounds?.length && worst(theme.accent, against) < 2) {
-    theme.accent = theme.text;
-    theme.accentText = readableOn([theme.text]);
+    theme.accent = legibleAccent(theme.text, against);
+    theme.accentText = readableOn([theme.accent]);
   }
 
   if (style.heading && style.heading !== "classic") css["--card-display"] = `var(${FONT_VARS[style.heading]})`;

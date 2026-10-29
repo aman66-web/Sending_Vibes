@@ -24,12 +24,14 @@ type Kit<G extends string> = {
 // stickers bigger for the intro and finale, smaller on busy screens.
 type Wear<G extends string> = Omit<ScreenStyle, "stickers"> & { on: G; stickers: string[]; scale?: number };
 
-// Spots round the edge for stickers, filled in order: the corners first, then the sides
-// and along the top. Never the top right, where the sound button sits. Screens take turns
-// with two layouts, so a design's stickers don't sit in the same places on every screen.
+// Spots round the edge for stickers, filled in order: the corners first, then the sides.
+// The top corners belong to the card's own buttons, so the top-left spot sits below Back
+// (there from the second screen on) and nothing goes in the top right, where the sound
+// button is. Screens take turns with two layouts, so a design's stickers don't sit in the
+// same places on every screen.
 const SPOTS = [
-  [[9, 8, 11, -12], [91, 91, 12, 10], [9, 92, 10, 8], [5, 46, 8, -8], [95, 62, 8, 12], [26, 5, 7, 6]],
-  [[10, 10, 10, 10], [9, 90, 12, -8], [90, 92, 10, -12], [95, 55, 8, 8], [5, 66, 8, -10], [22, 6, 7, -6]],
+  [[9, 15, 11, -12], [91, 91, 12, 10], [9, 92, 10, 8], [5, 46, 8, -8], [95, 62, 8, 12], [95, 30, 7, 6]],
+  [[10, 16, 10, 10], [9, 90, 12, -8], [90, 92, 10, -12], [95, 55, 8, 8], [5, 66, 8, -10], [5, 32, 7, -6]],
 ] as const;
 
 function place(emojis: string[], layout: number, motion: Motion[], scale = 1): Sticker[] {
@@ -202,7 +204,7 @@ export const OUR_STORY = design(
 export const STILL_CHOOSE_YOU = design(
   {
     grounds: {
-      champagne: { background: ["#fcf7ee", "#efe2ca"], gradient: "glow", text: "#33281a", accent: "#94702f" },
+      champagne: { background: ["#fcf7ee", "#efe2ca"], gradient: "glow", text: "#33281a", accent: "#906d2e" },
       linen: { background: ["#f7f2e9", "#e6dac7"], gradient: "down", text: "#2d251b", accent: "#86642b" },
       candle: { background: ["#33291e", "#16110c"], gradient: "glow", text: "#f7edd9", accent: "#dfc07f" },
     },
@@ -365,7 +367,7 @@ export const IM_REALLY_SORRY = design(
 export const SCRATCH_MY_APOLOGY = design(
   {
     grounds: {
-      peach: { background: ["#fff4ec", "#ffd9c4"], gradient: "glow", text: "#4a1d10", accent: "#cf512a" },
+      peach: { background: ["#fff4ec", "#ffd9c4"], gradient: "glow", text: "#4a1d10", accent: "#c34c27" },
       coral: { background: ["#ffe8db", "#ffc6aa"], gradient: "diagonal", pattern: "zigzag", text: "#3a1508", accent: "#b84421" },
     },
     heading: "bold",
@@ -374,7 +376,7 @@ export const SCRATCH_MY_APOLOGY = design(
     transition: "zoom",
   },
   {
-    intro: { on: "peach", envelope: "#cf512a", burst: "confetti", stickers: ["🎟️", "🍝", "💛"] },
+    intro: { on: "peach", envelope: "#c34c27", burst: "confetti", stickers: ["🎟️", "🍝", "💛"] },
     scratch: { on: "coral", burst: "confetti", stickers: ["🍝", "🍰", "✨"], scale: 0.9 },
     question: { on: "peach", burst: "hearts", stickers: ["🕯️", "🍰", "🌮"], scale: 0.9 },
     photos: { on: "coral", stickers: ["📸", "💛", "🍝"] },
