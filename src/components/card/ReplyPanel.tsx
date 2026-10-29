@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useId, useState, useSyncExternalStore } from "react";
+import { useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
 import { fmt } from "@/i18n/config";
 import type { Dict } from "@/i18n/en";
 import type { CardData } from "@/lib/card";
@@ -62,6 +62,12 @@ export function ReplyPanel({ card, cardId, text, canReply }: Recipient & { card:
   const [justSent, setJustSent] = useState<Reaction | "">("");
   const remembered = useSyncExternalStore<Reaction | "">(onSentChange, () => sentFor(cardId), () => "");
   const sent = justSent || remembered;
+  // The Send button goes once it's sent, so the confirmation takes its focus and is read out.
+  // Only just now: coming back to a card already thanked for doesn't move anyone's focus.
+  const confirmation = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (justSent) confirmation.current?.focus();
+  }, [justSent]);
 
   const send = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,10 +97,14 @@ export function ReplyPanel({ card, cardId, text, canReply }: Recipient & { card:
   return (
     // Comes in once the finale has had its moment.
     <div className="mt-2 flex w-full max-w-sm animate-screen-in flex-col items-center gap-4 [animation-delay:900ms]">
+      {/* There from the start, so screen readers announce it when the words arrive. */}
+      <p role="status" className="sr-only">
+        {justSent ? fmt(text.sent, { name }) : ""}
+      </p>
       {canReply && (
         <section aria-labelledby={`${id}-title`} className="w-full rounded-2xl bg-[var(--c-surface)] p-5 shadow-[0_14px_30px_-20px_rgba(0,0,0,0.6)] ring-1 ring-current/10 backdrop-blur">
           {sent ? (
-            <p role="status" id={`${id}-title`} className="flex flex-col items-center gap-2 font-display text-2xl font-semibold italic leading-snug">
+            <p ref={confirmation} tabIndex={-1} id={`${id}-title`} className="flex flex-col items-center gap-2 font-display text-2xl font-semibold italic leading-snug outline-none">
               <span aria-hidden className="animate-pop text-5xl not-italic">
                 {REACTION_EMOJI[sent]}
               </span>
