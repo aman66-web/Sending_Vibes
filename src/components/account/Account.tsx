@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ShareLink } from "@/components/basket/ShareLink";
+import { CardActions, type Delivery } from "@/components/account/CardActions";
 import { SignIn } from "@/components/SignIn";
 import { Motif } from "@/components/card/motifs";
 import { LANGUAGES, fmt } from "@/i18n/config";
@@ -11,7 +11,7 @@ import type { Occasion, ThemeName } from "@/lib/card";
 import { themes } from "@/lib/themes";
 
 type Card = { id: string; to: string; from: string; paidAt: string; occasion: Occasion; theme: ThemeName; email?: string; sendOn?: string };
-type State = { enabled: boolean; google: boolean; email: boolean; account: { email: string | null; name: string | null } | null; cards: Card[]; error?: boolean };
+type State = { enabled: boolean; google: boolean; email: boolean; account: { email: string | null; name: string | null } | null; cards: (Card & Delivery)[]; error?: boolean };
 
 // The signed-in buyer's cards, or a way to sign in (Google or an emailed code).
 export function Account() {
@@ -91,7 +91,7 @@ export function Account() {
                     <p className="mt-1 text-sm text-ink/60">{fmt(a.bought, { date: date(card.paidAt) })}</p>
                   </div>
                 </div>
-                <ShareLink url={`${window.location.origin}/c/${card.id}`} />
+                <CardActions card={card} />
               </li>
             );
           })}

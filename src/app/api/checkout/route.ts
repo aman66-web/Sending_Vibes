@@ -78,14 +78,16 @@ export async function POST(req: NextRequest) {
         continue;
       }
       // Names and price come from the saved card, not the browser.
-      const item: OrderItem = { cardId: wanted.id, to: card.to, from: card.from, tier: cardTier(card), occasion: card.occasion, theme: card.theme, delivery: wanted.delivery };
+      const item: OrderItem = { cardId: wanted.id, to: card.to, from: card.from, tier: cardTier(card), occasion: card.occasion, theme: card.theme, template: card.template, delivery: wanted.delivery };
       if (wanted.delivery === "email") {
         if (!emailReady()) return fail(errors.noEmail, 400, { id: wanted.id });
         if (!wanted.email) return fail(fmt(errors.needEmail, { name: card.to }), 400, { id: wanted.id });
         item.email = wanted.email;
         if (wanted.sendAt) {
           const at = Date.parse(wanted.sendAt);
-          if (at > now + (MAX_SCHEDULE_DAYS + 1) * 86_400_000) return fail(fmt(errors.tooFar, { days: MAX_SCHEDULE_DAYS }), 400, { id: wanted.id });
+          // Resend books emails up to MAX_SCHEDULE_DAYS ahead; keep an hour's room, since
+          // it's booked when payment comes through, not now. The basket offers one day less.
+          if (at > now + MAX_SCHEDULE_DAYS * 86_400_000 - 3_600_000) return fail(fmt(errors.tooFar, { days: MAX_SCHEDULE_DAYS - 1 }), 400, { id: wanted.id });
           if (at > now + 2 * 60_000) Object.assign(item, { sendAt: new Date(at).toISOString(), sendOn: wanted.sendOn });
         }
       }
