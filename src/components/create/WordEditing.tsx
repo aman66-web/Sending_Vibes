@@ -176,6 +176,8 @@ type DistributiveOmit<T, K extends keyof T> = T extends unknown ? Omit<T, K> : n
 
 // The most photos a photos screen holds (see lib/card.ts).
 const MAX_PHOTOS = 6;
+// How far a finger can wander and still count as a tap, not a swipe.
+const TAP_SLOP = 10;
 
 // Colours to pick from, and two-colour blends for backgrounds.
 const PALETTE = ["#1f1b16", "#ffffff", "#f6efe0", "#e23d3d", "#ff6fae", "#c026d3", "#8b5cf6", "#2563eb", "#38bdf8", "#16a34a", "#facc15", "#f97316", "#d4af37", "#14213d"];
@@ -225,6 +227,8 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
   const [hover, setHover] = useState<Box | null>(null);
   const [open, setOpen] = useState<Selected | null>(null);
   const gesture = useRef<Gesture | null>(null);
+  // Where a touch or click on the card began, so lifting it picks something only if it was a tap.
+  const tap = useRef<{ id: number; x: number; y: number } | null>(null);
   // Each selection is one step for Undo, however many changes are made while it's open.
   const begun = useRef(false);
   // Which photo the chosen file replaces (a photos screen's, or a placed one), or null to add them.
@@ -534,6 +538,13 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
     }
     return true;
   };
+  // The browser took the touch over (to scroll the page, say): stop, keeping any move made so far.
+  const cancelGesture = () => {
+    const g = gesture.current;
+    gesture.current = null;
+    tap.current = null;
+    if (g?.moved) remeasure(g.deco, g.index);
+  };
 
   const pickPhotos = (replace: { deco: boolean; index: number } | null) => {
     setReplacing(replace);
@@ -639,23 +650,32 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
       {children}
       <input ref={files} type="file" accept="image/*" multiple className="hidden" onChange={(e) => addPhotos(e.target.files)} />
       {enabled && (
+        // A finger swiping across the card scrolls the page; only a tap picks what's under it.
+        // By touch, something is dragged once it's selected (the box over it, below); a mouse
+        // can drag a sticker, text box or photo straight away.
         <div
           ref={layer}
-          className="absolute inset-0 z-[45] cursor-pointer touch-none"
+          className="absolute inset-0 z-[45] cursor-pointer touch-manipulation"
           onPointerDown={(e) => {
-            const hit = under(e.clientX, e.clientY);
-            if (hit?.kind === "deco" && startGesture("move", hit.deco, hit.index, e, hit.el)) return;
+            tap.current = { id: e.pointerId, x: e.clientX, y: e.clientY };
             gesture.current = null;
+            if (e.pointerType === "touch") return;
+            const hit = under(e.clientX, e.clientY);
+            if (hit?.kind === "deco") startGesture("move", hit.deco, hit.index, e, hit.el);
           }}
           onPointerMove={(e) => {
-            if (moveGesture(e)) return;
+            if (moveGesture(e) || e.pointerType === "touch") return;
             const hit = under(e.clientX, e.clientY);
             setHover(hit && hit.kind !== "background" ? boxOf(hit.el) : null);
           }}
           onPointerUp={(e) => {
+            const down = tap.current;
+            tap.current = null;
             if (endGesture()) return;
+            if (!down || down.id !== e.pointerId || Math.hypot(e.clientX - down.x, e.clientY - down.y) > TAP_SLOP) return;
             selectHit(under(e.clientX, e.clientY));
           }}
+          onPointerCancel={cancelGesture}
           onPointerLeave={() => setHover(null)}
           onWheel={(e) => {
             // Let long screens still scroll underneath.
@@ -680,6 +700,22 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
           style={{ left: open.box.left - 4, top: open.box.top - 3, width: open.box.width + 8, height: open.box.height + 6 }}
         />
       )}
+      {/* A selected sticker, text box or photo can be dragged by touch, not just with a mouse. */}
+      {enabled && open?.kind === "deco" && (
+        <div
+          data-edit-ui
+          aria-hidden
+          className="absolute z-[47] cursor-move touch-none"
+          style={{ left: open.box.left, top: open.box.top, width: open.box.width, height: open.box.height }}
+          onPointerDown={(e) => {
+            const el = decoEl(open.deco, open.index);
+            if (el) startGesture("move", open.deco, open.index, e, el);
+          }}
+          onPointerMove={(e) => moveGesture(e)}
+          onPointerUp={() => endGesture()}
+          onPointerCancel={cancelGesture}
+        />
+      )}
       {enabled && open?.kind === "deco" && (
         <span
           data-edit-ui
@@ -695,6 +731,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
           }}
           onPointerMove={(e) => moveGesture(e)}
           onPointerUp={() => endGesture()}
+          onPointerCancel={cancelGesture}
         />
       )}
       {/* A round handle above it (below it, at the very top) to turn it, like a design app. */}
@@ -720,6 +757,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
           }}
           onPointerMove={(e) => moveGesture(e)}
           onPointerUp={() => endGesture()}
+          onPointerCancel={cancelGesture}
         >
           ↻
         </span>
