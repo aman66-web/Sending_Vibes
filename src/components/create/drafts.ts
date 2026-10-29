@@ -1,4 +1,4 @@
-import type { CardData } from "@/lib/card";
+import type { CardData, ThemeName } from "@/lib/card";
 import { cardTier } from "@/lib/catalog";
 import { inBasket, readMade, type Made } from "@/lib/basket";
 import type { Tier } from "@/lib/pricing";
@@ -30,6 +30,8 @@ export type SavedQuiz = {
   question: number;
   mode: Tier;
   templateSlug?: string;
+  // The colour picked for that design on its product page, if one was.
+  theme?: ThemeName;
   idea: string;
   to: string;
   from: string;

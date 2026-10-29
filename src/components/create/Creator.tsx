@@ -45,6 +45,10 @@ const EXAMPLE_SLUGS = ["be-my-valentine", "birthday-bash", "festival-of-lights",
 type Album = { photos: string[]; captions: string[] };
 // A new card being asked for: everything makeCard was given, and which try this is.
 type MakeJob = { prompt: string; names: { to: string; from: string }; source: "quiz" | "describe"; album?: Album; template?: string; brief?: Brief; attempt: number };
+// A colour picked for a design on its product page.
+type Picked = { slug: string; theme: ThemeName };
+const pickedIn = (quiz: SavedQuiz | null | undefined): Picked | undefined =>
+  quiz?.templateSlug && typeof quiz.theme === "string" && Object.prototype.hasOwnProperty.call(themes, quiz.theme) ? { slug: quiz.templateSlug, theme: quiz.theme } : undefined;
 
 // Puts photos added before the card was written into its photos screen. Without one,
 // a card made from scratch gets one before the message (or finale), and a ready-made
@@ -122,6 +126,9 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     saved ? saved.mode : draft ? draft.mode : chosen || initialStart === "premade" || (initialOccasion && initialStart !== "custom") ? "premade" : "custom",
   );
   const [templateSlug, setTemplateSlug] = useState<string | undefined>(saved ? saved.templateSlug : chosen?.slug);
+  // The colour picked for a design on its product page. It's kept with the questions, so it
+  // survives signing in with Google (which comes back to a plain link) and carrying on later.
+  const [picked, setPicked] = useState<Picked | undefined>(() => pickedIn(saved) ?? (chosen && initialTheme ? { slug: chosen.slug, theme: initialTheme } : undefined));
   const [to, setTo] = useState(saved?.to ?? draft?.card.to ?? initialTo ?? "");
   const [from, setFrom] = useState(saved?.from ?? draft?.card.from ?? initialFrom ?? "");
   const [card, setCard] = useState<CardData | null>(draft?.card ?? null);
@@ -161,6 +168,8 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   const [job, setJob] = useState<MakeJob | null>(null);
   const [concept, setConcept] = useState<string | null>(null);
   const [outcome, setOutcome] = useState<"ready" | { error: string } | null>(null);
+  // Leaving the page (Back, say) stops a card being made, so its use of the allowance is given back.
+  useEffect(() => () => making.current?.abort(), []);
   // The live preview: on a phone or a computer, which screen it's showing, and a nudge
   // that makes it jump back to a screen after that screen changes.
   // It starts as the device they're on (see `shown` below); the other is a tap away.
@@ -218,6 +227,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     question,
     mode,
     templateSlug,
+    theme: picked && picked.slug === templateSlug ? picked.theme : undefined,
     idea,
     to,
     from,
@@ -270,6 +280,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
 
   // The two ways: personalised goes to the questions, ready-made to the designs first.
   const chooseWay = (way: Mode) => {
+    setAiError(null);
     setMode(way);
     setQuestion(0);
     setStep(way === "premade" ? "pick" : "quiz");
@@ -282,6 +293,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   const toQuestions = (slug = templateSlug) => {
     const tpl = getTemplate(slug);
     if (!tpl) return;
+    setAiError(null);
     setTemplateSlug(tpl.slug);
     setAnswers((a) => withSuggestions({ ...a, occasion: tpl.occasion, occasionOther: "" }, t.quiz.relations, tpl));
     setQuestion(0);
@@ -306,6 +318,11 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     setPast([]);
     setFuture([]);
     setAiDone(false);
+    setAiError(null);
+    setAiNote(null);
+    setAsk("");
+    setScreenAsk("");
+    setPicked(undefined);
     setAnswers(NO_ANSWERS);
     setQuestion(0);
     setTemplateSlug(undefined);
@@ -342,6 +359,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     setQuestion(quiz.question);
     setMode(quiz.mode);
     setTemplateSlug(quiz.templateSlug);
+    setPicked(pickedIn(quiz));
     setIdea(quiz.idea);
     setTo(quiz.to);
     setFrom(quiz.from);
@@ -449,7 +467,6 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   const makeCard = async (prompt: string, names: { to: string; from: string }, source: "quiz" | "describe", album?: Album, template?: string, brief?: Brief) => {
     const controller = new AbortController();
     making.current = controller;
-    clearQuiz();
     setJob((j) => ({ prompt, names, source, album, template, brief, attempt: (j?.attempt ?? 0) + 1 }));
     setBusy("make");
     setAiError(null);
@@ -475,7 +492,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       );
       rememberLook(direction);
       // A colour picked on the product page carries over, but only for that design.
-      const coloured = template && initialTheme && template === initialTemplate ? withTheme(written, initialTheme) : written;
+      const coloured = template && picked?.slug === template ? withTheme(written, picked.theme) : written;
       const filled = withPhotos(coloured, album, t.labels.screens.photos, !template);
       // A ready-made design gets a gentle look of its own (new button and envelope colours,
       // stickers, a font of the same kind), so no two people's copies look the same. Its theme
@@ -484,6 +501,8 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       // A moment to say it's ready, with the envelope sealed, before it plays for them.
       setOutcome("ready");
       await new Promise((done) => setTimeout(done, 1200));
+      // Only now are the questions done with: until the card is here, a reload or Back brings them back.
+      clearQuiz();
       setCard(made);
       setSelected(made.screens[0]?.id);
       setMode(template ? "premade" : "custom");
@@ -822,7 +841,16 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
             setIndex={setQuestion}
             onGenerate={makeFromQuiz}
             onBack={() => setStep(design ? "pick" : "choose")}
-            onDescribe={design ? undefined : () => setStep("describe")}
+            onDescribe={
+              design
+                ? undefined
+                : () => {
+                    // The names typed on the first question come too.
+                    setTo((v) => answers.to.trim() || v);
+                    setFrom((v) => answers.from.trim() || v);
+                    setStep("describe");
+                  }
+            }
             design={design}
             onChangeDesign={() => setStep("pick")}
             signUp={signUp}
@@ -832,7 +860,14 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
 
       {step === "describe" && (
         <section className="mx-auto max-w-3xl px-4 py-10">
-          <button onClick={() => setStep("quiz")} className="text-sm font-semibold opacity-70">
+          <button
+            onClick={() => {
+              // And names typed here go back to the questions.
+              setAnswers((a) => ({ ...a, to: to.trim() || a.to, from: from.trim() || a.from }));
+              setStep("quiz");
+            }}
+            className="text-sm font-semibold opacity-70"
+          >
             {x.back}
           </button>
           <div className="mt-4">
@@ -917,6 +952,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
           from={job.names.from}
           brief={job.brief}
           template={job.template}
+          theme={job.template && picked?.slug === job.template ? picked.theme : undefined}
           typed={job.source === "describe" ? job.prompt : undefined}
           photos={job.album?.photos.length ?? 0}
           concept={concept}

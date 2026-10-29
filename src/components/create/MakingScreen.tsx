@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { fmt } from "@/i18n/config";
 import { useI18n } from "@/i18n/client";
+import { ProductThumb } from "@/components/catalog/ProductThumb";
 import type { Brief } from "@/lib/brief";
+import type { ThemeName } from "@/lib/card";
 import { TONES, getTemplate, toneInfo, type Tone } from "@/lib/catalog";
 import { getLook } from "@/lib/looks";
 import { occasions } from "@/lib/templates";
@@ -62,8 +64,9 @@ type Props = {
   from: string;
   // The choices from the questions (none when they described the card in their own words).
   brief?: Brief;
-  // The ready-made design their words are going into, if any.
+  // The ready-made design their words are going into, if any, and the colour picked for it.
   template?: string;
+  theme?: ThemeName;
   // What they typed, when they described the card in their own words.
   typed?: string;
   photos: number;
@@ -77,7 +80,7 @@ type Props = {
   onBack: () => void;
 };
 
-export function MakingScreen({ to, from, brief, template, typed, photos, concept, progress, outcome, onStop, onRetry, onBack }: Props) {
+export function MakingScreen({ to, from, brief, template, theme, typed, photos, concept, progress, outcome, onStop, onRetry, onBack }: Props) {
   const { t } = useI18n();
   const x = t.custom;
   const ready = outcome === "ready";
@@ -122,6 +125,8 @@ export function MakingScreen({ to, from, brief, template, typed, photos, concept
   const name = to.trim() || t.quiz.them;
   const look = getLook(brief?.look);
   const design = getTemplate(template);
+  // A ready-made design shows its own front, as on the questions, in the colour they picked.
+  const front = useMemo(() => (design && theme ? { ...design, theme } : design), [design, theme]);
   // Their choices in a few friendly words, not the instructions sent to the writer.
   const chips = [
     brief?.occasion && `${occasions[brief.occasion].emoji} ${t.occasions[brief.occasion].label}`,
@@ -180,7 +185,13 @@ export function MakingScreen({ to, from, brief, template, typed, photos, concept
       <div className="mt-7 w-full rounded-3xl border border-line bg-panel p-5 text-start shadow-sm">
         <p className="text-xs font-bold uppercase tracking-wide opacity-50">{x.yourChoices}</p>
         <div className="mt-2 flex items-center gap-4">
-          <VibePreview to={to} from={from} occasion={brief?.occasion ?? ""} look={brief?.look ?? ""} className="w-24 shrink-0 sm:w-32" />
+          {front ? (
+            <div className="w-24 shrink-0 overflow-hidden rounded-md shadow-sm sm:w-32">
+              <ProductThumb template={front} />
+            </div>
+          ) : (
+            <VibePreview to={to} from={from} occasion={brief?.occasion ?? ""} look={brief?.look ?? ""} className="w-24 shrink-0 sm:w-32" />
+          )}
           <ul className="flex min-w-0 flex-1 flex-wrap gap-1.5">
             {chips.map((chip, i) => (
               <li key={i} dir="auto" className="rounded-full border border-line bg-background px-3 py-1 text-sm font-semibold">
