@@ -28,6 +28,7 @@ import { useWide } from "./use-wide";
 import { AllWords, EditableCard, setAt, type Path } from "./WordEditing";
 import { stageFor, stillToWrite } from "@/lib/blanks";
 import type { Brief } from "@/lib/brief";
+import { newSeed, restyle } from "@/lib/vary";
 
 const DRAFT_KEY = "sv-draft-v1";
 const MODE_KEY = "sv-draft-mode";
@@ -334,7 +335,11 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       const { card: written } = await callAi(template ? { prompt, template, keepDesign: true, brief } : { prompt, brief }, names, setProgress, controller.signal);
       // A colour picked on the product page carries over, but only for that design.
       const coloured = template && initialTheme && template === initialTemplate ? { ...written, theme: initialTheme } : written;
-      const made = withPhotos(coloured, album, t.labels.screens.photos, !template);
+      const filled = withPhotos(coloured, album, t.labels.screens.photos, !template);
+      // A ready-made design gets a gentle look of its own (new button and envelope colours,
+      // stickers, a font of the same kind), so no two people's copies look the same. Its theme
+      // and words stay as picked, and the shop's previews of it stay as designed.
+      const made = template ? restyle(filled, newSeed(), { gentle: true, favourite: brief?.accent ?? null }) : filled;
       setCard(made);
       setSelected(made.screens[0]?.id);
       setMode(template ? "premade" : "custom");

@@ -1294,7 +1294,14 @@ export const en = {
   looks: {},
 
   // A new look for the whole card at a tap (components/create/NewLook.tsx, lib/vary.ts).
-  vary: {},
+  vary: {
+    button: "Try another look",
+    // Under the button before the first tap.
+    hint: "New colours, fonts and stickers. Your words and photos stay just as they are.",
+    // After each tap. {n} is which look it is; the card they started with is look 1.
+    look: "Look {n}",
+    again: "Tap again for another",
+  },
 
   // What the person who got the card can send back (components/card/ReplyPanel.tsx).
   reply: {},
