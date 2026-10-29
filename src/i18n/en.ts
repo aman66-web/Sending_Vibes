@@ -1309,11 +1309,32 @@ export const en = {
 
   // The card designer: like making a presentation, a screen at a time.
   studio: {
-    tabs: { text: "Text", upload: "Upload", screens: "Screens", elements: "Elements", ai: "Make with AI" },
+    tabs: { words: "Words", text: "Add text", upload: "Photos", screens: "Screens", elements: "Stickers", ai: "Ask for a change" },
     howTitle: "How to design your card",
     how: ["Tap a screen below the card to work on it.", "Tap anything on the card to change it: words, colours, pictures.", "Add text, screens and elements from these buttons."],
     onScreen: "Adding to screen {n}: {name}",
     addTitle: "Add to your card:",
+    intro: "Change the words in ✏️ Words, or tap anything on the card to change it.",
+    // The two ways of looking at the card: changing it, or watching it as they will.
+    modes: { edit: "✏️ Change it", play: "▶ Watch it" },
+    watchHint: "This is how they'll see it. Tap through it like they will. To change anything, tap ✏️ Change it.",
+    // Words: every word on the screen as a form
+    wordsOn: "Words on screen {n}: {name}",
+    wordsHint: "Type in any box and the card changes as you type.",
+    addedTexts: "Words you added",
+    addedText: "Your words {n}",
+    moreWords: "More words: buttons and little hints ({n})",
+    usually: "Normally “{words}”",
+    captionN: "Caption for photo {n}",
+    lineGroups: {
+      noLines: "What the No button says as it runs away",
+      wrongLines: "What it says after a wrong answer",
+      sliderLines: "What it says as the slider goes up",
+    },
+    // Asking for a change in their own words
+    askTitle: "Ask for a change",
+    askHow: "Say what you'd like in your own words, then press “Make the change”. It can write new words, change the colours, add a game or a whole new screen, or take screens out.",
+    askButton: "Make the change ✨",
     // Text
     addHeading: "Add a heading",
     addSubheading: "Add a subheading",
@@ -1321,7 +1342,7 @@ export const en = {
     headingText: "Your heading",
     subheadingText: "A subheading",
     smallText: "Some words",
-    fancyTitle: "Ready-styled text",
+    fancyTitle: "Ready-made words",
     fancy: ["Happy Birthday!", "Love you lots", "Surprise!", "with love", "BIG NEWS", "Congratulations"],
     // Screens
     screensIntro: "Tap a group to see its screens, then tap a screen to add it to your card.",
@@ -1355,8 +1376,8 @@ export const en = {
     added: "Added: {name}",
     // Elements
     photosTitle: "Your photos",
-    addPhotos: "Upload photos",
-    photosHint: "Upload your photos, then tap one to put it on the card. Drag it to move it, turn it, make it bigger, or choose which part shows in its frame.",
+    addPhotos: "Add your photos",
+    photosHint: "Add your photos, then tap one to put it on the card. Drag it to move it, turn it, make it bigger, or choose which part shows in its frame.",
     noUploads: "Nothing uploaded yet.",
     putOnCard: "Put this photo on the card",
     iconsTitle: "Icons",
@@ -1364,17 +1385,20 @@ export const en = {
     // The screens strip
     screens: "Screens",
     addScreen: "Add a screen",
-    duplicate: "Duplicate",
+    duplicate: "Make another",
+    copyScreen: "Copy this screen",
     moveLeft: "Move left",
     moveRight: "Move right",
-    deleteScreen: "Delete screen",
-    screenSettings: "Screen settings",
+    deleteScreen: "Delete this screen",
+    screenSettings: "Colours & effects",
+    moreActions: "More",
+    closeActions: "Close",
     lastScreen: "A card needs at least one screen.",
     tooManyScreens: "A card can have up to {n} screens.",
     full: "There's no room for more of those on this screen.",
     // Changing what's tapped
     text: "Text",
-    element: "Element",
+    element: "Sticker",
     photo: "Photo",
     words: "Words",
     colour: "Colour",
@@ -1382,6 +1406,7 @@ export const en = {
     font: "Font",
     buttonColour: "Button colour",
     envelopeColour: "Envelope colour",
+    envelopeTitle: "The envelope",
     backgroundColour: "Background colour",
     blends: "Two-colour blends",
     smaller: "Smaller",
@@ -1434,12 +1459,12 @@ export const en = {
     welcomeTitle: "Welcome to your card! 🎉",
     welcomeIntro: "Here's the card we made for {name}. Have a look, then make it exactly how you want.",
     welcomeSteps: [
-      "Watch it: press ▶ Preview mode to see it just as {name} will.",
-      "Change anything: tap words, colours or pictures on the card.",
-      "Add more: use Text, Screens and Elements to add your own touches.",
+      "Watch it first, just as {name} will see it.",
+      "Change the words: tap ✏️ Words, or tap anything on the card.",
+      "Add more: use Add text, Photos, Screens and Stickers for your own touches.",
       "Happy with it? Press Add to basket.",
     ],
-    startDesigning: "Start designing",
+    startDesigning: "Make it yours",
   },
 
   editor: {
@@ -1496,6 +1521,7 @@ export const en = {
     questionLabel: "Question",
     answers: "Answers (tick the right one)",
     answerCorrect: "Answer {n} is correct",
+    answerN: "Answer {n}",
     removeAnswer: "Remove answer",
     addAnswer: "+ Add an answer",
     addQuestion: "+ Add a question",

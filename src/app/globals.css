@@ -3,7 +3,9 @@
 :root {
   --background: #f3ecdf;
   --foreground: #1f1b16;
-  --brand: #d8432f;
+  /* Postbox red, just deep enough to read as small text on cream (4.5:1) and to carry white
+     words on a red button (5.3:1). */
+  --brand: #c23a27;
   --brand-soft: #f7ddd5;
   --line: rgba(31, 27, 22, 0.12);
   --panel: #fbf7ef;
@@ -40,7 +42,7 @@
   --color-ink: #1f1b16;
   --color-cream: #f3ecdf;
   --color-paper: #fbf7ef;
-  --color-hot: #d8432f;
+  --color-hot: #c23a27;
   --color-air: #2b5aa6;
   --color-sun: #ecb340;
   --color-rose: #f2b8c0;
@@ -262,6 +264,33 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-ui-face), var(--font-devanagari), var(--font-gurmukhi), var(--font-gujarati), var(--font-bengali), var(--font-arabic), system-ui, sans-serif;
+}
+
+/* iPhones zoom the whole page in when a box with words smaller than 16px is tapped, which
+   leaves people lost. On a touch screen no box is smaller: those that take their size from
+   around them are raised here (bigger sizes are kept)... */
+@layer base {
+  @media (pointer: coarse) {
+    :is(input:not([type="range"], [type="color"], [type="checkbox"], [type="radio"], [type="file"]), textarea, select) {
+      font-size: max(16px, 1em);
+    }
+  }
+}
+/* ...and those given a small size of their own are raised past it. */
+@media (pointer: coarse) {
+  :is(input, textarea, select):is(.text-xs, .text-sm, [class*=":text-xs"], [class*=":text-sm"]) {
+    font-size: 16px;
+  }
+}
+
+/* Faint ink is too faint for older eyes: half-strength ink is only 3.2:1 on cream. Text this
+   light is drawn at 70% instead (5.8:1), which still reads as a quieter grey. */
+.text-ink\/40,
+.text-ink\/45,
+.text-ink\/50,
+.text-ink\/55,
+.text-ink\/60 {
+  color: rgb(31 27 22 / 0.7);
 }
 
 @layer components {

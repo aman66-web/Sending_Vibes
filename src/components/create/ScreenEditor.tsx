@@ -11,9 +11,18 @@ const MAX_PHOTOS = 6;
 // Updates are functions of the latest screen, so photo uploads finishing one by
 // one never overwrite each other or edits made in the meantime.
 type Update = (update: (prev: Screen) => Screen) => void;
-type Props = { screen: Screen; onChange: Update };
+// keepDesign: a ready-made design keeps its games and finale as they are, so only the words show.
+type Props = { screen: Screen; onChange: Update; keepDesign?: boolean };
 
-export function ScreenEditor({ screen, onChange }: Props) {
+// Big, labelled boxes that are easy to tap and read, at 16px or more so iPhones don't zoom in.
+const BOX = "rounded-xl border-2 border-line bg-panel px-3 py-3 text-lg outline-none focus:border-brand focus:ring-2 focus:ring-brand/20";
+const LABEL = "text-base font-bold";
+// Adding another line to a list.
+const ADD = "min-h-11 rounded-full border-2 border-line px-4 py-2 text-base font-semibold text-brand transition hover:border-brand";
+// The ✕ that takes one out.
+const REMOVE = "grid h-11 w-11 shrink-0 place-items-center rounded-full text-lg opacity-75 transition hover:bg-brand-soft hover:opacity-100";
+
+export function ScreenEditor({ screen, onChange, keepDesign = false }: Props) {
   const { t } = useI18n();
   const e = t.editor;
   // Each field edit produces a new screen of the same type.
@@ -58,7 +67,7 @@ export function ScreenEditor({ screen, onChange }: Props) {
     case "game":
       return (
         <>
-          <Select label={e.game} value={screen.game} options={t.labels.games} onChange={(v) => set("game", v)} />
+          {!keepDesign && <Select label={e.game} value={screen.game} options={t.labels.games} onChange={(v) => set("game", v)} />}
           <Field label={e.title} value={screen.title} max={120} onChange={(v) => set("title", v)} />
           <Field label={e.instructions} value={screen.instructions} max={200} onChange={(v) => set("instructions", v)} />
           <Field label={e.winText} value={screen.winText} max={140} onChange={(v) => set("winText", v)} />
@@ -148,7 +157,7 @@ export function ScreenEditor({ screen, onChange }: Props) {
             <Field label={e.low} value={screen.low} max={30} onChange={(v) => set("low", v)} />
             <Field label={e.high} value={screen.high} max={30} onChange={(v) => set("high", v)} />
           </div>
-          <p className="text-xs opacity-60">{e.sliderTip}</p>
+          <p className="text-base opacity-75">{e.sliderTip}</p>
           <Field label={e.sliderDone} value={screen.winText} max={140} onChange={(v) => set("winText", v)} />
         </>
       );
@@ -165,7 +174,7 @@ export function ScreenEditor({ screen, onChange }: Props) {
           <Field label={e.title} value={screen.title} max={120} onChange={(v) => set("title", v)} />
           <Field label={e.instructions} value={screen.instructions} max={200} onChange={(v) => set("instructions", v)} />
           <ListField label={e.boxes} items={screen.prizes} min={2} max={3} maxLength={80} placeholder={e.boxExample} addLabel={e.addBox} removeLabel={e.remove} onChange={setList("prizes")} />
-          <p className="text-xs opacity-60">{e.boxTip}</p>
+          <p className="text-base opacity-75">{e.boxTip}</p>
         </>
       );
     case "finale":
@@ -173,7 +182,7 @@ export function ScreenEditor({ screen, onChange }: Props) {
         <>
           <Field label={e.title} value={screen.title} max={140} onChange={(v) => set("title", v)} />
           <Field label={e.finalWords} value={screen.body} max={600} rows={3} onChange={(v) => set("body", v)} />
-          <Select label={e.effect} value={screen.effect} options={t.labels.effects} onChange={(v) => set("effect", v)} />
+          {!keepDesign && <Select label={e.effect} value={screen.effect} options={t.labels.effects} onChange={(v) => set("effect", v)} />}
         </>
       );
   }
@@ -203,29 +212,30 @@ function ListField({
 }) {
   return (
     <div className="space-y-2">
-      <span className="text-sm font-semibold">
+      <span className={LABEL}>
         {label} ({items.length}/{max})
       </span>
       {items.map((item, i) => (
         <div key={i} className="flex items-center gap-2">
-          <span className="w-5 shrink-0 text-end text-xs font-bold opacity-50">{i + 1}</span>
+          <span className="w-5 shrink-0 text-end text-sm font-bold opacity-75">{i + 1}</span>
           <input
             value={item}
             maxLength={maxLength}
             placeholder={placeholder}
+            dir="auto"
             aria-label={`${label} ${i + 1}`}
             onChange={(e) => onChange((list) => list.map((x, j) => (j === i ? e.target.value : x)))}
-            className="min-w-0 flex-1 rounded-lg border border-line bg-panel px-3 py-2 text-sm outline-none focus:border-brand"
+            className={`min-w-0 flex-1 ${BOX}`}
           />
           {items.length > min && (
-            <button type="button" aria-label={removeLabel} onClick={() => onChange((list) => list.filter((_, j) => j !== i))} className="px-1 text-sm opacity-60 hover:opacity-100">
+            <button type="button" aria-label={`${removeLabel}: ${label} ${i + 1}`} onClick={() => onChange((list) => list.filter((_, j) => j !== i))} className={REMOVE}>
               ✕
             </button>
           )}
         </div>
       ))}
       {items.length < max && (
-        <button type="button" onClick={() => onChange((list) => [...list, ""])} className="text-xs font-semibold text-brand">
+        <button type="button" onClick={() => onChange((list) => [...list, ""])} className={ADD}>
           {addLabel}
         </button>
       )}
@@ -239,10 +249,9 @@ function TimelineField({ screen, onChange }: { screen: TimelineScreen; onChange:
   const e = useI18n().t.editor;
   const update = (fn: (events: TimelineScreen["events"]) => TimelineScreen["events"]) =>
     onChange((prev) => (prev.type === "timeline" ? { ...prev, events: fn(prev.events) } : prev));
-  const cls = "rounded-lg border border-line bg-panel px-3 py-2 text-sm outline-none focus:border-brand";
   return (
     <div className="space-y-2">
-      <span className="text-sm font-semibold">{fmt(e.moments, { n: screen.events.length })}</span>
+      <span className={LABEL}>{fmt(e.moments, { n: screen.events.length })}</span>
       {screen.events.map((ev, i) => (
         <div key={i} className="flex items-start gap-2">
           <input
@@ -251,7 +260,8 @@ function TimelineField({ screen, onChange }: { screen: TimelineScreen; onChange:
             placeholder={e.when}
             aria-label={fmt(e.momentDate, { n: i + 1 })}
             onChange={(e) => update((list) => list.map((x, j) => (j === i ? { ...x, when: e.target.value } : x)))}
-            className={`w-28 shrink-0 ${cls}`}
+            dir="auto"
+            className={`w-32 shrink-0 ${BOX}`}
           />
           <input
             value={ev.what}
@@ -259,17 +269,18 @@ function TimelineField({ screen, onChange }: { screen: TimelineScreen; onChange:
             placeholder={e.what}
             aria-label={fmt(e.moment, { n: i + 1 })}
             onChange={(e) => update((list) => list.map((x, j) => (j === i ? { ...x, what: e.target.value } : x)))}
-            className={`min-w-0 flex-1 ${cls}`}
+            dir="auto"
+            className={`min-w-0 flex-1 ${BOX}`}
           />
           {screen.events.length > 1 && (
-            <button type="button" aria-label={e.removeMoment} onClick={() => update((list) => list.filter((_, j) => j !== i))} className="px-1 pt-2 text-sm opacity-60 hover:opacity-100">
+            <button type="button" aria-label={e.removeMoment} onClick={() => update((list) => list.filter((_, j) => j !== i))} className={`${REMOVE} mt-1.5`}>
               ✕
             </button>
           )}
         </div>
       ))}
       {screen.events.length < 8 && (
-        <button type="button" onClick={() => update((list) => [...list, { when: "", what: "" }])} className="text-xs font-semibold text-brand">
+        <button type="button" onClick={() => update((list) => [...list, { when: "", what: "" }])} className={ADD}>
           {e.addMoment}
         </button>
       )}
@@ -290,33 +301,38 @@ function QuizField({ screen, onChange }: { screen: QuizScreen; onChange: Update 
   return (
     <div className="space-y-4">
       {screen.questions.map((q, qi) => (
-        <div key={qi} className="space-y-3 rounded-xl border border-line p-3">
+        <div key={qi} className="space-y-3 rounded-2xl border-2 border-line p-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-bold">{fmt(e.questionN, { n: qi + 1 })}</span>
+            <span className="text-lg font-bold">{fmt(e.questionN, { n: qi + 1 })}</span>
             {screen.questions.length > 1 && (
-              <button type="button" onClick={() => update((qs) => qs.filter((_, i) => i !== qi))} className="text-xs font-semibold text-red-600">
+              <button type="button" onClick={() => update((qs) => qs.filter((_, i) => i !== qi))} className="min-h-11 rounded-full px-3 text-base font-semibold text-red-700 hover:bg-red-50">
                 {e.remove}
               </button>
             )}
           </div>
           <Field label={e.questionLabel} value={q.question} max={140} onChange={(v) => setQuestion(qi, { question: v })} />
           <div className="space-y-2">
-            <span className="text-sm font-semibold">{e.answers}</span>
+            <span className={LABEL}>{e.answers}</span>
             {q.options.map((opt, oi) => (
-              <div key={oi} className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name={`quiz-${screen.id}-${qi}`}
-                  checked={q.answer === oi}
-                  onChange={() => setQuestion(qi, { answer: oi })}
-                  aria-label={fmt(e.answerCorrect, { n: oi + 1 })}
-                  className="h-4 w-4 accent-[var(--brand)]"
-                />
+              <div key={oi} className="flex items-center gap-1.5">
+                {/* The tick has a finger-sized space around it. */}
+                <label className="grid h-11 w-11 shrink-0 cursor-pointer place-items-center rounded-full hover:bg-brand-soft">
+                  <input
+                    type="radio"
+                    name={`quiz-${screen.id}-${qi}`}
+                    checked={q.answer === oi}
+                    onChange={() => setQuestion(qi, { answer: oi })}
+                    aria-label={fmt(e.answerCorrect, { n: oi + 1 })}
+                    className="h-6 w-6 accent-[var(--brand)]"
+                  />
+                </label>
                 <input
                   value={opt}
                   maxLength={60}
+                  dir="auto"
+                  aria-label={`${fmt(e.questionN, { n: qi + 1 })}: ${fmt(e.answerN, { n: oi + 1 })}`}
                   onChange={(e) => setQuestion(qi, { options: q.options.map((o, j) => (j === oi ? e.target.value : o)) })}
-                  className="flex-1 rounded-lg border border-line bg-panel px-2 py-1.5 text-sm outline-none focus:border-brand"
+                  className={`min-w-0 flex-1 ${BOX}`}
                 />
                 {q.options.length > 2 && (
                   <button type="button"
@@ -327,7 +343,7 @@ function QuizField({ screen, onChange }: { screen: QuizScreen; onChange: Update 
                         answer: q.answer === oi ? 0 : q.answer > oi ? q.answer - 1 : q.answer,
                       })
                     }
-                    className="text-sm opacity-60"
+                    className={REMOVE}
                   >
                     ✕
                   </button>
@@ -335,7 +351,7 @@ function QuizField({ screen, onChange }: { screen: QuizScreen; onChange: Update 
               </div>
             ))}
             {q.options.length < 4 && (
-              <button type="button" onClick={() => setQuestion(qi, { options: [...q.options, ""] })} className="text-xs font-semibold text-brand">
+              <button type="button" onClick={() => setQuestion(qi, { options: [...q.options, ""] })} className={ADD}>
                 {e.addAnswer}
               </button>
             )}
@@ -345,7 +361,7 @@ function QuizField({ screen, onChange }: { screen: QuizScreen; onChange: Update 
       {screen.questions.length < MAX_QUESTIONS && (
         <button type="button"
           onClick={() => update((qs) => [...qs, { question: "", options: ["", ""], answer: 0 }])}
-          className="rounded-full border border-line px-3 py-1.5 text-sm font-semibold hover:border-brand hover:text-brand"
+          className={ADD}
         >
           {e.addQuestion}
         </button>
@@ -390,7 +406,7 @@ export function PhotoField({ screen, onChange }: { screen: PhotosScreen; onChang
 
   return (
     <div className="space-y-3">
-      <span className="text-sm font-semibold">{fmt(e.photos, { n: screen.photos.length, max: MAX_PHOTOS })}</span>
+      <span className={LABEL}>{fmt(e.photos, { n: screen.photos.length, max: MAX_PHOTOS })}</span>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {screen.photos.map((src, i) => (
           <div key={src} className="space-y-1.5">
@@ -400,7 +416,7 @@ export function PhotoField({ screen, onChange }: { screen: PhotosScreen; onChang
               <button type="button"
                 onClick={() => remove(i)}
                 aria-label={e.removePhoto}
-                className="absolute end-1.5 top-1.5 grid h-7 w-7 place-items-center rounded-full bg-black/60 text-sm text-white"
+                className="absolute end-1 top-1 grid h-11 w-11 place-items-center rounded-full bg-black/70 text-base text-white"
               >
                 ✕
               </button>
@@ -410,7 +426,9 @@ export function PhotoField({ screen, onChange }: { screen: PhotosScreen; onChang
               maxLength={120}
               onChange={(e) => caption(i, e.target.value)}
               placeholder={e.caption}
-              className="w-full rounded-lg border border-line bg-transparent px-2 py-1.5 text-sm outline-none focus:border-brand"
+              aria-label={e.caption}
+              dir="auto"
+              className="w-full rounded-lg border-2 border-line bg-transparent px-2 py-2 text-base outline-none focus:border-brand"
             />
           </div>
         ))}
@@ -422,14 +440,18 @@ export function PhotoField({ screen, onChange }: { screen: PhotosScreen; onChang
         {screen.photos.length + uploading < MAX_PHOTOS && (
           <button type="button"
             onClick={() => input.current?.click()}
-            className="grid aspect-square place-items-center rounded-xl border-2 border-dashed border-line text-sm font-semibold hover:border-brand hover:text-brand"
+            className="grid aspect-square place-items-center rounded-xl border-2 border-dashed border-line text-base font-semibold hover:border-brand hover:text-brand"
           >
             {e.addPhotos}
           </button>
         )}
       </div>
       <input ref={input} type="file" accept="image/*" multiple hidden onChange={(e) => add(e.target.files)} />
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && (
+        <p role="alert" className="text-sm font-semibold text-red-700">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
@@ -449,14 +471,14 @@ export function Field({
   rows?: number;
   placeholder?: string;
 }) {
-  const cls = "mt-1 w-full rounded-xl border border-line bg-panel px-3 py-2.5 outline-none focus:border-brand focus:ring-2 focus:ring-brand/20";
+  const cls = `mt-1 w-full ${BOX}`;
   return (
     <label className="block">
-      <span className="text-sm font-semibold">{label}</span>
+      <span className={LABEL}>{label}</span>
       {rows ? (
-        <textarea value={value} maxLength={max} rows={rows} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} className={cls} />
+        <textarea value={value} maxLength={max} rows={rows} placeholder={placeholder} dir="auto" onChange={(e) => onChange(e.target.value)} className={`${cls} leading-relaxed`} />
       ) : (
-        <input value={value} maxLength={max} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} className={cls} />
+        <input value={value} maxLength={max} placeholder={placeholder} dir="auto" onChange={(e) => onChange(e.target.value)} className={cls} />
       )}
     </label>
   );
@@ -477,12 +499,8 @@ export function Select<T extends string>({
   const entries = Array.isArray(options) ? options : (Object.entries(options) as [T, string][]);
   return (
     <label className="block">
-      <span className="text-sm font-semibold">{label}</span>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value as T)}
-        className="mt-1 w-full rounded-xl border border-line bg-panel px-3 py-2.5 outline-none focus:border-brand"
-      >
+      <span className={LABEL}>{label}</span>
+      <select value={value} onChange={(e) => onChange(e.target.value as T)} className={`mt-1 w-full ${BOX}`}>
         {entries.map(([k, text]) => (
           <option key={k} value={k}>
             {text}
