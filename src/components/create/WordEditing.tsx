@@ -703,17 +703,19 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
   // The controls go under what's selected or above it, wherever they fit in the window
   // without covering it (they may hang over the edge of the preview); else beside it.
   // On a computer the controls sit just left of the card, over the design panel, so they never
-  // cover what's being changed: level with it, and kept inside the window.
-  const place = (box: Box, tall: number) => ({
-    left: -316,
-    top: Math.max(12 - area.top, Math.min(box.top - 12, area.view - area.top - tall - 12)),
-  });
+  // cover what's being changed: level with it, and kept inside the window. `tall` is about how
+  // tall they are; they never reach past the bottom of the window, so Done can always be
+  // reached (what doesn't fit scrolls inside them).
+  const place = (box: Box, tall: number) => {
+    const top = Math.max(12 - area.top, Math.min(box.top - 12, area.view - area.top - tall - 12));
+    return { left: -316, top, maxHeight: area.view - area.top - top - 12 };
+  };
   const item = open?.kind === "deco" ? (style[listOf(open.deco)] as Record<string, unknown>[] | undefined)?.[open.index] : undefined;
   const close = () => select(null);
   const label = "text-sm font-bold opacity-75";
   // The controls for what's selected: beside it on a computer, a sheet at the bottom on a phone.
   // On a phone the sheet scrolls, so its name and Done stay pinned at the top, always in reach.
-  const controls = (at: { left: number; top: number }, title: string, body: React.ReactNode) =>
+  const controls = (at: { left: number; top: number; maxHeight: number }, title: string, body: React.ReactNode) =>
     sheet ? (
       createPortal(
         <div
@@ -917,7 +919,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
         open?.kind === "deco" &&
         item &&
         controls(
-          place(open.box, open.deco === "text" ? 560 : open.deco === "image" ? 600 : 420),
+          place(open.box, open.deco === "text" ? 740 : open.deco === "image" ? 710 : 570),
           open.deco === "text" ? s.text : open.deco === "image" ? s.photo : s.element,
           <>
           <p className="text-base leading-snug opacity-75">{s.dragHint}</p>
@@ -1055,7 +1057,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
         open?.kind === "photo" &&
         screen?.type === "photos" &&
         controls(
-          place(open.box, 380),
+          place(open.box, 450),
           x.photoTitle,
           <>
           <div className="grid gap-2">
@@ -1086,7 +1088,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
       {enabled &&
         open?.kind === "words" &&
         controls(
-          place(open.box, (long || lines.length > 1 ? 120 : 60) + 300 + (open.button ? 140 : 0)),
+          place(open.box, (lines.length > 1 ? 200 : long ? 130 : 60) + 380 + (open.button ? 180 : 0)),
           list ? x.linesTitle : x.wordsTitle,
           <>
           {list ? (
@@ -1142,7 +1144,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
       {enabled &&
         open?.kind === "envelope" &&
         controls(
-          place(open.box, 260),
+          place(open.box, 300),
           s.envelopeTitle,
           <Swatches title={s.envelopeColour} value={style.envelope} onPick={(envelope) => restyle((st) => ({ ...st, envelope }))} />,
         )}
@@ -1150,7 +1152,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
       {enabled &&
         open?.kind === "background" &&
         controls(
-          place({ left: 0, top: 0, width: area.width, height: 0 }, 640),
+          place({ left: 0, top: 0, width: area.width, height: 0 }, screen?.type === "game" ? 1200 : 800),
           s.screenSettings,
           <>
           {/* A new look for the whole card, before this screen's own colours. */}
