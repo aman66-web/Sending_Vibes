@@ -7,10 +7,10 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getI18n()).t.create.metaTitle };
 }
 
-type Search = { occasion?: string; template?: string; to?: string; from?: string; theme?: string; start?: string; resume?: string; error?: string };
+type Search = { occasion?: string; template?: string; to?: string; from?: string; theme?: string; start?: string; resume?: string; error?: string; edit?: string };
 
 export default async function CreatePage({ searchParams }: { searchParams: Promise<Search> }) {
-  const { occasion, template, to, from, theme, start, resume, error } = await searchParams;
+  const { occasion, template, to, from, theme, start, resume, error, edit } = await searchParams;
   const initial = OCCASIONS.find((o) => o === occasion) as Occasion | undefined;
   const initialTheme = THEMES.find((x) => x === theme) as ThemeName | undefined;
   return (
@@ -23,6 +23,8 @@ export default async function CreatePage({ searchParams }: { searchParams: Promi
       initialStart={start === "custom" || start === "premade" ? start : undefined}
       resume={resume === "1"}
       signInFailed={error === "signin"}
+      // "Change this card" from the basket.
+      initialEdit={typeof edit === "string" && /^[A-Za-z0-9_-]{1,40}$/.test(edit) ? edit : undefined}
     />
   );
 }
