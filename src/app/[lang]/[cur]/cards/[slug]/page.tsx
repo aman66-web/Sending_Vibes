@@ -6,6 +6,7 @@ import { ProductView } from "@/components/catalog/ProductView";
 import { JsonLd } from "@/components/JsonLd";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+import { TrustStrip } from "@/components/TrustStrip";
 import { TEMPLATES, getTemplate } from "@/lib/catalog";
 import { plainAmount, tierPrice } from "@/lib/pricing";
 import { absolute, breadcrumbs, seller } from "@/lib/structured-data";
@@ -80,6 +81,7 @@ export default async function ProductPage({ params }: Props) {
           <span className="text-ink">{t.name}</span>
         </nav>
         <ProductView slug={t.slug} />
+        <TrustStrip className="mt-14 rounded-2xl border-2 border-dashed border-ink/25 p-6 sm:p-8" />
 
         <section className="mt-24">
           <div className="flex items-end justify-between gap-4">

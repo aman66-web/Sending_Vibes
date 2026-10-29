@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { fmt } from "@/i18n/config";
 import { useI18n } from "@/i18n/client";
 import { price } from "@/lib/pricing";
@@ -10,11 +11,21 @@ import { price } from "@/lib/pricing";
 type WithNavigation = { navigation?: { currentEntry?: { index: number } | null } };
 
 // The bar under a full-screen demo: back to where they were, or straight on to making it.
-// It sits below the card rather than over it (see DemoPage), and stays in view if the card scrolls.
+// It sits below the card rather than over it (see DemoPage), and stays in view if the card
+// scrolls. The chat button, when there is one, lines up at its end (see Chat.tsx).
 export function DemoBar({ slug, back }: { slug: string; back: string }) {
   const { t, currency } = useI18n();
   const router = useRouter();
   const d = t.demo;
+
+  // Tells the chat button to drop into line with the bar on phones, as StickyMakeBar does.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.dataset.bar = "1";
+    return () => {
+      delete root.dataset.bar;
+    };
+  }, []);
 
   // Back where they came from, scrolled to where they were, when that was one of our pages.
   // Otherwise (they arrived on this link, or the browser can't tell) the link's own page.
@@ -28,7 +39,8 @@ export function DemoBar({ slug, back }: { slug: string; back: string }) {
   };
 
   return (
-    <div className="sticky bottom-0 z-50 border-t-2 border-ink bg-cream px-3 pb-[calc(0.75rem_+_env(safe-area-inset-bottom))] pt-3">
+    // Under the chat button (z-40) but over the card's own pieces; room is left at the end for it.
+    <div className="sticky bottom-0 z-30 border-t-2 border-ink bg-cream px-3 pb-[calc(0.75rem_+_env(safe-area-inset-bottom))] pt-3 sm:pb-[calc(1rem_+_env(safe-area-inset-bottom))] sm:pt-4 [html:has(.chat-launcher)_&]:pe-20">
       <div className="mx-auto flex max-w-4xl items-center gap-2 sm:gap-4">
         <Link href={back} onClick={goBack} className="btn btn-paper shrink-0 px-4 py-3 text-base">
           {d.back}

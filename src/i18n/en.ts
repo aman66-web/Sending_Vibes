@@ -608,6 +608,8 @@ export const en = {
     yourName: "Your name",
     colours: "Colours",
     customise: "Customise this card →",
+    // The bar kept at the bottom of a phone screen once the button above has scrolled away.
+    stickyCta: "Customise this card · {price}",
     noSignup: "No app to download. Ready in minutes.",
     inside: "What's inside",
     canChange: "What you can change",

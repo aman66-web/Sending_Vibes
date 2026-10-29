@@ -7,6 +7,8 @@ import { JsonLd } from "@/components/JsonLd";
 import { RichText } from "@/components/RichText";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+import { StickyMakeBar } from "@/components/StickyMakeBar";
+import { TrustStrip } from "@/components/TrustStrip";
 import { fmt, LANGUAGES } from "@/i18n/config";
 import { getI18n } from "@/i18n/server";
 import { MAX_SCHEDULE_DAYS } from "@/lib/basket";
@@ -92,7 +94,7 @@ export default async function OccasionPage({ params }: Props) {
               )}
             </div>
             <div className="flex shrink-0 flex-col gap-3 sm:flex-row md:flex-col">
-              <Link href={`/create?occasion=${o}`} className="btn btn-red px-7 py-3.5 text-lg">
+              <Link id="occasion-cta" href={`/create?occasion=${o}`} className="btn btn-red px-7 py-3.5 text-lg">
                 {make}
               </Link>
               <a href="#designs" className="btn btn-paper px-7 py-3.5 text-lg">
@@ -109,6 +111,8 @@ export default async function OccasionPage({ params }: Props) {
             <ProductTile key={x.slug} slug={x.slug} />
           ))}
         </div>
+
+        <TrustStrip className="mt-16 rounded-2xl border-2 border-dashed border-ink/25 p-6 sm:p-8" />
 
         {seo && (
           <section className="mt-24 grid gap-5 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:gap-14">
@@ -136,7 +140,8 @@ export default async function OccasionPage({ params }: Props) {
                 </li>
               ))}
             </ul>
-            <Link href={`/create?occasion=${o}`} className="btn btn-red mt-10 px-7 py-3.5 text-lg">
+            {/* Its own big button, so the phone bar steps aside while it's on screen. */}
+            <Link data-no-bar href={`/create?occasion=${o}`} className="btn btn-red mt-10 px-7 py-3.5 text-lg">
               {make}
             </Link>
           </section>
@@ -185,6 +190,7 @@ export default async function OccasionPage({ params }: Props) {
         </section>
       </main>
       <SiteFooter />
+      <StickyMakeBar href={`/create?occasion=${o}`} label={make} watchId="occasion-cta" />
     </div>
   );
 }
