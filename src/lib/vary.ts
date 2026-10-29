@@ -347,6 +347,9 @@ const EFFECTS_FOR: Record<Occasion, { ambient: Effect[]; finale: Effect[]; burst
   missyou: { ambient: ["hearts", "stars", "petals"], finale: ["hearts", "stars", "fireworks"], burst: ["hearts", "stars", "sparkles"] },
   friendship: { ambient: ["confetti", "sparkles", "bubbles", "balloons"], finale: ["confetti", "sparkles", "fireworks", "balloons"], burst: ["confetti", "balloons", "sparkles", "bubbles"] },
   leaving: { ambient: ["balloons", "confetti", "sparkles", "stars"], finale: ["balloons", "confetti", "fireworks"], burst: ["confetti", "balloons", "stars"] },
+  graduation: { ambient: ["confetti", "stars", "sparkles"], finale: ["fireworks", "confetti", "stars"], burst: ["confetti", "stars", "fireworks"] },
+  retirement: { ambient: ["sparkles", "balloons", "confetti"], finale: ["confetti", "balloons", "fireworks"], burst: ["confetti", "balloons", "sparkles"] },
+  newhome: { ambient: ["sparkles", "petals", "confetti"], finale: ["confetti", "lanterns", "sparkles"], burst: ["confetti", "sparkles", "petals"] },
 };
 
 // Emoji that suit each occasion; a card uses a few of them.
@@ -372,6 +375,9 @@ const STICKERS: Record<Occasion, string[]> = {
   missyou: ["🫶", "💌", "🌙", "⭐", "💕", "✈️"],
   friendship: ["👯", "💛", "🌈", "✨", "🍕", "🎉", "🫶"],
   leaving: ["👋", "🎈", "🌟", "✈️", "🎉", "🍀"],
+  graduation: ["🎓", "📜", "🌟", "🎉", "📚", "✨"],
+  retirement: ["🏖️", "⛳", "🌴", "☕", "🎉", "🌟"],
+  newhome: ["🏡", "🔑", "🪴", "📦", "✨", "🛋️"],
 };
 const ALL_STICKERS = new Set(Object.values(STICKERS).flat());
 
