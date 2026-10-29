@@ -7,7 +7,7 @@ import { GameView } from "./games";
 import { useRunaway } from "./runaway";
 import { Flourish, HeartMark, Laurel } from "./ornaments";
 import { useSfx } from "./sound";
-import { useTune } from "./tune";
+import { HELP_AFTER, useStuck, useTune } from "./tune";
 import { cropStyle } from "@/lib/screen-style";
 import { useWords } from "./words";
 
@@ -29,13 +29,28 @@ export function usePressAt(stage: number, at: number, find: () => HTMLElement | 
   }, [stage, at]);
 }
 
-// Small capitals with generous spacing, like the button on a printed invitation.
+// A big pill in plain words (easier for older eyes than small capitals), tall enough to tap.
 export const BUTTON =
-  "rounded-full bg-[var(--c-accent)] px-8 py-3.5 text-[0.8rem] font-semibold uppercase tracking-[0.2em] text-[var(--c-accent-text)] shadow-[0_12px_28px_-14px_rgba(0,0,0,0.7)] transition hover:brightness-110 active:scale-95";
+  "min-h-14 rounded-full bg-[var(--c-accent)] px-8 py-3 text-[1.0625rem] font-semibold leading-snug tracking-[0.02em] text-[var(--c-accent-text)] shadow-[0_12px_28px_-14px_rgba(0,0,0,0.7)] transition hover:brightness-110 active:scale-95";
 
 export function PrimaryButton({ children, onClick, className = "" }: { children: React.ReactNode; onClick?: () => void; className?: string }) {
   return (
     <button data-primary onClick={onClick} className={`${BUTTON} ${className}`}>
+      {children}
+    </button>
+  );
+}
+
+// Offered on a screen that has to be won, once they seem stuck (see useStuck in tune.ts). It
+// sits where Next will appear and finishes the screen for them, so nobody is left unable
+// to reach the rest of their card.
+export function HelpButton({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      data-help
+      onClick={onClick}
+      className="min-h-14 animate-screen-in rounded-full bg-[var(--c-surface)] px-6 py-3 text-base font-semibold leading-snug text-[var(--c-text)] shadow-sm ring-1 ring-current/25 backdrop-blur"
+    >
       {children}
     </button>
   );
@@ -183,7 +198,7 @@ export function QuestionScreen({ screen, onNext, stage = 0 }: ScreenProps<"quest
     <button
       {...noProps}
       data-no
-      className={`${moved ? "absolute transition-[left,top] duration-200 ease-out" : ""} whitespace-nowrap rounded-full bg-[var(--c-secondary)] px-6 py-3 text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-[var(--c-text)] shadow-sm ring-1 ring-current/20`}
+      className={`${moved ? "absolute transition-[left,top] duration-200 ease-out" : ""} min-h-14 whitespace-nowrap rounded-full bg-[var(--c-secondary)] px-6 py-3 text-[1.0625rem] font-semibold tracking-[0.02em] text-[var(--c-text)] shadow-sm ring-1 ring-current/20`}
     >
       {label(screen.no, list("noLines"))}
     </button>
@@ -231,14 +246,22 @@ export function PhotosScreen({ screen, onNext, stage = 0, wide = false }: Screen
         <div className="mx-auto grid w-full max-w-3xl grid-cols-2 gap-4 @2xl:grid-cols-3 @2xl:gap-6">
           {photos.map((src, i) => (
             <figure
-              key={src + i}
+              key={`${src}-${i}`}
               className="relative animate-pop rounded-md bg-white p-2 pb-9 shadow-xl transition duration-300 hover:z-10 hover:scale-105 hover:rotate-0 @2xl:p-3 @2xl:pb-12"
               style={{ transform: `rotate(${[-4, 3, -2, 5, -3, 2][i % 6]}deg)`, animationDelay: `${i * 120}ms` }}
             >
               <span className="absolute -top-2 left-1/2 h-4 w-4 -translate-x-1/2 rounded-full bg-[var(--c-accent)] shadow ring-2 ring-white" />
-              <div className="aspect-square w-full overflow-hidden rounded-sm">
+              <div className="aspect-square w-full overflow-hidden rounded-sm bg-neutral-100">
                 {/* eslint-disable-next-line @next/next/no-img-element -- user photos from our storage, already resized on upload */}
-                <img data-photo={i} src={src} alt="" className="h-full w-full object-cover" style={cropStyle(screen.crops?.[i])} draggable={false} />
+                <img
+                  data-photo={i}
+                  src={src}
+                  alt={screen.captions[i] || `Photo ${i + 1}`}
+                  decoding="async"
+                  className="h-full w-full object-cover"
+                  style={cropStyle(screen.crops?.[i])}
+                  draggable={false}
+                />
               </div>
               <figcaption className="absolute inset-x-2 bottom-1.5 truncate font-hand text-lg text-neutral-700 @2xl:bottom-3 @2xl:text-xl">
                 {screen.captions[i] ?? ""}
@@ -273,7 +296,8 @@ export function PhotosScreen({ screen, onNext, stage = 0, wide = false }: Screen
             const rotation = [-4, 5, -2, 3, -6, 2][i % 6];
             return (
               <figure
-                key={src}
+                // The same photo can be in twice.
+                key={`${src}-${i}`}
                 className="absolute inset-0 rounded-md bg-white p-3 pb-14 shadow-xl transition-all duration-500"
                 style={{
                   transform: `rotate(${offset === 0 ? rotation : rotation * 1.6}deg) translateY(${offset * 6}px) scale(${1 - offset * 0.04})`,
@@ -281,9 +305,19 @@ export function PhotosScreen({ screen, onNext, stage = 0, wide = false }: Screen
                   opacity: offset > 2 ? 0 : 1,
                 }}
               >
-                <div className="h-full w-full overflow-hidden rounded-sm">
+                {/* A soft paper colour, so a photo still on its way doesn't look like a hole. */}
+                <div className="h-full w-full overflow-hidden rounded-sm bg-neutral-100">
                   {/* eslint-disable-next-line @next/next/no-img-element -- user photos from our storage, already resized on upload */}
-                  <img data-photo={i} src={src} alt="" className="h-full w-full object-cover" style={cropStyle(screen.crops?.[i])} draggable={false} />
+                  <img
+                    data-photo={i}
+                    src={src}
+                    alt={screen.captions[i] || `Photo ${i + 1}`}
+                    decoding="async"
+                    fetchPriority={offset === 0 ? "high" : undefined}
+                    className="h-full w-full object-cover"
+                    style={cropStyle(screen.crops?.[i])}
+                    draggable={false}
+                  />
                 </div>
                 <figcaption className="absolute inset-x-3 bottom-3 truncate font-hand text-xl text-neutral-700">
                   {screen.captions[i] ?? ""}
@@ -293,7 +327,7 @@ export function PhotosScreen({ screen, onNext, stage = 0, wide = false }: Screen
           })}
         </button>
       )}
-      {total > 1 && <p className="text-sm text-[var(--c-muted)]">{text("photosTap", { i: index + 1, n: total })}</p>}
+      {total > 1 && <p className="text-base text-[var(--c-muted)]">{text("photosTap", { i: index + 1, n: total })}</p>}
       <NextButton onClick={onNext} />
     </div>
   );
@@ -301,22 +335,28 @@ export function PhotosScreen({ screen, onNext, stage = 0, wide = false }: Screen
 
 export function MessageScreen({ screen, onNext }: ScreenProps<"message">) {
   const reduced = useReducedMotion();
+  const { text } = useWords();
+  const body = screen.body;
   const [typed, setTyped] = useState(0);
   // Restart the typewriter when the text changes (e.g. while editing in the preview).
-  const [typedBody, setTypedBody] = useState(screen.body);
-  if (typedBody !== screen.body) {
-    setTypedBody(screen.body);
+  const [typedBody, setTypedBody] = useState(body);
+  if (typedBody !== body) {
+    setTypedBody(body);
     setTyped(0);
   }
-  const shown = reduced ? screen.body.length : typed;
-  const done = shown >= screen.body.length;
+  let shown = reduced ? body.length : Math.min(typed, body.length);
+  // Never half an emoji.
+  if (shown < body.length && /[\uD800-\uDBFF]/.test(body[shown - 1] ?? "")) shown += 1;
+  const done = shown >= body.length;
 
-  // Typed out letter by letter; faster or slower with style.tune.speed.
+  // Typed out letter by letter; faster or slower with style.tune.speed. A long letter types
+  // a few at a time, so even the longest is all there in about eight seconds.
   const { speed } = useTune();
+  const step = Math.max(1, Math.ceil(body.length / 280));
   useEffect(() => {
-    const t = setInterval(() => setTyped((s) => (s >= screen.body.length ? s : s + 1)), 28 / speed);
+    const t = setInterval(() => setTyped((s) => (s >= body.length ? s : s + step)), 28 / speed);
     return () => clearInterval(t);
-  }, [screen.body, speed]);
+  }, [body, speed, step]);
 
   return (
     <div className="flex w-full flex-col items-center gap-6 text-center">
@@ -325,13 +365,28 @@ export function MessageScreen({ screen, onNext }: ScreenProps<"message">) {
         <Flourish className="mx-auto mt-3 text-[var(--c-muted)]" />
       </div>
       <button
-        onClick={() => setTyped(screen.body.length)}
-        className="min-h-40 w-full whitespace-pre-line rounded-sm bg-[var(--c-surface)] p-7 text-left text-lg leading-relaxed shadow-[0_14px_30px_-20px_rgba(0,0,0,0.6)] ring-1 ring-current/10"
+        onClick={() => setTyped(body.length)}
+        className="min-h-40 w-full whitespace-pre-line rounded-sm bg-[var(--c-surface)] p-7 text-left text-xl leading-relaxed shadow-[0_14px_30px_-20px_rgba(0,0,0,0.6)] ring-1 ring-current/10"
       >
-        {screen.body.slice(0, shown)}
-        {!done && <span className="ml-0.5 inline-block h-5 w-0.5 animate-pulse bg-current align-middle" />}
+        {body.slice(0, shown)}
+        {/* The words still to come are already in place, unseen, and the cursor takes no
+            room, so the letter is its full size from the start and never pushes things down. */}
+        {!done && (
+          <>
+            <span aria-hidden className="relative">
+              <span className="absolute inset-y-0 left-0 w-0.5 animate-pulse bg-current" />
+            </span>
+            <span aria-hidden className="invisible">
+              {body.slice(shown)}
+            </span>
+          </>
+        )}
       </button>
-      <NextButton onClick={onNext} className={done ? "" : "invisible"} />
+      {done ? (
+        <NextButton onClick={onNext} className="animate-pop" />
+      ) : (
+        <p className="grid min-h-14 place-items-center text-base text-[var(--c-muted)]">{text("messageSkip")}</p>
+      )}
     </div>
   );
 }
@@ -340,7 +395,9 @@ const FIREWORK_GAMES: Game[] = ["light-diyas", "release-lanterns", "launch-firew
 
 export function GameScreen({ screen, onNext, stage = 0, occasion }: ScreenProps<"game"> & { occasion: Occasion }) {
   const sfx = useSfx();
+  const { text } = useWords();
   const [won, setWon] = useState(stage >= 1);
+  const stuck = useStuck(HELP_AFTER.game);
   const win = () => {
     setWon(true);
     sfx("win");
@@ -349,9 +406,10 @@ export function GameScreen({ screen, onNext, stage = 0, occasion }: ScreenProps<
     <div className="flex w-full flex-col items-center gap-3 text-center">
       {won && <Burst usual={FIREWORK_GAMES.includes(screen.game) || (screen.game === "shake-it" && occasion === "diwali") ? "fireworks" : "confetti"} />}
       <h2 className="font-display text-3xl font-semibold leading-tight">{screen.title}</h2>
-      <p className="text-[var(--c-muted)]">{won ? screen.winText : screen.instructions}</p>
+      <p className="text-lg text-[var(--c-muted)]">{won ? screen.winText : screen.instructions}</p>
       <GameView game={screen.game} occasion={occasion} won={won} onWin={win} />
-      <NextButton onClick={onNext} className={won ? "animate-pop" : "invisible"} />
+      {/* Finishing it for them still counts as a win: the burst, the sound, the win words. */}
+      {stuck && !won ? <HelpButton onClick={win}>{text("helpFinish")}</HelpButton> : <NextButton onClick={onNext} className={won ? "animate-pop" : "invisible"} />}
     </div>
   );
 }
@@ -388,9 +446,12 @@ export function QuizScreen({ screen, onNext, stage = 0 }: ScreenProps<"quiz">) {
   const [index, setIndex] = useState(stage <= 1 ? 0 : stage - 1);
   const [wrong, setWrong] = useState<number | null>(stage === 1 ? (screen.questions[0].answer === 0 ? 1 : 0) : null);
   const [misses, setMisses] = useState(stage === 1 ? 1 : 0);
+  // Wrong answers to this question, to offer the answer after a couple.
+  const [missesHere, setMissesHere] = useState(stage === 1 ? 1 : 0);
   const [right, setRight] = useState<number | null>(null);
   const done = index >= screen.questions.length;
   const q = screen.questions[Math.min(index, screen.questions.length - 1)];
+  const stuck = useStuck(HELP_AFTER.quiz, missesHere, 2, index);
 
   const pick = (i: number) => {
     if (right !== null) return;
@@ -401,10 +462,12 @@ export function QuizScreen({ screen, onNext, stage = 0 }: ScreenProps<"quiz">) {
       setTimeout(() => {
         setRight(null);
         setIndex((n) => n + 1);
+        setMissesHere(0);
       }, 650);
     } else {
       setWrong(i);
       setMisses((m) => m + 1);
+      setMissesHere((m) => m + 1);
       sfx("wrong");
     }
   };
@@ -415,7 +478,7 @@ export function QuizScreen({ screen, onNext, stage = 0 }: ScreenProps<"quiz">) {
         <Burst />
         <Laurel className={`h-20 w-28 animate-pop ${misses === 0 ? "text-[var(--c-accent)]" : "text-[var(--c-muted)]"}`} />
         <h2 className="font-display text-3xl font-semibold">{screen.winText}</h2>
-        <p className="text-[var(--c-muted)]">{misses === 0 ? text("quizPerfect") : misses === 1 ? text("quizMissedOne") : text("quizMissed", { n: misses })}</p>
+        <p className="text-lg text-[var(--c-muted)]">{misses === 0 ? text("quizPerfect") : misses === 1 ? text("quizMissedOne") : text("quizMissed", { n: misses })}</p>
         <NextButton onClick={onNext} />
       </div>
     );
@@ -423,7 +486,7 @@ export function QuizScreen({ screen, onNext, stage = 0 }: ScreenProps<"quiz">) {
 
   return (
     <div className="flex w-full flex-col items-center gap-5 text-center">
-      <p className="text-sm font-bold uppercase tracking-widest text-[var(--c-muted)]">
+      <p className="text-base font-semibold text-[var(--c-muted)]">
         <span>{screen.title}</span> · <span>{text("quizCount", { i: index + 1, n: screen.questions.length })}</span>
       </p>
       <h2 key={index} className="animate-screen-in font-display text-3xl font-semibold leading-tight">
@@ -447,7 +510,8 @@ export function QuizScreen({ screen, onNext, stage = 0 }: ScreenProps<"quiz">) {
           </button>
         ))}
       </div>
-      <p className="h-6 font-display font-semibold text-[var(--c-accent)]">{wrong !== null ? list("wrongLines")[(misses - 1) % list("wrongLines").length] : ""}</p>
+      <p className="h-7 font-display text-lg font-semibold">{wrong !== null ? list("wrongLines")[(misses - 1) % list("wrongLines").length] : ""}</p>
+      {stuck && right === null && <HelpButton onClick={() => pick(q.answer)}>{text("helpAnswer")}</HelpButton>}
     </div>
   );
 }
@@ -461,6 +525,7 @@ export function ScratchScreen({ screen, onNext, stage = 0 }: ScreenProps<"scratc
   const drawing = useRef(false);
   const strokes = useRef(0);
   const [revealed, setRevealed] = useState(stage >= 1);
+  const stuck = useStuck(HELP_AFTER.scratch);
 
   useEffect(() => {
     const el = canvas.current;
@@ -521,7 +586,7 @@ export function ScratchScreen({ screen, onNext, stage = 0 }: ScreenProps<"scratc
     <div className="flex w-full flex-col items-center gap-5 text-center">
       {revealed && <Burst />}
       <h2 className="font-display text-3xl font-semibold leading-tight">{screen.title}</h2>
-      <p className="text-[var(--c-muted)]">{revealed ? text("scratchDone") : screen.instructions}</p>
+      <p className="text-lg text-[var(--c-muted)]">{revealed ? text("scratchDone") : screen.instructions}</p>
       <div className="relative h-56 w-full max-w-sm overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-black/10">
         <div className="absolute inset-0 grid place-items-center p-6">
           <p className="font-display text-3xl font-semibold leading-tight text-[#3b0a1f]">{screen.hidden}</p>
@@ -541,7 +606,18 @@ export function ScratchScreen({ screen, onNext, stage = 0 }: ScreenProps<"scratc
           className={`absolute inset-0 h-full w-full touch-none transition-opacity duration-700 ${revealed ? "pointer-events-none opacity-0" : ""}`}
         />
       </div>
-      <NextButton onClick={onNext} className={revealed ? "animate-pop" : "invisible"} />
+      {stuck && !revealed ? (
+        <HelpButton
+          onClick={() => {
+            setRevealed(true);
+            sfx("win");
+          }}
+        >
+          {text("helpReveal")}
+        </HelpButton>
+      ) : (
+        <NextButton onClick={onNext} className={revealed ? "animate-pop" : "invisible"} />
+      )}
     </div>
   );
 }
@@ -555,18 +631,26 @@ export function TypeItScreen({ screen, onNext, stage = 0 }: ScreenProps<"typeit"
   const target = normalise(screen.phrase);
   const [value, setValue] = useState(stage >= 1 ? screen.phrase : "");
   const [hints, setHints] = useState(0);
+  // Times they've gone wrong while typing, to offer the answer after a few.
+  const [slips, setSlips] = useState(0);
+  const stuck = useStuck(HELP_AFTER.typeit, slips, 3);
   const typed = normalise(value);
   const solved = typed === target;
   // How many leading characters are right so far.
   let correct = 0;
   while (correct < typed.length && typed[correct] === target[correct]) correct++;
   const wrongNow = typed.length > correct;
+  const solve = (phrase: string) => {
+    setValue(phrase);
+    sfx("unlock");
+    setTimeout(() => sfx("win"), 200);
+  };
 
   return (
     <div className="flex w-full flex-col items-center gap-5 text-center">
       {solved && <Burst />}
       <h2 className="font-display text-3xl font-semibold leading-tight">{screen.title}</h2>
-      <p className="text-[var(--c-muted)]">{solved ? screen.winText : screen.instructions}</p>
+      <p className="text-lg text-[var(--c-muted)]">{solved ? screen.winText : screen.instructions}</p>
       {/* The tiles show it a letter at a time (or not yet), so the editor reads it from here. */}
       <div className={`flex flex-wrap justify-center gap-1.5 ${wrongNow ? "animate-shake" : ""}`} aria-hidden data-text={screen.phrase}>
         {target.split("").map((ch, i) =>
@@ -590,11 +674,13 @@ export function TypeItScreen({ screen, onNext, stage = 0 }: ScreenProps<"typeit"
             value={value}
             onChange={(e) => {
               const next = normalise(e.target.value);
+              if (next === target) return solve(e.target.value);
               setValue(e.target.value);
-              if (next === target) {
-                sfx("unlock");
-                setTimeout(() => sfx("win"), 200);
-              } else if (next.length > typed.length) sfx(target.startsWith(next) ? "tap" : "wrong");
+              if (next.length > typed.length) {
+                const ok = target.startsWith(next);
+                sfx(ok ? "tap" : "wrong");
+                if (!ok && !wrongNow) setSlips((n) => n + 1);
+              }
             }}
             aria-label="Type the secret phrase"
             placeholder={text("typeStart")}
@@ -604,12 +690,12 @@ export function TypeItScreen({ screen, onNext, stage = 0 }: ScreenProps<"typeit"
             spellCheck={false}
             className="w-full max-w-sm rounded-2xl bg-[var(--c-secondary)] px-5 py-4 text-center font-display text-xl font-semibold text-[var(--c-text)] shadow-sm outline-none ring-1 ring-black/10 placeholder:opacity-50 focus:ring-2 focus:ring-[var(--c-accent)]"
           />
-          <button onClick={() => setHints((h) => Math.min(h + 1, target.length))} className="text-sm font-semibold underline underline-offset-4 opacity-75">
+          <button onClick={() => setHints((h) => Math.min(h + 1, target.length))} className="min-h-11 px-4 text-base font-semibold underline underline-offset-4 opacity-80">
             {text("typeHint")}
           </button>
         </>
       )}
-      <NextButton onClick={onNext} className={solved ? "animate-pop" : "invisible"} />
+      {stuck && !solved ? <HelpButton onClick={() => solve(screen.phrase)}>{text("helpAnswer")}</HelpButton> : <NextButton onClick={onNext} className={solved ? "animate-pop" : "invisible"} />}
     </div>
   );
 }

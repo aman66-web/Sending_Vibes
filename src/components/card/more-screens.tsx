@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import type { Screen } from "@/lib/card";
 import { SLIDER_STAGES } from "@/lib/stages";
 import { Burst } from "./effects";
-import { NextButton, usePressAt } from "./screens";
+import { HelpButton, NextButton, usePressAt } from "./screens";
 import { useSfx } from "./sound";
-import { useTune } from "./tune";
+import { HELP_AFTER, LiveContext, useStuck, useTune } from "./tune";
 import { useWords } from "./words";
 
 type Of<T extends Screen["type"]> = Extract<Screen, { type: T }>;
@@ -69,7 +69,7 @@ export function WheelScreen({ screen, onNext, stage = 0 }: ScreenProps<"wheel">)
     <div className="flex w-full flex-col items-center gap-4 text-center">
       {result !== null && <Burst />}
       <h2 className="font-display text-3xl font-bold leading-tight">{screen.title}</h2>
-      <p className="text-[var(--c-muted)]">{result !== null ? screen.winText : screen.instructions}</p>
+      <p className="text-lg text-[var(--c-muted)]">{result !== null ? screen.winText : screen.instructions}</p>
       <div className="relative h-72 w-72 @2xl:h-80 @2xl:w-80">
         <svg viewBox="-104 -104 208 208" className="h-full w-full drop-shadow-xl">
           <g
@@ -112,7 +112,7 @@ export function WheelScreen({ screen, onNext, stage = 0 }: ScreenProps<"wheel">)
         <>
           <p className="animate-pop rounded-2xl bg-[var(--c-surface)] px-6 py-3 font-display text-2xl font-semibold italic shadow-sm ring-1 ring-black/5">{options[result]}</p>
           <NextButton onClick={onNext} />
-          <button onClick={spin} className="text-sm font-semibold underline underline-offset-4 opacity-75">
+          <button onClick={spin} className="min-h-11 px-4 text-base font-semibold underline underline-offset-4 opacity-80">
             {text("spinAgain")}
           </button>
         </>
@@ -137,9 +137,10 @@ export function WheelScreen({ screen, onNext, stage = 0 }: ScreenProps<"wheel">)
 const TICKET_MASK =
   "radial-gradient(circle 9px at left center, transparent 98%, #000) left / 51% 100% no-repeat, radial-gradient(circle 9px at right center, transparent 98%, #000) right / 51% 100% no-repeat";
 
-export function CouponsScreen({ screen, onNext, stage = 0 }: ScreenProps<"coupons">) {
+export function CouponsScreen({ screen, onNext, stage = 0, from = "" }: ScreenProps<"coupons"> & { from?: string }) {
   const sfx = useSfx();
   const { text } = useWords();
+  const live = useContext(LiveContext);
   const [redeemed, setRedeemed] = useState<boolean[]>(() => screen.coupons.map(() => stage >= 1));
   const any = redeemed.some(Boolean);
 
@@ -149,10 +150,26 @@ export function CouponsScreen({ screen, onNext, stage = 0 }: ScreenProps<"coupon
     sfx("stamp");
   };
 
+  // Sends the ones they've redeemed to whoever made the card, as a message from their own
+  // phone (its share menu, or WhatsApp where there isn't one), so there's nothing to
+  // screenshot. Nothing goes through us.
+  const send = () => {
+    const chosen = screen.coupons.filter((_, i) => redeemed[i]).join(", ");
+    const words = text("couponMessage", { coupons: chosen });
+    const message = words.includes(chosen) ? words : `${words} ${chosen}`;
+    const whatsApp = () => window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank", "noopener");
+    sfx("chime");
+    if (typeof navigator.share !== "function") return whatsApp();
+    // Closing the share menu without sending isn't a failure.
+    navigator.share({ text: message }).catch((e: unknown) => {
+      if (!(e instanceof DOMException && e.name === "AbortError")) whatsApp();
+    });
+  };
+
   return (
     <div className="flex w-full flex-col items-center gap-4 text-center">
       <h2 className="font-display text-3xl font-bold leading-tight">{screen.title}</h2>
-      <p className="text-[var(--c-muted)]">{any ? text("couponClaim") : screen.instructions}</p>
+      <p className="text-lg text-[var(--c-muted)]">{any ? text("couponClaim") : screen.instructions}</p>
       <div className="grid w-full grid-cols-2 gap-3 @2xl:grid-cols-3">
         {screen.coupons.map((c, i) => (
           <button
@@ -163,17 +180,30 @@ export function CouponsScreen({ screen, onNext, stage = 0 }: ScreenProps<"coupon
             style={{ mask: TICKET_MASK, WebkitMask: TICKET_MASK, borderRadius: 14 }}
           >
             <span className="absolute inset-1.5 rounded-[10px] border-2 border-dashed border-[var(--c-accent)] opacity-40" />
-            <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[var(--c-accent)]">{text("coupon")}</span>
-            <span className="font-display text-base font-bold leading-tight">{c}</span>
-            <span className={`text-[11px] font-semibold opacity-50 ${redeemed[i] ? "invisible" : ""}`}>{text("couponTap")}</span>
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--c-accent)]">{text("coupon")}</span>
+            <span className="font-display text-lg font-bold leading-tight">{c}</span>
+            <span className={`text-sm font-semibold opacity-75 ${redeemed[i] ? "invisible" : ""}`}>{text("couponTap")}</span>
             {redeemed[i] && (
-              <span className="absolute bottom-1.5 right-2 animate-stamp rounded-md border-2 border-red-600 bg-white/80 px-1.5 font-display text-xs font-black uppercase tracking-wider text-red-600">
+              <span className="absolute bottom-1.5 right-2 animate-stamp rounded-md border-2 border-red-600 bg-white/80 px-1.5 font-display text-sm font-black uppercase tracking-wider text-red-600">
                 {text("couponDone")}
               </span>
             )}
           </button>
         ))}
       </div>
+      {/* Only on the card itself: a preview has nobody to send it to. */}
+      {any && live && (
+        <button
+          data-coupon-send
+          onClick={send}
+          className="inline-flex min-h-14 animate-screen-in items-center gap-2.5 rounded-full bg-[var(--c-surface)] px-6 py-3 text-base font-semibold leading-snug text-[var(--c-text)] shadow-sm ring-2 ring-[var(--c-accent)] backdrop-blur"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+            <path d="M21.5 2.5 10.5 13.5M21.5 2.5l-7 19-4-8-8-4z" />
+          </svg>
+          {text("couponSend", { name: from.trim() || "them" })}
+        </button>
+      )}
       <NextButton onClick={onNext} className={any ? "animate-pop" : ""} />
     </div>
   );
@@ -200,7 +230,7 @@ export function ReasonsScreen({ screen, onNext, stage = 0 }: ScreenProps<"reason
     <div className="flex w-full flex-col items-center gap-4 text-center">
       {done && <Burst />}
       <h2 className="font-display text-3xl font-bold leading-tight">{screen.title}</h2>
-      <p className="text-[var(--c-muted)]">{done ? text("jarEmpty") : screen.instructions}</p>
+      <p className="text-lg text-[var(--c-muted)]">{done ? text("jarEmpty") : screen.instructions}</p>
       <div className="flex min-h-32 w-full items-center justify-center">
         {pulled > 0 ? (
           <div
@@ -208,7 +238,7 @@ export function ReasonsScreen({ screen, onNext, stage = 0 }: ScreenProps<"reason
             className="w-full max-w-sm animate-pop rounded-2xl px-6 py-5 text-[#3b0a1f] shadow-lg"
             style={{ background: SLIP_COLORS[(pulled - 1) % SLIP_COLORS.length], transform: `rotate(${pulled % 2 ? -2 : 2}deg)` }}
           >
-            <p className="text-xs font-bold uppercase tracking-widest opacity-60">
+            <p className="text-sm font-bold uppercase tracking-wider opacity-75">
               {text("jarCount", { i: pulled, n: total })}
             </p>
             <p className="mt-1 font-hand text-2xl leading-snug">{screen.reasons[pulled - 1]}</p>
@@ -258,6 +288,7 @@ export function SliderScreen({ screen, onNext, stage = 0 }: ScreenProps<"slider"
   const current = useRef(start);
   const last = useRef<number | null>(null);
   const done = value >= 100;
+  const stuck = useStuck(HELP_AFTER.slider);
 
   const bump = (amount: number) => {
     const before = current.current;
@@ -327,8 +358,8 @@ export function SliderScreen({ screen, onNext, stage = 0 }: ScreenProps<"slider"
           <span>{screen.high}</span>
         </div>
       </div>
-      {!done && <p className="text-xs font-semibold uppercase tracking-widest opacity-50">{text("sliderDrag")}</p>}
-      <NextButton onClick={onNext} className={done ? "animate-pop" : "invisible"} />
+      {!done && <p className="text-base font-semibold opacity-75">{text("sliderDrag")}</p>}
+      {stuck && !done ? <HelpButton onClick={() => bump(100)}>{text("helpFinish")}</HelpButton> : <NextButton onClick={onNext} className={done ? "animate-pop" : "invisible"} />}
     </div>
   );
 }
@@ -359,8 +390,8 @@ export function TimelineScreen({ screen, onNext, stage = 0 }: ScreenProps<"timel
               {i + 1}
             </span>
             <div className="min-w-0 flex-1 rounded-2xl bg-[var(--c-surface)] px-4 py-3 shadow-sm ring-1 ring-black/5 backdrop-blur">
-              <p className="text-xs font-bold uppercase tracking-widest text-[var(--c-accent)]">{ev.when}</p>
-              <p className="mt-0.5 font-semibold leading-snug">{ev.what}</p>
+              <p className="text-sm font-bold uppercase tracking-wider text-[var(--c-muted)]">{ev.when}</p>
+              <p className="mt-0.5 text-lg font-semibold leading-snug">{ev.what}</p>
             </div>
           </li>
         ))}
@@ -371,7 +402,7 @@ export function TimelineScreen({ screen, onNext, stage = 0 }: ScreenProps<"timel
         <button
           data-reveal-next
           onClick={reveal}
-          className="rounded-full bg-[var(--c-secondary)] px-6 py-3 font-display font-semibold text-[var(--c-text)] shadow ring-1 ring-black/10 transition hover:-translate-y-0.5"
+          className="min-h-14 rounded-full bg-[var(--c-secondary)] px-6 py-3 font-display text-lg font-semibold text-[var(--c-text)] shadow ring-1 ring-black/10 transition hover:-translate-y-0.5"
         >
           {text("timelineMore", { i: shown, n: total })}
         </button>
@@ -404,7 +435,7 @@ export function BoxesScreen({ screen, onNext, stage = 0 }: ScreenProps<"boxes">)
     <div className="flex w-full flex-col items-center gap-5 text-center">
       {picked !== null && <Burst />}
       <h2 className="font-display text-3xl font-bold leading-tight">{screen.title}</h2>
-      <p className="text-[var(--c-muted)]">{picked !== null ? text("boxesPicked") : screen.instructions}</p>
+      <p className="text-lg text-[var(--c-muted)]">{picked !== null ? text("boxesPicked") : screen.instructions}</p>
       <div ref={row} className="flex w-full items-end justify-center gap-4 pt-10">
         {screen.prizes.map((prize, i) => {
           const open = picked === i || (others && picked !== null);
@@ -420,7 +451,7 @@ export function BoxesScreen({ screen, onNext, stage = 0 }: ScreenProps<"boxes">)
               {open && (
                 <span
                   className={`absolute bottom-full left-1/2 mb-3 w-[6.5rem] -translate-x-1/2 animate-pop rounded-xl px-2 py-2 font-display font-bold leading-tight shadow-lg @2xl:w-36 ${
-                    mine ? "z-10 bg-white text-base text-[#3b0a1f] ring-2 ring-[var(--c-accent)]" : "bg-[var(--c-surface)] text-xs"
+                    mine ? "z-10 bg-white text-base text-[#3b0a1f] ring-2 ring-[var(--c-accent)]" : "bg-[var(--c-surface)] text-sm"
                   }`}
                 >
                   {prize}
