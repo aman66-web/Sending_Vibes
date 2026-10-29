@@ -4,6 +4,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import { fmt } from "@/i18n/config";
 import { useI18n } from "@/i18n/client";
 import { removeFromBasket } from "@/lib/basket";
+import { rememberMine } from "@/lib/mine";
 
 const noop = () => () => {};
 // Phones (and some computers) have their own share menu, which already lists WhatsApp,
@@ -83,8 +84,12 @@ export function ShareLink({ url, to, from, compact = false }: { url: string; to:
   );
 }
 
-// Takes the cards that were just bought out of this browser's basket.
+// Takes the cards that were just bought out of this browser's basket, and notes them as
+// this buyer's own, so opening them here isn't reported to them as the card being opened.
 export function ClearBasket({ ids }: { ids: string[] }) {
-  useEffect(() => removeFromBasket(ids), [ids]);
+  useEffect(() => {
+    removeFromBasket(ids);
+    rememberMine(ids);
+  }, [ids]);
   return null;
 }

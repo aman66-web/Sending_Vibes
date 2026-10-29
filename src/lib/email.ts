@@ -57,6 +57,11 @@ function shareButtons(order: Order, item: OrderItem) {
   return `<div style="margin-top:4px">${smallButton(whatsapp, create.whatsapp, "#25D366", "#1f1b16")}${smallButton(mail, basket.share.byEmail, "#fbf7ef", "#1f1b16")}</div>`;
 }
 
+// The buyer's own look at a link they're sending on (?me=1), so checking it isn't counted as
+// it being opened. The plain link stays plain: it's the one they copy and pass on.
+const watchLink = (order: Order, item: OrderItem) =>
+  `<div style="margin-bottom:10px"><a href="${esc(ownUrl(order, item))}" style="color:#2b5aa6;font-weight:bold">&#9654; ${esc(DICTS[order.locale].basket.share.watch)}</a></div>`;
+
 // What the receipt says about each card, once this attempt's card emails have gone (or not).
 function receiptNote(order: Order, item: OrderItem, status: CardStatus) {
   const t = DICTS[order.locale].email;
@@ -86,7 +91,7 @@ function receipt(order: Order) {
 <div style="font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:bold">${esc(fmt(t.cardFor, { to: item.to, from: item.from }))}</div>
 <div style="margin:4px 0 10px;color:#5b5247">${esc(receiptNote(order, item, status))}</div>
 <div style="margin-bottom:8px;word-break:break-all"><a href="${esc(link)}" style="color:#2b5aa6">${esc(link)}</a></div>
-${sendsItself(status) ? shareButtons(order, item) : ""}
+${sendsItself(status) ? watchLink(order, item) + shareButtons(order, item) : ""}
 </td></tr>`;
     })
     .join("");
@@ -105,7 +110,8 @@ ${sendsItself(status) ? shareButtons(order, item) : ""}
     "",
     ...order.items.map((item) => {
       const status = cardStatus(item);
-      return `${fmt(t.cardFor, { to: item.to, from: item.from })}\n${receiptNote(order, item, status)}\n${sendsItself(status) ? cardUrl(order, item) : ownUrl(order, item)}\n`;
+      const watch = `▶ ${DICTS[order.locale].basket.share.watch}: ${ownUrl(order, item)}`;
+      return `${fmt(t.cardFor, { to: item.to, from: item.from })}\n${receiptNote(order, item, status)}\n${sendsItself(status) ? `${cardUrl(order, item)}\n${watch}` : ownUrl(order, item)}\n`;
     }),
   ].join("\n");
   return { subject: t.receiptSubject, html, text };

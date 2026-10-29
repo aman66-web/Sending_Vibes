@@ -1769,6 +1769,7 @@ export const en = {
     failed: "That didn't send. Please try again.",
     sendBack: "Send {name} a card back 💌",
     makeOwn: "Or make one for someone else",
+    ownView: "This is where {name} can send you a thank-you or a card back.",
     opened: "Opened {date} ✓",
     email: {
       openedSubject: "{to} has opened your card 💌",
