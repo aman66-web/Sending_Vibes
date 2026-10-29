@@ -17,6 +17,9 @@ export const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt
 
 const cardUrl = (order: Order, item: OrderItem) => `${order.site}/c/${item.cardId}`;
 
+// The buyer's own look at a card we're emailing for them, so it isn't counted as them opening it.
+const ownUrl = (order: Order, item: OrderItem) => `${cardUrl(order, item)}?me=1`;
+
 // The day the buyer picked, written out in their language.
 function sendDay(order: Order, item: OrderItem) {
   const day = item.sendOn ? new Date(`${item.sendOn}T12:00:00Z`) : new Date(item.sendAt!);
@@ -77,10 +80,12 @@ function receipt(order: Order) {
   const rows = order.items
     .map((item) => {
       const status = cardStatus(item);
+      // A link the buyer sends on stays plain; one we're emailing is just for them to watch.
+      const link = sendsItself(status) ? cardUrl(order, item) : ownUrl(order, item);
       return `<tr><td style="padding:14px 0;border-top:1px solid #e3d9c6">
 <div style="font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:bold">${esc(fmt(t.cardFor, { to: item.to, from: item.from }))}</div>
 <div style="margin:4px 0 10px;color:#5b5247">${esc(receiptNote(order, item, status))}</div>
-<div style="margin-bottom:8px;word-break:break-all"><a href="${esc(cardUrl(order, item))}" style="color:#2b5aa6">${esc(cardUrl(order, item))}</a></div>
+<div style="margin-bottom:8px;word-break:break-all"><a href="${esc(link)}" style="color:#2b5aa6">${esc(link)}</a></div>
 ${sendsItself(status) ? shareButtons(order, item) : ""}
 </td></tr>`;
     })
@@ -98,7 +103,10 @@ ${sendsItself(status) ? shareButtons(order, item) : ""}
     "",
     t.receiptIntro,
     "",
-    ...order.items.map((item) => `${fmt(t.cardFor, { to: item.to, from: item.from })}\n${receiptNote(order, item, cardStatus(item))}\n${cardUrl(order, item)}\n`),
+    ...order.items.map((item) => {
+      const status = cardStatus(item);
+      return `${fmt(t.cardFor, { to: item.to, from: item.from })}\n${receiptNote(order, item, status)}\n${sendsItself(status) ? cardUrl(order, item) : ownUrl(order, item)}\n`;
+    }),
   ].join("\n");
   return { subject: t.receiptSubject, html, text };
 }

@@ -35,6 +35,9 @@ export type OrderItem = {
   // Kept as they go out, so a retry only sends what's still missing. Older orders don't have these.
   cardEmail?: EmailResult;
   receipt?: EmailResult;
+  // Set on orders placed since those results were kept. Without it, a claim with no
+  // results is an older order whose emails went out before results existed.
+  tracked?: true;
 };
 
 export type Order = {
@@ -112,7 +115,7 @@ async function writeLocal(order: Order) {
 }
 
 export async function createOrder(order: Omit<Order, "id" | "status" | "createdAt">): Promise<Order> {
-  const full: Order = { ...order, id: newOrderId(), status: "pending", createdAt: new Date().toISOString() };
+  const full: Order = { ...order, items: order.items.map((i) => ({ ...i, tracked: true as const })), id: newOrderId(), status: "pending", createdAt: new Date().toISOString() };
   if (usingSupabase()) {
     const { error } = await db().insert({
       id: full.id,
@@ -230,16 +233,21 @@ async function saveDelivery(id: string, items: OrderItem[], again: boolean) {
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+// The thank-you page is part-way through sending an order's emails. Nothing's wrong: the
+// webhook asks Stripe to come back later, without alerting the owner.
+export class StillSending extends Error {}
+
 // A claim older than any attempt can run for was left behind (it crashed, or couldn't save).
 const STALE = 10 * 60_000;
 const stale = (order: Order) => !!order.emailedAt && Date.now() - Date.parse(order.emailedAt) > STALE;
 
 // Whether someone else's claim has finished: everything sent or refused for good. Orders
-// from before results were kept have none, so theirs counts once it's old.
+// from before results were kept have none, so theirs counts once it's old. Any newer one
+// left unfinished is taken over instead (an attempt that died mid-send).
 function finished(order: Order) {
   if (!order.emailedAt) return false;
   if (nothingLeft(pending(order))) return true;
-  return stale(order) && order.items.every((i) => !i.cardEmail && !i.receipt);
+  return stale(order) && order.items.every((i) => !i.tracked && !i.cardEmail && !i.receipt);
 }
 
 // This attempt's failures are logged with the order, so the owner can see who to help.
@@ -287,7 +295,7 @@ async function deliver(order: Order, strict: boolean): Promise<Order> {
     if (stale(now) && (await claimEmails(order.id, now.emailedAt))) return sendEmails(order, strict);
     if (!strict) return now;
     // Give the other caller a few seconds to finish before asking Stripe to come back.
-    if (tries >= 3) throw new Error(`Emails for order ${order.id} are still being sent`);
+    if (tries >= 3) throw new StillSending(`Emails for order ${order.id} are still being sent`);
     if (now.emailedAt) await sleep(2000);
   }
 }
@@ -305,8 +313,13 @@ export async function fulfilSession(sessionId: string, { strict = false } = {}):
   let session: Stripe.Checkout.Session;
   try {
     session = await s.checkout.sessions.retrieve(sessionId);
-  } catch {
-    return null;
+  } catch (e) {
+    // Only a session Stripe doesn't have is "no such order". Anything else (an outage, a
+    // limit, a key that's changed) throws, so the webhook gets a retry and the thank-you
+    // page offers "Check again".
+    const { code, statusCode } = (e ?? {}) as { code?: string; statusCode?: number };
+    if (code === "resource_missing" || statusCode === 404) return null;
+    throw e;
   }
   const orderId = session.metadata?.order_id;
   const order = orderId ? await getOrder(orderId) : null;
