@@ -2,8 +2,8 @@ import type { Game } from "./card";
 
 // What each game asks of the player and how many it takes to win, as plain data the
 // server can read (the card writer in lib/generate.ts). The games themselves are in
-// components/card/games.tsx and more-games.tsx, and components/card/tune.ts has the same
-// usual numbers: keep the three in step.
+// components/card/games.tsx and more-games.tsx, which read these numbers through
+// components/card/tune.ts: keep GOAL_MAX in step with the caps they pass to tune.goal().
 
 // How many it usually takes to win each game whose goal can be changed (style.tune.goal).
 export const USUAL_GOAL = {
