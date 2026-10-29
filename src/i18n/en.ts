@@ -857,6 +857,11 @@ export const en = {
     fullScreen: "⛶ Full screen",
     closePreview: "Close preview",
     needNames: "Add both names first.",
+    toWriteTitle: "Some words still need writing",
+    toWriteIntro: "These screens still say what to type there. Tap one to write your own words.",
+    toWriteScreen: "Screen {n} · {name}",
+    toWriteBack: "Go back and write them",
+    toWriteAnyway: "Add to basket anyway",
     failed: "Something went wrong. Please try again.",
     hints: {
       message: "A note that types itself out",

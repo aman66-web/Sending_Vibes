@@ -855,6 +855,11 @@ export const ar: Dict = {
     fullScreen: "⛶ Full screen",
     closePreview: "إغلاق المعاينة",
     needNames: "أضف الاسمين أولًا.",
+    toWriteTitle: "ما زالت بعض الكلمات بحاجة إلى كتابة",
+    toWriteIntro: "ما زالت هذه الشاشات تقول ما يُكتب فيها. اضغط على واحدة لتكتب كلماتك.",
+    toWriteScreen: "الشاشة {n} · {name}",
+    toWriteBack: "ارجع واكتبها",
+    toWriteAnyway: "أضف إلى السلة على أي حال",
     failed: "حدث خطأ ما. حاول مرة أخرى من فضلك.",
     hints: {
       message: "رسالة تكتب نفسها",

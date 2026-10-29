@@ -9,6 +9,7 @@ import { CATCHING, USUAL_GOAL } from "@/components/card/tune";
 import { FONT_VARS } from "@/lib/screen-style";
 import { LISTS, TEXTS, isList, labelList, labelsOn, type LabelKey, type ListKey } from "@/lib/labels";
 import { uploadPhoto } from "./image";
+import { isBlank } from "./screen-kit";
 import { useWide } from "./use-wide";
 
 // Click the words on the live preview to change them, like editing a design.
@@ -51,6 +52,19 @@ function textFields(card: CardData, screenId?: string, withEmpty = false): Field
   }
   return out;
 }
+
+// Tapping into words that still say what goes there ("Type your question here") selects
+// them, so typing replaces them.
+const selectBlank = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const el = e.currentTarget;
+  if (!isBlank(el.value)) return;
+  // Just the first line, so a message keeps its sign-off. Again a moment later, as iOS
+  // drops a selection made while it's still focusing.
+  const line = el.value.indexOf("\n");
+  const pick = () => el.setSelectionRange(0, line < 0 ? el.value.length : line);
+  pick();
+  setTimeout(pick, 0);
+};
 
 const labelValue = (own: unknown, usual: string) => (typeof own === "string" && own.trim() ? own : usual);
 
@@ -991,6 +1005,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
                   dir="auto"
                   value={getAt(card, [...list.slice(0, 4), j]) || line}
                   maxLength={80}
+                  onFocus={selectBlank}
                   onChange={(e) => edit([...list.slice(0, 4), j], e.target.value)}
                   className="w-full rounded-xl border border-line bg-background px-3 py-1.5 text-sm outline-none focus:border-brand"
                 />
@@ -1003,6 +1018,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
               dir="auto"
               value={value}
               maxLength={limitFor(card, open.path)}
+              onFocus={selectBlank}
               onChange={(e) => edit(open.path, e.target.value)}
               className="w-full resize-y rounded-xl border border-line bg-background px-3 py-2 text-sm outline-none focus:border-brand"
             />
@@ -1012,6 +1028,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
               dir="auto"
               value={value}
               maxLength={limitFor(card, open.path)}
+              onFocus={selectBlank}
               onChange={(e) => edit(open.path, e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && close()}
               className="w-full rounded-xl border border-line bg-background px-3 py-2 text-sm outline-none focus:border-brand"
@@ -1255,6 +1272,7 @@ export function AllWords({ card, screenId, onChange }: { card: CardData; screenI
               value,
               "aria-label": name,
               maxLength: limitFor(card, f.path),
+              onFocus: selectBlank,
               onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => onChange(f.path, e.target.value),
               className: "w-full rounded-xl border border-line bg-background px-3 py-1.5 outline-none focus:border-brand",
             };

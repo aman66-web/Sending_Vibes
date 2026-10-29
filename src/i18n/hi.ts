@@ -849,6 +849,11 @@ export const hi: Dict = {
     fullScreen: "⛶ Full screen",
     closePreview: "प्रीव्यू बंद करें",
     needNames: "पहले दोनों नाम डालिए।",
+    toWriteTitle: "कुछ शब्द अभी लिखने बाकी हैं",
+    toWriteIntro: "इन स्क्रीन पर अभी भी लिखा है कि वहाँ क्या लिखना है। अपने शब्द लिखने के लिए किसी एक पर टैप कीजिए।",
+    toWriteScreen: "स्क्रीन {n} · {name}",
+    toWriteBack: "वापस जाकर लिखिए",
+    toWriteAnyway: "फिर भी कार्ट में डालें",
     failed: "कुछ गड़बड़ हो गई। कृपया फिर से कोशिश करें।",
     hints: {
       message: "एक चिट्ठी जो अपने-आप टाइप होती है",

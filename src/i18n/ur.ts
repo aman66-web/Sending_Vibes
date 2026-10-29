@@ -855,6 +855,11 @@ export const ur: Dict = {
     fullScreen: "⛶ Full screen",
     closePreview: "پری ویو بند کریں",
     needNames: "پہلے دونوں نام لکھیں۔",
+    toWriteTitle: "کچھ الفاظ ابھی لکھنا باقی ہیں",
+    toWriteIntro: "ان اسکرینوں پر ابھی بھی لکھا ہے کہ وہاں کیا لکھنا ہے۔ اپنے الفاظ لکھنے کے لیے کسی ایک پر ٹیپ کریں۔",
+    toWriteScreen: "اسکرین {n} · {name}",
+    toWriteBack: "واپس جا کر لکھیں",
+    toWriteAnyway: "پھر بھی ٹوکری میں ڈالیں",
     failed: "کچھ گڑبڑ ہو گئی۔ براہ کرم دوبارہ کوشش کریں۔",
     hints: {
       message: "ایک نوٹ جو خود بخود لکھا جاتا ہے",

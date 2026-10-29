@@ -855,6 +855,11 @@ export const fr: Dict = {
     fullScreen: "⛶ Full screen",
     closePreview: "Fermer l'aperçu",
     needNames: "Ajoute d'abord les deux prénoms.",
+    toWriteTitle: "Il reste des mots à écrire",
+    toWriteIntro: "Ces écrans indiquent encore quoi y écrire. Touche-en un pour écrire tes propres mots.",
+    toWriteScreen: "Écran {n} · {name}",
+    toWriteBack: "Revenir les écrire",
+    toWriteAnyway: "Ajouter au panier quand même",
     failed: "Un souci s'est produit. Réessaie, s'il te plaît.",
     hints: {
       message: "Un mot qui s'écrit tout seul",

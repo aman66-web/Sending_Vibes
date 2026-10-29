@@ -859,6 +859,11 @@ export const es: Dict = {
     fullScreen: "⛶ Full screen",
     closePreview: "Cerrar vista previa",
     needNames: "Primero añade los dos nombres.",
+    toWriteTitle: "Aún faltan algunas palabras por escribir",
+    toWriteIntro: "Estas pantallas todavía dicen qué escribir en ellas. Toca una para escribir tus propias palabras.",
+    toWriteScreen: "Pantalla {n} · {name}",
+    toWriteBack: "Volver y escribirlas",
+    toWriteAnyway: "Añadir a la cesta de todos modos",
     failed: "Algo ha fallado. Inténtalo de nuevo.",
     hints: {
       message: "Una nota que se escribe sola",

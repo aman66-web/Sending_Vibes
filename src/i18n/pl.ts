@@ -858,6 +858,11 @@ export const pl: Dict = {
     fullScreen: "⛶ Full screen",
     closePreview: "Zamknij podgląd",
     needNames: "Najpierw wpisz oba imiona.",
+    toWriteTitle: "Kilka słów wciąż czeka na wpisanie",
+    toWriteIntro: "Te ekrany wciąż mówią, co w nich wpisać. Stuknij jeden, aby wpisać własne słowa.",
+    toWriteScreen: "Ekran {n} · {name}",
+    toWriteBack: "Wróć i je wpisz",
+    toWriteAnyway: "Dodaj do koszyka mimo to",
     failed: "Coś poszło nie tak. Spróbuj ponownie.",
     hints: {
       message: "Liścik, który pisze się sam",

@@ -855,6 +855,11 @@ export const pa: Dict = {
     fullScreen: "⛶ Full screen",
     closePreview: "ਪ੍ਰੀਵਿਊ ਬੰਦ ਕਰੋ",
     needNames: "ਪਹਿਲਾਂ ਦੋਵੇਂ ਨਾਂ ਲਿਖੋ।",
+    toWriteTitle: "ਕੁਝ ਸ਼ਬਦ ਅਜੇ ਲਿਖਣੇ ਬਾਕੀ ਹਨ",
+    toWriteIntro: "ਇਨ੍ਹਾਂ ਸਕ੍ਰੀਨਾਂ 'ਤੇ ਅਜੇ ਵੀ ਲਿਖਿਆ ਹੈ ਕਿ ਉੱਥੇ ਕੀ ਲਿਖਣਾ ਹੈ। ਆਪਣੇ ਸ਼ਬਦ ਲਿਖਣ ਲਈ ਕਿਸੇ ਇੱਕ 'ਤੇ ਟੈਪ ਕਰੋ।",
+    toWriteScreen: "ਸਕ੍ਰੀਨ {n} · {name}",
+    toWriteBack: "ਵਾਪਸ ਜਾ ਕੇ ਲਿਖੋ",
+    toWriteAnyway: "ਫਿਰ ਵੀ ਕਾਰਟ ਵਿੱਚ ਪਾਓ",
     failed: "ਕੁਝ ਗੜਬੜ ਹੋ ਗਈ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
     hints: {
       message: "ਇੱਕ ਚਿੱਠੀ ਜੋ ਆਪੇ ਲਿਖੀ ਜਾਂਦੀ ਹੈ",

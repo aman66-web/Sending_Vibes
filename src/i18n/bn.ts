@@ -855,6 +855,11 @@ export const bn: Dict = {
     fullScreen: "⛶ Full screen",
     closePreview: "প্রিভিউ বন্ধ করুন",
     needNames: "আগে দুজনের নামই দিন।",
+    toWriteTitle: "কিছু কথা এখনও লেখা বাকি",
+    toWriteIntro: "এই স্ক্রিনগুলোতে এখনও লেখা আছে সেখানে কী লিখতে হবে। নিজের কথা লিখতে একটিতে ট্যাপ করুন।",
+    toWriteScreen: "স্ক্রিন {n} · {name}",
+    toWriteBack: "ফিরে গিয়ে লিখুন",
+    toWriteAnyway: "তবুও কার্টে যোগ করুন",
     failed: "কিছু একটা সমস্যা হয়েছে। আবার চেষ্টা করুন।",
     hints: {
       message: "নিজে নিজে টাইপ হয়ে যাওয়া একটা চিরকুট",

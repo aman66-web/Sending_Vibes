@@ -26,6 +26,7 @@ import { AtComputerSize, AtPhoneSize } from "./AtPhoneSize";
 import { STUDIO_TABS, ScreenStrip, StudioPanel, type Tab } from "./Studio";
 import { useWide } from "./use-wide";
 import { AllWords, EditableCard, setAt, type Path } from "./WordEditing";
+import { stillToWrite } from "./screen-kit";
 
 const DRAFT_KEY = "sv-draft-v1";
 const MODE_KEY = "sv-draft-mode";
@@ -428,9 +429,15 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     setBusy(null);
   };
 
-  const publish = async () => {
+  // Screens still saying what to write there ("Type your question here"), checked before
+  // the card goes in the basket.
+  const [toWrite, setToWrite] = useState<ReturnType<typeof stillToWrite> | null>(null);
+  const publish = async (anyway = false) => {
     if (!card) return;
     if (!card.to.trim() || !card.from.trim()) return setError(c.needNames);
+    const blanks = stillToWrite(card);
+    if (blanks.length && !anyway) return setToWrite(blanks);
+    setToWrite(null);
     setSaving(true);
     setError(null);
     try {
@@ -757,7 +764,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
               <button onClick={() => setShowPreview(true)} className="flex-1 rounded-full border-2 border-line py-3.5 font-semibold lg:hidden">
                 {c.fullScreen}
               </button>
-              <button onClick={publish} disabled={saving} className="flex-[2] rounded-full bg-brand py-3.5 font-brand text-lg font-semibold text-white shadow-lg disabled:opacity-50 lg:w-full">
+              <button onClick={() => publish()} disabled={saving} className="flex-[2] rounded-full bg-brand py-3.5 font-brand text-lg font-semibold text-white shadow-lg disabled:opacity-50 lg:w-full">
                 {saving ? c.adding : fmt(c.addToBasket, { price: formatMoney(tierPrice(cardTier(card)), currency) })}
               </button>
             </div>
@@ -894,6 +901,22 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
         />
       )}
 
+      {toWrite && card && (
+        <StillToWrite
+          card={card}
+          blanks={toWrite}
+          onClose={() => setToWrite(null)}
+          onAnyway={() => publish(true)}
+          onGo={(id) => {
+            setToWrite(null);
+            setShowPreview(false);
+            setWordMode("edit");
+            goToScreen(id);
+            requestAnimationFrame(() => cardBox.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+          }}
+        />
+      )}
+
       {bigView && card && <FullScreenView card={card} startAt={viewing} closeLabel={c.closePreview} onClose={() => setBigView(false)} />}
 
       {showPreview && card && (
@@ -929,6 +952,79 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
         </div>
       )}
 
+    </div>
+  );
+}
+
+// Before the basket: the screens whose words still say what to write there, to go and
+// write them, or add the card anyway.
+function StillToWrite({
+  card,
+  blanks,
+  onGo,
+  onAnyway,
+  onClose,
+}: {
+  card: CardData;
+  blanks: ReturnType<typeof stillToWrite>;
+  onGo: (id: string) => void;
+  onAnyway: () => void;
+  onClose: () => void;
+}) {
+  const { t } = useI18n();
+  const c = t.create;
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+  // One row per screen, with the first couple of its unwritten bits.
+  const screens = [...new Set(blanks.map((b) => b.index))];
+  return (
+    <div role="dialog" aria-modal="true" aria-labelledby="to-write-title" className="fixed inset-0 z-[70] overflow-y-auto bg-black/50" onClick={onClose}>
+      <div className="flex min-h-full items-end justify-center p-4 sm:items-center">
+        <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md rounded-3xl border-2 border-foreground bg-background p-5 shadow-2xl">
+          <h2 id="to-write-title" className="font-brand text-2xl font-bold">
+            {c.toWriteTitle}
+          </h2>
+          <p className="mt-1 opacity-75">{c.toWriteIntro}</p>
+          <div className="mt-4 space-y-2">
+            {screens.map((index) => {
+              const screen = card.screens[index];
+              const name = screen.type === "game" ? t.labels.games[screen.game] : t.labels.screens[screen.type];
+              const words = blanks.filter((b) => b.index === index).map((b) => `“${b.text}”`);
+              return (
+                <button
+                  key={screen.id}
+                  type="button"
+                  autoFocus={index === screens[0]}
+                  onClick={() => onGo(screen.id)}
+                  className="flex w-full items-center gap-3 rounded-2xl border-2 border-line px-4 py-3 text-start transition hover:border-brand"
+                >
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-semibold">{fmt(c.toWriteScreen, { n: index + 1, name })}</span>
+                    <span className="block truncate text-sm opacity-65">
+                      {words.slice(0, 2).join(", ")}
+                      {words.length > 2 ? "…" : ""}
+                    </span>
+                  </span>
+                  <span aria-hidden className="text-xl text-brand">
+                    ✎
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          <div className="mt-5 flex flex-col gap-2 sm:flex-row-reverse">
+            <button type="button" onClick={onClose} className="flex-1 rounded-full bg-brand py-3 font-semibold text-white">
+              {c.toWriteBack}
+            </button>
+            <button type="button" onClick={onAnyway} className="flex-1 rounded-full border-2 border-line py-3 font-semibold">
+              {c.toWriteAnyway}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

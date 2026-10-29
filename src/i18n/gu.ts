@@ -855,6 +855,11 @@ export const gu: Dict = {
     fullScreen: "⛶ Full screen",
     closePreview: "પ્રિવ્યૂ બંધ કરો",
     needNames: "પહેલાં બંને નામ ઉમેરો.",
+    toWriteTitle: "કેટલાક શબ્દો હજુ લખવાના બાકી છે",
+    toWriteIntro: "આ સ્ક્રીન પર હજુ પણ લખ્યું છે કે ત્યાં શું લખવું. તમારા પોતાના શબ્દો લખવા માટે એક પર ટેપ કરો.",
+    toWriteScreen: "સ્ક્રીન {n} · {name}",
+    toWriteBack: "પાછા જઈને લખો",
+    toWriteAnyway: "છતાં કાર્ટમાં ઉમેરો",
     failed: "કંઈક ગડબડ થઈ. કૃપા કરીને ફરી પ્રયત્ન કરો.",
     hints: {
       message: "જાતે લખાતી ચિઠ્ઠી",
