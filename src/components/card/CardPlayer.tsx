@@ -7,6 +7,7 @@ import { FONT_VARS, cropStyle, screenLook } from "@/lib/screen-style";
 import { themes } from "@/lib/themes";
 import { Backdrop, BurstContext } from "./effects";
 import { BoxesScreen, CouponsScreen, ReasonsScreen, SliderScreen, TimelineScreen, WheelScreen } from "./more-screens";
+import { ReplyPanel, type Recipient } from "./ReplyPanel";
 import {
   FinaleScreen,
   GameScreen,
@@ -60,6 +61,8 @@ type Props = {
   // A preview that grows to fit each screen (filling at least its box) instead of scrolling
   // inside itself: the editor's own on a phone, so a swipe on it always scrolls the page.
   grow?: boolean;
+  // Only on the card's own page (c/[id]), for the person it's for: a thank-you and a card back.
+  recipient?: Recipient;
 };
 
 export function CardPlayer({
@@ -73,6 +76,7 @@ export function CardPlayer({
   onScreenChange,
   editing = false,
   grow = false,
+  recipient,
 }: Props) {
   const screens = useMemo(
     () => card.screens.filter((s) => preview || s.type !== "photos" || s.photos.length > 0),
@@ -215,7 +219,11 @@ export function CardPlayer({
               screen={current}
               onReplay={replay}
               footer={
-                !preview && (
+                // The real card, for the person it's for: tell the sender what they thought, or
+                // send one back (ReplyPanel.tsx). Demos keep the plain link; previews show nothing.
+                recipient && !preview ? (
+                  <ReplyPanel card={card} {...recipient} />
+                ) : !preview && (
                   <Link
                     href={card.template ? `/create?template=${card.template}` : "/create"}
                     className="mt-4 rounded-full bg-[var(--c-surface)] px-5 py-2.5 text-sm font-semibold shadow-sm ring-1 ring-black/10 backdrop-blur"

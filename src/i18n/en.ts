@@ -660,6 +660,8 @@ export const en = {
         title: "Who can see a card",
         paragraphs: [
           "Anyone with the card's link can open it, so only share it with the people you want to see it. Links are long random codes that can't realistically be guessed, and cards are never listed, searchable or shown anywhere else on the site. We also ask search engines not to index them.",
+          "The first time a card is opened, we email the person who sent it to say so. We only keep the time, not who opened it or where.",
+          "If you reply to a card you were sent, we email the person who sent it the reaction you tapped and any words you added, and keep them with the card. You never see their email address.",
         ],
       },
       {
@@ -671,7 +673,7 @@ export const en = {
       {
         title: "Things saved on your device",
         paragraphs: [
-          "While you're making a card, we keep an unfinished copy in your browser's local storage so a refresh doesn't lose your work. We also remember whether you've muted card sounds and, in a small cookie, which language you picked. If you sign in, a cookie keeps you signed in. These stay on your device. We don't use advertising or tracking cookies.",
+          "While you're making a card, we keep an unfinished copy in your browser's local storage so a refresh doesn't lose your work. We also remember whether you've muted card sounds or replied to a card and, in a small cookie, which language you picked. If you sign in, a cookie keeps you signed in. These stay on your device. We don't use advertising or tracking cookies.",
         ],
       },
       {
@@ -1296,8 +1298,42 @@ export const en = {
   // A new look for the whole card at a tap (components/create/NewLook.tsx, lib/vary.ts).
   vary: {},
 
-  // What the person who got the card can send back (components/card/ReplyPanel.tsx).
-  reply: {},
+  // What the person who got the card can send back (components/card/ReplyPanel.tsx), and
+  // what their sender hears about it (lib/notify.ts, the account page).
+  reply: {
+    title: "Tell {name} what you thought",
+    hint: "Tap one and we'll pass it on.",
+    reactions: { love: "Loved it", laugh: "Made me laugh", tears: "Happy tears", party: "Brilliant!" },
+    noteLabel: "Add a few words if you like",
+    notePlaceholder: "Thank you so much…",
+    left: "{n} letters left",
+    send: "Send to {name}",
+    sending: "Sending…",
+    sent: "Sent! We've passed it on to {name}.",
+    full: "{name} has already had a few replies to this card, so this one can't be sent.",
+    tooMany: "That's a lot of tries. Please wait a few minutes and try again.",
+    failed: "That didn't send. Please try again.",
+    sendBack: "Send {name} a card back 💌",
+    makeOwn: "Or make one for someone else",
+    opened: "Opened {date} ✓",
+    email: {
+      openedSubject: "{to} has opened your card 💌",
+      openedTitle: "{to} has opened your card 💌",
+      openedBody: "The card you sent {to} has just been opened for the first time. We hope it made their day.",
+      openedNote: "We only tell you the first time a card is opened. We don't record who opened it or where.",
+      seeCards: "See my cards",
+      another: "Make another card",
+      replySubject: "{to} replied to your card {emoji}",
+      replyTitle: {
+        love: "{to} loved your card",
+        laugh: "Your card made {to} laugh",
+        tears: "Your card gave {to} happy tears",
+        party: "{to} thought your card was brilliant",
+      },
+      replySaid: "They added:",
+      replyNote: "{to} replied from the card itself. We never show them your email address.",
+    },
+  },
 
   // The bar on full-screen demos (components/DemoBar.tsx).
   demo: {},
