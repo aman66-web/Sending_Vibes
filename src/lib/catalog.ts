@@ -3,6 +3,7 @@ import type { Tier } from "./pricing";
 import * as B from "./design-styles-b";
 import { MORE_DESIGNS } from "./catalog-more";
 import { OCCASION_DESIGNS } from "./catalog-occasions";
+import { DESIGN_SCREENS } from "./design-history";
 import { BLANK, arcade, bloom, blush, bout, candle, crown, dusk, fizz, flight, gallery, garden, golden, groan, gulal, hush, lilac, lullaby, memo, oak, reveal, splash, stick, sunny, thread, ticket, voyage, zine } from "./design-styles-c";
 import { P, at, boxes, coupons, finale, game, intro, message, photos, q, question, quiz, reasons, scratch, slider, timeline, typeit, wheel } from "./design-kit";
 import { dress, sticker } from "./design-styles-a";
@@ -3312,13 +3313,15 @@ export function buildCard(t: Template, to: string, from: string): CardData {
 // Premade: one of our designs with its screens as they come (every word, photo, colour
 // and tune can still change). Anything else is custom: a card written from a
 // description, or one with screens added, taken out or moved. The checkout works this
-// out from the saved card, so the price never depends on what the browser says.
+// out from the saved card, so the price never depends on what the browser says. A card
+// saved before its design changed still counts: it matches one of the design's earlier
+// lists of screens (lib/design-history.ts).
 export function cardTier(card: Pick<CardData, "template" | "screens">): Tier {
   const template = getTemplate(card.template);
   if (!template) return "custom";
-  const want = template.screens("", "").map((s) => s.type);
-  const got = card.screens.map((s) => s.type);
-  return want.length === got.length && want.every((type, i) => type === got[i]) ? "premade" : "custom";
+  const got = card.screens.map((s) => s.type).join(",");
+  const lists = [template.screens("", "").map((s) => s.type).join(","), ...(DESIGN_SCREENS[template.slug] ?? [])];
+  return lists.includes(got) ? "premade" : "custom";
 }
 
 // The card as shown in previews: sample names and illustrated photos.
