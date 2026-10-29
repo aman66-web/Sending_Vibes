@@ -1288,4 +1288,10 @@ export const pa: Dict = {
     tooManyPhotos: "ਤੁਸੀਂ {n} ਤੱਕ ਫ਼ੋਟੋਆਂ ਪਾ ਸਕਦੇ ਹੋ।",
     uploadFailed: "ਇਹ ਫ਼ੋਟੋ ਨਹੀਂ ਪਾਈ ਜਾ ਸਕੀ। JPG ਜਾਂ PNG ਵਰਤ ਕੇ ਵੇਖੋ।",
   },
+  looks: {},
+  vary: {},
+  reply: {},
+  kit: {},
+  demo: {},
+  occasionSeo: {},
 };

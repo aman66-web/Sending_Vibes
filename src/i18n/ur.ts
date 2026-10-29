@@ -1288,4 +1288,10 @@ export const ur: Dict = {
     tooManyPhotos: "آپ زیادہ سے زیادہ {n} تصویریں لگا سکتے ہیں۔",
     uploadFailed: "یہ تصویر نہیں لگ سکی۔ JPG یا PNG آزما کر دیکھیں۔",
   },
+  looks: {},
+  vary: {},
+  reply: {},
+  kit: {},
+  demo: {},
+  occasionSeo: {},
 };

@@ -1282,4 +1282,10 @@ export const hi: Dict = {
     tooManyPhotos: "आप ज़्यादा से ज़्यादा {n} फ़ोटो जोड़ सकते हैं।",
     uploadFailed: "यह फ़ोटो जोड़ी नहीं जा सकी। JPG या PNG आज़माइए।",
   },
+  looks: {},
+  vary: {},
+  reply: {},
+  kit: {},
+  demo: {},
+  occasionSeo: {},
 };

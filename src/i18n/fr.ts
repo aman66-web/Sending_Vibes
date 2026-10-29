@@ -1288,4 +1288,10 @@ export const fr: Dict = {
     tooManyPhotos: "Tu peux ajouter jusqu'à {n} photos.",
     uploadFailed: "Impossible d'ajouter cette photo. Essaie un JPG ou un PNG.",
   },
+  looks: {},
+  vary: {},
+  reply: {},
+  kit: {},
+  demo: {},
+  occasionSeo: {},
 };

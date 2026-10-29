@@ -1288,4 +1288,10 @@ export const bn: Dict = {
     tooManyPhotos: "আপনি সর্বোচ্চ {n}টি ছবি যোগ করতে পারবেন।",
     uploadFailed: "ছবিটা যোগ করা গেল না। JPG বা PNG দিয়ে চেষ্টা করুন।",
   },
+  looks: {},
+  vary: {},
+  reply: {},
+  kit: {},
+  demo: {},
+  occasionSeo: {},
 };

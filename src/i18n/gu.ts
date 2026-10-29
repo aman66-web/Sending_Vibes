@@ -1288,4 +1288,10 @@ export const gu: Dict = {
     tooManyPhotos: "તમે વધુમાં વધુ {n} ફોટા ઉમેરી શકો છો.",
     uploadFailed: "આ ફોટો ઉમેરી શકાયો નહીં. JPG કે PNG અજમાવો.",
   },
+  looks: {},
+  vary: {},
+  reply: {},
+  kit: {},
+  demo: {},
+  occasionSeo: {},
 };

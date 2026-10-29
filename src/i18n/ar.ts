@@ -1288,4 +1288,10 @@ export const ar: Dict = {
     tooManyPhotos: "يمكنك إضافة {n} صور كحد أقصى.",
     uploadFailed: "تعذّرت إضافة هذه الصورة. جرّب صورة JPG أو PNG.",
   },
+  looks: {},
+  vary: {},
+  reply: {},
+  kit: {},
+  demo: {},
+  occasionSeo: {},
 };
