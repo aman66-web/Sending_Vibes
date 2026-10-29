@@ -193,6 +193,8 @@ const SWAPS = ["❤️", "💖", "⭐", "✨", "🎈", "🎉", "🌸", "🌈", "
 const SIZE: Record<Deco, [number, number]> = { sticker: [4, 40], text: [2, 20], image: [10, 90] };
 // The most of each a screen holds (see lib/card.ts).
 const MOST: Record<Deco, number> = { sticker: 10, text: 8, image: 6 };
+// How far something's turned, as people read it: "30°", or "−15°" for anticlockwise.
+const degrees = (deg: number) => `${deg < 0 ? "−" : ""}${Math.abs(deg)}°`;
 // An angle between -180 and 180 degrees, whole, and exactly straight when within 4 degrees of it.
 const straight = (deg: number) => {
   const d = Math.round((((deg % 360) + 540) % 360) - 180);
@@ -229,6 +231,8 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
   const gesture = useRef<Gesture | null>(null);
   // Where a touch or click on the card began, so lifting it picks something only if it was a tap.
   const tap = useRef<{ id: number; x: number; y: number } | null>(null);
+  // While the turning handle is dragged, the angle shows beside it.
+  const [turning, setTurning] = useState(false);
   // Each selection is one step for Undo, however many changes are made while it's open.
   const begun = useRef(false);
   // Which photo the chosen file replaces (a photos screen's, or a placed one), or null to add them.
@@ -488,6 +492,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
       // Selected while it moves, so its box follows it.
       select({ kind: "deco", deco: g.deco, index: g.index, box: g.box });
       begin();
+      if (g.mode === "rotate") setTurning(true);
     }
     const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
     if (g.mode === "move") {
@@ -530,6 +535,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
   const endGesture = () => {
     const g = gesture.current;
     gesture.current = null;
+    setTurning(false);
     if (!g) return false;
     if (g.moved) remeasure(g.deco, g.index);
     else {
@@ -543,6 +549,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
     const g = gesture.current;
     gesture.current = null;
     tap.current = null;
+    setTurning(false);
     if (g?.moved) remeasure(g.deco, g.index);
   };
 
@@ -748,6 +755,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
           role="slider"
           aria-label={s.turn}
           aria-valuenow={Number(item?.rotate ?? 0)}
+          aria-valuetext={degrees(Number(item?.rotate ?? 0))}
           className="absolute z-[48] grid h-8 w-8 cursor-grab touch-none place-items-center rounded-full border-2 border-brand bg-white text-lg font-bold text-brand shadow-lg active:cursor-grabbing"
           style={{ left: open.box.left + open.box.width / 2 - 16, top: turnBelow ? open.box.top + open.box.height + 12 : open.box.top - 44 }}
           onPointerDown={(e) => {
@@ -760,6 +768,20 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
           onPointerCancel={cancelGesture}
         >
           ↻
+        </span>
+      )}
+      {enabled && open?.kind === "deco" && turning && (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute z-[49] whitespace-nowrap rounded-full bg-foreground px-2.5 py-1 text-sm font-bold tabular-nums text-background shadow-lg"
+          style={{
+            top: (turnBelow ? open.box.top + open.box.height + 12 : open.box.top - 44) + 4,
+            ...(open.box.left + open.box.width / 2 + 90 > open.area.width
+              ? { left: open.box.left + open.box.width / 2 - 24, transform: "translateX(-100%)" }
+              : { left: open.box.left + open.box.width / 2 + 24 }),
+          }}
+        >
+          {degrees(Number(item?.rotate ?? 0))}
         </span>
       )}
       {enabled && clip && (
@@ -882,6 +904,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
                 {icon}
               </button>
             ))}
+            <span className="min-w-[4ch] text-center text-sm font-bold tabular-nums">{degrees(Number(item.rotate ?? 0))}</span>
             {Number(item.rotate ?? 0) !== 0 && (
               <button
                 type="button"
