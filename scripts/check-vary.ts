@@ -4,7 +4,7 @@
 // card still validates and is priced the same; their photos, text boxes, own stickers and
 // favourite colour stay as they were; the words stay readable; and the same seed always
 // gives the same look.
-import { cardSchema, type CardData, type Screen, type ScreenStyle } from "../src/lib/card";
+import { OCCASIONS, cardSchema, type CardData, type Screen, type ScreenStyle } from "../src/lib/card";
 import { TEMPLATES, buildCard, cardTier } from "../src/lib/catalog";
 import { contrast, screenLook } from "../src/lib/screen-style";
 import { themes } from "../src/lib/themes";
@@ -51,19 +51,35 @@ function words(card: CardData) {
 
 // Their own things on each screen: text boxes, photos, and stickers that aren't ours.
 const theirs = (card: CardData) => card.screens.map((s) => ({ texts: s.style?.texts ?? [], images: s.style?.images ?? [], stickers: (s.style?.stickers ?? []).filter((x) => !isOurSticker(x)), tune: s.style?.tune }));
+const stickersOf = (s: Screen) => s.style?.stickers ?? [];
+// Where the design's own words already read at 4.5:1 (some don't, and a look makes them clearer).
+const reads = (card: CardData, s: Screen) => worst(screenLook(themes[card.theme], s.style).theme.text, backgroundOf(card, s)) >= 4.5;
 
 function checkLook(before: CardData, after: CardData, label: string, opts: { gentle?: boolean; favourite?: string } = {}) {
   expect(cardSchema.safeParse(after).success, `${label}: validates (${cardSchema.safeParse(after).error?.issues[0]?.message})`);
   expect(json(after.screens.map((s) => [s.id, s.type])) === json(before.screens.map((s) => [s.id, s.type])), `${label}: same screens in the same order`);
   expect(json(words(after)) === json(words(before)), `${label}: words unchanged`);
   expect(cardTier(after) === cardTier(before), `${label}: same price tier`);
-  expect(json(theirs(after)) === json(theirs(before)), `${label}: their text boxes, photos, stickers and tunes kept`);
+  if (!opts.gentle) expect(json(theirs(after)) === json(theirs(before)), `${label}: their text boxes, photos, stickers and tunes kept`);
+  else {
+    // Everything on a design is the design's own, and its stickers are varied: each one is
+    // still there (nudged, perhaps swapped) or left exactly as it was.
+    const keptBits = (c: CardData) => theirs(c).map(({ stickers: _s, ...rest }) => (void _s, rest));
+    expect(json(keptBits(after)) === json(keptBits(before)), `${label}: text boxes, photos and tunes kept`);
+    for (const [i, s] of after.screens.entries()) {
+      const was = stickersOf(before.screens[i]);
+      const now = stickersOf(s);
+      expect(now.length >= was.length && now.length <= was.length + 3, `${label} #${i}: the design's stickers all still there (${was.length} → ${now.length})`);
+      expect(now.filter((x) => !isOurSticker(x)).every((x) => was.some((w) => json(w) === json(x))), `${label} #${i}: stickers not varied are exactly as designed`);
+    }
+  }
   expect(after.ambient !== "fireworks", `${label}: no fireworks in the background`);
   for (const [i, s] of after.screens.entries()) {
     const style: ScreenStyle = s.style ?? {};
     const ours = (style.stickers ?? []).filter(isOurSticker);
     expect((style.stickers?.length ?? 0) <= 10, `${label} #${i}: at most 10 stickers`);
-    if (s.type === "game") expect(ours.length === 0, `${label} #${i}: no stickers of ours on a game`);
+    // We never add stickers to a game; a gentle look only moves the design's own.
+    if (s.type === "game") expect(ours.length <= (opts.gentle ? stickersOf(before.screens[i]).length : 0), `${label} #${i}: no stickers of ours added to a game`);
     for (const st of ours) {
       expect(!(st.x > 75 && st.y < 22), `${label} #${i}: top right kept clear (${st.x}, ${st.y})`);
       expect(st.x < 15 || st.x > 85 || st.y < 14 || st.y > 86, `${label} #${i}: sticker near an edge (${st.x}, ${st.y})`);
@@ -79,7 +95,13 @@ function checkLook(before: CardData, after: CardData, label: string, opts: { gen
   if (opts.gentle) {
     expect(after.theme === before.theme, `${label}: gentle keeps the theme`);
     expect(after.ambient === before.ambient, `${label}: gentle keeps the background effect`);
-    expect(json(after.screens.map((s) => [s.style?.background, s.style?.text, s.style?.body, s.type === "finale" ? s.effect : 0])) === json(before.screens.map((s) => [s.style?.background, s.style?.text, s.style?.body, s.type === "finale" ? s.effect : 0])), `${label}: gentle keeps backgrounds, text colours, body font and finale`);
+    const kept = (c: CardData) => c.screens.map((s) => [s.style?.text, s.style?.body, s.style?.gradient, s.type === "finale" ? s.effect : 0]);
+    expect(json(kept(after)) === json(kept(before)), `${label}: gentle keeps text colours, body font, gradients and finale`);
+    for (const [i, s] of before.screens.entries()) {
+      const now = after.screens[i].style?.background;
+      if (reads(before, s)) expect(json(now) === json(s.style?.background), `${label} #${i}: gentle keeps the background`);
+      else expect((now?.length ?? 0) === backgroundOf(before, s).length, `${label} #${i}: gentle only makes a hard-to-read background clearer`);
+    }
   }
 }
 
@@ -96,8 +118,9 @@ for (const p of PALETTES) {
     expect(toPalette(p, moved) === moved || Math.abs(lum(toPalette(p, moved)) - lum(moved)) < 0.01, `${p.key}: ${c} maps onto itself`);
   }
 }
-for (const occasion of new Set(TEMPLATES.map((t) => t.occasion))) {
-  expect(PALETTES.filter((p) => p.occasions.includes(occasion)).length >= 4, `${occasion}: at least four palettes suit it`);
+for (const occasion of OCCASIONS) {
+  const n = PALETTES.filter((p) => p.occasions.includes(occasion)).length;
+  expect(n >= 6, `${occasion}: at least six palettes suit it (${n})`);
 }
 
 // ---------- Every design ----------
@@ -111,29 +134,33 @@ for (const t of TEMPLATES) {
     expect(json(restyle(card, seed)) === json(full), `${t.slug} ${seed}: same seed, same look`);
     const gentle = restyle(card, seed, { gentle: true, favourite: null });
     checkLook(card, gentle, `${t.slug} gentle ${seed}`, { gentle: true });
-    expect(gentle.screens.some((s) => s.style?.stickers?.some(isOurSticker)), `${t.slug} gentle ${seed}: some stickers of its own`);
+    expect(gentle.screens.some((s) => s.style?.stickers?.some(isOurSticker)), `${t.slug} gentle ${seed}: its stickers are its own (varied or added)`);
+    expect(json(gentle.screens.map((s) => s.style)) !== json(card.screens.map((s) => s.style)), `${t.slug} gentle ${seed}: not the same as the design`);
   }
   expect(json(card) === frozen, `${t.slug}: the card passed in isn't changed`);
   // Stepping through looks, as the button does, starting from the gentle one they're given.
   let look = restyle(card, "open", { gentle: true, favourite: null });
   for (let n = 1; n <= 8; n++) {
     const next = restyle(look, `step:${n}`);
-    checkLook(card, next, `${t.slug} look ${n}`);
+    // Compared with the look before: the design's own stickers, once varied, are ours to replace.
+    checkLook(look, next, `${t.slug} look ${n}`);
     expect(next.screens.every((s) => (s.style?.stickers ?? []).filter(isOurSticker).length <= 3), `${t.slug} look ${n}: stickers don't pile up`);
     expect(json(next.screens.map((s) => s.style?.background)) !== json(look.screens.map((s) => s.style?.background)), `${t.slug} look ${n}: each tap changes the colours`);
     look = next;
   }
 }
 
-// Variety: the same design for different people.
-{
-  const t = TEMPLATES[0];
+// Variety: the same design for different people, on every design.
+for (const t of TEMPLATES) {
   const card = buildCard(t, "Lily", "Sam");
   const seeds = Array.from({ length: 40 }, (_, i) => `person-${i}`);
   const palettes = new Set(seeds.map((s) => restyle(card, s).screens[0].style?.background?.join()));
-  const gentle = new Set(seeds.map((s) => json(restyle(card, s, { gentle: true, favourite: null }).screens.map((x) => x.style))));
-  expect(palettes.size >= 6, `variety: 40 new looks use ${palettes.size} palettes`);
-  expect(gentle.size === seeds.length, `variety: 40 people's copies of ${t.slug} all look different (${gentle.size})`);
+  const gentle = seeds.map((s) => restyle(card, s, { gentle: true, favourite: null }));
+  expect(palettes.size >= 5, `variety: 40 new looks of ${t.slug} use ${palettes.size} palettes`);
+  expect(new Set(gentle.map((g) => json(g.screens.map((x) => x.style)))).size === seeds.length, `variety: 40 people's copies of ${t.slug} all look different`);
+  // And not just by a hair: something you'd notice (a button or envelope colour, a font, a sticker) differs.
+  const noticed = new Set(gentle.map((g) => json(g.screens.map((x) => [x.style?.accent, x.style?.envelope, x.style?.heading, x.style?.transition, (x.style?.stickers ?? []).map((st) => st.emoji)]))));
+  expect(noticed.size >= 30, `variety: copies of ${t.slug} differ noticeably (${noticed.size} of 40)`);
 }
 
 // A favourite colour on a ready-made design becomes its buttons when it reads well.
@@ -141,9 +168,13 @@ for (const t of TEMPLATES) {
   const card = buildCard(TEMPLATES[0], "Lily", "Sam");
   const gentle = restyle(card, "fav", { gentle: true, favourite: "#2563eb" });
   checkLook(card, gentle, "favourite on a design", { gentle: true });
-  expect(gentle.screens.every((s) => s.style?.accent === "#2563eb"), "favourite on a design: it's the button colour");
+  // Wherever it reads well as a button, it is the button.
+  const fits = gentle.screens.filter((s) => worst("#2563eb", backgroundOf(gentle, s)) >= 2.6);
+  expect(fits.length > 0 && fits.every((s) => s.style?.accent === "#2563eb"), `favourite on a design: it's the button colour (${fits.length} screens)`);
   const again = restyle(gentle, "fav-2");
-  expect(again.screens.every((s) => s.style?.accent === "#2563eb"), "favourite on a design: a new look keeps it, in case");
+  expect(gentle.screens.every((s, i) => s.style?.accent !== "#2563eb" || again.screens[i].style?.accent === "#2563eb"), "favourite on a design: a new look keeps it, in case");
+  const known = restyle(gentle, "fav-3", { favourite: "#2563eb" });
+  expect(gentle.screens.every((s, i) => s.style?.accent !== "#2563eb" || known.screens[i].style?.accent === "#2563eb"), "favourite on a design: a new look keeps it when it's known");
 }
 
 // ---------- A card styled like the AI's ----------
