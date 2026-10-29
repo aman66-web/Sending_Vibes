@@ -1,0 +1,165 @@
+[
+  {
+    "id": "mum-birthday-surprise",
+    "to": "Mum",
+    "from": "Priya",
+    "prompt": "Occasion: Birthday\nIt's for Mum (Mum), from Priya.\nHow it should feel: Heartfelt, Funny\nHow the card should look, screen by screen (build it in exactly this order): Surprise me! Design the whole card however you think she'd love it most.",
+    "brief": { "occasion": "birthday", "relation": "Mum", "tones": ["heartfelt", "funny"], "surprise": true },
+    "details": []
+  },
+  {
+    "id": "dan-30th-details",
+    "to": "Dan",
+    "from": "Sam",
+    "prompt": "Occasion: Birthday\nIt's for Dan (Best friend), from Sam.\nHow it should feel: Funny\nHow the card should look, screen by screen (build it in exactly this order): Make it funny. He's turning 30, supports Arsenal through thick and thin, and is obsessed with his air fryer (he air-fries everything, even toast). We met at uni in Leeds.",
+    "brief": { "occasion": "birthday", "relation": "Best friend", "tones": ["funny"], "about": "Turning 30, Arsenal fan, obsessed with his air fryer, we met at uni in Leeds" },
+    "details": ["Arsenal", "air fryer", "Leeds"]
+  },
+  {
+    "id": "grandad-christmas-gentle",
+    "to": "Grandad",
+    "from": "Ellie",
+    "prompt": "Occasion: Christmas\nIt's for Grandad (Grandparent), from Ellie.\nHow it should feel: Heartfelt, Festive\nHow the card should look, screen by screen (build it in exactly this order): Something simple and warm. He's 91, loves his allotment and his crossword, and still calls me his little sprout.",
+    "brief": { "occasion": "christmas", "relation": "Grandparent", "tones": ["heartfelt", "festive"], "age": "older", "gentle": true, "about": "91, loves his allotment and the crossword, calls me his little sprout" },
+    "details": ["allotment", "crossword", "sprout"]
+  },
+  {
+    "id": "partner-anniversary",
+    "to": "Jamie",
+    "from": "Alex",
+    "prompt": "Occasion: Anniversary\nIt's for Jamie (Partner), from Alex.\nHow it should feel: Romantic, Cute\nHow the card should look, screen by screen (build it in exactly this order): Five years together. Our first date was at a terrible karaoke bar in Glasgow, and we have a dog called Pickle.",
+    "brief": { "occasion": "anniversary", "relation": "Partner", "tones": ["romantic", "cute"], "about": "Five years together, first date at a karaoke bar in Glasgow, dog called Pickle" },
+    "details": ["karaoke", "Glasgow", "Pickle"]
+  },
+  {
+    "id": "colleague-leaving",
+    "to": "Fiona",
+    "from": "The accounts team",
+    "prompt": "Occasion: Leaving\nIt's for Fiona (Colleague), from The accounts team.\nHow it should feel: Funny, Heartfelt\nHow the card should look, screen by screen (build it in exactly this order): She's retiring after 22 years. She ran the office bake-off and always had biscuits in her drawer.",
+    "brief": { "occasion": "leaving", "relation": "Colleague", "tones": ["funny", "heartfelt"], "about": "Retiring after 22 years, ran the office bake-off, biscuits in her drawer" },
+    "details": ["bake-off", "biscuits"]
+  },
+  {
+    "id": "child-birthday-little",
+    "to": "Ava",
+    "from": "Auntie Sara",
+    "prompt": "Occasion: Birthday\nIt's for Ava (Niece), from Auntie Sara.\nHow it should feel: Cute, Funny\nHow the card should look, screen by screen (build it in exactly this order): She's turning 4 and loves dinosaurs and the colour purple.",
+    "brief": { "occasion": "birthday", "relation": "Niece", "tones": ["cute", "funny"], "age": "little", "about": "Turning 4, loves dinosaurs and purple" },
+    "details": ["dinosaur"]
+  },
+  {
+    "id": "nani-diwali",
+    "to": "Nani",
+    "from": "Arjun",
+    "prompt": "Occasion: Diwali\nIt's for Nani (Grandparent), from Arjun.\nHow it should feel: Festive, Heartfelt\nHow the card should look, screen by screen (build it in exactly this order): She lives in Birmingham and makes the best gulab jamun. I'm at uni so I can't be home this year.",
+    "brief": { "occasion": "diwali", "relation": "Grandparent", "tones": ["festive", "heartfelt"], "age": "older", "about": "Lives in Birmingham, best gulab jamun, I'm at uni and can't be home" },
+    "details": ["Birmingham", "gulab jamun", "uni"]
+  },
+  {
+    "id": "screen-by-screen",
+    "to": "Maya",
+    "from": "Sam",
+    "prompt": "Occasion: Valentine's Day\nIt's for Maya (Partner), from Sam.\nHow it should feel: Romantic\nHow the card should look, screen by screen (build it in exactly this order): 1. A dark green envelope with gold stars. 2. A question asking if she'll be my valentine. 3. A game where she catches falling hearts. 4. A letter about our trip to Lisbon. 5. A finale with petals.",
+    "brief": { "occasion": "valentine", "relation": "Partner", "tones": ["romantic"] },
+    "details": ["Lisbon"],
+    "expectTypes": ["intro", "question", "game", "message", "finale"]
+  },
+  {
+    "id": "picked-screens",
+    "to": "Tom",
+    "from": "Lucy",
+    "prompt": "Occasion: Congratulations\nIt's for Tom (Brother), from Lucy.\nHow it should feel: Funny, Festive\nHow the card should look, screen by screen (build it in exactly this order): He passed his driving test on the fifth go.",
+    "brief": { "occasion": "congrats", "relation": "Brother", "tones": ["funny", "festive"], "include": ["quiz", "wheel", "game:launch-fireworks"], "length": "short", "about": "Passed his driving test on the fifth go" },
+    "details": ["driving"],
+    "expectIncluded": ["quiz", "wheel", "game:launch-fireworks"]
+  },
+  {
+    "id": "sorry-sister",
+    "to": "Hannah",
+    "from": "Beth",
+    "prompt": "Occasion: Sorry\nIt's for Hannah (Sister), from Beth.\nHow it should feel: Heartfelt, Cute\nHow the card should look, screen by screen (build it in exactly this order): I forgot her graduation dinner. I want to say sorry properly and make her laugh a bit.",
+    "brief": { "occasion": "sorry", "relation": "Sister", "tones": ["heartfelt", "cute"], "about": "I forgot her graduation dinner" },
+    "details": ["graduation"]
+  },
+  {
+    "id": "eid-friend",
+    "to": "Zara",
+    "from": "Aisha",
+    "prompt": "Occasion: Eid\nIt's for Zara (Best friend), from Aisha.\nHow it should feel: Festive, Cute\nHow the card should look, screen by screen (build it in exactly this order): Surprise me.",
+    "brief": { "occasion": "eid", "relation": "Best friend", "tones": ["festive", "cute"], "surprise": true },
+    "details": []
+  },
+  {
+    "id": "dad-fathersday",
+    "to": "Dad",
+    "from": "Callum",
+    "prompt": "Occasion: Father's Day\nIt's for Dad (Dad), from Callum.\nHow it should feel: Funny\nHow the card should look, screen by screen (build it in exactly this order): He tells terrible jokes, loves fishing and falls asleep in front of the snooker every Sunday.",
+    "brief": { "occasion": "fathersday", "relation": "Dad", "tones": ["funny"], "about": "Terrible jokes, fishing, falls asleep in front of the snooker" },
+    "details": ["fishing", "snooker"]
+  },
+  {
+    "id": "getwell-neighbour",
+    "to": "Margaret",
+    "from": "Pat next door",
+    "prompt": "Occasion: Get well soon\nIt's for Margaret (Neighbour), from Pat next door.\nHow it should feel: Heartfelt\nHow the card should look, screen by screen (build it in exactly this order): She's 78 and just had a hip operation. Keep it gentle. I'm feeding her cat Tibbles.",
+    "brief": { "occasion": "getwell", "relation": "Neighbour", "tones": ["heartfelt"], "gentle": true, "age": "older", "about": "78, hip operation, I'm feeding her cat Tibbles" },
+    "details": ["hip", "Tibbles"]
+  },
+  {
+    "id": "teen-halloween",
+    "to": "Leo",
+    "from": "Cousin Max",
+    "prompt": "Occasion: Halloween\nIt's for Leo (Cousin), from Cousin Max.\nHow it should feel: Funny\nHow the card should look, screen by screen (build it in exactly this order): He's 15, loves horror films and is scared of spiders (secretly).",
+    "brief": { "occasion": "halloween", "relation": "Cousin", "tones": ["funny"], "age": "teen", "about": "15, loves horror films, secretly scared of spiders" },
+    "details": ["spider"]
+  },
+  {
+    "id": "newbaby",
+    "to": "Rosie and Ben",
+    "from": "Kate",
+    "prompt": "Occasion: New baby\nIt's for Rosie and Ben (Friends), from Kate.\nHow it should feel: Cute, Heartfelt\nHow the card should look, screen by screen (build it in exactly this order): Their daughter Isla was born on Tuesday.",
+    "brief": { "occasion": "newbaby", "relation": "Friends", "tones": ["cute", "heartfelt"], "about": "Their daughter Isla was born on Tuesday" },
+    "details": ["Isla"]
+  },
+  {
+    "id": "thanks-teacher",
+    "to": "Mr Okafor",
+    "from": "Jude",
+    "prompt": "Occasion: Thank you\nIt's for Mr Okafor (Teacher), from Jude.\nHow it should feel: Heartfelt, Funny\nHow the card should look, screen by screen (build it in exactly this order): He helped me through my GCSE maths and always wore the same brown cardigan.",
+    "brief": { "occasion": "thanks", "relation": "Teacher", "tones": ["heartfelt", "funny"], "about": "Helped me through GCSE maths, same brown cardigan" },
+    "details": ["maths", "cardigan"]
+  },
+  {
+    "id": "describe-box-no-brief",
+    "to": "Chris",
+    "from": "Jo",
+    "prompt": "A card for my husband Chris for our 10th wedding anniversary. He loves camping in the Lake District and makes me tea every morning.",
+    "details": ["Lake District", "tea"]
+  },
+  {
+    "id": "missyou-australia",
+    "to": "Grace",
+    "from": "Holly",
+    "prompt": "Occasion: Miss you\nIt's for Grace (Best friend), from Holly.\nHow it should feel: Heartfelt, Cute\nHow the card should look, screen by screen (build it in exactly this order): She moved to Melbourne in March. We used to get chips on the pier at Brighton every Friday.",
+    "brief": { "occasion": "missyou", "relation": "Best friend", "tones": ["heartfelt", "cute"], "about": "Moved to Melbourne in March, chips on the pier at Brighton every Friday" },
+    "details": ["Melbourne", "Brighton", "chips"]
+  },
+  {
+    "id": "holi-family",
+    "to": "The Sharma family",
+    "from": "Neha",
+    "prompt": "Occasion: Holi\nIt's for The Sharma family (Family), from Neha.\nHow it should feel: Festive, Funny\nHow the card should look, screen by screen (build it in exactly this order): Surprise me!",
+    "brief": { "occasion": "holi", "relation": "Family", "tones": ["festive", "funny"], "surprise": true },
+    "details": []
+  },
+  {
+    "id": "favourite-colour-music",
+    "to": "Oliver",
+    "from": "Grandma Jean",
+    "prompt": "Occasion: Birthday\nIt's for Oliver (Grandchild), from Grandma Jean.\nHow it should feel: Funny, Cute\nHow the card should look, screen by screen (build it in exactly this order): He's turning 8 and loves football and Lego.",
+    "brief": { "occasion": "birthday", "relation": "Grandchild", "tones": ["funny", "cute"], "age": "child", "accent": "#2a9d8f", "music": "joy", "about": "Turning 8, loves football and Lego" },
+    "details": ["football", "Lego"],
+    "expectAccent": "#2a9d8f",
+    "expectMusic": "joy"
+  }
+]

@@ -6,13 +6,16 @@ import { Motif } from "@/components/card/motifs";
 import { RichText } from "@/components/RichText";
 import { fmt } from "@/i18n/config";
 import { useI18n } from "@/i18n/client";
-import { MAX_SCHEDULE_DAYS, basketSnapshot, onBasketChange, removeFromBasket, serverBasket, writeBasket, type BasketItem } from "@/lib/basket";
+import { MAX_SCHEDULE_DAYS, basketSnapshot, madeIds, onBasketChange, removeFromBasket, serverBasket, writeBasket, type BasketItem } from "@/lib/basket";
 import { getTemplate } from "@/lib/catalog";
 import { formatMoney, tierPrice } from "@/lib/pricing";
 import { themes } from "@/lib/themes";
 
 const noop = () => () => {};
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// The furthest day to pick. One short of Resend's limit, since 9am on the last day can be
+// past it, and the email is only booked once payment comes through.
+const SCHEDULE_DAYS = MAX_SCHEDULE_DAYS - 1;
 
 // YYYY-MM-DD for a day offset from today, in the visitor's own time zone.
 function day(offset: number) {
@@ -66,6 +69,8 @@ export function Basket({ emailReady }: { emailReady: boolean }) {
   }
 
   const total = formatMoney(items.reduce((sum, i) => sum + tierPrice(i.tier ?? "premade", currency), 0), currency);
+  // Cards made in this browser can go back into the card maker to be changed.
+  const made = madeIds();
 
   const pay = async () => {
     const problems: Record<string, string> = {};
@@ -123,6 +128,14 @@ export function Basket({ emailReady }: { emailReady: boolean }) {
                     {template && <span className="text-ink/45"> · {template.name}</span>}
                   </p>
                   <p className="mt-1 font-semibold">{formatMoney(tierPrice(item.tier ?? "premade", currency), currency)}</p>
+                  {made.has(item.id) && (
+                    <Link
+                      href={`/create?edit=${encodeURIComponent(item.id)}`}
+                      className="mt-3 inline-flex min-h-11 items-center rounded-full border-2 border-ink/25 px-4 text-base font-semibold transition hover:border-ink"
+                    >
+                      {t.create.changeCard}
+                    </Link>
+                  )}
                 </div>
                 <button onClick={() => removeFromBasket([item.id])} className="self-start text-sm font-semibold text-ink/60 underline-offset-4 hover:text-ink hover:underline">
                   {b.remove}
@@ -164,6 +177,8 @@ export function Basket({ emailReady }: { emailReady: boolean }) {
                         onChange={(e) => update(item.id, { email: e.target.value })}
                         className="mt-1 w-full rounded-xl border-2 border-ink/20 bg-paper px-3 py-2.5 outline-none focus:border-ink"
                       />
+                      {/* The email's reply address is the buyer's, so say so. */}
+                      <span className="mt-1 block text-sm text-ink/60">{fmt(b.replyHint, { name: item.to })}</span>
                     </label>
                     <div>
                       <p className="text-sm font-semibold">{b.when}</p>
@@ -189,12 +204,12 @@ export function Basket({ emailReady }: { emailReady: boolean }) {
                             type="date"
                             aria-label={b.when}
                             min={day(0)}
-                            max={day(MAX_SCHEDULE_DAYS)}
+                            max={day(SCHEDULE_DAYS)}
                             value={item.sendOn}
                             onChange={(e) => update(item.id, { sendOn: e.target.value })}
                             className="rounded-xl border-2 border-ink/20 bg-paper px-3 py-2 outline-none focus:border-ink"
                           />
-                          <p className="mt-1 text-xs text-ink/55">{fmt(b.dateHint, { days: MAX_SCHEDULE_DAYS })}</p>
+                          <p className="mt-1 text-xs text-ink/55">{fmt(b.dateHint, { days: SCHEDULE_DAYS })}</p>
                         </div>
                       )}
                     </div>

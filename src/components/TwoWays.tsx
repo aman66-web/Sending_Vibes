@@ -56,7 +56,8 @@ export function TwoWays({ onPick }: { onPick?: (way: Way) => void }) {
             </div>
             <div className="flex flex-1 flex-col p-6">
               <h3 className="font-brand text-3xl font-bold leading-tight">{w.title}</h3>
-              <p className="mt-1 text-sm font-bold uppercase tracking-wide text-hot">{w.easy}</p>
+              {/* A deeper red than the brand's, to stay readable on the featured one's yellow. */}
+              <p className="mt-1 text-sm font-bold uppercase tracking-wide text-[#a8301f]">{w.easy}</p>
               <p className="mt-3 leading-relaxed text-ink/75">{w.body}</p>
               <ol className="mt-4 flex-1 space-y-2 text-sm font-semibold">
                 {w.steps.map((step, i) => (
@@ -73,7 +74,9 @@ export function TwoWays({ onPick }: { onPick?: (way: Way) => void }) {
             </div>
           </>
         );
-        const className = `group sheet relative flex flex-col overflow-hidden text-start text-ink transition hover:-translate-y-1 ${w.featured ? "bg-sun/25" : ""}`;
+        // The featured one's yellow is mixed into cream rather than see-through, so in dark mode
+        // the page behind doesn't turn it dark under its (always dark) words.
+        const className = `group sheet relative flex flex-col overflow-hidden text-start text-ink transition hover:-translate-y-1 ${w.featured ? "bg-[color-mix(in_srgb,var(--color-sun)_25%,var(--color-cream))]" : ""}`;
         return onPick ? (
           <button key={w.way} onClick={() => onPick(w.way)} className={className}>
             {inside}

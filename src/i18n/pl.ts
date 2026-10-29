@@ -5,9 +5,9 @@ import type { Dict } from "./en";
 
 export const pl: Dict = {
   meta: {
-    title: "Envelette: personalizowane interaktywne kartki, które naprawdę zapadają w pamięć",
+    title: "Envelette: personalizowane interaktywne e-kartki, które naprawdę zapadają w pamięć",
     description:
-      "Personalizowane interaktywne kartki na urodziny, walentynki, Diwali, Id, Boże Narodzenie, Halloween i nie tylko. Uciekające przyciski „Nie”, minigry, twoje zdjęcia, muzyka i wielki finał. Wystarczy uzupełnić puste pola.",
+      "Personalizowane interaktywne e-kartki na urodziny, Diwali, Id, Boże Narodzenie, walentynki i nie tylko: minigry, twoje zdjęcia, muzyka i wielki finał, a całość wysyłasz jako link.",
   },
 
   nav: {
@@ -32,6 +32,9 @@ export const pl: Dict = {
     help: "Pomoc i FAQ",
     privacy: "Prywatność",
     terms: "Regulamin",
+    contact: "Kontakt",
+    ask: "Masz pytanie albo problem z kartką? Napisz do nas: {email}",
+    company: "Envelette to nazwa handlowa firmy {name}, zarejestrowanej w Anglii i Walii, numer spółki: {number}. Adres siedziby: {address}.",
     copyright: "© {year} Envelette. Przycisk „Nie” nadal nie działa.",
   },
 
@@ -78,6 +81,7 @@ export const pl: Dict = {
     christmas: "Boże Narodzenie",
     mothersDay: "Dzień Matki (UK)",
     fathersDay: "Dzień Ojca",
+    bhaiDooj: "Bhai Dooj",
   },
 
   occasions: {
@@ -186,6 +190,21 @@ export const pl: Dict = {
       tagline: "Pożegnaj kogoś z pracy grami i dobrymi życzeniami.",
       intro: "Pożegnaj kogoś z pracy listą wszystkiego, za czym zespół będzie tęsknić, jednorękim bandytą z prezentami na pożegnanie i mnóstwem życzeń powodzenia.",
     },
+    graduation: {
+      label: "Ukończenie szkoły",
+      tagline: "Podrzuć biret, zdaj ostatni egzamin i posłuchaj, jak bardzo wszyscy są z ciebie dumni.",
+      intro: "Dla absolwentów szkół i uczelni: potrząśnij telefonem, żeby podrzucić biret, zdaj ostatni egzamin, którego nie da się oblać, a na koniec podziwiaj fajerwerki. Albo powiedz, jak wiele udało się osiągnąć, i dołącz uścisk, który można nacisnąć i przytrzymać.",
+    },
+    retirement: {
+      label: "Emerytura",
+      tagline: "Poza biurem – na zawsze. Pożegnanie z grami i wielkim „dziękuję”.",
+      intro: "Autoodpowiedź „jestem poza biurem”, która nigdy się nie kończy, koło, które wylosuje pierwsze zajęcie na emeryturze, i słoik ze wszystkim, za czym będziecie tęsknić. Dla współpracowników, rodziców i każdego, kto odwiesza służbowy identyfikator na kołek.",
+    },
+    newhome: {
+      label: "Nowy dom",
+      tagline: "Kod do drzwi do złamania, karton do rozpakowania i dobre życzenia na nowym miejscu.",
+      intro: "Kartka na parapetówkę, w którą naprawdę się gra: złam kod do drzwi wejściowych, wybierz karton z przeprowadzki i rozpakuj prezent, a potem wyciągaj ze słoika życzenia na nowe miejsce.",
+    },
   },
 
   tones: {
@@ -288,7 +307,7 @@ export const pl: Dict = {
       lullaby: "Kołysanka",
       spooky: "Upiorna",
       joy: "Oda do radości",
-      auld: "Auld Lang Syne",
+      auld: "Ogniska już dogasa blask",
     },
   },
 
@@ -303,9 +322,11 @@ export const pl: Dict = {
     cta: "Zrób swoją kartkę już dziś →",
     waysTitle: "Dwa sposoby na twoją kartkę",
     waysIntro: "W obu przypadkach zaczynasz od kilku krótkich pytań o osobę, dla której jest kartka, a przed wysłaniem możesz zmienić wszystko.",
-    reassure: "Bez aplikacji. Bez konta. Około dwóch minut.",
+    reassure: "**{price} za kartkę.** Wypróbuj ją, zanim zapłacisz.",
+    seasonCta: "Zobacz kartki",
     comingUp: "Nadchodzące okazje",
     comingUpIntro: "Załatw to teraz i miej jedną rzecz mniej na głowie.",
+    comingUpSchedule: "Zrób kartkę już teraz, a wyślemy ją e-mailem w odpowiednim dniu, o 9:00 (do {days} dni naprzód).",
     allOccasions: "Wszystkie okazje ({n}) →",
     featuresTitle: "Kartka do zabawy, nie tylko do czytania",
     featuresIntro: "Każda kartka to kilka ekranów, które układasz po swojemu. Oto kilka z nich. Spróbuj.",
@@ -333,14 +354,14 @@ export const pl: Dict = {
     aiCta: "Wypróbuj · {price}",
     tryTitle: "Wypróbuj teraz",
     tryIntro: "To prawdziwe kartki, działające na żywo. Stukaj i przeglądaj.",
-    popularTitle: "Teraz na topie",
+    popularTitle: "Nasze ulubione",
     popularIntro: "Zabawne, rozczulające, urocze albo świąteczne. Przewijaj, a każda zacznie grać sama.",
     browseAll: "Przeglądaj wszystkie ({n}) →",
     howTitle: "Jak to działa",
     howIntro: "Cztery proste kroki, od początku do końca.",
     how: [
       { title: "Wybierz sposób", body: "Kartka na miarę, zrobiona od zera, albo jeden z naszych {n} gotowych projektów." },
-      { title: "Odpowiedz na 6 krótkich pytań", body: "Dla kogo jest kartka, z jakiej okazji i jak dokładnie ma wyglądać, ekran po ekranie." },
+      { title: "Odpowiedz na kilka krótkich pytań", body: "Dla kogo jest kartka, z jakiej okazji, jaki ma mieć nastrój i co ma się w niej znaleźć. Na większość pytań odpowiadasz jednym stuknięciem, a odpowiedzi ci podpowiadamy." },
       { title: "Zrób ją po swojemu", body: "Wpisz, co chcesz zmienić, albo kliknij dowolne słowa, żeby je przepisać, i wstaw swoje zdjęcia. Tworzymy ją razem, z twoim osobistym akcentem." },
       { title: "Zapłać i wyślij", body: "Wyślemy ją e-mailem od razu albo w wybranym przez ciebie dniu. Możesz też dostać link i wysłać go, jak tylko chcesz." },
     ],
@@ -350,20 +371,60 @@ export const pl: Dict = {
     howLink: "Albo skopiuj link i wyślij przez WhatsApp",
     pricingTitle: "Taniej niż bukiet kwiatów",
     pricingIntro: "Jedna cena za kartkę. Bez subskrypcji, nic do anulowania.",
-    tierCard: "Gotowa",
-    tierCardPoints: ["Dowolny z {n} projektów", "Edycja każdego słowa na każdym ekranie", "Do 6 twoich zdjęć", "Wszystkie gry, quizy i efekty"],
-    tierAi: "Na miarę",
-    tierAiPoints: ["Zrobiona od zera na podstawie twoich odpowiedzi", "Wszystkie gry, quizy i efekty", "Nowe ekrany i zmiany z pomocą AI", "Dodawanie, usuwanie i przestawianie ekranów"],
+    priceOne: "za kartkę, niezależnie od tego, jak ją zrobisz",
+    pricePoints: [
+      "Dowolny z naszych {n} projektów albo kartka zrobiona od zera na podstawie twoich odpowiedzi",
+      "Wszystkie gry, quizy, melodie i finały",
+      "Do 6 twoich zdjęć",
+      "Wypróbuj całą kartkę, zanim zapłacisz",
+      "Wyślemy ją e-mailem w wybranym dniu (do {days} dni naprzód) albo wyślesz link samodzielnie",
+      "Bez znaczków: dotrze w kilka sekund, w dowolne miejsce na świecie",
+      "Wysyłasz kilka? Zapłać za wszystkie naraz",
+    ],
+    trust: {
+      secure: {
+        title: "Bezpieczna płatność przez Stripe",
+        body: "Nigdy nie widzimy ani nie przechowujemy danych twojej karty.",
+      },
+      play: {
+        title: "Wypróbuj, zanim zapłacisz",
+        body: "Najpierw wypróbuj każdy ekran. Płacisz dopiero wtedy, gdy kartka ci się podoba.",
+      },
+      fix: {
+        title: "Naprawimy albo zwrócimy pieniądze",
+        body: "Jeśli kartka się nie otwiera albo coś w niej nie działa, naprawimy to. Jeśli się nie da, oddamy ci pieniądze.",
+      },
+    },
     faqTitle: "Najczęstsze pytania",
     faqs: [
-      { q: "Czy odbiorca musi pobierać aplikację?", a: "Nie. To po prostu link. Wystarczy go stuknąć, a kartka otworzy się w przeglądarce na każdym telefonie, tablecie i komputerze." },
+      {
+        q: "Czy odbiorca musi pobierać aplikację?",
+        a: "Nie. To po prostu link. Wystarczy go stuknąć, a kartka otworzy się w przeglądarce na każdym telefonie, tablecie i komputerze.",
+      },
       {
         q: "Czy kartka gra muzykę?",
         a: "Tak. Każda kartka ma efekty dźwiękowe i wybraną przez ciebie melodię, która zaczyna grać po otwarciu koperty. Jest też przycisk wyciszenia, gdyby odbiorca był w cichym miejscu.",
       },
-      { q: "Czy kartka jest prywatna?", a: "Kartkę mogą otworzyć tylko osoby, które mają link. Linki to długie, losowe kody, a kartek nie ma na żadnych listach ani w wyszukiwarkach." },
-      { q: "Czy mogę dodać własne zdjęcia?", a: "Tak, do 6. Przed wysłaniem są zmniejszane na twoim telefonie, co usuwa też dane o miejscu, w którym je zrobiono." },
-      { q: "Ile trwa zrobienie kartki?", a: "Kilka minut. Odpowiedz na 6 krótkich pytań, dodaj zdjęcia, jeśli chcesz, zmień, co tylko chcesz, i gotowe: dostaniesz swój link." },
+      {
+        q: "Czy kartka jest prywatna?",
+        a: "Kartkę mogą otworzyć tylko osoby, które mają link. Linki to długie, losowe kody, a kartek nie ma na żadnych listach ani w wyszukiwarkach.",
+      },
+      {
+        q: "Czy mogę dodać własne zdjęcia?",
+        a: "Tak, do 6. Przed wysłaniem są zmniejszane na twoim telefonie, co usuwa też dane o miejscu, w którym je zrobiono.",
+      },
+      {
+        q: "Ile trwa zrobienie kartki?",
+        a: "Kilka minut. Odpowiedz na kilka krótkich pytań, przeważnie jednym stuknięciem, dodaj zdjęcia, jeśli chcesz, zmień, co tylko chcesz, i gotowe: dostaniesz swój link.",
+      },
+      {
+        q: "Kto stoi za Envelette?",
+        a: "Mała brytyjska firma. Envelette to nazwa handlowa firmy {company}, zarejestrowanej w Anglii i Walii (numer spółki {number}). Napisz do nas, kiedy tylko chcesz: {email}.",
+      },
+      {
+        q: "Co, jeśli coś pójdzie nie tak?",
+        a: "Jeśli kartka się nie otwiera albo coś w niej nie działa, napisz do nas na adres {email}, a naprawimy to. Jeśli się nie da, zwrócimy ci pieniądze.",
+      },
       {
         q: "Ile to kosztuje?",
         a: "Każda kartka kosztuje {price}, czy to kartka na miarę, czy gotowy projekt. Płacisz raz, bez subskrypcji.",
@@ -373,10 +434,13 @@ export const pl: Dict = {
     finalTitle: "Śmiało. Zrób komuś dzień.",
     finalCta: "Zrób swoją kartkę →",
     finalNote: "{price} za kartkę. Bez rejestracji.",
+    stickyCta: "Zrób kartkę · {price}",
   },
 
   hero: {
-    tryNo: "no dalej, spróbuj nacisnąć „Nie”",
+    tryNo: "no dalej, spróbuj nacisnąć „{no}”",
+    tapIt: "no dalej, zagraj",
+    cardAria: "Prawdziwa kartka do zabawy",
     onPhone: "a tu na telefonie ↑",
     boxTitle: "Uzupełnij puste pola",
     tryIt: "spróbuj!",
@@ -385,8 +449,8 @@ export const pl: Dict = {
     theirName: "Imię odbiorcy",
     yourName: "Twoje imię",
     yourPhotos: "twoje zdjęcia",
-    hintEmpty: "Wpisz imię i zobacz, jak zmienia się kartka na laptopie.",
-    hintTyped: "Widzisz? Kartka na laptopie właśnie się zmieniła. Tylko tyle trzeba.",
+    hintEmpty: "Wpisz imię i zobacz, jak zmienia się kartka.",
+    hintTyped: "Widzisz? Kartka właśnie się zmieniła. Tylko tyle trzeba.",
     finish: "Dokończ tę kartkę →",
   },
 
@@ -436,16 +500,60 @@ export const pl: Dict = {
 
   catalog: {
     searchLabel: "Szukaj kartek",
-    searchPlaceholder: "Szukaj: oświadczyny, suchary, kupony…",
+    searchPlaceholder: "Szukaj: urodziny, babcia, Diwali, kupony…",
     occasion: "Okazja",
     vibe: "Klimat",
     device: "Urządzenie",
     all: "Wszystkie",
+    allOccasions: "Wszystkie okazje",
+    anyVibe: "Dowolny klimat",
+    whoFor: "Dla kogo",
+    anyone: "Dla każdego",
+    who: {
+      partner: "Druga połówka",
+      mum: "Mama",
+      dad: "Tata",
+      grandparent: "Babcia/dziadek",
+      sibling: "Brat lub siostra",
+      child: "Dziecko",
+      family: "Rodzina",
+      friend: "Kolega/koleżanka",
+      colleague: "Ktoś z pracy",
+      teacher: "Nauczyciel/nauczycielka",
+    },
+    easy: "Łatwa w obsłudze",
+    easyHint: "Bez szybkiego stukania i pisania, więc każdy sobie poradzi.",
+    notEasy: "Jest w niej gra, która wymaga szybkich palców.",
+    inside: {
+      game: "1 gra",
+      games: "gry: {n}",
+      photos: "zdjęcia",
+      message: "liścik",
+      question: "uciekające „Nie”",
+      quiz: "quiz",
+      scratch: "zdrapka",
+      typeit: "tajne hasło",
+      wheel: "koło fortuny",
+      coupons: "kupony",
+      reasons: "słoik powodów",
+      slider: "licznik miłości",
+      timeline: "wasza historia",
+      boxes: "tajemnicze pudełka",
+    },
     count: "Projekty: {n}",
     countOne: "1 projekt",
     nothing: "Na razie nic nie pasuje do wszystkich tych filtrów",
+    nothingFor: "Na razie nic nie pasuje do hasła „{q}”",
     clear: "Wyczyść filtry",
+    near: "Podobne propozycje",
+    scratchTitle: "Możemy zrobić kartkę specjalnie dla tej osoby",
+    scratchBody: "Odpowiedz na kilka krótkich pytań, a stworzymy jedyną w swoim rodzaju kartkę na podstawie twoich odpowiedzi.",
+    scratch: "✨ Zrób ją od zera",
+    notQuite: "Nie do końca to, czego szukasz?",
     previewAria: "Podgląd: {name}",
+    useThis: "Wybierz ten projekt",
+    backToDesigns: "← Wróć do projektów",
+    details: "Więcej o tym projekcie",
   },
 
   cardsPage: {
@@ -463,10 +571,10 @@ export const pl: Dict = {
   },
 
   occasionPage: {
-    metaTitle: "{label}: interaktywne kartki · Envelette",
+    metaTitle: "{label}: interaktywne e-kartki · Envelette",
     metaSuffix: "Spersonalizuj kartkę w dwie minuty, bez programowania.",
     // {label} is shown in red.
-    title: "{label}: interaktywne kartki",
+    title: "{label}: interaktywne e-kartki",
     next: "{name} wypada {date}",
     make: "Zrób kartkę: {label} · {price}",
     see: "Zobacz projekty ({n}) ↓",
@@ -476,15 +584,41 @@ export const pl: Dict = {
       { title: "Wyślij ją jako link", body: "WhatsApp, SMS lub Instagram. Otwiera się w przeglądarce na każdym telefonie i komputerze. Nic nie trzeba pobierać." },
     ],
     more: "Więcej okazji",
+    ogPrice: "{price} za kartkę · wysyłana jako link",
+    writeIntro: "Nie wiesz, co napisać? Weź jeden z tych tekstów i przerób go po swojemu. Przed wysłaniem możesz zmienić każde słowo na kartce.",
+    copy: "Kopiuj",
+    copied: "Skopiowano ✓",
+    copyAria: "Skopiuj wiadomość: {who}",
+    whenQ: "Kiedy wypada {name} w {year} roku?",
+    whenA: "{name} wypada {date}.",
+    whenApprox: "{name} wypada najprawdopodobniej {date}, ale data zależy od księżyca i może się przesunąć o jeden dzień.",
+    whenSend: "Możemy wysłać twoją kartkę e-mailem tak, żeby dotarła w tym dniu o 9:00 według twojej strefy czasowej. Możesz to ustawić do {days} dni naprzód.",
+    faqTitle: "Najczęstsze pytania",
+    faqs: [
+      {
+        q: "Czym jest interaktywna e-kartka?",
+        a: "To kartka, która zamiast w kopercie przychodzi jako link. Odbiorca otwiera ją stuknięciem, a potem we własnym tempie przechodzi przez kilka ekranów: gry, twoje zdjęcia, quiz, zdrapkę i nie tylko, a na końcu czeka twoja wiadomość i wielki finał.",
+      },
+      {
+        q: "Czy kartka może przyjść dokładnie tego dnia?",
+        a: "Tak. Wybierz wysyłkę e-mailem i dzień, a kartka dotrze o 9:00 według twojej strefy czasowej. Możesz to ustawić do {days} dni naprzód albo wysłać link samodzielnie, kiedy tylko chcesz.",
+      },
+      {
+        q: "Ile to kosztuje?",
+        a: "{price} za kartkę, płatne raz, bez subskrypcji. Zanim zapłacisz, możesz przejść całą kartkę od początku do końca.",
+      },
+    ],
   },
 
   product: {
-    metaTitle: "{name} · Kartka: {occasion} · Envelette",
+    metaTitle: "{name} · E-kartka: {occasion} · Envelette",
+    metaSuffix: "{occasion}: spersonalizuj tę e-kartkę i wyślij ją jako link.",
+    schemaName: "{name} – interaktywna e-kartka: {occasion}",
     onPhone: "📱 Na telefonie",
     onComputer: "💻 Na komputerze",
     live: "działa na żywo, stukaj i przeglądaj ↑",
     soundOn: "🔊 Włącz dźwięk: po otwarciu zagra „{tune}”",
-    fullScreen: "Otwórz na pełnym ekranie ↗",
+    fullScreen: "▶ Obejrzyj na pełnym ekranie",
     perCard: "za kartkę",
     tryNames: "Wypróbuj z waszymi imionami",
     tryNamesHint: "Podgląd zmienia się, gdy piszesz.",
@@ -492,6 +626,7 @@ export const pl: Dict = {
     yourName: "Twoje imię",
     colours: "Kolory",
     customise: "Dostosuj tę kartkę →",
+    stickyCta: "Dostosuj tę kartkę · {price}",
     noSignup: "Bez rejestracji. Zajmie ci około dwóch minut.",
     inside: "Co jest w środku",
     canChange: "Co możesz zmienić",
@@ -541,13 +676,26 @@ export const pl: Dict = {
             q: "Czym jest interaktywna kartka?",
             a: "To kartka, która zamiast w kopercie przychodzi jako link. Odbiorca otwiera ją stuknięciem, a potem we własnym tempie przechodzi przez kilka ekranów: pytanie, w którym przycisk „Nie” ucieka, minigrę, twoje zdjęcia, quiz o was, zdrapkę i nie tylko, a na końcu czeka twoja wiadomość i wielki finał. Są też muzyka i efekty dźwiękowe.",
           },
-          { q: "Czy odbiorca musi pobierać aplikację?", a: "Nie. Link otwiera się w przeglądarce na każdym telefonie, tablecie i komputerze. Nic nie trzeba instalować ani zakładać konta." },
+          {
+            q: "Czy odbiorca musi pobierać aplikację?",
+            a: "Nie. Link otwiera się w przeglądarce na każdym telefonie, tablecie i komputerze. Nic nie trzeba instalować ani zakładać konta.",
+          },
           {
             q: "Czy kartka działa na telefonach i komputerach?",
             a: "Tak. Każda kartka działa na każdym telefonie, tablecie i komputerze. Podczas tworzenia kartki możesz przełączać podgląd między telefonem a komputerem, żeby zobaczyć, jak wygląda na obu.",
           },
-          { q: "Czy muszę mieć konto?", a: "Rejestrujesz się przez Google albo adres e-mail tuż przed zrobieniem kartki. Dzięki temu kartka zapisuje się na twoim koncie i znajdziesz ją na każdym urządzeniu. To nic nie kosztuje i zajmuje kilka sekund. Osoba, do której wysyłasz kartkę, nie potrzebuje konta." },
-          { q: "Na jakie okazje macie kartki?", a: "Na wiele okazji (łącznie: {o}): od urodzin, walentynek, Diwali, Id i Bożego Narodzenia po podziękowania, przeprosiny, życzenia powrotu do zdrowia i pożegnania. Wszystkie znajdziesz na [stronie z okazjami](/occasions)." },
+          {
+            q: "Czy muszę mieć konto?",
+            a: "Rejestrujesz się przez Google albo adres e-mail tuż przed zrobieniem kartki. Dzięki temu kartka zapisuje się na twoim koncie i znajdziesz ją na każdym urządzeniu. To nic nie kosztuje i zajmuje kilka sekund. Osoba, do której wysyłasz kartkę, nie potrzebuje konta.",
+          },
+          {
+            q: "Na jakie okazje macie kartki?",
+            a: "Na wiele okazji (łącznie: {o}): od urodzin, walentynek, Diwali, Id i Bożego Narodzenia po podziękowania, przeprosiny, życzenia powrotu do zdrowia i pożegnania. Wszystkie znajdziesz na [stronie z okazjami](/occasions).",
+          },
+          {
+            q: "Kto prowadzi Envelette i jak się z wami skontaktować?",
+            a: "Envelette prowadzi mała brytyjska firma MARTZEY LTD (zarejestrowana w Anglii i Walii, numer spółki 14466643). Napisz do nas na adres hello@envelette.com w każdej sprawie: z pytaniem, z problemem z kartką albo w sprawie zwrotu pieniędzy.",
+          },
         ],
       },
       {
@@ -555,15 +703,15 @@ export const pl: Dict = {
         items: [
           {
             q: "Jak zrobić kartkę?",
-            a: "Naciśnij [Zrób kartkę](/create) i wybierz, jak chcesz ją zrobić. **Kartka na miarę**: odpowiedz na 6 krótkich pytań, a my stworzymy od zera całą kartkę na podstawie twoich odpowiedzi. **Gotowy projekt**: wybierz jeden z naszych {n} projektów, odpowiedz na te same pytania, a my wpiszemy do niego twoje słowa. W obu przypadkach możesz potem zmienić, co tylko chcesz, zanim naciśniesz **Dodaj do koszyka**.",
+            a: "Naciśnij [Zrób kartkę](/create) i wybierz, jak chcesz ją zrobić. **Kartka na miarę**: odpowiedz na kilka krótkich pytań, przeważnie jednym stuknięciem, a my stworzymy od zera całą kartkę na podstawie twoich odpowiedzi. **Gotowy projekt**: wybierz jeden z naszych {n} projektów, odpowiedz na kilka z tych samych pytań, a my wpiszemy do niego twoje słowa. W obu przypadkach możesz potem zmienić, co tylko chcesz, zanim naciśniesz **Dodaj do koszyka**.",
           },
           {
             q: "Czym różni się kartka na miarę od gotowego projektu?",
             a: "**Kartka na miarę** powstaje od zera na podstawie twoich odpowiedzi: to my wybieramy ekrany, gry, kolory i muzykę oraz piszemy każde słowo. **Gotowy projekt** to jeden z naszych projektów, który zostaje dokładnie taki, jaki jest – uzupełniamy go tylko słowami i zdjęciami z twoich odpowiedzi. Oba sposoby kosztują {price} i w obu możesz potem wszystko zmieniać.",
           },
           {
-            q: "Jakie to 6 pytań?",
-            a: "Dla kogo jest kartka, kim ta osoba jest dla ciebie, z jakiej okazji, jaki ma mieć klimat, jak dokładnie ma wyglądać (ekran po ekranie) i od kogo jest. Potem możesz jeszcze dodać zdjęcia, jeśli chcesz.",
+            q: "Jakie pytania zadajecie?",
+            a: "Pytamy o wasze imiona, o to, kim ta osoba jest dla ciebie, o okazję, nastrój kartki, styl i muzykę, o gry i ekrany, które mają się w niej znaleźć (możesz też zostawić to nam), a także o kilka drobiazgów, takich jak wiek, ulubiony kolor czy ksywka. Potem możesz jeszcze dodać zdjęcia, jeśli chcesz. Na większość pytań odpowiadasz jednym stuknięciem, wiele odpowiedzi podpowiadamy, a każde pytanie, przy którym masz wątpliwości, możesz pominąć. Zanim powstanie kartka, zobaczysz wszystkie odpowiedzi razem i każdą z nich możesz zmienić. Przy gotowym projekcie nie pytamy o okazję, styl ani ekrany, bo projekt już je ma.",
           },
           {
             q: "Co napisać, opisując kartkę?",
@@ -594,11 +742,30 @@ export const pl: Dict = {
       {
         title: "Płatności",
         items: [
-          { q: "Ile kosztuje kartka?", a: "{price} za kartkę, czy to kartka na miarę, czy gotowy projekt. Płacisz raz, bez subskrypcji i bez ukrytych dopłat." },
-          { q: "Jak mogę zapłacić?", a: "Kartą płatniczą, przez bezpieczną płatność Stripe. Nigdy nie widzimy ani nie przechowujemy danych twojej karty." },
-          { q: "Czy mogę kupić więcej niż jedną kartkę?", a: "Tak. Dodaj do koszyka, ile tylko chcesz, i zapłać za wszystkie razem. Każdą kartkę można wysłać w inny sposób." },
-          { q: "Czy macie kody rabatowe?", a: "Kiedy mamy promocję, kod możesz wpisać na stronie płatności." },
-          { q: "Czy dostanę potwierdzenie zakupu?", a: "Tak. Wyślemy ci e-mailem potwierdzenie zakupu z linkiem do każdej kartki z zamówienia, żeby zawsze można je było znowu znaleźć." },
+          {
+            q: "Ile kosztuje kartka?",
+            a: "{price} za kartkę, czy to kartka na miarę, czy gotowy projekt. Płacisz raz, bez subskrypcji i bez ukrytych dopłat.",
+          },
+          {
+            q: "Jak mogę zapłacić?",
+            a: "Kartą płatniczą, przez bezpieczną płatność Stripe. Nigdy nie widzimy ani nie przechowujemy danych twojej karty.",
+          },
+          {
+            q: "Czy mogę dostać zwrot pieniędzy?",
+            a: "Jeśli kartka nie działa tak, jak powinna, na przykład nie chce się otworzyć albo coś w niej nie działa, napisz do nas na adres hello@envelette.com, a naprawimy to. Jeśli się nie da, zwrócimy ci pieniądze. Kartki są cyfrowe i dostarczane od razu, więc po dostarczeniu kartki nie możesz zrezygnować z zakupu tylko z powodu zmiany zdania. Jeśli uważasz, że pobraliśmy opłatę przez pomyłkę, napisz do nas, a wszystko wyjaśnimy. Szczegóły znajdziesz w naszym [regulaminie](/terms).",
+          },
+          {
+            q: "Czy mogę kupić więcej niż jedną kartkę?",
+            a: "Tak. Dodaj do koszyka, ile tylko chcesz, i zapłać za wszystkie razem. Każdą kartkę można wysłać w inny sposób.",
+          },
+          {
+            q: "Czy macie kody rabatowe?",
+            a: "Kiedy mamy promocję, kod możesz wpisać na stronie płatności.",
+          },
+          {
+            q: "Czy dostanę potwierdzenie zakupu?",
+            a: "Tak. Wyślemy ci e-mailem potwierdzenie zakupu z linkiem do każdej kartki z zamówienia, żeby zawsze można je było znowu znaleźć.",
+          },
         ],
       },
       {
@@ -655,12 +822,14 @@ export const pl: Dict = {
           "zdjęcia, które dodasz",
           "wybrany projekt, kolory, muzykę i efekty",
         ],
-        after: "Nie musisz zakładać konta. Jeśli zdecydujesz się zalogować przez Google, przechowujemy imię i nazwisko oraz adres e-mail, które udostępnia nam Google, żeby pokazać ci kupione przez ciebie kartki. Gdy płacisz, Stripe przekazuje nam twój adres e-mail, żebyśmy mogli wysłać ci potwierdzenie zakupu i linki. Jeśli poprosisz nas o wysłanie kartki e-mailem, przechowujemy adres e-mail odbiorcy, żeby ją dostarczyć. Żadnych z tych danych nigdy nie wykorzystujemy do celów marketingowych.",
+        after: "Żeby zrobić kartkę, rejestrujesz się przez Google albo za pomocą adresu e-mail. Przechowujemy twój adres e-mail (oraz imię i nazwisko, jeśli udostępni je Google), żeby móc pokazać ci twoje kartki. Gdy płacisz, Stripe przekazuje nam twój adres e-mail, żebyśmy mogli wysłać ci potwierdzenie zakupu i linki. Jeśli poprosisz nas o wysłanie kartki e-mailem, przechowujemy adres e-mail odbiorcy, żeby ją dostarczyć. W tym e-mailu widać twoje imię, a jeśli odbiorca na niego odpowie, odpowiedź trafi prosto do ciebie, więc zobaczy on twój adres e-mail. Żadnych z tych danych nigdy nie wykorzystujemy do celów marketingowych.",
       },
       {
         title: "Kto może zobaczyć kartkę",
         paragraphs: [
           "Każdy, kto ma link do kartki, może ją otworzyć, więc udostępniaj go tylko osobom, którym chcesz ją pokazać. Linki to długie, losowe kody, których w praktyce nie da się odgadnąć, a kartek nigdy nie ma na żadnych listach, w wyszukiwarkach ani nigdzie indziej na stronie. Prosimy też wyszukiwarki, żeby ich nie indeksowały.",
+          "Gdy kartka zostanie otwarta po raz pierwszy, wysyłamy jej nadawcy e-mail z tą informacją. Zapisujemy tylko czas otwarcia, a nie to, kto ją otworzył ani gdzie.",
+          "Jeśli odpowiesz na kartkę, którą ktoś ci przysłał, wyślemy tej osobie e-mailem wybraną przez ciebie reakcję i słowa, które dopiszesz, a także zachowamy je razem z kartką. Sama kartka nigdy nie pokazuje adresu e-mail nadawcy.",
         ],
       },
       {
@@ -672,7 +841,7 @@ export const pl: Dict = {
       {
         title: "Co zapisuje się na twoim urządzeniu",
         paragraphs: [
-          "Gdy tworzysz kartkę, trzymamy jej niedokończoną kopię w pamięci lokalnej przeglądarki, żeby odświeżenie strony nie skasowało twojej pracy. Zapamiętujemy też, czy dźwięki kartek są wyciszone, a w małym pliku cookie – jaki język wybrano. Jeśli się zalogujesz, plik cookie podtrzymuje twoją sesję logowania. Te dane zostają na twoim urządzeniu. Nie używamy reklamowych ani śledzących plików cookie.",
+          "Gdy tworzysz kartkę, trzymamy jej niedokończoną kopię w pamięci lokalnej przeglądarki, żeby odświeżenie strony nie skasowało twojej pracy. Zapamiętujemy też, czy dźwięki kartek są wyciszone i czy kartka dostała już od ciebie odpowiedź, a w małym pliku cookie – jaki język wybrano. Jeśli się zalogujesz, plik cookie podtrzymuje twoją sesję logowania. Te dane zostają na twoim urządzeniu. Nie używamy reklamowych ani śledzących plików cookie.",
         ],
       },
       {
@@ -698,6 +867,18 @@ export const pl: Dict = {
     body: "Jak przycisk „Nie” na naszych kartkach – nigdzie jej nie ma. Jeśli ktoś przysłał ci kartkę, sprawdź, czy link został skopiowany w całości.",
     home: "Strona główna",
     browse: "Przeglądaj kartki",
+    errors: {
+      title: "Przepraszamy, coś nie zadziałało",
+      body: "Coś poszło nie tak po naszej stronie, nie po twojej. Spróbuj ponownie. Jeśli to się powtarza, odczekaj kilka minut i wróć.",
+      retry: "Spróbuj jeszcze raz",
+      cardTitle: "Twoja kartka jest bezpieczna",
+      cardBody: "Tym razem po prostu nie otworzyła się poprawnie. Tak się zdarza przy słabym zasięgu. Stuknij przycisk, żeby spróbować ponownie.",
+      cardLater: "Nadal nie działa? Odczekaj kilka minut i otwórz link jeszcze raz.",
+      saveInvalid: "Coś w tej kartce się nie zgadza. Sprawdź, czy wszystkie pola są wypełnione.",
+      saveScreen: "Coś na ekranie {n} się nie zgadza. Sprawdź, czy wszystko na nim jest wypełnione, i spróbuj ponownie.",
+      saveTooMany: "To sporo zapisanych kartek w krótkim czasie. Odczekaj kilka minut i spróbuj ponownie.",
+      uploadTooMany: "To sporo zdjęć w krótkim czasie. Odczekaj kilka minut i spróbuj ponownie.",
+    },
   },
 
   chat: {
@@ -744,6 +925,7 @@ export const pl: Dict = {
     email: "Niech {name} dostanie ją e-mailem",
     emailHint: "Wyślemy e-mail z linkiem do kartki.",
     emailLabel: "Adres e-mail odbiorcy ({name})",
+    replyHint: "Jeśli {name} odpowie na e-mail, odpowiedź trafi prosto do ciebie.",
     when: "Kiedy kartka ma dotrzeć?",
     now: "Zaraz po zapłacie",
     later: "W wybranym dniu",
@@ -784,6 +966,33 @@ export const pl: Dict = {
       refresh: "Sprawdź ponownie",
       more: "Zrób kolejną kartkę",
       allCards: "Zobacz wszystkie moje kartki",
+      finishing: "Płatność przeszła. Właśnie przygotowujemy twoje kartki: za chwilę stuknij „Sprawdź ponownie”.",
+      checkFailed: "Nie udało się teraz sprawdzić zamówienia. Jeśli płatność przeszła, nie martw się: twoje kartki są bezpieczne. Za chwilę stuknij „Sprawdź ponownie”.",
+      howTitle: "Jak ją wysłać",
+      how: [
+        "Naciśnij czerwony przycisk „Wyślij”.",
+        "Wybierz WhatsApp, Wiadomości albo e-mail, a potem osobę, do której ma trafić kartka.",
+        "Naciśnij „Wyślij”. I gotowe!",
+      ],
+      scheduledDone: "Gotowe! Wyślemy ją e-mailem na adres {email} w dniu {date}, o 9:00. Nie musisz już nic robić.",
+      emailedDone: "Gotowe! Wysłaliśmy ją e-mailem na adres {email}.",
+      sendYourself: "Albo wyślij link samodzielnie",
+      emailFailed: "Nie udało się wysłać kartki na adres {email}. Wyślij ją samodzielnie przyciskiem poniżej, a {name} i tak ją dostanie.",
+      emailRetrying: "Na razie nie udało się wysłać kartki na adres {email}. Będziemy próbować dalej, ale możesz też już teraz wysłać ją samodzielnie, a {name} dostanie ją od razu.",
+      preview: "To zobaczy {name}, kiedy wyślesz kartkę",
+      sameDesign: "Wyślij ten projekt komuś innemu",
+      nextTitle: "Chcesz zaskoczyć kogoś jeszcze?",
+      nextIntro: "Te okazje już niedługo. Zrobienie kartki zajmuje tylko kilka minut.",
+      nextMake: "Zrób kartkę",
+    },
+    share: {
+      send: "Wyślij do: {name}",
+      title: "{from} wysyła ci kartkę 💌",
+      message: "{to}, mam coś dla ciebie 💌 Otwórz z włączonym dźwiękiem:",
+      byEmail: "Wyślij e-mailem",
+      copy: "Skopiuj link",
+      watch: "Najpierw obejrzyj",
+      showLink: "Pokaż link",
     },
   },
 
@@ -798,15 +1007,45 @@ export const pl: Dict = {
     receiptTitle: "Dziękujemy. Twoje kartki są gotowe.",
     receiptIntro: "Oto linki do twoich kartek. Zachowaj tę wiadomość w bezpiecznym miejscu: każdy, kto ma link, może otworzyć daną kartkę.",
     cardFor: "Do: {to} · Od: {from}",
-    willEmail: "Wyślemy ją e-mailem na adres {email} w dniu {date}.",
+    willEmail: "Wyślemy ją e-mailem na adres {email} w dniu {date}, o 9:00.",
     emailedNow: "Wysłaliśmy ją e-mailem na adres {email}.",
     sendYourself: "Wyślij ten link, kiedy zechcesz, a {to} dostanie od ciebie kartkę.",
+    emailFailed: "Nie udało się wysłać kartki na adres {email}. Wyślij ten link samodzielnie, a {to} i tak dostanie od ciebie kartkę.",
+    emailRetrying: "Na razie nie udało się wysłać kartki na adres {email}. Będziemy próbować dalej, ale możesz też wysłać ten link samodzielnie, a {to} dostanie od ciebie kartkę.",
     total: "Łącznie zapłacono: {amount}",
     help: "Potrzebujesz pomocy? Zajrzyj na {url}",
     cardSubject: "{to}, {from} ma coś dla ciebie",
+    subjects: {
+      valentine: "{to}, {from} ma do ciebie pytanie 💘",
+      birthday: "Wszystkiego najlepszego, {to}! {from} wysyła ci kartkę 🎂",
+      diwali: "Szczęśliwego Diwali, {to}! {from} wysyła ci kartkę 🪔",
+      christmas: "Wesołych Świąt, {to}! {from} wysyła ci kartkę 🎄",
+      eid: "Id Mubarak, {to}! {from} wysyła ci kartkę 🌙",
+      anniversary: "Szczęśliwej rocznicy, {to}! {from} ma coś dla ciebie 💍",
+      sorry: "{to}, {from} chce ci coś powiedzieć",
+      thanks: "{to}, {from} chce ci podziękować 🙏",
+      congrats: "Gratulacje, {to}! {from} wysyła ci kartkę 🏆",
+      halloween: "Wesołego Halloween, {to}! {from} wysyła ci coś upiornego 🎃",
+      newyear: "Szczęśliwego Nowego Roku, {to}! {from} wysyła ci kartkę 🥂",
+      mothersday: "Wszystkiego najlepszego z okazji Dnia Matki, {to}! {from} wysyła ci kartkę 💐",
+      fathersday: "Wszystkiego najlepszego z okazji Dnia Ojca, {to}! {from} wysyła ci kartkę 👔",
+      rakhi: "Szczęśliwego Raksha Bandhan, {to}! {from} wysyła ci kartkę 🎀",
+      holi: "Szczęśliwego Holi, {to}! {from} wysyła ci kartkę 🌈",
+      newbaby: "{to}, {from} wysyła ci coś wyjątkowego 💌",
+      wedding: "{to}, {from} wysyła ci coś wyjątkowego 💌",
+      getwell: "Wracaj szybko do zdrowia, {to}! {from} wysyła ci kartkę 🌻",
+      missyou: "{to}, {from} tęskni za tobą 🫶",
+      friendship: "{to}, {from} ma coś dla ciebie 👯",
+      leaving: "Powodzenia, {to}! {from} wysyła ci kartkę 👋",
+    },
+    fromName: "{from} przez Envelette",
+    preheader: "{from} wysyła ci interaktywną kartkę, zrobioną specjalnie dla ciebie. Otwórz ją z włączonym dźwiękiem 🔊",
     cardTitle: "{from} wysyła ci interaktywną kartkę",
     cardBody: "{to}, kliknij przycisk poniżej, żeby otworzyć kartkę. Najlepiej z włączonym dźwiękiem.",
+    envelopeAlt: "Zaklejona koperta. Do: {to}, od: {from}. Stuknij, żeby ją otworzyć.",
     cardButton: "Otwórz kartkę",
+    linkHint: "Przycisk nie działa? Skopiuj ten link do przeglądarki:",
+    replyNote: "Jeśli odpowiesz na ten e-mail, {from} od razu dostanie twoją wiadomość.",
     cardFooter: "Wiadomość wysłana przez Envelette w imieniu nadawcy: {from}.",
     codeSubject: "Twój kod do Envelette: {code}",
     codeTitle: "Oto twój kod",
@@ -821,14 +1060,14 @@ export const pl: Dict = {
     chooseIntro: "W obu przypadkach zadamy ci kilka krótkich pytań o osobę, dla której jest kartka, a przed zakupem możesz zmienić wszystko.",
     personalTitle: "Kartka na miarę",
     personalEasy: "Zrobiona od zera, specjalnie dla tej osoby",
-    personalBody: "Odpowiedz na 6 krótkich pytań, a stworzymy jedyną w swoim rodzaju kartkę na podstawie twoich odpowiedzi: gry, kolory, muzykę i każde słowo.",
-    personalSteps: ["Odpowiedz na 6 krótkich pytań", "Tworzymy całą kartkę", "Zmień, co tylko chcesz"],
+    personalBody: "Odpowiedz na kilka krótkich pytań, przeważnie jednym stuknięciem, a stworzymy jedyną w swoim rodzaju kartkę na podstawie twoich odpowiedzi: gry, kolory, muzykę i każde słowo.",
+    personalSteps: ["Odpowiedz na kilka krótkich pytań", "Tworzymy całą kartkę", "Zmień, co tylko chcesz"],
     personalCta: "Zrób kartkę na miarę",
     personalDemo: "Na początku niebieska koperta w gwiazdki. Potem gra, w której łapie spadające serduszka…",
     readyTitle: "Gotowy projekt",
     readyEasy: "Wybierz projekt, a my go uzupełnimy",
-    readyBody: "Wybierz jeden z naszych {n} projektów i odpowiedz na te same 6 pytań. Wpiszemy do niego twoje słowa i dodamy twoje zdjęcia. Projekt zostaje taki, jaki jest.",
-    readySteps: ["Wybierz projekt", "Odpowiedz na 6 krótkich pytań", "Wpisujemy twoje słowa i dodajemy zdjęcia"],
+    readyBody: "Wybierz jeden z naszych {n} projektów i odpowiedz na kilka krótkich pytań. Wpiszemy do niego twoje słowa i dodamy twoje zdjęcia. Projekt zostaje taki, jaki jest.",
+    readySteps: ["Wybierz projekt", "Odpowiedz na kilka krótkich pytań", "Wpisujemy twoje słowa i dodajemy zdjęcia"],
     readyCta: "Wybierz projekt",
     option: "Sposób {n}",
     example: "Na przykład",
@@ -888,6 +1127,43 @@ export const pl: Dict = {
     textMessage: "Wyślij SMS-em",
     whatsappMessage: "Mam coś dla ciebie 💌 {url}",
     openCard: "Otwórz kartkę",
+    startOverTitle: "Zacząć nową kartkę?",
+    startOverBody: "Kartka, którą ma dostać {name}, zostanie usunięta i nie da się jej przywrócić.",
+    startOverEditBody: "Zmiany w kartce, którą ma dostać {name}, zostaną usunięte. Kartka w koszyku zostanie taka, jaka była.",
+    startOverKeep: "Nie, zostaw moją kartkę",
+    startOverYes: "Tak, usuń ją",
+    startDifferent: "Zacznij inną kartkę",
+    deleted: "Usunięto ekran {n} · {name}",
+    dismiss: "Zamknij",
+    carryOnTitle: "Witaj ponownie! Dokończymy to, co zaczęte?",
+    carryOnDraft: "Dokończ kartkę, którą ma dostać {name}",
+    carryOnDraftHint: "Wszystko jest tak, jak było",
+    carryOnBasket: "Zmień kartkę, którą ma dostać {name}",
+    carryOnBasketHint: "Jest w twoim koszyku. Nadal możesz zmienić w niej wszystko.",
+    carryOnQuiz: "Wróć do pytań o kartkę, którą ma dostać {name}",
+    carryOnAnswers: "Wróć do swoich odpowiedzi",
+    carryOnQuizHint: "Wszystkie dotychczasowe odpowiedzi wciąż tu są",
+    startNew: "Zacznij nową",
+    cantOpen: "Na tym urządzeniu nie możemy otworzyć tej kartki do edycji. Nadal jest bezpieczna w twoim koszyku.",
+    toBasket: "🧺 Przejdź do koszyka",
+    changeCard: "✏️ Zmień tę kartkę",
+    tryAgain: "Spróbuj jeszcze raz",
+    askHelp: "Poproś nas o pomoc",
+    changedMeanwhile: "Kartka zmieniła się w trakcie naszej pracy, więc zostawiliśmy twoje zmiany i niczego nie ruszaliśmy. Poproś jeszcze raz, jeśli nadal tego chcesz.",
+    fixScreen: "Przejdź do ekranu {n} · {name}",
+    saveOffline: "Nie udało się teraz połączyć z Envelette. Sprawdź, czy masz internet, i spróbuj ponownie. Twoja kartka jest tu bezpieczna.",
+    basketFull: "Koszyk jest już pełny (limit kartek: {n}). Najpierw zapłać za te, które w nim są, a potem dodaj tę. Twoja kartka jest tu bezpieczna.",
+    code: {
+      steps: [
+        "Otwórz skrzynkę e-mail i znajdź wiadomość od Envelette.",
+        "Kod jest w temacie wiadomości: „{subject}”.",
+        "Wróć tutaj i wpisz go albo wklej. Gdy tylko wpiszesz cały kod, od razu się zalogujesz.",
+      ],
+      hidden: "······",
+      paste: "📋 Wklej kod",
+      pasteHint: "Żeby go wkleić, naciśnij i przytrzymaj pole powyżej, a potem wybierz Wklej.",
+      resent: "✓ Wysłaliśmy ci nowy kod.",
+    },
   },
 
   account: {
@@ -920,18 +1196,21 @@ export const pl: Dict = {
     empty: "Na razie brak kartek",
     emptyHint: "Tutaj pojawią się kartki kupione po zalogowaniu albo z użyciem tego adresu e-mail.",
     bought: "Data zakupu: {date}",
+    makeAnother: "Zrób kolejną kartkę, którą dostanie {name}",
     failed: "Nie udało się wczytać twoich kartek. Odśwież stronę.",
   },
 
   quiz: {
-    progress: "Pytanie {n} z {total}",
-    intro: "Odpowiedz na kilka krótkich pytań, a zrobimy kartkę specjalnie dla tej osoby. Potem możesz zmienić wszystko.",
+    progress: "Krok {n} z {total}",
+    intro: "Odpowiedz na kilka krótkich pytań, przeważnie jednym stuknięciem, a zrobimy kartkę specjalnie dla tej osoby. Potem możesz zmienić wszystko.",
     next: "Dalej",
+    skip: "Pomiń",
     back: "Wróć",
     generate: "Zrób moją kartkę",
+    makeFor: "Zrób kartkę, którą dostanie {name}",
     them: "ta osoba",
     price: "Kartka na miarę · {price}",
-    readyIntro: "Odpowiedz na kilka krótkich pytań, a wpiszemy twoje słowa do tego projektu. Potem możesz zmienić wszystko.",
+    readyIntro: "Odpowiedz na kilka krótkich pytań, przeważnie jednym stuknięciem, a wpiszemy twoje słowa do tego projektu. Potem możesz zmienić wszystko.",
     readyPrice: "Gotowy projekt · {price}",
     yourDesign: "Twój projekt: {name}",
     changeDesign: "Zmień",
@@ -940,15 +1219,156 @@ export const pl: Dict = {
     signedIn: "Zalogowano jako {email}. Naciśnij przycisk, żeby zrobić kartkę.",
     describeLink: "Wolisz opisać ją własnymi słowami?",
     other: "Inne",
-    describeStarters: ["Po otwarciu chcę…", "Potem na następnym ekranie…", "Następnie…", "Na koniec…"],
-    sayStarters: ["Niech będzie zabawnie…", "Wspomnij o…", "Dodaj…", "Na koniec napisz…"],
+    describeStarters: ["Po otwarciu chcę ", "Potem ", "Następnie ", "Na koniec "],
+    sayStarters: ["Wspomnij o ", "Na koniec napisz "],
     surprise: "Nie wiesz? Zaskocz mnie",
     surpriseDescribe: "Zaskocz mnie! Zaprojektuj całą kartkę tak, żeby jak najbardziej się spodobała.",
     surpriseSay: "Zaskocz mnie! Napisz ją tak, żeby jak najbardziej się spodobała.",
-    moreChars: "Napisz jeszcze trochę. Brakuje liter: {n}",
-    enough: "Tak jest idealnie",
     photosTitle: "Masz jakieś wspólne zdjęcia – ty i {name}?",
     photosHint: "To nieobowiązkowe. Dodaj do 6 zdjęć, a trafią prosto do kartki. Później możesz je zmienić.",
+    waitingPhotos: "Czekamy na zdjęcia…",
+    photosHintAdd: "To nieobowiązkowe. Dodaj do 6 zdjęć, a umieścimy je na ekranie ze zdjęciami tuż przed zakończeniem. Później możesz je zmienić.",
+    comingUp: "Nadchodzące okazje",
+    allOccasions: "Wszystkie okazje",
+    suggested: "Dobrane do okazji. Stuknij, żeby zmienić.",
+    suggestedDesign: "Taki klimat ma twój projekt. Stuknij, żeby zmienić.",
+    moreFeelings: "Więcej nastrojów",
+    maxFeelings: "Możesz wybrać najwyżej {n}. Najpierw stuknij jeden z wybranych, żeby go odznaczyć.",
+    chooseForMe: "Wybierzcie za mnie",
+    recommended: "polecane",
+    chooseForMeHint: "Dobierzemy gry i ekrany, które {name} na pewno polubi.",
+    orPick: "Albo stuknij te, które chcesz:",
+    showAll: "Pokaż wszystkie ({n})",
+    showFewer: "Pokaż mniej",
+    maxPicks: "To już {n}, czyli najwięcej, ile można wybrać. Najpierw stuknij jeden z wybranych, żeby go odznaczyć.",
+    howLong: "Jak długa?",
+    lengths: {
+      short: {
+        label: "Krótka, ale treściwa",
+        detail: "Około 5 ekranów",
+      },
+      medium: {
+        label: "W sam raz",
+        detail: "Około 7 ekranów",
+      },
+      long: {
+        label: "Na bogato",
+        detail: "Około 10 ekranów",
+      },
+    },
+    describeOwn: "Masz konkretny pomysł? Opisz go własnymi słowami",
+    feelings: {
+      funny: {
+        label: "Zabawne",
+        sample: "„Lubię cię najbardziej. Tylko nie mów reszcie.”",
+      },
+      heartfelt: {
+        label: "Wzruszające",
+        sample: "„Mam ogromne szczęście, że cię mam.”",
+      },
+      cute: {
+        label: "Urocze",
+        sample: "„Przy tobie wszystko jest odrobinę jaśniejsze.”",
+      },
+      romantic: {
+        label: "Romantyczne",
+        sample: "„Każdy dzień z tobą to mój ulubiony dzień.”",
+      },
+      festive: {
+        label: "Świąteczne",
+        sample: "„Czas zacząć świętowanie!”",
+      },
+      elegant: {
+        label: "Klasyczne i eleganckie",
+        sample: "„Z najserdeczniejszymi życzeniami, dziś i zawsze.”",
+      },
+      cheeky: {
+        label: "Zadziorne",
+        sample: "„Mam dla ciebie kartkę. Prawdziwym prezentem jestem ja.”",
+      },
+      nostalgic: {
+        label: "Nostalgiczne",
+        sample: "„Pamiętasz, jak śmialiśmy się do łez?”",
+      },
+      gentle: {
+        label: "Spokojne i łagodne",
+        sample: "„Myślę o tobie i przesyłam ci wielki, ciepły uścisk.”",
+      },
+      blessings: {
+        label: "Pełne błogosławieństw",
+        sample: "„Niech twój dom wypełnią światło i radość.”",
+      },
+    },
+    aboutStarters: {
+      valentine: ["Poznaliśmy się ", "Uwielbia ", "Mówię na nią/niego ", "Nasz prywatny żart: "],
+      birthday: ["Kończy ", "Uwielbia ", "Zawsze mówi ", "Ksywka: "],
+      diwali: ["Uwielbia ", "W tym roku na Diwali ", "Ulubiony przysmak: ", "Od nas wszystkich z "],
+      christmas: ["Uwielbia ", "W każde święta ", "Zawsze mówi ", "Ksywka: "],
+      eid: ["Uwielbia ", "W tym roku na Id ", "Ulubione danie: ", "Od nas wszystkich z "],
+      anniversary: ["Jesteśmy razem od ", "Poznaliśmy się ", "Nasza piosenka to ", "Nasz prywatny żart: "],
+      sorry: ["Przepraszam za ", "Obiecuję, że ", "Uwielbia "],
+      thanks: ["Dziękuję za ", "Ty zawsze ", "Uwielbia "],
+      congrats: ["Brawo za ", "Jesteśmy tacy dumni, że ", "Uwielbia "],
+      halloween: ["Uwielbia ", "Boi się ", "Ksywka: "],
+      newyear: ["W tym roku ", "W przyszłym roku ", "Zawsze mówi "],
+      mothersday: ["Mama zawsze mówi ", "Popisowe danie mamy to ", "Uwielbia ", "Dziękuję za "],
+      fathersday: ["Tata zawsze mówi ", "Najlepszy suchar taty to ", "Uwielbia ", "Dziękuję za "],
+      rakhi: ["Zawsze mi docina, że ", "Kiedy byliśmy mali, ", "Obiecuję, że ", "Uwielbia "],
+      holi: ["Uwielbia ", "W zeszłym roku na Holi ", "Ksywka: "],
+      newbaby: ["Maluszek ma na imię ", "Data urodzin: ", "Starsze rodzeństwo: "],
+      wedding: ["Młoda para poznała się ", "Ślub odbędzie się ", "Życzymy im "],
+      getwell: ["Dochodzi do siebie po ", "Uwielbia ", "Tęsknimy za nią/nim w "],
+      missyou: ["Ostatnio widzieliśmy się ", "Brakuje mi naszych ", "Nie mogę się doczekać, aż "],
+      friendship: ["Poznaliśmy się ", "Nasz prywatny żart: ", "Uwielbia ", "Ksywka: "],
+      leaving: ["Przenosi się do ", "Będzie nam brakować ", "Zawsze mówi ", "Od wszystkich z "],
+      graduation: ["Kończy ", "Szkoła lub uczelnia: ", "Następny przystanek: ", "Jesteśmy bardzo dumni z "],
+      retirement: ["Przechodzi na emeryturę po ", "Lata pracy w ", "Teraz w końcu jest czas na ", "Będzie nam brakować "],
+      newhome: ["Nowy dom jest w ", "Wprowadza się ", "Nie mogę się doczekać, aż zobaczę ", "Ulubiony pokój: "],
+      other: ["Uwielbia ", "Ksywka: ", "Nasz prywatny żart: ", "Wspomnienie: "],
+    },
+    age: {
+      title: "{name} to…",
+      little: "Maluch (poniżej 7 lat)",
+      child: "Dziecko",
+      teen: "Nastolatek/nastolatka",
+      adult: "Osoba dorosła",
+      older: "Starsza osoba (70+)",
+    },
+    gentle: "Niech gry będą spokojne i łatwe",
+    gentleHint: "Wolniejsze, większe i łatwe do wygrania. Dobre dla maluchów i dla wszystkich, którzy nie czują się pewnie z telefonem.",
+    colour: {
+      title: "Jaki kolor najbardziej lubi {name}?",
+      hint: "To nieobowiązkowe. Użyjemy go do przycisków i koperty.",
+    },
+    colours: {
+      red: "Czerwony",
+      pink: "Różowy",
+      purple: "Fioletowy",
+      lilac: "Liliowy",
+      navy: "Granatowy",
+      blue: "Niebieski",
+      teal: "Morski",
+      green: "Zielony",
+      yellow: "Żółty",
+      orange: "Pomarańczowy",
+      gold: "Złoty",
+      black: "Czarny",
+    },
+    recap: {
+      title: "Twoja kartka",
+      hint: "Sprawdź, czy wszystko się zgadza. Stuknij wiersz, żeby go zmienić.",
+      change: "Zmień",
+      names: "Do: {to} · Od: {from}",
+      weChoose: "Wybierzemy za ciebie",
+      anyLook: "Styl wybierzemy za ciebie",
+      anyScreens: "Gry i ekrany wybierzemy za ciebie",
+      gentle: "Spokojne, łatwe gry",
+      colour: "Ulubiony kolor: {colour}",
+      nothing: "Brak szczegółów o tej osobie",
+      photos: "Zdjęcia: {n}",
+      onePhoto: "1 zdjęcie",
+      noPhotos: "Bez zdjęć",
+    },
     relations: [
       "Druga połówka",
       "Sympatia",
@@ -973,17 +1393,30 @@ export const pl: Dict = {
     questions: {
       to: { title: "Dla kogo jest ta kartka?", hint: "Imię albo to, jak się do tej osoby zwracasz.", placeholder: "np. Oliwia" },
       relation: { title: "Kim jest dla ciebie {name}?", hint: "Stuknij jedną z odpowiedzi albo wpisz własną.", placeholder: "Ktoś inny? Wpisz tutaj" },
-      occasion: { title: "Z jakiej okazji?", hint: "Stuknij jedną z okazji.", placeholder: "Wpisz okazję, np. obrona dyplomu, emerytura, nowe mieszkanie" },
-      vibe: { title: "Jaki ma być klimat kartki?", hint: "Wybierz, ile tylko chcesz.", placeholder: "Opisz go, np. zadziornie, nostalgicznie, trochę ckliwie" },
+      occasion: { title: "Z jakiej okazji?", hint: "Stuknij jedną z okazji.", placeholder: "Wpisz okazję, np. zaręczyny, wyniki egzaminów, zdane prawo jazdy" },
+      vibe: { title: "Jaki ma być klimat kartki?", hint: "Stuknij najwyżej {n}. Pierwszy wybrany będzie najważniejszy.", placeholder: "Opisz go, np. zadziornie, nostalgicznie, trochę ckliwie" },
+      look: {
+        title: "Wybierz styl kartki, którą dostanie {name}",
+        hint: "Stuknij styl, który najbardziej ci się podoba, a potem wybierz muzykę. Jedno i drugie możesz później zmienić.",
+      },
+      inside: {
+        title: "Co ma się znaleźć w kartce, którą dostanie {name}?",
+        hint: "Zostaw to nam albo stuknij gry i ekrany, które chcesz.",
+      },
       describe: {
         title: "Opisz dokładnie, jak ma wyglądać twoja kartka",
-        hint: "Własnymi słowami opisz, co zobaczy ta osoba: od chwili otwarcia, potem co dalej i tak dalej. Przyciski poniżej pomogą ci zacząć. Nie wiesz? Stuknij „Zaskocz mnie”, a my ją zaprojektujemy. Potem możesz zmienić wszystko.",
+        hint: "Opisz, co zobaczy ta osoba, od otwarcia aż do końca, a zbudujemy kartkę w tej kolejności. Przyciski pomogą ci zacząć.",
         placeholder:
           "np. Po otwarciu chcę granatową kopertę, za którą migoczą gwiazdy. Potem ekran z pytaniem „Zostaniesz moją walentynką?”, na którym przycisk „Nie” ucieka. Potem gra, w której łapie spadające serduszka, a potem nasze zdjęcia. Na koniec fajerwerki i wiadomość o tym, jak bardzo ją kocham.",
       },
+      about: {
+        title: "Opowiedz nam trochę o tym, kim jest {name}",
+        hint: "To nieobowiązkowe, ale właśnie dzięki temu kartka brzmi, jakby była napisana specjalnie dla tej osoby. Stuknij przycisk, żeby zacząć, albo naciśnij 🎤 na klawiaturze i powiedz to na głos.",
+        placeholder: "np. Uwielbia swój ogródek i „Taniec z gwiazdami”. Zawsze mówi: „to ja nastawię czajnik”. W maju kończy 80 lat.",
+      },
       say: {
         title: "Co ma być napisane na kartce?",
-        hint: "Projekt zostaje taki, jaki jest, więc napisz nam, co ma się w nim znaleźć: żarty, imiona albo chwile, o których warto wspomnieć, i jak się podpisać.",
+        hint: "To nieobowiązkowe. Napisz, co ma się znaleźć w kartce, np. imiona, żarty albo wspomnienia, i jak się podpisać. Możesz też zostawić to nam.",
         placeholder: "np. Niech będzie zabawnie, wspomnij o jej kocie Biszkopcie i naszej wycieczce do Rzymu, a na koniec napisz, że jej nowa praca to dla mnie wielki powód do dumy",
       },
       from: { title: "Od kogo jest kartka?", hint: "Twoje imię, tak jak się podpisujesz. Kartka może być od kilku osób.", placeholder: "np. Babcia albo Tomek i Ola" },
@@ -997,10 +1430,43 @@ export const pl: Dict = {
     describeLabel: "Opisz swoją kartkę",
     describePlaceholder: "np. Kartka urodzinowa dla mojej siostry. Maya uwielbia koty, pizzę i okropne suchary. Ma być zabawnie, z quizem o naszym wspólnym dzieciństwie i tortem, na którym trzeba zdmuchnąć świeczki.",
     make: "Zrób moją kartkę",
-    making: ["Czytamy twój pomysł…", "Dobieramy kolory…", "Piszemy tekst…", "Wybieramy gry…", "Dopracowujemy szczegóły…"],
+    making: [
+      "Czytamy twoje odpowiedzi…",
+      "Wymyślamy coś wyjątkowego…",
+      "Dobieramy kolory…",
+      "Piszemy pierwsze słowa…",
+      "Wybieramy gry…",
+      "Nadajemy tekstowi twój styl…",
+      "Dodajemy odrobinę blasku…",
+      "Sprawdzamy każdy ekran…",
+      "Szlifujemy tekst…",
+      "Dopracowujemy szczegóły…",
+    ],
     takesAMoment: "To zajmie około pół minuty, a potem możesz zmienić wszystko.",
     makingTitle: "Tworzymy twoją kartkę",
+    makingKeep: "To zajmie około pół minuty. Nie zamykaj tej strony.",
+    makingLonger: "Tym razem trwa to trochę dłużej. Nie zamykaj tej strony.",
     yourIdea: "Twój pomysł",
+    yourChoices: "Twoje wybory",
+    chipFor: "Do: {name}",
+    chipFrom: "Od: {name}",
+    chipPhotos: "Twoje zdjęcia",
+    ideaFor: "Nasz pomysł na kartkę, którą dostanie {name}",
+    ideaThinking: "Szukamy świetnego pomysłu…",
+    makingRow: "{name}: „{title}”",
+    ready: "Kartka, którą dostanie {name}, jest gotowa!",
+    stop: "Przerwij",
+    stopSure: "Przerwać tworzenie kartki? Twoje odpowiedzi zostaną zachowane.",
+    keepGoing: "Nie, kontynuuj",
+    stopYes: "Tak, przerwij",
+    makingFailed: "Nie udało się zrobić kartki",
+    makingKept: "Wszystkie twoje odpowiedzi wciąż tu są, więc nic nie przepadło.",
+    tryAgain: "Spróbuj jeszcze raz",
+    backToAnswers: "← Wróć do odpowiedzi",
+    firstLookLine: "Tak zobaczy ją {name}",
+    happyTitle: "Podoba ci się?",
+    happyYes: "Tak, dokończmy ją",
+    happyChange: "✏️ Zmień coś",
     examplesTitle: "Potrzebujesz pomysłu? Stuknij jeden, żeby go wypróbować",
     examples: [
       "Kartka walentynkowa dla Olivii. Poznaliśmy się na quizie w pubie trzy lata temu. Ma być uroczo, z pytaniem, na które nie będzie mogła powiedzieć „nie”.",
@@ -1081,6 +1547,7 @@ export const pl: Dict = {
       busy: "Mamy teraz ogromny ruch. Spróbuj ponownie za minutę.",
       refused: "Nie możemy zrobić takiej kartki. Spróbuj opisać ją inaczej.",
       failed: "Nie udało się. Spróbuj ponownie.",
+      connection: "Połączenie zostało przerwane, zanim skończyliśmy. Sprawdź, czy masz internet, i spróbuj ponownie.",
       tooMany: "To sporo kartek w krótkim czasie. Spróbuj ponownie za jakiś czas.",
       signIn: "Najpierw się zarejestruj, a potem naciśnij przycisk jeszcze raz.",
       limitCards: "Wykorzystano już limit kartek do zrobienia ({n}). Za każdą kupioną kartkę możesz zrobić kolejne: {more}.",
@@ -1092,12 +1559,34 @@ export const pl: Dict = {
 
   // The card designer: like making a presentation, a screen at a time.
   studio: {
-    tabs: { text: "Tekst", upload: "Zdjęcia", screens: "Ekrany", elements: "Elementy", ai: "Twórz z AI" },
+    tabs: {
+      words: "Treść", text: "Dodaj tekst", upload: "Zdjęcia", screens: "Ekrany", elements: "Naklejki", ai: "Poproś o zmianę" },
     howTitle: "Jak zaprojektować kartkę",
     how: ["Stuknij ekran pod kartką, żeby nad nim popracować.", "Stuknij cokolwiek na kartce, żeby to zmienić: słowa, kolory, obrazki.", "Tymi przyciskami dodasz tekst, ekrany i elementy."],
     onScreen: "Dodajesz do ekranu {n}: {name}",
     // Text
     addTitle: "Dodaj do kartki:",
+    intro: "Zmień tekst w zakładce ✏️ Treść albo stuknij cokolwiek na kartce, żeby to zmienić.",
+    modes: {
+      edit: "✏️ Zmień",
+      play: "▶ Obejrzyj",
+    },
+    watchHint: "Tak zobaczy ją odbiorca – możesz przejść przez nią stuknięciami dokładnie tak samo. Żeby cokolwiek zmienić, stuknij ✏️ Zmień.",
+    wordsOn: "Tekst na ekranie {n}: {name}",
+    wordsHint: "Pisz w dowolnym polu, a kartka będzie się zmieniać na bieżąco.",
+    addedTexts: "Dodany przez ciebie tekst",
+    addedText: "Twój tekst {n}",
+    moreWords: "Więcej tekstu: przyciski i drobne podpowiedzi ({n})",
+    usually: "Zwykle: „{words}”",
+    captionN: "Podpis do zdjęcia {n}",
+    lineGroups: {
+      noLines: "Co mówi przycisk „Nie”, gdy ucieka",
+      wrongLines: "Co się pojawia po złej odpowiedzi",
+      sliderLines: "Co się pojawia, gdy suwak idzie w górę",
+    },
+    askTitle: "Poproś o zmianę",
+    askHow: "Napisz własnymi słowami, co chcesz zmienić, i naciśnij „Wprowadź zmianę”. Możemy napisać nowy tekst, zmienić kolory, dodać grę albo cały nowy ekran, a także usunąć ekrany.",
+    askButton: "Wprowadź zmianę ✨",
     // Text
     addHeading: "Dodaj nagłówek",
     addSubheading: "Dodaj podtytuł",
@@ -1108,7 +1597,7 @@ export const pl: Dict = {
     fancyTitle: "Gotowe napisy",
     fancy: ["Wszystkiego najlepszego!", "Bardzo cię kocham", "Niespodzianka!", "z miłością", "WIELKA NOWINA", "Gratulacje"],
     // Screens
-    screensIntro: "Stuknij grupę, żeby zobaczyć jej ekrany, a potem stuknij ekran, żeby dodać go do kartki.",
+    screensIntro: "Wybierz gotowy ekran i miejsce, w którym ma się pojawić. Potem możesz zmienić na nim wszystko.",
     screenCount: "Ekrany: {n}",
     oneScreen: "1 ekran",
     whereTitle: "Gdzie go wstawić?",
@@ -1139,7 +1628,7 @@ export const pl: Dict = {
     added: "Dodano: {name}",
     // Elements
     photosTitle: "Twoje zdjęcia",
-    addPhotos: "Dodaj zdjęcia",
+    addPhotos: "Dodaj swoje zdjęcia",
     photosHint: "Dodaj swoje zdjęcia, a potem stuknij jedno, żeby wstawić je na kartkę. Możesz je przeciągnąć w inne miejsce, obrócić, powiększyć albo wybrać, która część ma być widoczna w ramce.",
     noUploads: "Nie dodano jeszcze żadnych zdjęć.",
     putOnCard: "Wstaw to zdjęcie na kartkę",
@@ -1148,17 +1637,20 @@ export const pl: Dict = {
     // The screens strip
     screens: "Ekrany",
     addScreen: "Dodaj ekran",
-    duplicate: "Zrób kopię",
+    duplicate: "Powiel",
+    copyScreen: "Skopiuj ten ekran",
     moveLeft: "Przesuń w lewo",
     moveRight: "Przesuń w prawo",
-    deleteScreen: "Usuń ekran",
-    screenSettings: "Ustawienia ekranu",
+    deleteScreen: "Usuń ten ekran",
+    screenSettings: "Kolory i efekty",
+    moreActions: "Więcej",
+    closeActions: "Zamknij",
     lastScreen: "Kartka musi mieć co najmniej jeden ekran.",
     tooManyScreens: "Limit ekranów w jednej kartce to {n}.",
     full: "Na tym ekranie nie ma już miejsca na więcej takich elementów.",
     // Changing what's tapped
     text: "Tekst",
-    element: "Element",
+    element: "Naklejka",
     photo: "Zdjęcie",
     words: "Treść",
     colour: "Kolor",
@@ -1166,6 +1658,7 @@ export const pl: Dict = {
     font: "Czcionka",
     buttonColour: "Kolor przycisku",
     envelopeColour: "Kolor koperty",
+    envelopeTitle: "Koperta",
     backgroundColour: "Kolor tła",
     blends: "Przejścia dwóch kolorów",
     smaller: "Zmniejsz",
@@ -1218,12 +1711,12 @@ export const pl: Dict = {
     welcomeTitle: "Twoja kartka jest gotowa! 🎉",
     welcomeIntro: "Oto kartka, którą {name} od ciebie dostanie. Obejrzyj ją, a potem zrób ją dokładnie taką, jak chcesz.",
     welcomeSteps: [
-      "Obejrzyj: naciśnij ▶ Tryb podglądu, żeby zobaczyć kartkę tak, jak zobaczy ją {name}.",
-      "Zmieniaj: stuknij słowa, kolory albo obrazki na kartce.",
-      "Dodawaj: przyciski Tekst, Ekrany i Elementy pozwolą ci dodać coś od siebie.",
+      "Najpierw obejrzyj kartkę tak, jak zobaczy ją {name}.",
+      "Zmień tekst: stuknij ✏️ Treść albo cokolwiek na kartce.",
+      "Dodawaj: przyciskami Dodaj tekst, Zdjęcia, Ekrany i Naklejki dodasz coś od siebie.",
       "Podoba ci się? Naciśnij Dodaj do koszyka.",
     ],
-    startDesigning: "Zacznij projektować",
+    startDesigning: "Zrób ją po swojemu",
   },
 
   editor: {
@@ -1280,6 +1773,7 @@ export const pl: Dict = {
     questionLabel: "Pytanie",
     answers: "Odpowiedzi (zaznacz poprawną)",
     answerCorrect: "Odpowiedź {n} jest poprawna",
+    answerN: "Odpowiedź {n}",
     removeAnswer: "Usuń odpowiedź",
     addAnswer: "+ Dodaj odpowiedź",
     addQuestion: "+ Dodaj pytanie",
@@ -1290,5 +1784,2182 @@ export const pl: Dict = {
     addPhotos: "+ Dodaj zdjęcia",
     tooManyPhotos: "Możesz dodać do {n} zdjęć.",
     uploadFailed: "Nie udało się dodać tego zdjęcia. Spróbuj z plikiem JPG lub PNG.",
+  },
+  looks: {
+    title: "Wybierz styl kartki, którą dostanie {name}",
+    hint: "Stuknij ten, który najbardziej ci się podoba. Kolory możesz potem jeszcze zmienić.",
+    suggested: "Polecamy",
+    moreLooks: "Pokaż więcej stylów ({n})",
+    names: {
+      classic: "Klasyka i elegancja",
+      party: "Kolorowo i wesoło",
+      cute: "Słodko i delikatnie",
+      garden: "Ogrodowa świeżość",
+      midnight: "Gwiaździsta noc",
+      blush: "Róża i pudrowy róż",
+      blackgold: "Czerń i złoto",
+      jewel: "Klejnoty i złoto",
+      crescent: "Księżycowy szmaragd",
+      cosy: "Przytulne święta",
+      evergreen: "Zieleń i złoto",
+      sky: "Niebo i chmurki",
+      doodle: "Bazgroły z zeszytu",
+      vintage: "List retro",
+      minimal: "Czysto i prosto",
+      rainbow: "Kolory tęczy",
+      velvet: "Czerwony aksamit",
+      spooky: "Upiorna noc",
+    },
+    music: "Muzyka",
+    musicHint: "Stuknij, żeby posłuchać kilku sekund. Najpierw podgłośnij dźwięk.",
+    moreMusic: "Więcej…",
+    playing: "Gra fragment: {tune}. Stuknij jeszcze raz, żeby zatrzymać.",
+    preview: "Tak będzie wyglądać kartka, którą dostanie {name}",
+    previewNoName: "Tak będzie wyglądać kartka",
+  },
+  vary: {
+    button: "Wypróbuj inny styl",
+    hint: "Nowe kolory, czcionki i naklejki. Twój tekst i zdjęcia zostają bez zmian.",
+    look: "Styl {n}",
+    again: "Stuknij jeszcze raz, żeby zobaczyć kolejny",
+  },
+  reply: {
+    title: "Niech {name} się dowie, jak ci się podobało",
+    hint: "Stuknij jedną z odpowiedzi, a my ją przekażemy.",
+    reactions: {
+      love: "Zachwyciła mnie",
+      laugh: "Rozbawiła mnie",
+      tears: "Łzy szczęścia",
+      party: "Genialna!",
+    },
+    noteLabel: "Dopisz kilka słów, jeśli chcesz",
+    notePlaceholder: "Bardzo ci dziękuję…",
+    left: "Pozostało znaków: {n}",
+    send: "Wyślij do: {name}",
+    sending: "Wysyłanie…",
+    sent: "Wysłane! {name} zaraz to dostanie.",
+    full: "{name} ma już kilka odpowiedzi na tę kartkę, więc tej nie da się wysłać.",
+    tooMany: "Zbyt wiele prób. Odczekaj kilka minut i spróbuj ponownie.",
+    failed: "Nie udało się wysłać. Spróbuj ponownie.",
+    sendBack: "Odpowiedz kartką – {name} na pewno się ucieszy 💌",
+    makeOwn: "Albo zrób kartkę dla kogoś innego",
+    ownView: "Tutaj {name} może ci podziękować albo odpowiedzieć kartką.",
+    opened: "Otwarto: {date} ✓",
+    email: {
+      openedSubject: "{to} już ogląda twoją kartkę 💌",
+      openedTitle: "{to} już ogląda twoją kartkę 💌",
+      openedBody: "Kartka, którą {to} ma od ciebie, właśnie została otwarta po raz pierwszy. Mamy nadzieję, że wywołała wielki uśmiech.",
+      openedNote: "Dajemy znać tylko przy pierwszym otwarciu kartki. Nie zapisujemy, kto ją otworzył ani gdzie.",
+      seeCards: "Zobacz moje kartki",
+      another: "Zrób kolejną kartkę",
+      replySubject: "{to} odpowiada na twoją kartkę {emoji}",
+      replyTitle: {
+        love: "{to} uwielbia twoją kartkę",
+        laugh: "Przy twojej kartce {to} śmieje się w głos",
+        tears: "Przy twojej kartce {to} ma łzy szczęścia w oczach",
+        party: "{to} uważa, że twoja kartka jest genialna",
+      },
+      replySaid: "Do tego dopisek:",
+      replyNote: "Odpowiedź przyszła prosto z kartki, którą {to} ma od ciebie.",
+      replyPrivate: "Nigdy nie pokazujemy tej osobie twojego adresu e-mail.",
+    },
+  },
+  kit: {
+    searchLabel: "Szukaj ekranów",
+    searchPlaceholder: "Wpisz np. „świeczki”, „quiz” albo „przepraszam”",
+    clearSearch: "Wyczyść wyszukiwanie",
+    filtersLabel: "Pokaż ekrany",
+    filters: {
+      card: "Do tej kartki",
+      birthday: "Urodziny",
+      love: "Miłość",
+      festive: "Świąteczne",
+      family: "Rodzina",
+      fun: "Zabawa",
+      all: "Wszystkie ekrany",
+    },
+    showAll: "Pokaż wszystkie ({n})",
+    showFewer: "Pokaż mniej",
+    found: "Znalezione ekrany: {n}",
+    foundOne: "Znaleziono 1 ekran",
+    noMatch: "Żaden ekran nie pasuje do „{q}”. Wpisz inne słowo albo wyczyść wyszukiwanie.",
+    noneHere: "Na razie nie ma tu żadnych ekranów. Stuknij inny przycisk powyżej.",
+    writeYours: "Dopisz własne słowa",
+    addPhotos: "Dodaj swoje zdjęcia",
+    ready: "Gotowe od ręki",
+    items: {
+      intro: {
+        name: "Klasyczna koperta",
+        about: "Koperta z lakową pieczęcią w kolorach twojej kartki",
+      },
+      "intro:midnight": {
+        name: "List o północy",
+        about: "Granatowo i gwiaździście, na coś od serca",
+      },
+      "intro:party": {
+        name: "Wystrzał konfetti",
+        about: "Kolorowo, skocznie i z lawiną konfetti",
+      },
+      "intro:kiss": {
+        name: "List zapieczętowany buziakiem",
+        about: "Pudrowy róż i serduszka przy otwieraniu",
+      },
+      "intro:golden": {
+        name: "Złote zaproszenie",
+        about: "Czerń i złoto, jak na uroczystym zaproszeniu",
+      },
+      "intro:spooky": {
+        name: "Upiorna przesyłka",
+        about: "Nietoperze, dynie i dreszczyk na powitanie",
+      },
+      "intro:lantern": {
+        name: "Świąteczny lampion",
+        about: "Świecące lampiony i złoto, na Diwali",
+      },
+      "intro:north-pole": {
+        name: "Poczta z bieguna północnego",
+        about: "Specjalna przesyłka z warsztatu Świętego Mikołaja",
+      },
+      "intro:eid-moon": {
+        name: "Księżyc na Id",
+        about: "Półksiężyc i gwiazdy z życzeniami na Id",
+      },
+      "intro:stork": {
+        name: "Przesyłka od bociana",
+        about: "Delikatnie i słodko, na powitanie maluszka",
+      },
+      "intro:balloons": {
+        name: "Urodzinowe balony",
+        about: "Błękit nieba i balony ulatujące w górę",
+      },
+      "intro:garden": {
+        name: "Wiosenny ogród",
+        about: "Kwiaty i motyle, świeżo i delikatnie",
+      },
+      "intro:top-secret": {
+        name: "Ściśle tajne",
+        about: "Tajna misja, wyłącznie do rąk własnych",
+      },
+      "intro:snowy": {
+        name: "Śnieżna zima",
+        about: "Mroźny błękit i padający śnieg",
+      },
+      "intro:holi": {
+        name: "Kolory Holi",
+        about: "Prawdziwa feeria barw",
+      },
+      "intro:new-year": {
+        name: "Odliczanie do Nowego Roku",
+        about: "Północ, iskierki i nowy początek",
+      },
+      "intro:lace": {
+        name: "Ślubna koronka",
+        about: "Kość słoniowa i złoto dla młodej pary",
+      },
+      "intro:sunshine": {
+        name: "Promyk słońca",
+        about: "Ciepło i radośnie, żeby rozjaśnić komuś dzień",
+      },
+      "intro:rakhi": {
+        name: "Nitka rakhi",
+        about: "Ciepłe kolory na Raksha Bandhan",
+      },
+      "intro:dad": {
+        name: "Przesyłka dla taty",
+        about: "Granat i złoto, z tatusiowym sucharem",
+      },
+      "intro:sorry": {
+        name: "Gałązka oliwna",
+        about: "Delikatnie i łagodnie, na przeprosiny",
+      },
+      "intro:thanks": {
+        name: "Wielkie dzięki",
+        about: "Ciepła brzoskwinia i mnóstwo podziękowań",
+      },
+      "intro:bon-voyage": {
+        name: "Szczęśliwej podróży",
+        about: "Dla kogoś, kto rusza na nową przygodę",
+      },
+      message: {
+        name: "Krótki liścik",
+        about: "Liścik, który pisze się sam",
+      },
+      "message:love-letter": {
+        name: "List miłosny",
+        about: "Odręcznie i romantycznie. Słowa wpisujesz ty.",
+      },
+      "message:birthday": {
+        name: "Życzenia urodzinowe",
+        about: "Kolorowo i skocznie. Życzenia wpisujesz ty.",
+      },
+      "message:birthday-poem": {
+        name: "Wierszyk urodzinowy",
+        about: "Słodki wierszyk, już napisany",
+      },
+      "message:roses": {
+        name: "Róże są czerwone",
+        about: "Klasyczny wierszyk miłosny, gotowy do wysłania",
+      },
+      "message:thanks": {
+        name: "Liścik z podziękowaniem",
+        about: "Ciepło i od serca. Podziękowania wpisujesz ty.",
+      },
+      "message:sorry": {
+        name: "Liścik z przeprosinami",
+        about: "Delikatnie i szczerze. Przeprosiny wpisujesz ty.",
+      },
+      "message:get-well": {
+        name: "Życzenia zdrowia",
+        about: "Słonecznie i pogodnie. Życzenia wpisujesz ty.",
+      },
+      "message:get-well-hug": {
+        name: "Uścisk na zdrowie",
+        about: "Ciepłe życzenia powrotu do zdrowia, już napisane",
+      },
+      "message:proud": {
+        name: "Powód do dumy",
+        about: "Na wielki sukces. Opisz go własnymi słowami.",
+      },
+      "message:christmas": {
+        name: "List świąteczny",
+        about: "Świąteczna zieleń i padający śnieg",
+      },
+      "message:christmas-wishes": {
+        name: "Życzenia świąteczne",
+        about: "Ciepłe, rodzinne życzenia na święta, już napisane",
+      },
+      "message:diwali": {
+        name: "Życzenia na Diwali",
+        about: "Świecące lampiony. Życzenia wpisujesz ty.",
+      },
+      "message:diwali-blessings": {
+        name: "Pomyślnego Diwali",
+        about: "Radosne życzenia na Diwali, już napisane",
+      },
+      "message:eid": {
+        name: "Życzenia na Id",
+        about: "Księżyc i gwiazdy. Życzenia wpisujesz ty.",
+      },
+      "message:new-year": {
+        name: "Liścik noworoczny",
+        about: "Blask o północy na nowy początek",
+      },
+      "message:new-baby": {
+        name: "Witaj, maluszku",
+        about: "Delikatnie i słodko, dla nowego członka rodziny",
+      },
+      "message:mum": {
+        name: "Kochana Mamo",
+        about: "Kwiaty i odręczne pismo, dla mamy",
+      },
+      "message:dad": {
+        name: "Kochany Tato",
+        about: "Elegancki granat, dla taty",
+      },
+      "message:friend": {
+        name: "Przyjaciel/przyjaciółka",
+        about: "Wesoło i kolorowo, dla twojej ulubionej osoby",
+      },
+      "message:miss-you": {
+        name: "Tęsknię",
+        about: "Błękit oceanu, dla kogoś daleko",
+      },
+      "message:good-luck": {
+        name: "Powodzenia",
+        about: "Na nową pracę, egzamin albo przygodę",
+      },
+      "message:anniversary": {
+        name: "Szczęśliwej rocznicy",
+        about: "Głęboka czerwień i romantyzm, na wasze wspólne lata",
+      },
+      "message:typed": {
+        name: "List z maszyny do pisania",
+        about: "Staroświeckie pismo maszynowe na szarym papierze",
+      },
+      photos: {
+        name: "Stosik zdjęć",
+        about: "Twoje zdjęcia do przeglądania jedno po drugim",
+      },
+      "photos:best-bits": {
+        name: "Nasze najlepsze chwile",
+        about: "Jak taśma filmowa, dla twoich ulubionych zdjęć",
+      },
+      "photos:polaroid-wall": {
+        name: "Ściana polaroidów",
+        about: "Twoje zdjęcia przypięte do korkowej tablicy",
+      },
+      "photos:memory-lane": {
+        name: "Wspomnień czar",
+        about: "Sepia jak na starych zdjęciach, do wspominania",
+      },
+      "photos:party": {
+        name: "Zdjęcia z imprezy",
+        about: "Głośno, kolorowo i pełno konfetti",
+      },
+      "photos:love": {
+        name: "Ty i ja",
+        about: "Różowo i romantycznie, na wasze wspólne zdjęcia",
+      },
+      "photos:family": {
+        name: "Album rodzinny",
+        about: "Ciepła kość słoniowa, dla całej rodziny",
+      },
+      "photos:baby": {
+        name: "Malutkie chwile",
+        about: "Delikatny błękit i róż, na zdjęcia maluszka",
+      },
+      "photos:christmas": {
+        name: "Świąteczne zdjęcia",
+        about: "Świąteczna zieleń i padający śnieg",
+      },
+      "photos:diwali": {
+        name: "Diwali w domu",
+        about: "Lampiony i złoto, na zdjęcia z Diwali",
+      },
+      "photos:adventures": {
+        name: "Nasze przygody",
+        about: "Jak dziennik podróży, na wspólne wyprawy",
+      },
+      timeline: {
+        name: "Nasza historia do dziś",
+        about: "Wasza historia, chwila po chwili",
+      },
+      "timeline:our-story": {
+        name: "Nasza historia",
+        about: "Od dnia, w którym się poznaliście, aż do dziś",
+      },
+      "timeline:your-year": {
+        name: "Twój rok",
+        about: "Miniony rok w chwilach, pora roku po porze roku",
+      },
+      "timeline:then-now": {
+        name: "Kiedyś i dziś",
+        about: "Jak było kiedyś i jak jest teraz",
+      },
+      "timeline:friends": {
+        name: "Początki naszej przyjaźni",
+        about: "Historia pewnej przyjaźni",
+      },
+      "timeline:growing-up": {
+        name: "Dorastanie",
+        about: "Od maluszka aż po dorosłość",
+      },
+      "timeline:journey": {
+        name: "Twoja droga",
+        about: "Od pierwszego dnia do kolejnego wielkiego kroku",
+      },
+      reasons: {
+        name: "Za co cię kocham",
+        about: "Karteczki wyciągane ze słoika. Wpisujesz je ty.",
+      },
+      "reasons:admire": {
+        name: "Co w tobie podziwiam",
+        about: "Słoik gwiazdek pełen komplementów",
+      },
+      "reasons:best-mum": {
+        name: "Dlaczego jesteś najlepszą mamą",
+        about: "Piękne powody już napisane, plus jeden od ciebie",
+      },
+      "reasons:best-dad": {
+        name: "Dlaczego jesteś najlepszym tatą",
+        about: "Powody dla taty już napisane, plus jeden od ciebie",
+      },
+      "reasons:best-friend": {
+        name: "Dlaczego nasza przyjaźń jest najlepsza",
+        about: "Przyjacielskie powody już napisane, plus jeden od ciebie",
+      },
+      "reasons:grandparent": {
+        name: "Dlaczego tak bardzo cię kochamy",
+        about: "Dla babci lub dziadka, z miejscem na własne powody",
+      },
+      "reasons:miss": {
+        name: "Za czym tęsknię",
+        about: "Dla kogoś daleko",
+      },
+      "reasons:forgive": {
+        name: "Dlaczego warto mi wybaczyć",
+        about: "Przekorny sposób na przeprosiny",
+      },
+      "reasons:birthday": {
+        name: "Powody do świętowania",
+        about: "Imprezowy słoik pełen urodzinowych karteczek",
+      },
+      coupons: {
+        name: "Książeczka kuponów",
+        about: "Przyjemności do wykorzystania. Wpisujesz je ty.",
+      },
+      "coupons:hugs": {
+        name: "Kupony na przytulasy",
+        about: "Przytulasy na każde życzenie, gotowe do wysłania",
+      },
+      "coupons:chores": {
+        name: "Zwolnienie z obowiązków",
+        about: "Zmywanie, śmieci i odkurzanie: zrobisz to ty",
+      },
+      "coupons:breakfast": {
+        name: "Śniadanie do łóżka",
+        about: "Herbata, tosty i naleśniki, podane pod sam nos",
+      },
+      "coupons:date-night": {
+        name: "Kupony na randkę",
+        about: "Kolacje, filmy i spacery przy księżycu",
+      },
+      "coupons:birthday": {
+        name: "Urodzinowe przyjemności",
+        about: "Tort na śniadanie i nie tylko",
+      },
+      "coupons:pamper": {
+        name: "Dzień rozpieszczania",
+        about: "Kąpiele z pianą, masaże stóp i drzemki",
+      },
+      "coupons:kids": {
+        name: "Kupony od dzieci",
+        about: "Obietnice od najmłodszych",
+      },
+      "coupons:friend": {
+        name: "Kupony przyjaźni",
+        about: "Przekąski, kawa i szczere opinie",
+      },
+      question: {
+        name: "Twoje własne pytanie",
+        about: "Zapytaj o cokolwiek. Przycisk „Nie” ucieka.",
+      },
+      "question:valentine": {
+        name: "Zostaniesz moją walentynką?",
+        about: "Przycisk „Nie” ucieka. Zostaje tylko „Tak”.",
+      },
+      "question:favourite": {
+        name: "Jestem twoją ulubioną osobą?",
+        about: "Jest tylko jedna dobra odpowiedź",
+      },
+      "question:surprise": {
+        name: "Czas na niespodziankę?",
+        about: "Podsyca emocje przed wielkim odkryciem",
+      },
+      "question:forgive": {
+        name: "Wybaczysz mi?",
+        about: "Na przeprosiny. „Nie” nie wchodzi w grę.",
+      },
+      "question:dinner": {
+        name: "Kolacja? Ja stawiam",
+        about: "Zaproś na randkę. Nie da się odmówić.",
+      },
+      "question:bff": {
+        name: "Przyjaźń na zawsze?",
+        about: "Niech będzie oficjalnie",
+      },
+      "question:bridesmaid": {
+        name: "Zostaniesz moją druhną?",
+        about: "Zadaj najlepszej przyjaciółce to wielkie pytanie",
+      },
+      "question:still-love": {
+        name: "Nadal mnie kochasz?",
+        about: "Romantycznie, z przekornym uciekającym „Nie”",
+      },
+      "question:trip": {
+        name: "Wyjedziemy gdzieś razem?",
+        about: "Ogłoś wyjazd-niespodziankę",
+      },
+      "question:hug": {
+        name: "Przytulisz mnie?",
+        about: "Słodko i prosto, z uciekającym „Nie”",
+      },
+      quiz: {
+        name: "Twój własny quiz",
+        about: "Napisz własne pytania i odpowiedzi",
+      },
+      "quiz:know-me": {
+        name: "Jak dobrze mnie znasz?",
+        about: "Trzy pytania o ciebie. Odpowiedzi wpisujesz ty.",
+      },
+      "quiz:year": {
+        name: "Zgadnij, który to rok",
+        about: "Kiedy to wszystko się wydarzyło? Lata wpisujesz ty.",
+      },
+      "quiz:who-said": {
+        name: "Kto to powiedział?",
+        about: "Wasze słynne powiedzonka: kto z was to powiedział?",
+      },
+      "quiz:would-rather": {
+        name: "Co wolę…?",
+        about: "Zgadnij, co wybieram. Odpowiedzi zaznaczasz ty.",
+      },
+      "quiz:christmas": {
+        name: "Quiz przy choince",
+        about: "Świąteczne pytania, od razu do gry",
+      },
+      "quiz:birthday": {
+        name: "Quiz urodzinowy",
+        about: "Zwariowane urodzinowe pytania, od razu do gry",
+      },
+      "quiz:family": {
+        name: "Quiz rodzinny",
+        about: "Kto najlepiej gotuje? Kto zawsze się spóźnia?",
+      },
+      "quiz:love": {
+        name: "Nasz quiz miłosny",
+        about: "Pierwsze randki, wasza piosenka i kto zakochał się pierwszy",
+      },
+      scratch: {
+        name: "Zdrapka",
+        about: "Zdrap srebrne pole i odkryj sekret",
+      },
+      "scratch:gift": {
+        name: "Zdrap i odkryj prezent",
+        about: "Ukryj prezent pod srebrną warstwą",
+      },
+      "scratch:fortune": {
+        name: "Ciasteczko z wróżbą",
+        about: "Wróżba pod zdrapką, gotowa do wysłania",
+      },
+      "scratch:big-news": {
+        name: "Wielka nowina",
+        about: "Ogłoś coś ważnego. Nowinę wpisujesz ty.",
+      },
+      "scratch:ticket": {
+        name: "Wygrany los",
+        about: "Szczęśliwa zdrapka z nagrodą od ciebie",
+      },
+      "scratch:baby-news": {
+        name: "Wieści o maluszku",
+        about: "Delikatnie zdradź radosną nowinę",
+      },
+      "scratch:save-date": {
+        name: "Zarezerwuj datę",
+        about: "Zdradź datę wielkiego dnia",
+      },
+      typeit: {
+        name: "Tajne hasło",
+        about: "Odblokowuje się po wpisaniu hasła",
+      },
+      "typeit:crack-code": {
+        name: "Złam szyfr",
+        about: "Szpiegowski szyfr do złamania",
+      },
+      "typeit:magic-word": {
+        name: "Powiedz czarodziejskie słowo",
+        about: "Czarodziejskie słowo to „please”, czyli „proszę”. Od razu do gry.",
+      },
+      "typeit:pet-name": {
+        name: "Jak na ciebie mówię",
+        about: "Hasłem jest czułe zdrobnienie, którym nazywasz odbiorcę",
+      },
+      "typeit:our-song": {
+        name: "Tytuł naszej piosenki",
+        about: "Hasłem jest tytuł waszej piosenki",
+      },
+      "typeit:santa": {
+        name: "Tajny szyfr Mikołaja",
+        about: "Ho, ho, ho! Od razu do gry",
+      },
+      wheel: {
+        name: "Koło z nagrodami",
+        about: "Zakręć i wygraj. Nagrody wpisujesz ty.",
+      },
+      "wheel:date-night": {
+        name: "Randkowa ruletka",
+        about: "Zakręć i wylosuj następną randkę",
+      },
+      "wheel:treat": {
+        name: "Zakręć po przyjemność",
+        about: "Czekolada, herbatka albo dzień wolnego",
+      },
+      "wheel:dinner": {
+        name: "Co dziś jemy?",
+        about: "Nie możesz się zdecydować? Niech wybierze koło.",
+      },
+      "wheel:birthday": {
+        name: "Urodzinowe koło fortuny",
+        about: "Zakręć i wylosuj urodzinową przyjemność",
+      },
+      "wheel:rigged": {
+        name: "Ustawione koło",
+        about: "Zawsze staje na pierwszym polu. Ciii!",
+      },
+      "wheel:christmas": {
+        name: "Świąteczne koło",
+        about: "Świąteczne babeczki, filmy i pudding",
+      },
+      "wheel:eid": {
+        name: "Koło przysmaków na Id",
+        about: "Eidi, biryani i słodycze",
+      },
+      boxes: {
+        name: "Wybierz pudełko",
+        about: "Trzy tajemnicze pudełka. Nagrody wpisujesz ty.",
+      },
+      "boxes:present": {
+        name: "Wybierz prezent",
+        about: "Trzy zapakowane prezenty do wyboru",
+      },
+      "boxes:mystery": {
+        name: "Tajemnicze pudełka",
+        about: "Trzy niespodzianki ukryte w pudełkach, gotowe do wysłania",
+      },
+      "boxes:crackers": {
+        name: "Strzelające cukierki",
+        about: "Pociągnij za cukierek i zobacz, co jest w środku",
+      },
+      "boxes:love": {
+        name: "Pudełka miłości",
+        about: "Buziaki, kolacje i przytulasy",
+      },
+      "boxes:eidi": {
+        name: "Pudełka z eidi",
+        about: "Wybierz pudełko z prezentem na Id",
+      },
+      "boxes:mithai": {
+        name: "Pudełka z mithai",
+        about: "Który słodki przysmak na Diwali się trafi?",
+      },
+      slider: {
+        name: "Licznik miłości",
+        about: "Suwak, który idzie tylko w górę. Pytanie wpisujesz ty.",
+      },
+      "slider:love": {
+        name: "Jak bardzo cię kocham?",
+        about: "Do księżyca i z powrotem. Idzie tylko w górę.",
+      },
+      "slider:missed": {
+        name: "Jak bardzo mi cię brakowało",
+        about: "Dla kogoś, kto wraca do domu albo jest daleko",
+      },
+      "slider:sorry": {
+        name: "Jak bardzo mi przykro?",
+        about: "Bardzo, bardzo przepraszam",
+      },
+      "slider:excited": {
+        name: "Jak bardzo się cieszysz?",
+        about: "Jakkolwiek go przesunąć, idzie w górę",
+      },
+      "slider:proud": {
+        name: "Jak wielka jest moja duma?",
+        about: "Duma mnie rozpiera",
+      },
+      "slider:age": {
+        name: "Na ile lat się czujesz?",
+        about: "Przekorny suwak na urodziny",
+      },
+      "game:catch-hearts": {
+        name: "Łap serduszka",
+        about: "Stukaj spadające serduszka w kolorach twojej kartki",
+      },
+      "game:catch-hearts:sweetheart": {
+        name: "Łap serduszka: słodko",
+        about: "Pudrowy róż i 12 serduszek do złapania",
+      },
+      "game:catch-hearts:gentle": {
+        name: "Łap serduszka: na spokojnie",
+        about: "Duże, powolne serduszka. Każdy da radę.",
+      },
+      "game:light-diyas": {
+        name: "Zapal lampki diya",
+        about: "Stuknij każdą lampkę diya, żeby ją zapalić",
+      },
+      "game:light-diyas:midnight": {
+        name: "Zapal lampki diya: północ",
+        about: "Granat i złoto, z fajerwerkami",
+      },
+      "game:light-diyas:marigold": {
+        name: "Zapal lampki diya: aksamitka",
+        about: "Pomarańcz i róż oraz 7 lampek diya",
+      },
+      "game:blow-candles": {
+        name: "Zdmuchnij świeczki",
+        about: "Pomyśl życzenie, a potem stuknij płomyki",
+      },
+      "game:blow-candles:pastel": {
+        name: "Zdmuchnij świeczki: pastele",
+        about: "Delikatne kolory i balony",
+      },
+      "game:blow-candles:gold": {
+        name: "Zdmuchnij świeczki: złoto",
+        about: "Czerń i złoto na okrągłe urodziny",
+      },
+      "game:pop-balloons": {
+        name: "Przebij balony",
+        about: "Przebijaj je, gdy lecą w górę",
+      },
+      "game:pop-balloons:rainbow": {
+        name: "Przebij balony: tęcza",
+        about: "15 szybkich balonów we wszystkich kolorach",
+      },
+      "game:pop-balloons:gentle": {
+        name: "Przebij balony: na spokojnie",
+        about: "6 dużych, powolnych balonów. Każdy da radę.",
+      },
+      "game:catch-snowflakes": {
+        name: "Łapanie płatków śniegu",
+        about: "Łap padający śnieg",
+      },
+      "game:catch-snowflakes:frosty": {
+        name: "Łap płatki śniegu: mróz",
+        about: "Lodowy błękit i bałwanek",
+      },
+      "game:catch-snowflakes:blizzard": {
+        name: "Łap płatki śniegu: zamieć",
+        about: "15 szybkich płatków. Prawdziwe wyzwanie.",
+      },
+      "game:catch-stars": {
+        name: "Łap gwiazdy",
+        about: "Łap spadające gwiazdy",
+      },
+      "game:catch-stars:night-sky": {
+        name: "Łap gwiazdy: nocne niebo",
+        about: "Pomyśl życzenie pod nocnym niebem",
+      },
+      "game:catch-stars:gold-stars": {
+        name: "Łap gwiazdy: złote gwiazdki",
+        about: "Złote gwiazdki za dobrą robotę",
+      },
+      "game:memory-match": {
+        name: "Znajdź pary (memory)",
+        about: "Znajdź pasujące pary",
+      },
+      "game:memory-match:quick": {
+        name: "Znajdź pary: szybko",
+        about: "Tylko 4 pary. Szybko i łatwo.",
+      },
+      "game:memory-match:retro": {
+        name: "Znajdź pary: retro",
+        about: "W stylu starych gier komputerowych",
+      },
+      "game:unwrap-gift": {
+        name: "Rozpakuj prezent",
+        about: "Stukaj, żeby zerwać papier",
+      },
+      "game:unwrap-gift:christmas": {
+        name: "Rozpakuj prezent: święta",
+        about: "Prezent pod choinką",
+      },
+      "game:unwrap-gift:birthday": {
+        name: "Rozpakuj prezent: urodziny",
+        about: "Imprezowe kolory i konfetti",
+      },
+      "game:shake-it": {
+        name: "Potrząśnij telefonem",
+        about: "Potrząśnij, żeby się otworzyło (najlepiej na telefonie)",
+      },
+      "game:shake-it:champagne": {
+        name: "Potrząśnij telefonem: szampan",
+        about: "Potrząśnij, żeby strzelił korek",
+      },
+      "game:shake-it:snow-globe": {
+        name: "Potrząśnij telefonem: śnieżna kula",
+        about: "Potrząśnij, żeby zaczął padać śnieg",
+      },
+      "game:cursor-chase": {
+        name: "Goń serduszko",
+        about: "Ucieka przed myszką (najlepiej na komputerze)",
+      },
+      "game:cursor-chase:playful": {
+        name: "Goń serduszko: niedostępne",
+        about: "Szybsze serduszko, które udaje niedostępne",
+      },
+      "game:cursor-chase:slow": {
+        name: "Goń serduszko: powoli",
+        about: "Powolne serduszko, wystarczy złapać je 3 razy",
+      },
+      "game:loves-me-not": {
+        name: "Kocha, nie kocha",
+        about: "Zrywaj płatki, żeby się przekonać",
+      },
+      "game:loves-me-not:meadow": {
+        name: "Kocha, nie kocha: łąka",
+        about: "Stokrotka na zielonej łące",
+      },
+      "game:loves-me-not:rose": {
+        name: "Kocha, nie kocha: róża",
+        about: "Romantyczna głęboka czerwień i 11 płatków",
+      },
+      "game:whack-ghosts": {
+        name: "Pacnij duchy",
+        about: "Stukaj duchy, gdy wyskakują",
+      },
+      "game:whack-ghosts:haunted": {
+        name: "Pacnij duchy: nawiedzony dom",
+        about: "Pajęczyny, nietoperze i świece",
+      },
+      "game:whack-ghosts:pumpkin": {
+        name: "Pacnij duchy: dyniowe pole",
+        about: "Jaskrawy pomarańcz i szybsze duchy",
+      },
+      "game:launch-fireworks": {
+        name: "Odpal fajerwerki",
+        about: "Stuknij niebo, żeby je odpalić",
+      },
+      "game:launch-fireworks:midnight": {
+        name: "Odpal fajerwerki: północ",
+        about: "Powitaj Nowy Rok",
+      },
+      "game:launch-fireworks:grand": {
+        name: "Odpal fajerwerki: wielki finał",
+        about: "12 fajerwerków w czerni i złocie",
+      },
+      "game:release-lanterns": {
+        name: "Wypuść lampiony",
+        about: "Stuknij każdy i pomyśl życzenie",
+      },
+      "game:release-lanterns:wishes": {
+        name: "Wypuść lampiony: noc życzeń",
+        about: "Granatowe, rozgwieżdżone nocne niebo",
+      },
+      "game:release-lanterns:golden": {
+        name: "Wypuść lampiony: złote",
+        about: "Ciepłe złoto, na Diwali albo Id",
+      },
+      "game:bubble-wrap": {
+        name: "Popękaj folię bąbelkową",
+        about: "Czysta przyjemność",
+      },
+      "game:bubble-wrap:calm": {
+        name: "Popękaj folię bąbelkową: na spokojnie",
+        about: "12 powolnych bąbelków w rytm spokojnego oddechu",
+      },
+      "game:bubble-wrap:stress": {
+        name: "Popękaj folię bąbelkową: antystres",
+        about: "30 bąbelków, na których można się wyżyć",
+      },
+      "game:pinata": {
+        name: "Rozbij piniatę",
+        about: "Stukaj, aż pęknie",
+      },
+      "game:pinata:fiesta": {
+        name: "Rozbij piniatę: fiesta",
+        about: "Jaskrawe imprezowe kolory i 10 uderzeń",
+      },
+      "game:pinata:quick": {
+        name: "Rozbij piniatę: szybko",
+        about: "Tylko 4 stuknięcia. Łatwe nawet dla maluchów.",
+      },
+      "game:grow-flower": {
+        name: "Wyhoduj kwiatek",
+        about: "Podlewaj, aż zakwitnie",
+      },
+      "game:grow-flower:mum": {
+        name: "Wyhoduj kwiatek: dla mamy",
+        about: "Różowy kwiat na Dzień Matki",
+      },
+      "game:grow-flower:get-well": {
+        name: "Wyhoduj kwiatek: słonecznik",
+        about: "Słoneczna żółć, z życzeniami zdrowia",
+      },
+      "game:throw-colours": {
+        name: "Rzucaj kolorami",
+        about: "Rozchlapuj kolory po całym ekranie, na Holi",
+      },
+      "game:throw-colours:rainbow": {
+        name: "Rzucaj kolorami: tęcza",
+        about: "Białe tło i 20 kleksów",
+      },
+      "game:throw-colours:gulal": {
+        name: "Rzucaj kolorami: gulal",
+        about: "Odcienie różu i fioletu na Holi",
+      },
+      "game:slot-machine": {
+        name: "Jackpot w jednorękim bandycie",
+        about: "Pociągnij za dźwignię i wygraj jackpot",
+      },
+      "game:slot-machine:vegas": {
+        name: "Jednoręki bandyta: Vegas",
+        about: "Czerń, czerwień i złoto, jak w wielkim kasynie",
+      },
+      "game:slot-machine:christmas": {
+        name: "Jednoręki bandyta: święta",
+        about: "Świąteczny jackpot",
+      },
+      "game:hold-hug": {
+        name: "Wyślij uścisk",
+        about: "Naciśnij i przytrzymaj, żeby wysłać uścisk",
+      },
+      "game:hold-hug:cosy": {
+        name: "Wyślij uścisk: ciepło i przytulnie",
+        about: "Delikatna brzoskwinia, gdy ktoś potrzebuje otuchy",
+      },
+      "game:hold-hug:bear": {
+        name: "Wyślij uścisk: niedźwiedzi",
+        about: "Wielkie, figlarne przytulenie",
+      },
+      "game:catch-candy": {
+        name: "Łap słodycze",
+        about: "Łapanie spadających słodyczy",
+      },
+      "game:catch-candy:trick-treat": {
+        name: "Łap słodycze: cukierek albo psikus",
+        about: "Upiorne słodycze na Halloween",
+      },
+      "game:catch-candy:sweet-shop": {
+        name: "Łap słodycze: cukiernia",
+        about: "Pastelowy róż i 12 słodkości",
+      },
+      finale: {
+        name: "Finał z fajerwerkami",
+        about: "Fajerwerki i twoje najważniejsze słowa",
+      },
+      "finale:hearts": {
+        name: "Finał z serduszkami",
+        about: "Deszcz serduszek i „Kocham cię”",
+      },
+      "finale:confetti": {
+        name: "Finał z konfetti",
+        about: "Hip, hip, hura! Z konfetti",
+      },
+      "finale:birthday": {
+        name: "Urodzinowe konfetti",
+        about: "Sto lat, w deszczu konfetti",
+      },
+      "finale:balloons": {
+        name: "Finał z balonami",
+        about: "Balony odlatujące wysoko w niebo",
+      },
+      "finale:gold": {
+        name: "Złoty finał",
+        about: "Iskierki w czerni i złocie",
+      },
+      "finale:lanterns": {
+        name: "Finał z lampionami",
+        about: "Świecące lampiony unoszące się w górę",
+      },
+      "finale:diwali": {
+        name: "Fajerwerki na Diwali",
+        about: "Fajerwerki na niebie o północy",
+      },
+      "finale:snow": {
+        name: "Zaśnieżony finał",
+        about: "Wesołych Świąt w padającym śniegu",
+      },
+      "finale:eid": {
+        name: "Finał na Id",
+        about: "Gwiazdy i życzenia na Id",
+      },
+      "finale:new-year": {
+        name: "Noworoczne fajerwerki",
+        about: "Fajerwerki o północy",
+      },
+      "finale:holi": {
+        name: "Finał na Holi",
+        about: "Wszędzie kolory",
+      },
+      "finale:spooky": {
+        name: "Upiorny finał",
+        about: "Nietoperze i duchy. Muahaha!",
+      },
+      "finale:petals": {
+        name: "Finał z płatkami",
+        about: "Spadające płatki, delikatnie i pięknie",
+      },
+      "finale:mum": {
+        name: "Finał na Dzień Matki",
+        about: "Płatki i miłość dla mamy",
+      },
+      "finale:dad": {
+        name: "Finał na Dzień Ojca",
+        about: "Konfetti dla najlepszego taty",
+      },
+      "finale:rakhi": {
+        name: "Finał na rakhi",
+        about: "Iskierki na Raksha Bandhan",
+      },
+      "finale:sorry": {
+        name: "Finał z przeprosinami",
+        about: "Delikatne płatki i szczere „przepraszam”",
+      },
+      "finale:stars": {
+        name: "Gwiaździsty finał",
+        about: "Niebo pełne gwiazd",
+      },
+      "finale:bubbles": {
+        name: "Finał z bańkami",
+        about: "Unoszące się bańki i mocne uściski",
+      },
+      "finale:farewell": {
+        name: "Finał na pożegnanie",
+        about: "Życzenia powodzenia i konfetti",
+      },
+    },
+  },
+  demo: {
+    metaTitle: "{name}: demo na pełnym ekranie · Envelette",
+    back: "← Wróć",
+    make: "Zrób tę kartkę · {price}",
+    note: "To tylko przykład. Na twojej kartce znajdą się wasze imiona, twoje słowa i zdjęcia.",
+  },
+  occasionSeo: {
+    valentine: {
+      title: "E-kartki walentynkowe z uciekającym przyciskiem „Nie” · Envelette",
+      description: "Zapytaj, czy zostanie twoją walentynką, w interaktywnej e-kartce: przycisk „Nie”, którego nie da się nacisnąć, twoje zdjęcia, list miłosny, który pisze się sam, i deszcz serduszek.",
+      heading: "Interaktywne e-kartki na **walentynki**",
+      aboutTitle: "Walentynka, na którą nie da się powiedzieć „nie”",
+      about: [
+        "Nasza najsłynniejsza kartka: ukochana osoba otwiera kopertę, czyta „Zostaniesz moją walentynką?” i próbuje nacisnąć „Nie”. Przycisk za każdym razem ucieka, a przycisk „Tak” rośnie. Potem pojawiają się twoje zdjęcia, krótka gra i list miłosny, który pisze się sam na jej oczach, a na koniec spada deszcz serduszek.",
+        "Wolisz coś łagodniejszego? Są spokojne, romantyczne projekty ze spadającymi płatkami i słoikiem powodów, dla których kochasz tę osobę, a także zabawne, z kołem, które wylosuje pomysł na randkę, i kuponami. To kartka online, więc dociera w chwili wysłania: przez WhatsApp, SMS-em albo e-mailem. Możemy też wysłać ją e-mailem tak, żeby dotarła 14 lutego o 9:00.",
+      ],
+      writeTitle: "Co napisać w walentynce",
+      ideas: [
+        {
+          who: "Dla drugiej połówki",
+          text: "Co roku szukam kartki, która powie to jak należy, i co roku i tak piszę to samo: za każdym razem wybieram ciebie. I zawsze będę wybierać.",
+        },
+        {
+          who: "Dla nowej miłości",
+          text: "Wiem, że znamy się od niedawna, ale 14 lutego nie może minąć bez tych słów: dzięki tobie ta zima jest o wiele jaśniejsza.",
+        },
+        {
+          who: "Dla męża lub żony",
+          text: "Tyle lat razem, a ty wciąż rozśmieszasz mnie przy śniadaniu. Szczęśliwych walentynek dla mojej ulubionej osoby, z którą chcę się razem zestarzeć.",
+        },
+        {
+          who: "Na odległość",
+          text: "Dzielą nas setki kilometrów, a i tak każdego ranka najpierw myślę o tobie. Odliczam dni do chwili, gdy powiem ci to prosto w oczy.",
+        },
+        {
+          who: "Coś zabawnego",
+          text: "Róże są czerwone, przycisk też czerwony. Nie wciśniesz „Nie”, więc nasz los przesądzony.",
+        },
+        {
+          who: "Dla najlepszej przyjaciółki",
+          text: "Szczęśliwych galentynek dla przyjaciółki, która była ze mną przy każdej katastrofie. Nie ma nikogo, z kim wolałabym być singielką, w związku albo w kompletnej rozsypce.",
+        },
+      ],
+      faqTitle: "Pytania o e-kartki walentynkowe",
+      faqs: [
+        {
+          q: "Czy naprawdę nie da się nacisnąć „Nie”?",
+          a: "Można próbować. Przycisk „Nie” ucieka przy każdej próbie naciśnięcia, a przycisk „Tak” rośnie po każdym pudle. Pytanie możesz zmienić na dowolne, od „Zostaniesz moją walentynką?” po „Kolacja w piątek?”",
+        },
+        {
+          q: "Czy mogę wysłać kartkę tak, żeby dotarła w walentynki?",
+          a: "Tak. Wybierz wysyłkę e-mailem, a potem 14 lutego, i kartka dotrze o 9:00 według twojej strefy czasowej. Możesz to ustawić do {days} dni naprzód, więc da się wszystko załatwić już w styczniu i o tym zapomnieć. Możesz też samodzielnie wysłać link, kiedy tylko chcesz.",
+        },
+        {
+          q: "Czy kartka jest prywatna?",
+          a: "Kartkę mogą otworzyć tylko osoby, które mają link. Linki to długie, losowe kody, a kartek nie ma na żadnych listach ani w wyszukiwarkach, więc twój list miłosny zostaje tylko między wami.",
+        },
+        {
+          q: "Ile kosztuje e-kartka walentynkowa?",
+          a: "{price} za kartkę, płatne raz. Przed zapłatą możesz przejść całą kartkę od początku do końca, razem z grami, więc dokładnie wiesz, co dostanie twoja walentynka.",
+        },
+      ],
+    },
+    birthday: {
+      title: "Interaktywne e-kartki urodzinowe do zabawy · Envelette",
+      description: "E-kartka urodzinowa, która jest prawdziwą zabawą: zdmuchiwanie świeczek, rozbijanie piniaty, przeglądanie twoich zdjęć i finał z konfetti. Gotowa w kilka minut, wysyłana jako link.",
+      heading: "Interaktywne e-kartki na **urodziny**",
+      aboutTitle: "Kartka urodzinowa, która jest jak impreza",
+      about: [
+        "Zamiast kartki, którą czyta się raz i stawia na kominku, w telefonie czeka mała impreza: świeczki do zdmuchnięcia, balony do przebicia albo piniata do rozbicia, a potem twoje zdjęcia, twoja wiadomość i finał z konfetti, a wszystko przy dźwiękach Happy Birthday.",
+        "Niektóre projekty są zabawne, z delikatnymi żartami z wieku albo z quizem, który piszesz o tej osobie, a inne po prostu ciepłe, dla rodziców, partnerów i najlepszych przyjaciół. To internetowa kartka urodzinowa, więc równie łatwo dotrze do wnuków na drugim końcu kraju, jak do przyjaciół za granicą. Zleć nam wysyłkę e-mailem na 9:00 według twojej strefy czasowej w dniu urodzin albo wyślij link samodzielnie.",
+      ],
+      writeTitle: "Co napisać na kartce urodzinowej",
+      ideas: [
+        {
+          who: "Dla mamy lub taty",
+          text: "Wszystkiego najlepszego dla osoby, która nauczyła mnie wszystkiego, nawet zdmuchiwania świeczek bez włączania czujnika dymu. Z każdym rokiem kocham cię coraz bardziej.",
+        },
+        {
+          who: "Dla babci lub dziadka",
+          text: "Wszystkiego najlepszego! Dziękuję za ciasteczka, za opowieści i za to, że zawsze stoisz po mojej stronie. Niech ten dzień będzie tak cudowny jak ty.",
+        },
+        {
+          who: "Dla przyjaciela lub przyjaciółki",
+          text: "Za tobą kolejny genialny rok. Dziękuję za każdą wiadomość głosową, każdy okropny pomysł i za to, że tak często masz rację. Wszystkiego najlepszego!",
+        },
+        {
+          who: "Dla drugiej połówki",
+          text: "Wszystkiego najlepszego dla mojej ulubionej osoby. Miał być niesamowity prezent, ale szczerze? To ja jestem prezentem. (Tort też jest.)",
+        },
+        {
+          who: "Na okrągłe urodziny",
+          text: "Czterdziestka bardzo ci pasuje. Niech to będzie najlepsza dekada ze wszystkich, a liczba świeczek na torcie niech na zawsze zostanie naszą tajemnicą.",
+        },
+        {
+          who: "Dla kogoś z pracy",
+          text: "Wszystkiego najlepszego od nas wszystkich! Dziękujemy za śmiech, za herbatę parzoną dla całego biura i za cierpliwość do naszej biurowej playlisty. Niech to będzie wspaniały dzień!",
+        },
+      ],
+      faqTitle: "Pytania o e-kartki urodzinowe",
+      faqs: [
+        {
+          q: "Czy mogę zaplanować, żeby e-kartka urodzinowa dotarła w dniu urodzin?",
+          a: "Tak. Wybierz wysyłkę e-mailem, a potem dzień urodzin, i kartka dotrze o 9:00 według twojej strefy czasowej. Możesz to ustawić do {days} dni naprzód, co przydaje się przy urodzinach, o których zwykle przypominasz sobie o 22:00.",
+        },
+        {
+          q: "Czy mogę dodać quiz o osobie, która ma urodziny?",
+          a: "Tak. Kilka projektów ma quiz, a pytania i odpowiedzi wymyślasz ty, więc może dotyczyć pierwszego samochodu, najgorszej fryzury albo tego, jak dobrze cię zna. Ekran z quizem możesz też dodać do każdego projektu.",
+        },
+        {
+          q: "Czy możemy wysłać kartkę razem, w kilka osób?",
+          a: "Kartkę składa jedna osoba, ale może być od tylu osób, ilu tylko chcecie: w polu „Od” wpisz „nas wszystkich” i dodaj zdjęcia oraz wiadomości od każdego. Potem udostępnij link na grupowym czacie albo zleć nam wysyłkę e-mailem.",
+        },
+        {
+          q: "Czy kartka zadziała na telefonie odbiorcy?",
+          a: "Tak. Otwiera się w przeglądarce na każdym telefonie, tablecie i komputerze. Nic nie trzeba pobierać ani zakładać konta. Jeśli odbiorca nie przepada za technologią, wystarczy, że stuknie link, a potem kopertę.",
+        },
+      ],
+    },
+    diwali: {
+      title: "E-kartki na Diwali: zapal lampki diya, a potem fajerwerki · Envelette",
+      description: "Wyślij życzenia na Diwali w interaktywnej e-kartce: odbiorca zapala lampki diya, wypuszcza lampiony szczęścia i wypełnia niebo fajerwerkami. Dociera od razu do rodziny w każdym zakątku świata.",
+      heading: "Interaktywne e-kartki na **Diwali**",
+      aboutTitle: "Święto świateł w telefonie",
+      about: [
+        "E-kartka na Diwali od Envelette jest do zabawy, nie tylko do czytania. Odbiorca zapala lampki diya jedną po drugiej, wypuszcza świecące lampiony szczęścia albo odpala własne fajerwerki, a potem ogląda twoje rodzinne zdjęcia i czyta twoje życzenia na Diwali. Niektóre projekty są zabawne, jak quiz o słodyczach mithai, w którym jest tylko jedna dobra odpowiedź, a inne spokojne i pełne wdzięku, stworzone z myślą o rodzicach i starszych w rodzinie.",
+        "To kartka online, więc w tej samej chwili dotrze do rodziny w Indiach, Kanadzie, USA czy na sąsiedniej ulicy, bez znaczków i czekania. Wyślij link przez WhatsApp, udostępnij go na rodzinnej grupie albo zleć nam wysyłkę e-mailem, żeby kartka dotarła w samo Diwali o 9:00 według twojej strefy czasowej.",
+      ],
+      writeTitle: "Co napisać w kartce na Diwali",
+      ideas: [
+        {
+          who: "Dla mamy i taty",
+          text: "Szczęśliwego Diwali! Dziękuję, że każde Diwali było dzięki wam wyjątkowe, od rangoli po mithai. Niech ten rok przyniesie wam zdrowie, szczęście i mnóstwo światła.",
+        },
+        {
+          who: "Dla rodziny za granicą",
+          text: "Będziemy tu zapalać lampki diya i myśleć o was. Życzymy wam wszystkim Diwali pełnego światła, śmiechu i stanowczo zbyt wielu słodyczy.",
+        },
+        {
+          who: "Dla starszych w rodzinie",
+          text: "Życzę wam błogosławionego i radosnego Diwali. Niech bogini Lakszmi przyniesie w tym roku do waszego domu spokój, zdrowie i dostatek.",
+        },
+        {
+          who: "Dla przyjaciół",
+          text: "Szczęśliwego Diwali! Niech twój rok będzie jasny jak lampki diya i słodki jak pudełko kaju katli, którym na pewno się nie podzielisz.",
+        },
+        {
+          who: "Dla współpracowników",
+          text: "Tobie i twojej rodzinie życzę bardzo szczęśliwego Diwali. Dziękuję, że przez cały rok rozjaśniasz nasz zespół. Udanego świętowania!",
+        },
+        {
+          who: "Dla drugiej połówki",
+          text: "Każde Diwali z tobą jest jaśniejsze. Dziękuję, że jesteś moim światłem przez cały rok. Szczęśliwego Diwali, kochanie.",
+        },
+      ],
+      faqTitle: "Pytania o e-kartki na Diwali",
+      faqs: [
+        {
+          q: "Czy mogę wysłać kartkę na Diwali rodzinie w Indiach lub za granicą?",
+          a: "Tak. Kartka jest wysyłana jako link, więc dociera do każdego, w dowolne miejsce na świecie, w chwili wysłania i bez znaczków. Kosztuje {price}, a zapłacić możesz we własnej walucie.",
+        },
+        {
+          q: "Czy mogę napisać życzenia w hindi, gudżarati albo pendżabskim?",
+          a: "Tak. Wpisz swoje słowa w dowolnym języku, a pojawią się na kartce dokładnie tak, jak je napiszesz. Jeśli odpowiesz na nasze pytania w swoim języku, w nim też napiszemy kartkę. Przyciski na kartce pozostają po angielsku.",
+        },
+        {
+          q: "Czy jest projekt dla rodziców i starszych w rodzinie?",
+          a: "Tak. [Diwali Blessings](/cards/diwali-blessings) to pełna wdzięku, wzruszająca kartka z twoimi rodzinnymi zdjęciami, stworzona z myślą o rodzicach i starszych w rodzinie, a [Lanterns of Light](/cards/lanterns-of-light) to spokojna kartka z lampionami szczęścia i fajerwerkami. Dla przyjaciół, którzy uwielbiają słodycze, wybierz [Mithai Mayhem](/cards/mithai-mayhem).",
+        },
+        {
+          q: "Czy jedną kartkę można wysłać całej rodzinie?",
+          a: "Tak. Każdy, kto ma link, może ją otworzyć, więc możesz udostępnić jedną kartkę na rodzinnej grupie na WhatsApp. Jeśli wolisz, żeby każdy dostał własną, z imieniem na kopercie, zrób osobną dla każdej osoby.",
+        },
+      ],
+    },
+    christmas: {
+      title: "Interaktywne e-kartki świąteczne dla rodziny blisko i daleko · Envelette",
+      description: "E-kartka świąteczna, która jest jak prezent: odbiorca ją rozpakowuje, łapie płatki śniegu i czyta twoją wiadomość przy dźwiękach Jingle Bells. Bez znaczków i bez stresu, że poczta nie zdąży przed świętami.",
+      heading: "Interaktywne e-kartki **świąteczne**",
+      aboutTitle: "Kartka świąteczna, która jest jak prezent",
+      about: [
+        "Odbiorca rozpakowuje palcem prezent, łapie spadające płatki śniegu i wyciąga ze słoika karteczki z twoimi powodami, a w tle słychać Jingle Bells. Na koniec pada delikatny śnieg. Dla żartownisiów jest kartka Naughty or Nice?, w której ucieka przycisk „Naughty” (niegrzeczny), oraz Secret Santa, w której każdy prezent okazuje się skarpetkami.",
+        "E-kartka nie ma ostatniego terminu nadania. Od razu dociera do rodziny za granicą, nic nie ginie w przedświątecznym zamieszaniu na poczcie, a wysyłkę e-mailem możesz zaplanować na 9:00 według twojej strefy czasowej, rano w pierwszy dzień świąt. Zrób kilka kartek naraz, dodaj wszystkie do koszyka i wyślij każdą w inny sposób.",
+      ],
+      writeTitle: "Co napisać na kartce świątecznej",
+      ideas: [
+        {
+          who: "Dla rodziny",
+          text: "Wesołych Świąt dla tych, dzięki którym naprawdę czuć święta. Życzę wam przytulnego dnia, pełnego stołu i bardzo leniwego drugiego dnia świąt.",
+        },
+        {
+          who: "Dla rodziny za granicą",
+          text: "Bez was to nie są do końca te same święta. Wzniesiemy toast za wasze zdrowie i już odliczamy dni do chwili, gdy znów będziemy wszyscy razem.",
+        },
+        {
+          who: "Dla wnuków",
+          text: "Wesołych Świąt, moje kochane skarby! Mam nadzieję, że Święty Mikołaj przyniesie wszystko z waszej listy, a wy zostawicie mu ode mnie dodatkowego pierniczka.",
+        },
+        {
+          who: "Dla drugiej połówki",
+          text: "Moją ulubioną częścią świąt wciąż jesteś ty. Dziękuję za ten rok, za każdy okropny świąteczny suchar i za to, że znosisz moje śpiewanie kolęd.",
+        },
+        {
+          who: "Dla przyjaciół",
+          text: "Wesołych Świąt! Wznoszę toast za makowiec na śniadanie, świąteczny sweter, który podobno nosisz dla żartu, i dużo spokojniejszy nowy rok.",
+        },
+        {
+          who: "Dla sąsiadów",
+          text: "Życzymy wam wesołych Świąt i szczęśliwego Nowego Roku. Dziękujemy, że jesteście tak wspaniałymi sąsiadami. Cieszcie się każdą chwilą świątecznego odpoczynku.",
+        },
+      ],
+      faqTitle: "Pytania o e-kartki świąteczne",
+      faqs: [
+        {
+          q: "Czy kartka zdąży dotrzeć na święta?",
+          a: "Zawsze. E-kartka jest wysyłana jako link, więc dociera w chwili wysłania, gdziekolwiek mieszka odbiorca. Możesz też wybrać wysyłkę e-mailem i dzień 25 grudnia, a kartka dotrze o 9:00 według twojej strefy czasowej, rano w pierwszy dzień świąt. Możesz to ustawić do {days} dni naprzód.",
+        },
+        {
+          q: "Czy mogę wysłać kartki świąteczne do wielu osób?",
+          a: "Tak. Zrób kartkę dla każdej osoby, dodaj wszystkie do koszyka i zapłać raz. Każdą kartkę możemy wysłać e-mailem w innym dniu albo możesz ją wysłać jako link, a wszystkie linki znajdziesz też w e-mailu z potwierdzeniem zakupu.",
+        },
+        {
+          q: "Czy kartka gra świąteczną muzykę?",
+          a: "Tak. Świąteczne projekty grają Jingle Bells po otwarciu koperty, a gry mają efekty dźwiękowe. W rogu jest przycisk wyciszenia, gdyby odbiorca był w cichym miejscu.",
+        },
+        {
+          q: "Czy mogę dodać nasze rodzinne zdjęcia?",
+          a: "Tak, do 6, każde z podpisem, jeśli chcesz. Przed wysłaniem są zmniejszane na twoim telefonie, co usuwa też ukryte dane o miejscu, które telefony dodają do zdjęć.",
+        },
+      ],
+    },
+    eid: {
+      title: "E-kartki Eid Mubarak: interaktywne kartki na Id · Envelette",
+      description: "Wyślij życzenia Eid Mubarak w interaktywnej e-kartce: łapanie gwiazd pod półksiężycem, rodzinne zdjęcia i twoje życzenia. Dociera do rodziny w każdym zakątku świata.",
+      heading: "Interaktywne e-kartki na **Id**",
+      aboutTitle: "Życzenia na Id z odrobiną magii",
+      about: [
+        "Pod półksiężycem odbiorca łapie gwiazdy, dostaje świąteczny uścisk, który trzeba nacisnąć i przytrzymać, albo kręci kołem, żeby wylosować menu na świąteczną ucztę. Potem pojawiają się twoje rodzinne zdjęcia i życzenia, a na koniec niebo pełne gwiazd. Jest łagodny, elegancki projekt dla rodziców i starszych w rodzinie oraz zadziorny, z prośbą o eidi, w którym przycisk „Nie” ucieka.",
+        "To e-kartka, więc w tej samej chwili dotrze do rodziny w Pakistanie, Bangladeszu, krajach Zatoki Perskiej czy na sąsiedniej ulicy, i to bez znaczków. Pasuje zarówno na Id al-Fitr, jak i na Id al-Adha, a link możesz wysłać w chwili, gdy Id zostanie ogłoszone.",
+      ],
+      writeTitle: "Co napisać w kartce na Id",
+      ideas: [
+        {
+          who: "Dla rodziny",
+          text: "Eid Mubarak! Niech Allah przyjmie wasze posty i modlitwy oraz napełni wasz dom spokojem, szczęściem i mnóstwem pysznego jedzenia.",
+        },
+        {
+          who: "Dla rodziców",
+          text: "Eid Mubarak, Ammi i Abbu. Dziękuję, że każde Id było dzięki wam wyjątkowe. Niech to Id przyniesie wam zdrowie, radość i mnóstwo wspólnego czasu.",
+        },
+        {
+          who: "Dla starszych w rodzinie",
+          text: "Życzę wam błogosławionego Id. Niech ten dzień przyniesie wam spokój, zdrowie i szczęście, i obyśmy jeszcze wiele razy świętowali razem.",
+        },
+        {
+          who: "Dla przyjaciół",
+          text: "Eid Mubarak! Życzę ci dnia pełnego jedzenia, rodziny i ani jednego pytania o to, kiedy ślub.",
+        },
+        {
+          who: "Dla rodziny za granicą",
+          text: "W to Id będzie nam was brakowało przy stole. Przesyłamy wam stąd całą naszą miłość i modlitwy (du'a). Eid Mubarak!",
+        },
+        {
+          who: "Prośba o eidi",
+          text: "Eid Mubarak! Moje zachowanie w tym roku było wzorowe, więc na pewno się zgodzisz, że moje eidi powinno to uwzględnić.",
+        },
+      ],
+      faqTitle: "Pytania o e-kartki na Id",
+      faqs: [
+        {
+          q: "Czy kartka pasuje na Id al-Fitr i Id al-Adha?",
+          a: "Tak. Każdy projekt na Id pasuje na oba święta. Napisz „Eid Mubarak” albo własne słowa i zmień dowolną linijkę, żeby pasowała do Id, które obchodzisz.",
+        },
+        {
+          q: "Data Id zależy od księżyca. Czy mimo to mogę wysłać kartkę w sam dzień święta?",
+          a: "Tak. Zrób ją wcześniej, zachowaj link i wyślij go samodzielnie przez WhatsApp albo SMS-em, gdy tylko Id zostanie ogłoszone. Link znajdziesz też w e-mailu z potwierdzeniem zakupu, więc tego dnia łatwo go odszukać.",
+        },
+        {
+          q: "Czy mogę napisać kartkę w urdu, po arabsku albo po bengalsku?",
+          a: "Tak. Wpisz swoje słowa w dowolnym języku, a pojawią się na kartce dokładnie tak, jak je napiszesz. Jeśli odpowiesz na nasze pytania w swoim języku, w nim też napiszemy kartkę. Przyciski na kartce pozostają po angielsku.",
+        },
+        {
+          q: "Czy mogę wysłać kartkę rodzinie za granicą?",
+          a: "Tak. To link, więc od razu dociera do każdego, w dowolne miejsce na świecie, i to bez znaczków. Jedną kartkę można udostępnić na rodzinnej grupie albo zrobić osobną dla każdej osoby, z jej imieniem.",
+        },
+      ],
+    },
+    anniversary: {
+      title: "E-kartki na rocznicę z waszą historią i zdjęciami · Envelette",
+      description: "Opowiedz waszą historię chwila po chwili w interaktywnej e-kartce na rocznicę: wasze zdjęcia, quiz o waszych pierwszych wspólnych chwilach, kupony miłości i list miłosny.",
+      heading: "Interaktywne e-kartki na **rocznicę**",
+      aboutTitle: "Wasza dotychczasowa historia w jednej kartce",
+      about: [
+        "E-kartka na rocznicę pomieści więcej niż papierowa. Opowiedz waszą historię chwila po chwili, od dnia, w którym się poznaliście, aż do dziś, dodaj ulubione zdjęcia, ułóż quiz o waszych pierwszych wspólnych chwilach albo podaruj książeczkę kuponów miłości. Na koniec czeka list, który pisze się sam na oczach ukochanej osoby.",
+        "Jest coś na każdą rocznicę: stonowane i eleganckie projekty na okrągłą rocznicę, urocze i trochę przesłodzone na pierwszą, a także projekt na komputer, w którym trzeba wpisać tajne hasło, żeby odblokować ścianę waszych zdjęć. Zmień dowolne słowo i przejdź całą kartkę przed zapłatą.",
+      ],
+      writeTitle: "Co napisać w kartce na rocznicę",
+      ideas: [
+        {
+          who: "Pierwsza rocznica",
+          text: "Za nami pierwszy rok, a z tobą jest jeszcze piękniej, niż można było marzyć. Dziękuję za najlepszy rok mojego życia. Za wszystkie następne!",
+        },
+        {
+          who: "Dla męża lub żony",
+          text: "Wszystkiego najlepszego z okazji rocznicy. Po tylu latach to wciąż tobie najpierw chcę o wszystkim opowiedzieć. I wciąż wybieram ciebie, za każdym razem.",
+        },
+        {
+          who: "Na okrągłą rocznicę",
+          text: "Dwadzieścia pięć lat, dwa domy, jeden bardzo rozpieszczony pies i mnóstwo śmiechu. Wszystkiego najlepszego z okazji rocznicy dla mojej bratniej duszy.",
+        },
+        {
+          who: "Coś zabawnego",
+          text: "Wszystkiego najlepszego z okazji rocznicy dla jedynej osoby, która tak długo ze mną wytrzymuje. W nagrodę dostajesz kolejny rok ze mną. Gratulacje?",
+        },
+        {
+          who: "Dla rodziców",
+          text: "Wszystkiego najlepszego z okazji rocznicy, mamo i tato. Dziękujemy, że pokazujecie nam, jak wygląda miłość na całe życie. Jesteśmy z was ogromnie dumni.",
+        },
+        {
+          who: "Na odległość",
+          text: "Kolejny rok kochania cię na odległość, a każdy kilometr jest tego wart. Wszystkiego najlepszego z okazji rocznicy i do zobaczenia już niedługo.",
+        },
+      ],
+      faqTitle: "Pytania o e-kartki na rocznicę",
+      faqs: [
+        {
+          q: "Czy mogę opowiedzieć naszą historię z datami i zdjęciami?",
+          a: "Tak. Ekran „Nasza historia” pokazuje wasze chwile jedną po drugiej, każdą z własną datą i kilkoma słowami, a do tego możesz dodać do 6 zdjęć z podpisami. Jeśli projekt nie ma takiego ekranu, możesz go dodać.",
+        },
+        {
+          q: "Czym są kupony miłości?",
+          a: "To książeczka kuponów, które wykorzystuje się jednym stuknięciem: śniadanie do łóżka, masaż stóp, dziś ty wybierasz film. Wymyślasz je ty, więc mogą być tak słodkie albo tak zadziorne, jak tylko chcesz.",
+        },
+        {
+          q: "Czy mogę wysłać kartkę tak, żeby dotarła w dniu naszej rocznicy?",
+          a: "Tak. Wybierz wysyłkę e-mailem, a potem datę, i kartka dotrze o 9:00 według twojej strefy czasowej. Możesz to ustawić do {days} dni naprzód.",
+        },
+        {
+          q: "Czy można ją zachować na pamiątkę?",
+          a: "Tak. Link działa dalej, więc kartkę można otworzyć ponownie, kiedy tylko się chce, a na końcu jest przycisk „Play it again” (Obejrzyj jeszcze raz).",
+        },
+      ],
+    },
+    sorry: {
+      title: "E-kartki z przeprosinami, którym nie da się odmówić · Envelette",
+      description: "Przeproś interaktywną e-kartką: uciekający przycisk „Nie”, uścisk, który trzeba nacisnąć i przytrzymać, i kupony, którymi wszystko wynagrodzisz. Na wesoło albo na poważnie.",
+      heading: "Interaktywne e-kartki z **przeprosinami**",
+      aboutTitle: "Przeprosiny, obok których trudno przejść obojętnie",
+      about: [
+        "Czasem łatwiej pokazać, że jest ci przykro, niż to powiedzieć. E-kartka z przeprosinami może być na wesoło, z pytaniem „Wybaczysz mi?”, w którym przycisk „Nie” ucieka, i kuponami, którymi wszystko wynagrodzisz, albo całkiem na poważnie, ze szczerymi słowami i kilkoma radośniejszymi wspomnieniami. Ty wybierasz ton, a każde słowo możesz zmienić.",
+        "Kartka dociera w chwili wysłania, więc nie czekasz całymi dniami, aż poczta przemówi za ciebie. Wyślij link przez WhatsApp albo SMS-em lub zleć nam wysyłkę e-mailem, a odbiorca otworzy kartkę w dogodnej chwili na dowolnym telefonie lub komputerze.",
+      ],
+      writeTitle: "Co napisać w kartce z przeprosinami",
+      ideas: [
+        {
+          who: "Dla drugiej połówki",
+          text: "Przepraszam. To moja wina i nie mogę znieść, że przeze mnie jest ci przykro. Znaczysz dla mnie więcej niż to, kto ma rację, i obiecuję się poprawić.",
+        },
+        {
+          who: "Za drobne przewinienia",
+          text: "Przepraszam, że twoja dokładka z wczoraj zniknęła w moim brzuchu. Na swoją obronę: była pyszna. Przyjmij, proszę, tę kartkę i świeżą porcję na zgodę.",
+        },
+        {
+          who: "Dla przyjaciela lub przyjaciółki",
+          text: "Ostatnio za mało mnie w twoim życiu i bardzo mi przykro. Tęsknię za tobą. Dasz się zaprosić na kawę? Chcę przeprosić jak należy.",
+        },
+        {
+          who: "Dla rodziny",
+          text: "Przepraszam za swoje słowa. Wcale tak nie myślę i od tamtej pory czuję się okropnie. Kocham cię i mam nadzieję, że niedługo porozmawiamy.",
+        },
+        {
+          who: "Za zapomnianą datę",
+          text: "Wyleciało mi to z głowy i nie mam żadnej dobrej wymówki. Przepraszam. Pozwól, że ci to wynagrodzę, zaczynając od kolacji: ja stawiam, ty wybierasz.",
+        },
+        {
+          who: "Krótko i na temat",
+          text: "Bez wymówek, po prostu przepraszam. Mam nadzieję, że mi wybaczysz.",
+        },
+      ],
+      faqTitle: "Pytania o kartki z przeprosinami",
+      faqs: [
+        {
+          q: "Czy kartka może być poważna, a nie żartobliwa?",
+          a: "Tak. [I'm Really Sorry](/cards/im-really-sorry) to szczery projekt bez żartów, z samymi twoimi słowami i kilkoma zdjęciami. W każdym projekcie możesz też zmienić tekst, więc zabawny może stać się wzruszający i na odwrót.",
+        },
+        {
+          q: "Czy da się odmówić?",
+          a: "W zabawnych projektach przycisk „Nie” ucieka, więc wybaczenie to jedyna opcja (przynajmniej na kartce). Jeśli to zbyt zuchwałe jak na to, co się stało, wybierz projekt bez pytania.",
+        },
+        {
+          q: "Czy odbiorca będzie wiedział, że kartka jest ode mnie?",
+          a: "Tak. Twoje imię jest na kopercie i w kartce. Jeśli wyślemy ją za ciebie e-mailem, w wiadomości będzie napisane, że jest od ciebie, i będzie w niej przycisk do otwarcia kartki.",
+        },
+        {
+          q: "Czy kartka jest prywatna?",
+          a: "Tak. Kartkę mogą otworzyć tylko osoby, które mają link, a kartek nie ma na żadnych listach ani w wyszukiwarkach, więc to, co napiszesz, zostaje między wami.",
+        },
+      ],
+    },
+    thanks: {
+      title: "E-kartki z podziękowaniem dla nauczycieli, pielęgniarek i przyjaciół · Envelette",
+      description: "Podziękuj interaktywną e-kartką: odbiorca podlewa kwiatek, aż zakwitnie, ogląda twoje zdjęcia i czyta twoją wiadomość. Dla nauczycieli, pielęgniarek, sąsiadów i przyjaciół.",
+      heading: "Interaktywne e-kartki z **podziękowaniem**",
+      aboutTitle: "Podziękowania jak należy",
+      about: [
+        "E-kartka z podziękowaniem to piękny sposób, żeby powiedzieć komuś: dzięki tobie wiele się zmieniło. Odbiorca podlewa małą roślinkę, aż zakwitnie, przegląda galerię zdjęć albo gra w memory, a potem czyta twoją wiadomość. Na koniec sypie się konfetti albo płatki kwiatów. Sprawdzi się równie dobrze dla nauczycielki na koniec semestru, jak i dla sąsiada, który karmił kota.",
+        "Na wspólne podziękowanie świetnie nadaje się Gallery of Thanks z miejscem na maksymalnie 6 zdjęć: jedna kartka od całej klasy, oddziału czy zespołu. Wyślij ją jako link na grupowym czacie albo zleć nam wysyłkę e-mailem w wybranym dniu.",
+      ],
+      writeTitle: "Co napisać w kartce z podziękowaniem",
+      ideas: [
+        {
+          who: "Dla nauczyciela",
+          text: "Dziękujemy za wspaniały rok: za naukę, która była zabawą, za wiarę w naszego malucha i za niekończącą się cierpliwość. Będziemy tęsknić!",
+        },
+        {
+          who: "Dla pielęgniarki lub opiekunki",
+          text: "Dziękujemy za życzliwość, cierpliwość i troskę wtedy, gdy najbardziej ich potrzebowaliśmy. Dzięki tobie ten trudny czas był o wiele łatwiejszy i nigdy tego nie zapomnimy.",
+        },
+        {
+          who: "Dla sąsiadów",
+          text: "Dziękujemy za doglądanie domu, odbieranie paczek i karmienie kota. Mamy szczęście, że mieszkamy obok was.",
+        },
+        {
+          who: "Dla przyjaciela lub przyjaciółki",
+          text: "Dziękuję, że zawsze się pojawiasz, kiedy to naprawdę ważne. Za rzadko to mówię, ale tak bardzo się cieszę, że cię mam.",
+        },
+        {
+          who: "Dla kogoś z pracy",
+          text: "Dziękuję za całą twoją pomoc. Bez ciebie nic by z tego nie wyszło, a w przyszłym tygodniu ja stawiam ciastka.",
+        },
+        {
+          who: "Dla gospodarzy",
+          text: "Dziękujemy za gościnę. Jedzenie, towarzystwo i nocne rozmowy były dokładnie tym, czego nam było trzeba. Następnym razem nasza kolej!",
+        },
+      ],
+      faqTitle: "Pytania o kartki z podziękowaniem",
+      faqs: [
+        {
+          q: "Czy cała klasa albo cały zespół może wysłać jedną kartkę?",
+          a: "Tak. Robi ją jedna osoba, ale może być od wszystkich: w polu „Od” wpisz na przykład „całej klasy 6b”, dodaj wspólne zdjęcia i napisz wiadomości od całej grupy. Potem udostępnij link albo zleć nam wysyłkę e-mailem.",
+        },
+        {
+          q: "Czy to dobre podziękowanie dla nauczyciela?",
+          a: "Nauczyciele dostają mnóstwo kubków. Kartka do zabawy, ze zdjęciami z całego roku i słowami od twojego dziecka, to coś innego, co można zachować i otwierać wiele razy. Nic nie trzeba pobierać.",
+        },
+        {
+          q: "Czy możecie wysłać kartkę e-mailem?",
+          a: "Tak. Podaj w koszyku adres e-mail odbiorcy, a wyślemy kartkę z przyciskiem do jej otwarcia od razu albo o 9:00 według twojej strefy czasowej w wybranym dniu, do {days} dni naprzód.",
+        },
+        {
+          q: "Ile kosztuje e-kartka z podziękowaniem?",
+          a: "{price} za kartkę, płatne raz, bez subskrypcji. Taniej niż pudełko czekoladek, a do tego się nie roztopi.",
+        },
+      ],
+    },
+    congrats: {
+      title: "E-kartki z gratulacjami na wielkie sukcesy · Envelette",
+      description: "E-kartki z gratulacjami z okazji nowej pracy, zdanych egzaminów, ukończenia studiów i awansu: przebij balony, wylosuj jackpot i pokaż, ile w tobie dumy.",
+      heading: "Interaktywne e-kartki z **gratulacjami**",
+      aboutTitle: "Na wielkie sukcesy i te mniejsze też",
+      about: [
+        "Nowa praca, wyniki egzaminów, ukończenie studiów, awans albo wreszcie zdane prawo jazdy: e-kartka z gratulacjami pozwala porządnie to uczcić. Odbiorca przebija balony, gra na jednorękim bandycie o jackpot albo rozwiązuje (bardzo łatwy) test na geniusza, a potem próbuje ocenić poziom twojej dumy na suwaku, który idzie tylko w górę.",
+        "Zrobienie kartki zajmuje kilka minut, a link dostajesz zaraz po zapłacie, więc kartka dotrze, póki wiadomość jest jeszcze świeża. Dodaj zdjęcia z wielkiego dnia, zmień każde słowo i przejdź całą kartkę przed zapłatą.",
+      ],
+      writeTitle: "Co napisać w kartce z gratulacjami",
+      ideas: [
+        {
+          who: "Nowa praca",
+          text: "Gratulacje z okazji nowej pracy! Mają z tobą wielkie szczęście. Pokaż im, jak to się robi (i szybko wybadaj, gdzie chowają najlepsze ciastka).",
+        },
+        {
+          who: "Wyniki egzaminów",
+          text: "Twoja ciężka praca naprawdę się opłaciła. Gratulujemy wyników, wszyscy jesteśmy z ciebie ogromnie dumni.",
+        },
+        {
+          who: "Ukończenie studiów",
+          text: "Gratulacje z okazji dyplomu! Wszystkie zarwane noce się opłaciły. Nie możemy się doczekać, co będzie dalej.",
+        },
+        {
+          who: "Awans",
+          text: "Gratulacje z okazji awansu! Nikt nie zasłużył na niego bardziej. Oczywiście to ty stawiasz.",
+        },
+        {
+          who: "Prawo jazdy",
+          text: "Zdane! Gratulacje. Drogi już nigdy nie będą takie same. Tylko jeszcze nie proś o pożyczenie samochodu.",
+        },
+        {
+          who: "Od całej rodziny",
+          text: "Cokolwiek teraz zrobisz, będziemy ci kibicować. Jesteśmy z ciebie tacy dumni. Gratulacje od nas wszystkich.",
+        },
+      ],
+      faqTitle: "Pytania o e-kartki z gratulacjami",
+      faqs: [
+        {
+          q: "Na jakie okazje są te kartki?",
+          a: "Na wszystko, co warto uczcić: nową pracę, awans, egzaminy, ukończenie studiów, prawo jazdy i wszelkie wielkie sukcesy. Możesz zmienić każde słowo, więc kartka powie dokładnie, co udało się osiągnąć.",
+        },
+        {
+          q: "Czy mogę dodać zdjęcia z wielkiego dnia?",
+          a: "Tak, do 6, każde z podpisem. Jeśli projekt nie ma ekranu ze zdjęciami, możesz go dodać bez dodatkowych kosztów.",
+        },
+        {
+          q: "Jak szybko mogę wysłać kartkę?",
+          a: "Od razu. Zrobienie kartki zajmuje kilka minut, a link dostajesz zaraz po zapłacie. Wyślij go przez WhatsApp albo SMS-em lub zleć nam wysyłkę e-mailem.",
+        },
+        {
+          q: "Czy do otwarcia kartki potrzebna jest aplikacja?",
+          a: "Nie. Kartka otwiera się w przeglądarce na każdym telefonie, tablecie i komputerze, a odbiorca nie musi też zakładać konta.",
+        },
+      ],
+    },
+    halloween: {
+      title: "E-kartki na Halloween: cukierek albo psikus, duchy i słodycze · Envelette",
+      description: "E-kartka na Halloween z uciekającym przyciskiem „Psikus”, duchami do pacania, słodyczami do łapania i upiorną muzyką. Zabawna, tylko troszkę straszna, wysyłana jako link.",
+      heading: "Interaktywne e-kartki na **Halloween**",
+      aboutTitle: "Upiornie, zabawnie i tylko troszkę strasznie",
+      about: [
+        "„Cukierek albo psikus?” – pada pytanie, a przycisk „Psikus” ucieka. Potem trzeba pacnąć duchy i złapać spadające słodycze, a na koniec ekran wypełnia wir nietoperzy i duchów, a w tle gra upiorna muzyka. Jest też urocza kartka dla drugiej połówki i nawiedzony dom na laptopa, do którego wchodzi się po wpisaniu hasła.",
+        "E-kartka na Halloween jest idealna dla siostrzenic, bratanków i wnuków, którzy mieszkają za daleko, żeby zapukać do twoich drzwi po cukierki. Wyślij ją jako link 31 października albo zleć nam wysyłkę e-mailem na 9:00 według twojej strefy czasowej.",
+      ],
+      writeTitle: "Co napisać w kartce na Halloween",
+      ideas: [
+        {
+          who: "Dla dzieci",
+          text: "Wesołego Halloween! Życzę ci mnóstwa cukierków i tylko odrobiny strachu. Zostaw mi jedną czekoladkę!",
+        },
+        {
+          who: "Dla wnuków",
+          text: "Wesołego Halloween od babci i dziadka! Nie możemy się doczekać, aż zobaczymy twój kostium. Nie zjedz wszystkich cukierków naraz.",
+        },
+        {
+          who: "Dla drugiej połówki",
+          text: "Wesołego Halloween dla mojego ulubionego duszka. Tylko z tobą dzielę się cukierkami. No, prawie.",
+        },
+        {
+          who: "Dla przyjaciół",
+          text: "Wesołego Halloween! Niech będzie za dużo słodyczy, przerażający film i ktoś, kto wrzaśnie, gdy zadzwoni dzwonek do drzwi. Pewnie ty.",
+        },
+        {
+          who: "Coś upiornego",
+          text: "Coś cię obserwuje… To my i życzymy ci wesołego Halloween. Mua-ha-ha.",
+        },
+        {
+          who: "Dla biura",
+          text: "Wesołego Halloween, ekipo! Najstraszniejsza rzecz w tym tygodniu to nasza skrzynka mailowa. Słodkości czekają w kuchni.",
+        },
+      ],
+      faqTitle: "Pytania o e-kartki na Halloween",
+      faqs: [
+        {
+          q: "Czy kartka nie jest zbyt straszna dla dzieci?",
+          a: "Nie. Kartki na Halloween są raczej zabawne niż przerażające: rysunkowe duchy, nietoperze i słodycze, a muzyka bardziej bawi, niż straszy. Jeśli to za dużo, dźwięk można wyłączyć przyciskiem w rogu.",
+        },
+        {
+          q: "Czy mogę wysłać kartkę wnukom?",
+          a: "Tak. To link, więc od razu do nich dotrze, gdziekolwiek są. Wyślij go przez WhatsApp na telefon któregoś z rodziców albo zleć nam wysyłkę e-mailem, a dzieci będą mogły się nią bawić razem z rodzicami na telefonie, tablecie lub komputerze.",
+        },
+        {
+          q: "Czy kartka ma dźwięk?",
+          a: "Tak. Projekty na Halloween grają upiorną muzykę po otwarciu koperty, gry mają efekty dźwiękowe, a w rogu jest przycisk wyciszenia.",
+        },
+        {
+          q: "Kiedy najlepiej wysłać kartkę?",
+          a: "W dowolnym momencie przed Halloween albo w sam dzień. Wybierz wysyłkę e-mailem, a potem 31 października, i kartka dotrze o 9:00 według twojej strefy czasowej, na długo przed tym, jak dzieci ruszą po cukierki.",
+        },
+      ],
+    },
+    newyear: {
+      title: "Noworoczne e-kartki z fajerwerkami · Envelette",
+      description: "Złóż życzenia noworoczne interaktywną e-kartką: fajerwerki o północy do samodzielnego odpalenia, koło postanowień noworocznych i wspomnienia z waszego wspólnego roku.",
+      heading: "Interaktywne e-kartki **noworoczne**",
+      aboutTitle: "Fajerwerki o północy, w każdym zakątku świata",
+      about: [
+        "Odbiorca sam odpala fajerwerki o północy, kręci kołem, żeby wylosować postanowienie noworoczne (koło jest ustawione, więc to ty wybierasz), albo potrząsa telefonem jak butelką szampana, aż strzeli korek. Jeśli wolisz coś spokojniejszego, powspominajcie mijający rok miesiąc po miesiącu, z twoimi zdjęciami i słoikiem najlepszych chwil.",
+        "Noworoczna e-kartka jest idealna dla przyjaciół i rodziny w innych strefach czasowych: wyślij link o północy u siebie albo u nich lub zleć nam wysyłkę e-mailem na 9:00 według twojej strefy czasowej w Nowy Rok. Dotrze od razu, gdziekolwiek świętują.",
+      ],
+      writeTitle: "Co napisać w kartce noworocznej",
+      ideas: [
+        {
+          who: "Dla rodziny",
+          text: "Szczęśliwego Nowego Roku! Dziękuję za każdy wspólny śmiech w tym roku. Niech kolejny przyniesie zdrowie, szczęście i więcej czasu razem.",
+        },
+        {
+          who: "Dla przyjaciół",
+          text: "Szczęśliwego Nowego Roku! Plan jak co roku: pierwszego wielkie postanowienia, trzeciego deska serów. I niech tak zostanie.",
+        },
+        {
+          who: "Dla drugiej połówki",
+          text: "Kolejny rok z tobą i jak dotąd najlepszy. Szczęśliwego Nowego Roku. Nie mogę się doczekać, co przyniesie nam następny.",
+        },
+        {
+          who: "Dla kogoś daleko",
+          text: "O północy wzniesiemy toast za ciebie. Szczęśliwego Nowego Roku od nas wszystkich i oby w tym roku było cię u nas o wiele więcej.",
+        },
+        {
+          who: "Dla współpracowników",
+          text: "Szczęśliwego Nowego Roku dla najlepszego zespołu. Dziękuję za waszą ciężką pracę. Niech kolejny rok będzie jeszcze lepszy.",
+        },
+        {
+          who: "Na podsumowanie roku",
+          text: "To był rok! Dziękuję, że wszystkie najlepsze chwile były z tobą. Szczęśliwego Nowego Roku i za kolejne dwanaście miesięcy!",
+        },
+      ],
+      faqTitle: "Pytania o e-kartki noworoczne",
+      faqs: [
+        {
+          q: "Czy kartka może dotrzeć o północy?",
+          a: "E-mailem możemy wysłać kartkę o 9:00 według twojej strefy czasowej w wybranym dniu, więc Nowy Rok pasuje idealnie. Jeśli chcesz, żeby dotarła równo o północy, po zapłacie skopiuj link i wyślij go samodzielnie przez WhatsApp albo SMS-em, gdy zegar wybije dwunastą.",
+        },
+        {
+          q: "Czy kartka może podsumować nasz rok?",
+          a: "Tak. [Our Year in Review](/cards/year-in-review) pokazuje wasze najlepsze chwile miesiąc po miesiącu, z maksymalnie 6 zdjęciami i słoikiem najpiękniejszych wspomnień. Każdą chwilę i każdy podpis możesz napisać po swojemu.",
+        },
+        {
+          q: "Czy koło postanowień naprawdę jest ustawione?",
+          a: "Jeśli tylko chcesz. Możesz wybrać, gdzie zatrzyma się koło, więc postanowieniem może być „więcej wakacji” albo „częściej dzwoń do mamy”. Możesz też zdać się na los.",
+        },
+        {
+          q: "Czy mogę wysłać kartkę wszystkim?",
+          a: "Tak. Każdy, kto ma link, może ją otworzyć, więc jedną kartkę można wysłać na grupowy czat. Możesz też zrobić kilka, dodać je do koszyka i zapłacić za wszystkie razem.",
+        },
+      ],
+    },
+    mothersday: {
+      title: "E-kartki na Dzień Matki: wyhoduj mamie kwiatek · Envelette",
+      description: "E-kartka na Dzień Matki, do której mama będzie wracać: wyhoduje kwiatek, przeczyta twoją wiadomość, obejrzy wasze zdjęcia i dostanie książeczkę kuponów na cały rok.",
+      heading: "Interaktywne e-kartki na **Dzień Matki**",
+      aboutTitle: "Dla mamy, która ma wszystko (oprócz tego)",
+      about: [
+        "Mama podlewa małą roślinkę, aż zakwitnie, czyta twoją wiadomość i ogląda wasze wspólne zdjęcia. Albo dostaje książeczkę kuponów, z których naprawdę skorzysta przez cały rok, uścisk, który odbiera, naciskając i przytrzymując, albo quiz o tym, kto jest jej ulubionym dzieckiem (z tylko jedną dobrą odpowiedzią).",
+        "E-kartka na Dzień Matki to świetny pomysł, jeśli mieszkasz daleko albo mama wszystko ma w telefonie. To link, więc wystarczy, że go stuknie, i nic nie trzeba pobierać. Zleć nam wysyłkę e-mailem na 9:00 według twojej strefy czasowej w brytyjski Dzień Matki (Mothering Sunday) albo wyślij ją przez WhatsApp wieczorem dzień wcześniej, żeby czekała na mamę, gdy się obudzi.",
+      ],
+      writeTitle: "Co napisać w kartce na Dzień Matki",
+      ideas: [
+        {
+          who: "Dla mamy",
+          text: "Wszystkiego najlepszego z okazji Dnia Matki, mamo. Dziękuję za wszystko, co dla mnie zrobiłaś, wszystko, co wciąż robisz, i za każdy raz, kiedy udawałaś, że moja kuchnia ci smakuje.",
+        },
+        {
+          who: "Wzruszające",
+          text: "Mamo, zawsze byłaś moją największą fanką, moją bezpieczną przystanią i najlepszą radą. Za rzadko to mówię: dziękuję i kocham cię.",
+        },
+        {
+          who: "Coś zabawnego",
+          text: "Wszystkiego najlepszego z okazji Dnia Matki dla kobiety, która wciąż wie, kiedy kręcę. Gdyby co, to ja jestem twoim ulubionym dzieckiem. Ta kartka to dowód.",
+        },
+        {
+          who: "Z daleka",
+          text: "Szkoda, że nie mogę przynieść ci śniadania do łóżka. Na razie przesyłam kartkę, mocny uścisk i kupon na czas, kiedy przyjadę do domu.",
+        },
+        {
+          who: "Dla świeżo upieczonej mamy",
+          text: "Wszystkiego najlepszego z okazji pierwszego Dnia Matki! Już teraz jesteś wspaniałą mamą. Życzymy ci dziś drzemki, gorącej herbaty i mnóstwa przytulasów.",
+        },
+        {
+          who: "Dla babci",
+          text: "Wszystkiego najlepszego z okazji Dnia Matki, babciu. Dziękuję za przytulasy, za opowieści i za to, że puszka z ciasteczkami zawsze jest pełna.",
+        },
+      ],
+      faqTitle: "Pytania o e-kartki na Dzień Matki",
+      faqs: [
+        {
+          q: "Czy mama da radę otworzyć kartkę?",
+          a: "Tak. Wystarczy, że stuknie link, a kartka otworzy się w przeglądarce na każdym telefonie, tablecie i komputerze. Nic nie trzeba pobierać ani zakładać konta. Potem stuka kopertę, zaczyna grać muzyka, a kartka wyświetla się ekran po ekranie.",
+        },
+        {
+          q: "Czy mogę zrobić mamie książeczkę kuponów?",
+          a: "Tak. [Mum's Coupon Book](/cards/mums-coupon-book) ma kupony, które mama może wykorzystywać przez cały rok, a ich treść wymyślasz ty: niedzielny obiad, wspólny wypad, tydzień zmywania naczyń. Każdy kupon wykorzystuje jednym stuknięciem.",
+        },
+        {
+          q: "Czy chodzi o brytyjski Dzień Matki?",
+          a: "Kartka pasuje na każdy Dzień Matki, gdziekolwiek jesteś. Pokazujemy datę brytyjskiego Dnia Matki (Mothering Sunday), ale kartkę możesz wysłać, kiedy tylko chcesz, albo zlecić nam wysyłkę e-mailem w wybranym dniu.",
+        },
+        {
+          q: "Czy mogę dodać stare rodzinne zdjęcia?",
+          a: "Tak, do 6, każde z podpisem. Zrób telefonem zdjęcie starej odbitki i dodaj je jak każde inne.",
+        },
+      ],
+    },
+    fathersday: {
+      title: "E-kartki na Dzień Ojca z tatusiowymi sucharami · Envelette",
+      description: "E-kartka na Dzień Ojca z quizem pełnym okropnych sucharów, twoimi zdjęciami i porządnym podziękowaniem. Gotowa w kilka minut i wysyłana tacie jako link.",
+      heading: "Interaktywne e-kartki na **Dzień Ojca**",
+      aboutTitle: "Dla taty (i jego żartów)",
+      about: [
+        "Quiz z okropnymi sucharami, za którymi tata niby nie przepada, suwak, na którym nie da się uznać jego żartów za nieśmieszne, i trzy tajemnicze prezenty, z których każdy okazuje się krawatem. Jeśli wolisz coś bardziej wzruszającego, opowiedz chwila po chwili, jak dorastało się przy tacie, z twoimi zdjęciami i porządnym podziękowaniem.",
+        "E-kartka na Dzień Ojca sprawdzi się zarówno u ojców, którzy nie rozstają się z telefonem, jak i u tych, którzy prawie z niego nie korzystają: wystarczy, że tata stuknie link, a kartka się otworzy. Nic nie trzeba pobierać. Zleć nam wysyłkę e-mailem na 9:00 według twojej strefy czasowej w dniu święta albo wyślij ją przez WhatsApp.",
+      ],
+      writeTitle: "Co napisać w kartce na Dzień Ojca",
+      ideas: [
+        {
+          who: "Dla taty",
+          text: "Wszystkiego najlepszego z okazji Dnia Ojca, tato. Dziękuję za podwózki, rady, okropne żarty i za to, że zawsze jesteś obok. Kocham cię.",
+        },
+        {
+          who: "Coś zabawnego",
+          text: "Wszystkiego najlepszego z okazji Dnia Ojca dla człowieka, który nauczył mnie wszystkiego, co wiem. Oprócz żartów. Te są tylko twoje.",
+        },
+        {
+          who: "Wzruszające",
+          text: "Tato, pokazałeś mi, jak być dobrym człowiekiem, jak ciężko pracować i jak śmiać się z siebie. To dla mnie ogromna duma być twoim dzieckiem.",
+        },
+        {
+          who: "Z daleka",
+          text: "Szkoda, że nie mogę postawić ci piwa. Wypij jedno za mnie. Wszystkiego najlepszego z okazji Dnia Ojca, prosto z daleka.",
+        },
+        {
+          who: "Dla świeżo upieczonego taty",
+          text: "Wszystkiego najlepszego z okazji pierwszego Dnia Ojca! Masz do tego talent. Życzymy ci dziś długiego spania (wiemy, że nic z tego).",
+        },
+        {
+          who: "Dla dziadka",
+          text: "Wszystkiego najlepszego z okazji Dnia Ojca, dziadku. Dziękuję za opowieści, cukierki i najlepsze rady. Jesteś jedyny w swoim rodzaju.",
+        },
+      ],
+      faqTitle: "Pytania o e-kartki na Dzień Ojca",
+      faqs: [
+        {
+          q: "Czy mogę wpisać własne tatusiowe suchary?",
+          a: "Jak najbardziej. [The Dad Joke Quiz](/cards/dad-joke-quiz) ma już kilka naprawdę okropnych, a każde pytanie i odpowiedź możesz zamienić na ulubione suchary taty.",
+        },
+        {
+          q: "Czy jest coś bardziej sentymentalnego?",
+          a: "Tak. [Best Dad Ever](/cards/best-dad-ever) opowiada chwila po chwili, jak dorastało się przy tacie, z twoimi zdjęciami i wzruszającym podziękowaniem. Możesz zmienić każde słowo.",
+        },
+        {
+          q: "Czy chodzi o brytyjski Dzień Ojca?",
+          a: "Kartka pasuje na każdy Dzień Ojca. Pokazujemy datę trzeciej niedzieli czerwca, kiedy Dzień Ojca obchodzi się w Wielkiej Brytanii, USA i wielu innych krajach, ale kartkę możesz wysłać, kiedy tylko chcesz.",
+        },
+        {
+          q: "Czy tata będzie musiał coś pobierać?",
+          a: "Nie. Wystarczy, że stuknie link, a kartka otworzy się w przeglądarce na każdym telefonie, tablecie i komputerze. Bez aplikacji i bez konta.",
+        },
+      ],
+    },
+    rakhi: {
+      title: "E-kartki na Raksha Bandhan dla brata i siostry · Envelette",
+      description: "E-kartki na Raksha Bandhan dla brata lub siostry: obietnica nie do odrzucenia, kupony na prezenty, które ci się należą, i wasze zdjęcia z dzieciństwa. Docierają od razu, w dowolne miejsce na świecie.",
+      heading: "Interaktywne e-kartki na **Raksha Bandhan**",
+      aboutTitle: "Dla brata lub siostry, bez względu na odległość",
+      about: [
+        "E-kartka na Raksha Bandhan pełna tego, co rodzeństwu wychodzi najlepiej: obietnica, przy której „Nie” nie wchodzi w grę, książeczka prezentów na rakhi, które ci się należą, quiz, który rozstrzygnie, kogo mama kocha bardziej, i jednoręki bandyta, który wylosuje twój prezent na rakhi. Dodaj wasze zdjęcia z dzieciństwa i zakończ deszczem iskierek.",
+        "Jeśli w tym roku nie możesz osobiście zawiązać rakhi, kartka online dostarczy twoją miłość w sam dzień święta, gdziekolwiek mieszka twoje rodzeństwo. Wyślij link przez WhatsApp, udostępnij go na rodzinnej grupie albo zleć nam wysyłkę e-mailem na 9:00 według twojej strefy czasowej.",
+      ],
+      writeTitle: "Co napisać w kartce na Raksha Bandhan",
+      ideas: [
+        {
+          who: "Dla brata",
+          text: "Szczęśliwego Raksha Bandhan, bhaiya. Dziękuję, że zawsze się mną opiekujesz, nawet kiedy doprowadzam cię do szału. A teraz w sprawie mojego prezentu…",
+        },
+        {
+          who: "Dla siostry",
+          text: "Szczęśliwego Rakhi, didi. Jesteś moją obrończynią, wspólniczką w psotach i najlepszą przyjaciółką. Obiecuję, że zawsze będę przy tobie.",
+        },
+        {
+          who: "Z daleka",
+          text: "W tym roku nie mogę zawiązać ci rakhi, więc musi wystarczyć ta kartka. Uznaj, że rakhi jest już zawiązane, z całą moją miłością. Szczęśliwego Raksha Bandhan.",
+        },
+        {
+          who: "Coś zabawnego",
+          text: "Szczęśliwego Raksha Bandhan! Rakhi zawiązane, więc teraz należy mi się prezent. Przyjmuję gotówkę, czekoladę i komplementy.",
+        },
+        {
+          who: "Dla młodszego brata",
+          text: "Dla mojego młodszego braciszka, który jakimś cudem jest teraz wyższy ode mnie: szczęśliwego Rakhi. Zawsze będę stać za tobą murem, nawet jeśli muszę przy tym zadzierać głowę.",
+        },
+        {
+          who: "Wzruszające",
+          text: "Dziękuję za każdą kłótnię, każdy sekret i za to, że zawsze trzymasz moją stronę. Szczęśliwego Raksha Bandhan. Mam ogromne szczęście, że cię mam.",
+        },
+      ],
+      faqTitle: "Pytania o e-kartki na Raksha Bandhan",
+      faqs: [
+        {
+          q: "Czy mogę wysłać kartkę na rakhi bratu za granicę?",
+          a: "Tak. Kartka jest wysyłana jako link, więc dociera w dowolne miejsce na świecie w chwili wysłania, i to bez znaczków. Kosztuje {price}, a zapłacić możesz we własnej walucie.",
+        },
+        {
+          q: "Czy kartki są dla braci, czy dla sióstr?",
+          a: "Dla jednych i drugich. Kartki na Raksha Bandhan sprawdzą się dla braci, sióstr, kuzynów i kuzynek, a każde słowo możesz zmienić tak, żeby pasowało do osoby, której wysyłasz kartkę.",
+        },
+        {
+          q: "Czy mogę dać znać, jaki prezent chcę dostać?",
+          a: "Właśnie do tego służy [The Rakhi Promise](/cards/rakhi-promise): książeczka kuponów na prezenty na rakhi, które ci się należą, a treść kuponów wymyślasz ty. W [Sibling Rivalry](/cards/sibling-rivalry) jest jednoręki bandyta, który zatrzymuje się na twoim prezencie na rakhi.",
+        },
+        {
+          q: "Czy reszta rodziny może zobaczyć kartkę?",
+          a: "Jeśli chcesz. Każdy, kto ma link, może ją otworzyć, więc oprócz wysłania jej rodzeństwu możesz ją też udostępnić na rodzinnej grupie.",
+        },
+      ],
+    },
+    holi: {
+      title: "E-kartki na Holi: rzucaj kolorami bez plam · Envelette",
+      description: "Wyślij życzenia na Holi w interaktywnej e-kartce: odbiorca rozchlapuje palcem kolory po ekranie, losuje kołem swój kolor i ogląda twoje zdjęcia. Zero plam.",
+      heading: "Interaktywne e-kartki na **Holi**",
+      aboutTitle: "Mnóstwo kolorów, zero plam",
+      about: [
+        "Odbiorca rozchlapuje palcem kolory po całym ekranie, kręci kołem, żeby sprawdzić, jaki kolor mu przypadł, i próbuje odmówić świętowania Holi (przycisk ucieka). Potem pojawiają się twoje zdjęcia z Holi i życzenia, a na koniec eksplozja kolorów.",
+        "E-kartka na Holi to prawie jak świętowanie razem, gdy rodzina jest w Indiach albo przyjaciele nie mogą przyjść na imprezę. Wyślij link przez WhatsApp, gdy tylko zaczną latać kolory, albo zleć nam wysyłkę e-mailem na 9:00 według twojej strefy czasowej w dniu święta.",
+      ],
+      writeTitle: "Co napisać w kartce na Holi",
+      ideas: [
+        {
+          who: "Dla rodziny",
+          text: "Szczęśliwego Holi! Życzę wam dnia pełnego kolorów, śmiechu, gujiya i ani jednego białego ubrania.",
+        },
+        {
+          who: "Dla przyjaciół",
+          text: "Szczęśliwego Holi! Wiadro kolorów na twoją głowę musi poczekać, więc na razie wystarczy ta kartka. Bura na mano, Holi hai!",
+        },
+        {
+          who: "Z daleka",
+          text: "Szkoda, że nie mogę obsypać cię kolorami osobiście. Szczęśliwego Holi od nas wszystkich i wspaniałego świętowania!",
+        },
+        {
+          who: "Dla drugiej połówki",
+          text: "Dzięki tobie każdy dzień jest bardziej kolorowy. Szczęśliwego Holi, kochanie.",
+        },
+        {
+          who: "Dla współpracowników",
+          text: "Tobie i twojej rodzinie życzę szczęśliwego i kolorowego Holi. Udanego świętowania!",
+        },
+        {
+          who: "Dla starszych w rodzinie",
+          text: "Życzymy wam radosnego Holi pełnego kolorów, zdrowia i szczęścia. Przesyłamy wyrazy miłości i szacunku od nas wszystkich.",
+        },
+      ],
+      faqTitle: "Pytania o e-kartki na Holi",
+      faqs: [
+        {
+          q: "Jak działa gra z kolorami?",
+          a: "Odbiorca rozchlapuje kolory po całym ekranie palcem albo, na komputerze, myszką. Najlepiej sprawdza się to na telefonie, a potem nie trzeba nic sprzątać.",
+        },
+        {
+          q: "Czy mogę wysłać kartkę rodzinie w Indiach?",
+          a: "Tak. To link, więc dociera od razu, w dowolne miejsce, bez znaczków. Wyślij go przez WhatsApp albo e-mailem, a kartka otworzy się w przeglądarce. Nic nie trzeba pobierać.",
+        },
+        {
+          q: "Czy mogę dodać nasze zdjęcia z Holi?",
+          a: "Tak, do 6, każde z podpisem. Kolorowe zdjęcia z zeszłorocznego Holi będą idealne.",
+        },
+        {
+          q: "Ile kosztuje e-kartka na Holi?",
+          a: "{price} za kartkę, płatne raz. Przed zapłatą możesz przejść całą kartkę, więc dokładnie wiesz, co zobaczy odbiorca.",
+        },
+      ],
+    },
+    newbaby: {
+      title: "E-kartki na narodziny dziecka i zdrapki z wielką nowiną · Envelette",
+      description: "Powitaj maluszka e-kartką z kołysanką albo podziel się wielką nowiną na zdrapce, którą odbiorca odkrywa palcem: wiadomość o ciąży albo ujawnienie płci dziecka.",
+      heading: "Interaktywne e-kartki na **narodziny dziecka**",
+      aboutTitle: "Powitaj maluszka albo ogłoś wielką nowinę",
+      about: [
+        "Dla świeżo upieczonych rodziców jest łagodna kołysanka, życzenia dla maluszka wyciągane ze słoika jedno po drugim i ciepłe powitanie. Dla przyszłych rodziców są zdrapki: wiadomość o ciąży, którą zdrapuje się palcem, albo ujawnienie płci dziecka, w którym najpierw trzeba zgadywać, a potem zdrapać pole, żeby poznać odpowiedź.",
+        "W kartce online wielka nowina rozchodzi się błyskawicznie. Przyszli dziadkowie, ciocie i przyjaciele za granicą dowiedzą się o niej w chwili wysłania i będą mogli otwierać kartkę ponownie, kiedy tylko zechcą. Wyślij osobną kartkę każdej osobie albo udostępnij jeden link na rodzinnej grupie.",
+      ],
+      writeTitle: "Co napisać w kartce na narodziny dziecka",
+      ideas: [
+        {
+          who: "Dla świeżo upieczonych rodziców",
+          text: "Gratulacje z okazji narodzin waszego cudownego maleństwa! Życzę wam całej miłości świata i choć kilku godzin snu.",
+        },
+        {
+          who: "Witaj na świecie",
+          text: "Witaj na świecie, maleństwo! Już teraz jesteś tak bardzo kochane. Gratulacje dla dumnych rodziców.",
+        },
+        {
+          who: "Od dziadków",
+          text: "Nasze serca są pełne radości. Witaj w rodzinie, maleństwo. Nie możemy się doczekać przytulania (i rozpieszczania).",
+        },
+        {
+          who: "Coś zabawnego",
+          text: "Gratulacje! Wysypianie się oficjalnie przechodzi do historii, ale uwierzcie nam: warto.",
+        },
+        {
+          who: "Wiadomość o ciąży",
+          text: "Mamy nowinę… Będziemy mieć dziecko! Termin wypada wiosną, a z tą wiadomością po prostu nie dało się czekać.",
+        },
+        {
+          who: "Ujawnienie płci",
+          text: "Różowy czy niebieski? Zgaduj, a potem zdrap, żeby się przekonać. Tak bardzo się cieszymy, że możemy się z tobą tym podzielić.",
+        },
+      ],
+      faqTitle: "Pytania o e-kartki na narodziny dziecka",
+      faqs: [
+        {
+          q: "Jak działa zdrapka?",
+          a: "Twoją nowinę zakrywa srebrne pole, które zdrapuje się palcem, jak na prawdziwej zdrapce. Na komputerze działa też myszką, ale najlepiej sprawdza się na telefonie.",
+        },
+        {
+          q: "Czy mogę ogłosić ciążę przyszłym dziadkom?",
+          a: "Tak, właśnie do tego służy [We Have Big News](/cards/big-news). Dziadkowie odpowiadają na pytanie, zdrapują pole i poznają nowinę. Możesz zmienić każde słowo, więc kartka powie dokładnie to, co chcesz.",
+        },
+        {
+          q: "Czy mogę utrzymać nowinę w tajemnicy do wybranego dnia?",
+          a: "Tak. Zrób kartkę teraz i zleć nam wysyłkę e-mailem na 9:00 według twojej strefy czasowej w wybranym dniu, do {days} dni naprzód. Możesz też zachować link i wysłać go samodzielnie, kiedy przyjdzie pora.",
+        },
+        {
+          q: "Czy mogę dodać zdjęcie z USG albo zdjęcia dziecka?",
+          a: "Tak, do 6 zdjęć, każde z podpisem. Przed wysłaniem są zmniejszane na twoim telefonie, a ukryte dane o miejscu zostają usunięte.",
+        },
+      ],
+    },
+    wedding: {
+      title: "E-kartki ślubne i na oświadczyny · Envelette",
+      description: "Interaktywne e-kartki ślubne: oświadcz się z uciekającym przyciskiem „Nie”, poproś przyjaciółki, żeby zostały druhnami, albo wznieś toast za młodą parę ze zdjęciami i konfetti.",
+      heading: "Interaktywne e-kartki **ślubne**",
+      aboutTitle: "Od oświadczyn do sakramentalnego „tak”",
+      about: [
+        "Oświadcz się, pokazując waszą dotychczasową historię i zdjęcia, a na koniec zadając pytanie, przy którym przycisk „Nie” ucieka. Poproś najlepszą przyjaciółkę, żeby została druhną, i dołącz na osłodę książeczkę druhnowych przywilejów. Albo jako gość wznieś toast za młodą parę z ich zdjęciami, quizem o wielkim dniu i deszczem konfetti.",
+        "E-kartka ślubna jest idealna, gdy nie możesz być na ślubie albo prezent z listy jest już kupiony, a chcesz, żeby twoje słowa dotarły w sam dzień ślubu. Zleć nam wysyłkę e-mailem na 9:00 według twojej strefy czasowej rano w dniu ślubu albo samodzielnie wyślij link młodej parze.",
+      ],
+      writeTitle: "Co napisać na kartce ślubnej",
+      ideas: [
+        {
+          who: "Dla młodej pary",
+          text: "Gratulacje z okazji ślubu! Życzę wam miłości i śmiechu na całe życie, a także kogoś, kto zawsze pozmywa za was naczynia.",
+        },
+        {
+          who: "Wzruszające",
+          text: "Patrzenie na was razem to czysta radość. Niech wasze małżeństwo będzie pełne przygód, czułości i miłości, która rośnie z każdym rokiem.",
+        },
+        {
+          who: "Gdy nie możesz przyjść",
+          text: "Bardzo nam przykro, że ominie nas wasz wielki dzień, ale stąd wzniesiemy toast za wasze zdrowie. Gratulacje dla was obojga.",
+        },
+        {
+          who: "Dla przyszłej druhny",
+          text: "Zawsze byłaś przy mnie, więc to musisz być ty. Zostaniesz moją druhną? (Przycisk „Nie” nie działa, wybacz.)",
+        },
+        {
+          who: "Oświadczyny",
+          text: "Od naszej pierwszej randki aż do dziś każda chwila prowadziła właśnie tutaj. Kocham cię bardziej, niż potrafię to wyrazić. Weźmiesz ze mną ślub?",
+        },
+        {
+          who: "Od rodziny",
+          text: "Jesteśmy z was obojga tacy dumni. Witaj w rodzinie i gratulacje z okazji tego pięknego dnia.",
+        },
+      ],
+      faqTitle: "Pytania o e-kartki ślubne",
+      faqs: [
+        {
+          q: "Czy mogę oświadczyć się kartką?",
+          a: "Tak. [Will You Marry Me?](/cards/will-you-marry-me) opowiada waszą historię chwila po chwili, pokazuje wasze zdjęcia, a potem zadaje pytanie. Przycisk „Nie” ucieka, więc jest tylko jedna odpowiedź. Pierścionek we własnym zakresie.",
+        },
+        {
+          q: "Czy mogę wysłać kartkę, jeśli nie mogę przyjść na ślub?",
+          a: "Oczywiście. [To the Happy Couple](/cards/to-the-happy-couple) ma zdjęcia młodej pary, quiz o wielkim dniu i toast w deszczu konfetti. Zleć nam wysyłkę e-mailem na 9:00 według twojej strefy czasowej w dniu ślubu, żeby kartka dotarła razem ze wszystkimi innymi.",
+        },
+        {
+          q: "Czy mogę w ten sposób poprosić przyjaciółki, żeby zostały druhnami?",
+          a: "Tak. [Will You Be My Bridesmaid?](/cards/be-my-bridesmaid) zadaje pytanie („Nie” ucieka) i ma książeczkę druhnowych przywilejów, które wymyślasz ty. Zrób osobną kartkę dla każdej druhny, z jej imieniem na kopercie.",
+        },
+        {
+          q: "Czy mogę dodać nasze zdjęcia ze ślubu?",
+          a: "Tak, do 6, każde z podpisem. Przed wysłaniem są zmniejszane na twoim telefonie, co usuwa też ukryte dane o miejscu.",
+        },
+      ],
+    },
+    getwell: {
+      title: "E-kartki z życzeniami powrotu do zdrowia i uściskiem do przytrzymania · Envelette",
+      description: "E-kartka z życzeniami powrotu do zdrowia: uścisk, który trzeba nacisnąć i przytrzymać, recepty na drzemki i lody oraz folia bąbelkowa do strzelania. Poprawi humor każdemu, kto utknął na kanapie.",
+      heading: "Interaktywne e-kartki z życzeniami **powrotu do zdrowia**",
+      aboutTitle: "Odrobina radości na kanapę",
+      about: [
+        "Uścisk, który odbiera się, naciskając i przytrzymując, bloczek recept, na których to ty przepisujesz drzemki i lody, oraz arkusz folii bąbelkowej do strzelania, kiedy trzeba leżeć w łóżku. Potem ciepła wiadomość i łagodny finał z unoszącymi się bańkami.",
+        "E-kartka z życzeniami powrotu do zdrowia dociera od razu, a to ważne, gdy ktoś choruje. Można ją otworzyć w łóżku na telefonie, nic nie trzeba pobierać, a gdy potrzeba poprawy humoru, wystarczy obejrzeć ją jeszcze raz.",
+      ],
+      writeTitle: "Co napisać w kartce z życzeniami powrotu do zdrowia",
+      ideas: [
+        {
+          who: "Dla przyjaciela lub przyjaciółki",
+          text: "Przykro mi, że cię rozłożyło. Zalecenia lekarza: odpoczynek, herbata, kiepska telewizja i zero sprawdzania służbowej poczty. Wracaj szybko do zdrowia!",
+        },
+        {
+          who: "Po operacji",
+          text: "Myślę o tobie i mam nadzieję, że z każdym dniem czujesz się trochę lepiej. Nie spiesz się i daj znać, jeśli czegokolwiek potrzebujesz.",
+        },
+        {
+          who: "Dla rodziny",
+          text: "Przesyłamy ci najmocniejszy uścisk i mnóstwo miłości. Brakuje nam ciebie w pełni sił, więc szybko wracaj do zdrowia (ale bez przesadnego pośpiechu).",
+        },
+        {
+          who: "Dla kogoś z pracy",
+          text: "Szybkiego powrotu do zdrowia życzy cały zespół. Bez ciebie w biurze jest zdecydowanie za cicho. Daj sobie tyle czasu, ile potrzebujesz.",
+        },
+        {
+          who: "Coś zabawnego",
+          text: "Słyszę, że chorujesz. Zupy nie będzie, bo znasz moją kuchnię. Zamiast niej masz tę kartkę. Wracaj do zdrowia!",
+        },
+        {
+          who: "Dla dziecka",
+          text: "Wracaj szybko do zdrowia, nasza gwiazdo! Dużo odpoczynku, dużo przytulania i może trochę lodów. Kochamy cię.",
+        },
+      ],
+      faqTitle: "Pytania o kartki z życzeniami powrotu do zdrowia",
+      faqs: [
+        {
+          q: "Czy kartka nada się dla kogoś, kto jest poważnie chory?",
+          a: "Tak. [Get Well Soon](/cards/get-well-soon) jest łagodna i ciepła, z uściskiem, który trzeba nacisnąć i przytrzymać, i życzliwą wiadomością. Możesz zmienić każde słowo, żeby pasowała do sytuacji, czy to zwykłe przeziębienie, czy coś poważniejszego.",
+        },
+        {
+          q: "Czy można ją otworzyć w szpitalu?",
+          a: "Tak, o ile jest pod ręką telefon z dostępem do internetu. Kartka otwiera się w przeglądarce, nic nie trzeba pobierać, a na cichych salach przyda się przycisk wyciszenia.",
+        },
+        {
+          q: "Czy mogę wysłać kartkę od razu?",
+          a: "Tak. Zrobienie kartki zajmuje kilka minut, a link dostajesz zaraz po zapłacie. Wyślij go przez WhatsApp albo SMS-em. Możemy też wysłać kartkę za ciebie e-mailem.",
+        },
+        {
+          q: "Ile to kosztuje?",
+          a: "{price} za kartkę, płatne raz. Taniej niż bukiet kwiatów, a do tego nie zwiędnie.",
+        },
+      ],
+    },
+    missyou: {
+      title: "E-kartki „Tęsknię za tobą” na odległość · Envelette",
+      description: "E-kartki „Tęsknię za tobą” na odległość: uścisk, który trzeba nacisnąć i przytrzymać, słoik z tym, za czym tęsknisz, i kupony na czas, gdy znów będziecie razem.",
+      heading: "Interaktywne e-kartki **„Tęsknię”**",
+      aboutTitle: "Kiedy kilometry dają się we znaki",
+      about: [
+        "Na każdy rodzaj odległości: dla ukochanej osoby na drugim końcu świata, dziecka na studiach w innym mieście albo najlepszego przyjaciela, który wyjechał daleko. Odbiorca naciska i przytrzymuje, żeby dostać od ciebie uścisk, wyciąga ze słoika karteczki z tym, za czym tęsknisz, i ogląda wasze wspólne zdjęcia albo odlicza dni na suwaku, który idzie tylko w górę.",
+        "To e-kartka, więc dociera w chwili wysłania, bez względu na różnicę czasu. Wyślij ją przez WhatsApp, SMS-em albo e-mailem, a odbiorca będzie mógł otwierać ją ponownie za każdym razem, gdy zatęskni.",
+      ],
+      writeTitle: "Co napisać w kartce, kiedy tęsknisz",
+      ideas: [
+        {
+          who: "Dla drugiej połówki",
+          text: "Bez ciebie w mieszkaniu jest o wiele za cicho. Odliczam dni do chwili, gdy porządnie cię przytulę. Strasznie za tobą tęsknię.",
+        },
+        {
+          who: "Dla dziecka na studiach",
+          text: "W domu jest bardzo czysto i bardzo cicho. Strasznie za tobą tęsknimy. Zjedz czasem jakieś warzywo, dzwoń do mamy i szybko wracaj do domu.",
+        },
+        {
+          who: "Dla przyjaciela lub przyjaciółki",
+          text: "Nikt inny nie łapie moich żartów. Wracaj albo przynajmniej częściej dzwoń. Tęsknię i zawsze będę.",
+        },
+        {
+          who: "Dla rodziny za granicą",
+          text: "Za każdym razem, gdy dzieje się coś dobrego, to tobie najpierw chcę o tym powiedzieć. Tęsknimy stąd za tobą i przesyłamy ci całą naszą miłość.",
+        },
+        {
+          who: "Dla dziadków",
+          text: "Bardzo za wami tęsknimy i nie możemy się doczekać, aż znów się zobaczymy. Przesyłamy wielki uścisk, który musi wam wystarczyć do tego czasu.",
+        },
+        {
+          who: "Krótko i słodko",
+          text: "Po prostu o tobie myślę. Tylko tyle. Tęsknię.",
+        },
+      ],
+      faqTitle: "Pytania o kartki „Tęsknię”",
+      faqs: [
+        {
+          q: "Jak działa uścisk?",
+          a: "Odbiorca naciska i przytrzymuje palec na ekranie albo, na komputerze, przycisk myszy, żeby dostać twój uścisk. To mała, ciepła chwila na odległość.",
+        },
+        {
+          q: "Czy kartka sprawdza się przy różnych strefach czasowych?",
+          a: "Tak. To link, więc dociera w chwili wysłania, gdziekolwiek jest odbiorca. Jeśli wyślemy ją e-mailem w wybranym dniu, dotrze o 9:00 według twojej strefy czasowej, więc wybierz dzień, który pasuje też do poranka u odbiorcy.",
+        },
+        {
+          q: "Czy mogę napisać, co zrobimy, kiedy znów będziemy razem?",
+          a: "Tak. [Counting the Days](/cards/counting-the-days) ma kupony na wszystko, co zrobicie, kiedy znów będziecie razem, a ich treść wymyślasz ty: pierwsze jedzenie na wynos, długi spacer, wylegiwanie się w łóżku.",
+        },
+        {
+          q: "Czy można ją zachować na pamiątkę?",
+          a: "Tak. Kartka zostaje pod swoim linkiem, więc odbiorca może ją otworzyć ponownie, gdy tylko zatęskni. Na końcu jest też przycisk „Play it again” (Obejrzyj jeszcze raz).",
+        },
+      ],
+    },
+    friendship: {
+      title: "E-kartki dla przyjaciółki lub przyjaciela z quizem o przyjaźni · Envelette",
+      description: "E-kartki dla najlepszych przyjaciół z quizem o przyjaźni, kuponami przyjaźni i galerią waszych najbardziej kultowych wspólnych zdjęć. Dla osoby, do której piszesz najczęściej.",
+      heading: "Interaktywne e-kartki dla **przyjaciół**",
+      aboutTitle: "Dla osoby, do której piszesz najczęściej",
+      about: [
+        "Quiz o przyjaźni, który sprawdzi, jak dobrze cię zna, suwak, na którym ocenia się waszą przyjaźń (idzie tylko w górę), książeczka kuponów przyjaźni na rozmowy o drugiej w nocy i awaryjne przekąski oraz galeria waszych najbardziej kultowych wspólnych zdjęć. Na wesoło, słodko albo jedno i drugie.",
+        "Wyślij e-kartkę przyjacielowi lub przyjaciółce na urodziny, po ciężkim tygodniu albo zupełnie bez okazji. Dociera jako link przez WhatsApp albo SMS-em, otwiera się w przeglądarce i można do niej wracać za każdym razem, gdy przyda się przypomnienie, jak wiele znaczy dla ciebie ta przyjaźń.",
+      ],
+      writeTitle: "Co napisać w kartce dla przyjaciółki lub przyjaciela",
+      ideas: [
+        {
+          who: "Bez okazji",
+          text: "Bez powodu, po prostu chcę ci powiedzieć, że nie ma nikogo lepszego od ciebie. Dziękuję, że jesteś moją bratnią duszą.",
+        },
+        {
+          who: "Coś zabawnego",
+          text: "Wiesz o mnie stanowczo za dużo. Dlatego musimy się przyjaźnić do końca życia.",
+        },
+        {
+          who: "Wzruszające",
+          text: "Przy każdej nieudanej fryzurze, każdym rozstaniu i każdym genialnym wieczorze na mieście zawsze jesteś obok. Mam ogromne szczęście, że cię mam.",
+        },
+        {
+          who: "Po ciężkim tygodniu",
+          text: "Wiem, że ostatnio jest ciężko. Zawsze tu jestem: do pogadania, na czekoladę, do wspólnego milczenia. Kocham cię.",
+        },
+        {
+          who: "Przyjaźń od lat",
+          text: "Dwadzieścia lat przyjaźni, a ty wciąż rozśmieszasz mnie do łez. Za kolejne dwadzieścia!",
+        },
+        {
+          who: "Nowa przyjaźń",
+          text: "Zabawne, jak szybko znalazło się dla ciebie miejsce wśród moich ulubionych ludzi. Tak się cieszę z naszej znajomości.",
+        },
+      ],
+      faqTitle: "Pytania o kartki dla przyjaciół",
+      faqs: [
+        {
+          q: "Czy mogę wymyślić własne pytania do quizu?",
+          a: "Tak. [The Bestie Quiz](/cards/bestie-quiz) ma gotowe pytania na początek, a każde z nich możesz zamienić na wasze prywatne żarty. Poprawnie odpowie tylko ta jedna wyjątkowa osoba.",
+        },
+        {
+          q: "Czy to tylko na urodziny?",
+          a: "Wcale nie. Wyślij kartkę na urodziny, w podziękowaniu, na poprawę humoru albo zupełnie bez okazji. Zmień każde słowo, żeby pasowało do sytuacji.",
+        },
+        {
+          q: "Czym są kupony przyjaźni?",
+          a: "To książeczka kuponów, które wykorzystuje się jednym stuknięciem: rozmowa o drugiej w nocy, awaryjne przekąski, wieczór filmowy. Wymyślasz je ty, więc mogą być tak zwariowane jak wasza przyjaźń.",
+        },
+        {
+          q: "Czy mogę wysłać kartkę grupie przyjaciół?",
+          a: "Tak. Każdy, kto ma link, może ją otworzyć, więc możesz udostępnić jedną kartkę na grupowym czacie. Możesz też zrobić osobną kartkę dla każdej osoby, z jej imieniem na kopercie.",
+        },
+      ],
+    },
+    leaving: {
+      title: "Pożegnalne e-kartki dla współpracowników · Envelette",
+      description: "Pożegnalne e-kartki dla kogoś z pracy, kto odchodzi: wszystko, za czym zespół będzie tęsknić, wasze zdjęcia i życzenia powodzenia. Łatwo udostępnić je na czacie zespołu.",
+      heading: "Interaktywne e-kartki **pożegnalne**",
+      aboutTitle: "Pożegnanie z prawdziwego zdarzenia",
+      about: [
+        "Kiedy ktoś z pracy odchodzi, pożegnaj go kartką, którą naprawdę zapamięta: wszystkim, za czym zespół będzie tęsknić, zdjęciami z pracy, jednorękim bandytą z prezentami na pożegnanie i życzeniami powodzenia od wszystkich. Jest też zabawna kartka, która stanowczo odmawia przyjęcia do wiadomości, że ktoś odchodzi.",
+        "Pożegnalna e-kartka to wygodne rozwiązanie dla zespołów pracujących zdalnie i hybrydowo: jedna osoba ją robi, wpisuje nazwę zespołu w polu „Od” i udostępnia link na czacie zespołu, żeby każdy mógł ją zobaczyć. Możesz też zlecić nam wysyłkę e-mailem w ostatnim dniu pracy tej osoby, o 9:00 według twojej strefy czasowej.",
+      ],
+      writeTitle: "Co napisać w kartce pożegnalnej",
+      ideas: [
+        {
+          who: "Dla kogoś z pracy",
+          text: "Bez ciebie to już nie będzie to samo. Dziękujemy za pomoc, za śmiech i za herbatę. Powodzenia we wszystkim i bądźmy w kontakcie!",
+        },
+        {
+          who: "Dla szefa lub szefowej",
+          text: "Dziękujemy za świetne kierowanie zespołem, za wsparcie i za wszystko, czego się od ciebie nauczyliśmy. Dzięki tobie praca była lepszym miejscem. Będzie nam ciebie brakowało.",
+        },
+        {
+          who: "Coś zabawnego",
+          text: "Postanowiliśmy, że nie wolno ci odejść. Jeśli się upierasz, powiedz chociaż, gdzie chowasz dobre ciastka.",
+        },
+        {
+          who: "Na emeryturę",
+          text: "Gratulacje z okazji przejścia na emeryturę! Ciesz się wylegiwaniem w łóżku, ogrodem i życiem bez budzika. Należy ci się każda minuta.",
+        },
+        {
+          who: "Wyjazd za granicę",
+          text: "Powodzenia w wielkiej przygodzie! Przysyłaj zdjęcia, znajdź najlepszą kawę i pamiętaj o nas, kiedy zdobędziesz sławę.",
+        },
+        {
+          who: "Od całego zespołu",
+          text: "Od nas wszystkich: dziękujemy za twój wkład w nasz zespół. Gdziekolwiek teraz trafisz, będą mieli z tobą wielkie szczęście.",
+        },
+      ],
+      faqTitle: "Pytania o kartki pożegnalne",
+      faqs: [
+        {
+          q: "Czy cały zespół może się podpisać?",
+          a: "Kartkę składa jedna osoba, ale jest od wszystkich: wpisz nazwę zespołu w polu „Od”, dodaj zdjęcia z pracy i wiadomości od zespołu na ekranach. Potem udostępnij link na czacie zespołu.",
+        },
+        {
+          q: "Czy kartka pasuje do miejsca pracy?",
+          a: "Tak. [Sad to See You Go](/cards/sad-to-see-you-go) jest ciepła i profesjonalna, a każde słowo możesz dopasować do swojego miejsca pracy. [You Can't Leave](/cards/you-cant-leave) jest dla zespołów, które lubią się pośmiać.",
+        },
+        {
+          q: "Czy kartka może dotrzeć w ostatnim dniu pracy?",
+          a: "Tak. Wybierz wysyłkę e-mailem, a potem ostatni dzień pracy tej osoby, i kartka dotrze o 9:00 według twojej strefy czasowej. Możesz to ustawić do {days} dni naprzód.",
+        },
+        {
+          q: "Czy trzeba coś pobierać?",
+          a: "Nie. Kartka otwiera się w przeglądarce na każdym telefonie i komputerze, więc działa też na służbowym laptopie.",
+        },
+      ],
+    },
   },
 };

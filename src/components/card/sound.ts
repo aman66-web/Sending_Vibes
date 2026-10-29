@@ -7,7 +7,7 @@ import type { Music } from "@/lib/card";
 // no audio files to load and nothing to license. Browsers only allow audio after
 // the person taps something, so the card calls unlockAudio() on their first tap.
 
-export type Sfx = "tap" | "pop" | "chime" | "win" | "whoosh" | "wrong" | "tick" | "boom" | "sparkle" | "stamp" | "unlock" | "boing";
+export type Sfx = "tap" | "pop" | "chime" | "win" | "whoosh" | "wrong" | "tick" | "boom" | "sparkle" | "stamp" | "unlock" | "boing" | "crack";
 
 let ctx: AudioContext | null = null;
 let sfxBus: GainNode | null = null;
@@ -29,6 +29,8 @@ export function setMuted(value: boolean) {
   try {
     localStorage.setItem(MUTE_KEY, value ? "1" : "0");
   } catch {}
+  // While muted, let go of the phone's media playback, so their own music or podcast carries on.
+  if (ctx && (value || users > 0)) holdPlayback(!value);
   listeners.forEach((l) => l());
 }
 
@@ -60,7 +62,109 @@ export function unlockAudio() {
     musicBus.gain.value = 0.16;
     musicBus.connect(ctx.destination);
   }
-  if (ctx.state === "suspended") ctx.resume().catch(() => {});
+  // Suspended, or "interrupted" on an iPhone after a call.
+  if (ctx.state !== "running" && ctx.state !== "closed") ctx.resume().catch(() => {});
+  if (!muted) holdPlayback(true);
+  // Let go again if nothing turns out to be using it (see retainAudio).
+  settle();
+}
+
+// What on the page may make sound right now: a card being played (with its sound on), or a
+// tune playing. The phone's media playback is only held while there's at least one, so once
+// they leave the card (to make one back, say) their own music or podcast is left alone, even
+// when they come back to the tab.
+let users = 0;
+let settleTimer: ReturnType<typeof setTimeout> | undefined;
+
+export function retainAudio(): () => void {
+  users += 1;
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    users -= 1;
+    settle();
+  };
+}
+
+// A moment's grace, so a tune's fade-out finishes and a player that's only being swapped
+// for another (the editor's phone and computer views) doesn't let go and grab it again.
+function settle() {
+  clearTimeout(settleTimer);
+  settleTimer = setTimeout(() => {
+    if (users > 0 || !ctx) return;
+    holdPlayback(false);
+    ctx.suspend().catch(() => {});
+  }, 1000);
+}
+
+// iPhones treat web audio like a ringtone: the ring/silent switch mutes it, and very many
+// phones are on silent. Asking to be media playback instead (like a video) lets the card be
+// heard: through the Audio Session API in recent Safari, or on older iPhones by quietly
+// playing a silent clip on a loop, which switches the page into playback. The card's own
+// mute button and the phone's volume buttons still work as usual.
+type WithAudioSession = Navigator & { audioSession?: { type: string } };
+let silence: HTMLAudioElement | null = null;
+
+function holdPlayback(on: boolean) {
+  const session = (navigator as WithAudioSession).audioSession;
+  if (session) {
+    const type = on ? "playback" : "auto";
+    try {
+      if (session.type !== type) session.type = type;
+    } catch {}
+    return;
+  }
+  const iPhone = navigator.maxTouchPoints > 0 && "webkitAudioContext" in window;
+  if (!iPhone) return;
+  if (!on) return silence?.pause();
+  if (!silence) {
+    silence = document.createElement("audio");
+    // Keeps it off the lock screen's and Control Centre's media controls.
+    silence.setAttribute("x-webkit-airplay", "deny");
+    silence.loop = true;
+    silence.src = silentClip(ctx?.sampleRate ?? 44100);
+  }
+  if (silence.paused) silence.play().catch(() => {});
+}
+
+// A tenth of a second of silence as a WAV file, at the card's own sample rate so the phone
+// doesn't switch rates (and distort the sound) going between the two.
+function silentClip(rate: number) {
+  const samples = Math.round(rate / 10);
+  const wav = new DataView(new ArrayBuffer(44 + samples));
+  const text = (at: number, s: string) => [...s].forEach((ch, i) => wav.setUint8(at + i, ch.charCodeAt(0)));
+  text(0, "RIFF");
+  wav.setUint32(4, 36 + samples, true);
+  text(8, "WAVE");
+  text(12, "fmt ");
+  wav.setUint32(16, 16, true);
+  wav.setUint16(20, 1, true); // plain PCM
+  wav.setUint16(22, 1, true); // mono
+  wav.setUint32(24, rate, true);
+  wav.setUint32(28, rate, true); // bytes a second
+  wav.setUint16(32, 1, true);
+  wav.setUint16(34, 8, true); // 8-bit, where silence is the middle value
+  text(36, "data");
+  wav.setUint32(40, samples, true);
+  new Uint8Array(wav.buffer, 44).fill(128);
+  return URL.createObjectURL(new Blob([wav.buffer], { type: "audio/wav" }));
+}
+
+// Nothing plays while they're in another app or tab (replying on WhatsApp, say), where the
+// music would otherwise carry on in their pocket. It picks up again when they come back, if
+// the card (or a tune) is still there.
+if (typeof document !== "undefined") {
+  document.addEventListener("visibilitychange", () => {
+    if (!ctx) return;
+    if (document.hidden) {
+      ctx.suspend().catch(() => {});
+      silence?.pause();
+    } else if (!muted && users > 0) {
+      ctx.resume().catch(() => {});
+      holdPlayback(true);
+    }
+  });
 }
 
 // A context that's still resuming from the tap that unlocked it queues sounds
@@ -139,9 +243,42 @@ const PLAYERS: Record<Sfx, () => void> = {
     tone(1320, 0.18, "square", 0.08, 0.08);
   },
   boing: () => tone(180, 0.28, "sine", 0.35, 0, 520),
+  // A wax seal snapping.
+  crack: () => {
+    noise(0.06, 0.45, "highpass", 1800);
+    noise(0.05, 0.3, "bandpass", 900, 0.03);
+    tone(240, 0.08, "triangle", 0.2, 0, 120);
+  },
 };
 
+// ---------- Haptics ----------
+
+// The big moments, felt in the hand too: a seal cracking, a win, fireworks. Kept short, as
+// longer buzzes feel like a phone call. Most other sounds (ticks, taps) have none.
+const BUZZ: Partial<Record<Sfx, number | number[]>> = {
+  crack: [14, 40, 22],
+  win: [18, 60, 18, 60, 40],
+  boom: 30,
+  stamp: 16,
+  unlock: [10, 40, 14],
+  pop: 10,
+  wrong: 20,
+};
+
+// A buzz on Android phones (iPhones don't let web pages vibrate, so they just get the
+// sound). Off with the card's mute button, like the sound.
+export function buzz(pattern: number | number[]) {
+  if (muted || typeof navigator === "undefined" || typeof navigator.vibrate !== "function") return;
+  // Chrome refuses (and complains) until they've tapped the page.
+  if (navigator.userActivation && !navigator.userActivation.hasBeenActive) return;
+  try {
+    navigator.vibrate(pattern);
+  } catch {}
+}
+
 export function sfx(name: Sfx) {
+  const pattern = BUZZ[name];
+  if (pattern) buzz(pattern);
   if (ready()) PLAYERS[name]();
 }
 
@@ -292,10 +429,12 @@ export function playMusic(name: Music): () => void {
   };
   schedule();
   const timer = setInterval(schedule, 120);
+  const release = retainAudio();
   return () => {
     clearInterval(timer);
     out.gain.setTargetAtTime(0.0001, audio.currentTime, 0.15);
     setTimeout(() => out.disconnect(), 4000);
+    release();
   };
 }
 

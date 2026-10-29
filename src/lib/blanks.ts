@@ -14,6 +14,8 @@ export const BLANK = {
   clue: "Type a clue here",
   password: "your password",
   bigMessage: "Type your big message",
+  // A "Who said it?" quiz question.
+  quote: "Type something one of you said",
   // Numbered, so each one can be told apart when tapped.
   prize: (n: number) => `Type prize ${n}`,
   coupon: (n: number) => `Type coupon ${n}`,
@@ -43,6 +45,7 @@ export const BLANKS = [
   BLANK.clue,
   BLANK.password,
   BLANK.bigMessage,
+  BLANK.quote,
   ...numbered(BLANK.prize, 8),
   ...numbered(BLANK.coupon, 8),
   ...numbered(BLANK.reason, 8),

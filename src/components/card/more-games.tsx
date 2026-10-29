@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
+import { cropStyle } from "@/lib/screen-style";
 import { useReducedMotion } from "./effects";
 import { HeartMark } from "./ornaments";
+import { bySize, isRtl, type PersonalPhoto, shortName, usePersonal } from "./personal";
 import { useSfx } from "./sound";
-import { USUAL_GOAL, useTune } from "./tune";
+import { LiveContext, USUAL_GOAL, useTune } from "./tune";
 import { useWords } from "./words";
 import { DropSprite, GameIcon, GhostSprite, HeadstoneSprite, HeartSprite, type IconName, PinataSprite, StarSprite } from "./sprites";
 
@@ -12,6 +14,68 @@ export type GameProps = { onWin: () => void; won: boolean };
 
 const PANEL = "relative w-full select-none overflow-hidden rounded-3xl ring-1 ring-black/5";
 const FOCUS = "outline-none focus-visible:ring-4 focus-visible:ring-[var(--c-accent)]";
+
+// Slower fingers: a timed game still going after a while quietly slows down and its
+// pieces grow, so nobody is left stuck before the rest of their card. Only on the real card:
+// previews and the editor keep the speed and size that were chosen.
+const ASSIST = [
+  { after: 0, speed: 1, size: 1 },
+  { after: 20000, speed: 0.75, size: 1.2 },
+  { after: 45000, speed: 0.55, size: 1.4 },
+];
+
+export function useAssist(won: boolean) {
+  const live = useContext(LiveContext);
+  const [level, setLevel] = useState(0);
+  useEffect(() => {
+    if (won || !live) return;
+    const timers = ASSIST.slice(1).map((step, i) => setTimeout(() => setLevel(i + 1), step.after));
+    return () => timers.forEach(clearTimeout);
+  }, [won, live]);
+  return live ? ASSIST[level] : ASSIST[0];
+}
+
+// Past this many, a row of progress pills would run off a phone, so it's counted instead.
+const MAX_PILLS = 10;
+
+export function Progress({ done, total }: { done: number; total: number }) {
+  if (total > MAX_PILLS) {
+    return (
+      <p className="font-display text-lg font-semibold tabular-nums">
+        {Math.min(done, total)} / {total}
+      </p>
+    );
+  }
+  return (
+    <div className="flex gap-1.5">
+      {Array.from({ length: total }, (_, i) => (
+        <span key={i} className={`h-2.5 w-5 rounded-full transition ${i < done ? "bg-[var(--c-accent)]" : "bg-current opacity-20"}`} />
+      ))}
+    </div>
+  );
+}
+
+// One of their photos filling its box, framed the way they framed it.
+export function PhotoFill({ photo, className = "" }: { photo: PersonalPhoto; className?: string }) {
+  return (
+    // eslint-disable-next-line @next/next/no-img-element -- their own photos, already resized on upload
+    <img src={photo.src} alt="" draggable={false} className={`h-full w-full object-cover ${className}`} style={cropStyle(photo.crop)} />
+  );
+}
+
+// Their name lit up across the night sky once the last one has gone up.
+function SkyName({ name }: { name: string }) {
+  if (!name) return null;
+  return (
+    <p
+      dir="auto"
+      className={`pointer-events-none absolute inset-x-4 top-[14%] line-clamp-2 animate-pop text-center leading-tight text-amber-100 [overflow-wrap:anywhere] [text-shadow:0_0_18px_rgba(255,200,120,0.9),0_0_4px_rgba(255,236,200,0.8)] ${bySize(name, ["text-5xl", "text-4xl", "text-3xl"])}`}
+      style={{ fontFamily: "var(--font-script-face), var(--font-hand-face), cursive" }}
+    >
+      {name}
+    </p>
+  );
+}
 
 // Where a tap lands inside a panel, in the panel's own pixels (it may be shown scaled down).
 // Keyboard players get a random spot instead.
@@ -29,7 +93,8 @@ const isPress = (e: React.KeyboardEvent) => e.key === "Enter" || e.key === " ";
 
 // ---------- Loves me, loves me not ----------
 
-// An odd number of petals, so the last one is always "loves me".
+// Usually an odd number of petals. With an even number the count starts on "loves me
+// not", so the last petal is always "loves me".
 const PETALS = USUAL_GOAL["loves-me-not"];
 
 export function LovesMeNot({ onWin, won }: GameProps) {
@@ -39,16 +104,17 @@ export function LovesMeNot({ onWin, won }: GameProps) {
   const { text } = useWords();
   const [plucked, setPlucked] = useState<boolean[]>(() => Array(total).fill(false));
   const count = plucked.filter(Boolean).length;
+  const lovesMe = (n: number) => (total - n) % 2 === 0;
 
   const pluck = (i: number) => {
     if (plucked[i] || won) return;
     const next = plucked.map((p, j) => (j === i ? true : p));
     setPlucked(next);
-    sfx(next.filter(Boolean).length % 2 ? "pop" : "boing");
+    sfx(lovesMe(next.filter(Boolean).length) ? "pop" : "boing");
     if (next.every(Boolean)) onWin();
   };
 
-  const verdict = count === 0 ? text("petalStart") : count % 2 === 1 ? text("lovesMe") : text("lovesMeNot");
+  const verdict = count === 0 ? text("petalStart") : lovesMe(count) ? text("lovesMe") : text("lovesMeNot");
   return (
     <div className="flex flex-col items-center gap-2">
       <p key={count} className="h-9 animate-pop font-display text-2xl font-semibold italic">
@@ -94,11 +160,17 @@ export function LovesMeNot({ onWin, won }: GameProps) {
 // ---------- Whack the ghosts ----------
 
 const GHOST_TARGET = USUAL_GOAL["whack-ghosts"];
+// How long each ghost stays up, and how often a new one appears, at normal speed.
+const GHOST_STAY = 1500;
+const GHOST_EVERY = 850;
 type Ghost = { id: number; cell: number };
 
 export function WhackGhosts({ onWin, won }: GameProps) {
   const tune = useTune();
   const total = tune.goal(GHOST_TARGET, 30);
+  const assist = useAssist(won);
+  const speed = tune.speed * assist.speed;
+  const stay = GHOST_STAY / speed;
   const sfx = useSfx();
   const { text } = useWords();
   const reduced = useReducedMotion();
@@ -121,16 +193,16 @@ export function WhackGhosts({ onWin, won }: GameProps) {
       const t = setTimeout(() => {
         setGhosts((g) => g.filter((x) => x.id !== id));
         timers.delete(t);
-      }, 1150 / tune.speed);
+      }, stay);
       timers.add(t);
     };
     spawn();
-    const interval = setInterval(spawn, 700 / tune.speed);
+    const interval = setInterval(spawn, GHOST_EVERY / speed);
     return () => {
       clearInterval(interval);
       timers.forEach(clearTimeout);
     };
-  }, [won, tune.speed]);
+  }, [won, speed, stay]);
 
   const whack = (ghost: Ghost) => {
     if (won) return;
@@ -146,7 +218,7 @@ export function WhackGhosts({ onWin, won }: GameProps) {
   return (
     <div className="w-full">
       <div className="mb-2 flex items-center justify-center gap-2 font-display text-lg font-semibold">
-        {Math.min(score, total)} / {total} <GhostSprite className="h-6 w-5" />
+        {won ? total : Math.min(score, total)} / {total} <GhostSprite className="h-6 w-5" />
       </div>
       {/* Keyboard players press Enter or Space to whack whichever ghost is up. */}
       <div
@@ -164,15 +236,15 @@ export function WhackGhosts({ onWin, won }: GameProps) {
           const boo = booed.find((b) => b.cell === cell);
           return (
             <div key={cell} className="relative h-20 overflow-hidden rounded-2xl bg-white/5 @2xl:h-24">
+              {/* The whole patch is the target, so a tap that's a little off still counts. */}
               {ghost && !won && (
-                <button
-                  data-whack
-                  aria-label="Whack the ghost"
-                  onPointerDown={() => whack(ghost)}
-                  className={`absolute inset-x-0 bottom-3 mx-auto w-fit leading-none ${reduced ? "" : "animate-ghost"}`}
-                  style={{ animationDuration: `${1.1 / tune.speed}s`, scale: tune.size }}
-                >
-                  <GhostSprite className="h-14 w-12 drop-shadow-[0_0_10px_rgba(255,255,255,0.25)]" />
+                <button data-whack aria-label="Whack the ghost" onPointerDown={() => whack(ghost)} className="absolute inset-0 leading-none">
+                  <span
+                    className={`absolute inset-x-0 bottom-3 mx-auto block w-fit ${reduced ? "" : "animate-ghost"}`}
+                    style={{ animationDuration: `${(stay - 50) / 1000}s`, scale: tune.size * assist.size }}
+                  >
+                    <GhostSprite className="h-14 w-12 drop-shadow-[0_0_10px_rgba(255,255,255,0.25)]" />
+                  </span>
                 </button>
               )}
               {boo && <span className="pointer-events-none absolute inset-0 grid animate-pop place-items-center font-display text-lg font-bold tracking-widest text-[#f3d9a4]">{text("boo")}</span>}
@@ -202,6 +274,7 @@ export function LaunchFireworks({ onWin, won }: GameProps) {
   const total = tune.goal(FIREWORK_TARGET, 20);
   const sfx = useSfx();
   const { text } = useWords();
+  const { to } = usePersonal();
   const [fireworks, setFireworks] = useState<Firework[]>([]);
   const [count, setCount] = useState(0);
   const launched = useRef(0);
@@ -226,7 +299,7 @@ export function LaunchFireworks({ onWin, won }: GameProps) {
   return (
     <div className="w-full">
       <div className="mb-2 flex items-center justify-center gap-2 font-display text-lg font-semibold">
-        {Math.min(count, total)} / {total} <StarSprite className="h-5 w-5" />
+        {won ? total : Math.min(count, total)} / {total} <StarSprite className="h-5 w-5" />
       </div>
       <div
         data-sky
@@ -279,9 +352,10 @@ export function LaunchFireworks({ onWin, won }: GameProps) {
             </span>
           );
         })}
-        {count === 0 && (
+        {count === 0 && !won && (
           <p className="pointer-events-none absolute inset-0 grid place-items-center font-display text-lg font-semibold text-white/80">{text("skyTap")}</p>
         )}
+        {won && <SkyName name={to} />}
       </div>
     </div>
   );
@@ -314,7 +388,10 @@ export function ReleaseLanterns({ onWin, won }: GameProps) {
   const total = tune.goal(LANTERNS, 10);
   const sfx = useSfx();
   const { text } = useWords();
+  const { to } = usePersonal();
   const [released, setReleased] = useState<boolean[]>(() => Array(total).fill(false));
+  // More than five go on two even rows (each lantern 3rem wide, half a rem apart), so they fit on a phone.
+  const perRow = total > 5 ? Math.ceil(total / 2) : total;
 
   const release = (i: number) => {
     if (released[i] || won) return;
@@ -329,7 +406,10 @@ export function ReleaseLanterns({ onWin, won }: GameProps) {
       {Array.from({ length: 22 }, (_, i) => (
         <span key={i} className="absolute h-1 w-1 animate-pulse rounded-full bg-white/70" style={{ left: `${(i * 41) % 100}%`, top: `${(i * 17) % 60}%`, animationDelay: `${i * 0.3}s` }} />
       ))}
-      <div className="absolute inset-x-0 bottom-4 flex items-end justify-center gap-3">
+      <div
+        className="absolute inset-x-0 bottom-4 mx-auto flex flex-wrap items-end justify-center gap-x-2 gap-y-1"
+        style={{ maxWidth: `${perRow * 3.5 - 0.4}rem` }}
+      >
         {released.map((up, i) => (
           <button
             key={i}
@@ -344,9 +424,10 @@ export function ReleaseLanterns({ onWin, won }: GameProps) {
           </button>
         ))}
       </div>
-      {!released.some(Boolean) && (
-        <p className="pointer-events-none absolute inset-x-0 top-1/3 text-center font-display text-lg font-semibold text-white/85">{text("lanternTap")}</p>
+      {!won && !released.some(Boolean) && (
+        <p className="pointer-events-none absolute inset-x-0 top-1/4 text-center font-display text-lg font-semibold text-white/85">{text("lanternTap")}</p>
       )}
+      {won && <SkyName name={to} />}
     </div>
   );
 }
@@ -383,7 +464,7 @@ export function BubbleWrap({ onWin, won }: GameProps) {
   return (
     <div className="w-full">
       <div className="mb-2 text-center font-display text-lg font-semibold">
-        {text("bubblesScore", { i: popped.filter(Boolean).length, n: total })}
+        {text("bubblesScore", { i: won ? total : popped.filter(Boolean).length, n: total })}
       </div>
       <div
         onPointerDown={(e) => {
@@ -469,26 +550,48 @@ export function Pinata({ onWin, won }: GameProps) {
             onClick={hit}
             className="absolute top-10 origin-top animate-swing leading-none"
           >
-            <span key={hits} className={`block ${hits ? "animate-shake" : ""}`} style={{ transform: `rotate(${hits * 4}deg)` }}>
+            {/* It tips further the closer it is to breaking, however many hits that takes. */}
+            <span key={hits} className={`block ${hits ? "animate-shake" : ""}`} style={{ transform: `rotate(${(hits / total) * 30}deg)` }}>
               <PinataSprite className="h-36 w-32 drop-shadow-md" />
             </span>
           </button>
         )}
       </div>
-      <div className="flex gap-1.5">
-        {Array.from({ length: total }, (_, i) => (
-          <span key={i} className={`h-2.5 w-5 rounded-full transition ${i < hits ? "bg-[var(--c-accent)]" : "bg-current opacity-20"}`} />
-        ))}
-      </div>
+      <Progress done={won ? total : hits} total={total} />
     </div>
   );
 }
 
 // ---------- Grow a flower ----------
 
+// It grows in five steps, however many waterings it takes (style.tune.goal, five usually).
 const STAGES = 5;
 
-function Plant({ stage }: { stage: number }) {
+// Their name on the pot, smaller for a longer one and cut short past 14 letters.
+function PotName({ name }: { name: string }) {
+  if (!name) return null;
+  const shown = shortName(name, 14);
+  const size = bySize(shown, [17, 14, 12]);
+  // Squeezed to fit the pot only when it would otherwise run over the edges.
+  const fit = [...shown].length * size * 0.48 > 62;
+  return (
+    <text
+      x="100"
+      y="196"
+      textAnchor="middle"
+      fontSize={size}
+      fill="#fff6ea"
+      style={{ fontFamily: "var(--font-hand-face), cursive" }}
+      direction={isRtl(shown) ? "rtl" : undefined}
+      textLength={fit ? 62 : undefined}
+      lengthAdjust={fit ? "spacingAndGlyphs" : undefined}
+    >
+      {shown}
+    </text>
+  );
+}
+
+function Plant({ stage, name = "" }: { stage: number; name?: string }) {
   const stem = [0, 22, 48, 72, 84, 90][stage];
   return (
     <svg viewBox="0 0 200 220" className="h-full w-full overflow-visible">
@@ -525,6 +628,7 @@ function Plant({ stage }: { stage: number }) {
       <rect x="52" y="152" width="96" height="16" rx="4" fill="#c97a4f" />
       <ellipse cx="100" cy="155" rx="42" ry="4" fill="#4a3324" />
       {stage === 0 && <ellipse cx="100" cy="152" rx="6" ry="3.5" fill="#7a5235" />}
+      <PotName name={name} />
     </svg>
   );
 }
@@ -532,16 +636,17 @@ function Plant({ stage }: { stage: number }) {
 export function GrowFlower({ onWin, won }: GameProps) {
   const sfx = useSfx();
   const { text } = useWords();
-  const [stage, setStage] = useState(0);
+  const { to } = usePersonal();
+  const total = useTune().goal(STAGES, 12);
   const [drops, setDrops] = useState(0);
+  const stage = won ? STAGES : Math.min(STAGES, Math.ceil((drops / total) * STAGES));
 
   const water = () => {
     if (won) return;
-    const next = Math.min(stage + 1, STAGES);
-    setStage(next);
-    setDrops((d) => d + 1);
-    sfx(next === STAGES ? "sparkle" : "tap");
-    if (next === STAGES) onWin();
+    const next = drops + 1;
+    setDrops(next);
+    sfx(next >= total ? "sparkle" : "tap");
+    if (next === total) onWin();
   };
 
   return (
@@ -554,7 +659,7 @@ export function GrowFlower({ onWin, won }: GameProps) {
             ))}
           </span>
         )}
-        <Plant stage={stage} />
+        <Plant stage={stage} name={to} />
         {won && <StarSprite className="absolute -right-2 top-6 h-10 w-10 animate-pop" />}
       </button>
       {!won && (
@@ -563,7 +668,7 @@ export function GrowFlower({ onWin, won }: GameProps) {
           onClick={water}
           className="rounded-full bg-[var(--c-accent)] px-6 py-3 font-display font-semibold text-[var(--c-accent-text)] shadow-lg active:scale-95"
         >
-          {text("waterIt", { i: stage, n: STAGES })}
+          {text("waterIt", { i: drops, n: total })}
         </button>
       )}
     </div>
@@ -583,6 +688,7 @@ export function ThrowColours({ onWin, won }: GameProps) {
   const sfx = useSfx();
   const { text } = useWords();
   const [splats, setSplats] = useState<Splat[]>([]);
+  const [score, setScore] = useState(0);
   const count = useRef(0);
   const nextId = useRef(0);
 
@@ -603,13 +709,14 @@ export function ThrowColours({ onWin, won }: GameProps) {
     sfx("pop");
     if (won) return;
     count.current += 1;
+    setScore(count.current);
     if (count.current === total) onWin();
   };
 
   return (
     <div className="w-full">
       <div className="mb-2 text-center font-display text-lg font-semibold">
-        {Math.min(splats.length, total)} / {total}
+        {won ? total : Math.min(score, total)} / {total}
       </div>
       <div
         data-splat
@@ -740,6 +847,8 @@ export function HoldHug({ onWin, won }: GameProps) {
   // Faster fills the hug quicker (style.tune.speed).
   const { speed } = useTune();
   const { text } = useWords();
+  // With a photo on the card, the hug fills with it.
+  const photo = usePersonal().photos[0];
   const [holding, setHolding] = useState(false);
   const [progress, setProgress] = useState(0);
   const value = useRef(0);
@@ -812,12 +921,34 @@ export function HoldHug({ onWin, won }: GameProps) {
           onKeyUp={() => setHolding(false)}
           onContextMenu={(e) => e.preventDefault()}
           disabled={won}
-          className="grid h-40 w-40 touch-none select-none place-items-center rounded-full bg-[var(--c-secondary)] shadow-xl ring-1 ring-black/10 [-webkit-touch-callout:none]"
+          className="relative grid h-40 w-40 touch-none select-none place-items-center overflow-hidden rounded-full bg-[var(--c-secondary)] shadow-xl ring-1 ring-black/10 [-webkit-touch-callout:none]"
         >
-          <span className={`block transition-transform ${won ? "animate-pop" : ""}`} style={{ transform: won ? undefined : `scale(${1 + shown * 0.5})` }}>
-            {won ? <HeartMark className="h-20 w-20 text-[var(--c-accent)]" /> : <HeartSprite className="h-16 w-16" />}
-          </span>
+          {photo && (
+            <>
+              <span aria-hidden className="absolute inset-0 opacity-30">
+                <PhotoFill photo={photo} />
+              </span>
+              {/* Their photo rises up the circle as the hug fills. */}
+              <span aria-hidden className="absolute inset-0" style={{ clipPath: `inset(${(1 - shown) * 100}% 0 0 0)` }}>
+                <PhotoFill photo={photo} />
+              </span>
+            </>
+          )}
+          {!(photo && won) && (
+            <span
+              className={`relative block transition-transform ${won ? "animate-pop" : ""}`}
+              // Over a photo the heart steps back as it fills, so their face shows.
+              style={{ transform: won ? undefined : `scale(${photo ? 1 - shown * 0.3 : 1 + shown * 0.5})`, opacity: photo ? 1 - shown * 0.6 : undefined }}
+            >
+              {won ? <HeartMark className="h-20 w-20 text-[var(--c-accent)]" /> : <HeartSprite className="h-16 w-16 drop-shadow-md" />}
+            </span>
+          )}
         </button>
+        {photo && won && (
+          <span className="absolute bottom-5 right-5 grid h-12 w-12 animate-pop place-items-center rounded-full bg-white shadow-lg ring-1 ring-black/10">
+            <HeartMark className="h-7 w-7 text-[var(--c-accent)]" />
+          </span>
+        )}
       </div>
       <p className="font-display text-lg font-semibold">{won ? text("hugDone") : holding ? text("hugHolding") : progress > 0 ? text("hugLetGo") : text("hugStart")}</p>
     </div>

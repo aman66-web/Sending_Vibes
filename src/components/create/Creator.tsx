@@ -1,52 +1,66 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CardPlayer } from "@/components/card/CardPlayer";
 import { Motif } from "@/components/card/motifs";
 import { Logo } from "@/components/Logo";
 import { BrowserFrame } from "@/components/BrowserFrame";
 import { PhoneFrame } from "@/components/PhoneFrame";
-import { addToBasket } from "@/lib/basket";
-import { OCCASIONS, type CardData, type Occasion, type Screen, type ScreenType, type ThemeName } from "@/lib/card";
+import { MAX_BASKET, addToBasket, inBasket, readMade, replaceInBasket, saveMade, type Made } from "@/lib/basket";
+import type { CardData, Occasion, Screen, ThemeName } from "@/lib/card";
 import { stagesOf } from "@/lib/stages";
-import { ProductThumb } from "@/components/catalog/ProductThumb";
-import { TEMPLATES, cardTier, getTemplate, toneInfo } from "@/lib/catalog";
-import { occasions } from "@/lib/templates";
+import { DesignPicker } from "@/components/catalog/DesignPicker";
+import { cardTier, getTemplate } from "@/lib/catalog";
 import { formatMoney, tierPrice } from "@/lib/pricing";
+import { withTheme } from "@/lib/recolour";
 import { themes } from "@/lib/themes";
 import { fmt } from "@/i18n/config";
 import { useI18n } from "@/i18n/client";
 import { SignIn, type SignedIn } from "@/components/SignIn";
 import { TwoWays } from "@/components/TwoWays";
-import { NO_ANSWERS, Quiz, quizPrompt, type Answers } from "./Quiz";
+import { NO_ANSWERS, Quiz, briefFrom, quizPrompt, withSuggestions, type Answers } from "./Quiz";
 import { Field } from "./ScreenEditor";
 import { openChat } from "@/components/open-chat";
 import { AtComputerSize, AtPhoneSize } from "./AtPhoneSize";
-import { STUDIO_TABS, ScreenStrip, StudioPanel, type Tab } from "./Studio";
+import { ScreenStrip, StudioPanel, type Tab } from "./Studio";
+import { useFreshTap } from "./one-tap";
 import { useWide } from "./use-wide";
 import { AllWords, EditableCard, setAt, type Path } from "./WordEditing";
 import { stageFor, stillToWrite } from "@/lib/blanks";
+import type { Brief } from "@/lib/brief";
+import { recentLooks, rememberLook } from "@/lib/recent-looks";
+import { newSeed, restyle } from "@/lib/vary";
+import { AiError, MakingScreen, NO_PROGRESS, keepScreenOn, type Progress } from "./MakingScreen";
+import { FirstLook } from "./FirstLook";
+import { CarryOn } from "./CarryOn";
+import { ConfirmDialog } from "./ConfirmDialog";
+import { ErrorNotice, canRetry } from "./ErrorNotice";
+import { UndoToast } from "./UndoToast";
+import { clearAdded, clearQuiz, dropDraft, forgetChanges, loadQuiz, markAdded, park, resumeFrom, saveDraft, saveQuiz, started, type Draft, type SavedQuiz, type Waiting } from "./drafts";
 
-const DRAFT_KEY = "sv-draft-v1";
-const MODE_KEY = "sv-draft-mode";
-// The questions in progress, kept while they sign in with Google (which leaves the site).
-const QUIZ_KEY = "sv-quiz-v1";
 // The designs shown next to each example description, in the same order as t.custom.examples.
 const EXAMPLE_SLUGS = ["be-my-valentine", "birthday-bash", "festival-of-lights", "naughty-or-nice", "please-forgive-me", "for-the-best-mum"];
 
 type Album = { photos: string[]; captions: string[] };
+// A new card being asked for: everything makeCard was given, and which try this is.
+type MakeJob = { prompt: string; names: { to: string; from: string }; source: "quiz" | "describe"; album?: Album; template?: string; brief?: Brief; attempt: number };
+// A colour picked for a design on its product page.
+type Picked = { slug: string; theme: ThemeName };
+const pickedIn = (quiz: SavedQuiz | null | undefined): Picked | undefined =>
+  quiz?.templateSlug && typeof quiz.theme === "string" && Object.prototype.hasOwnProperty.call(themes, quiz.theme) ? { slug: quiz.templateSlug, theme: quiz.theme } : undefined;
 
-// Puts photos added before the card was written into its photos screen. A card made
-// from scratch gets one before the message (or finale) if the writer didn't include
-// one; a ready-made design keeps its screens as they are.
-function withPhotos(card: CardData, album: Album | undefined, title: string, addScreen: boolean): CardData {
+// Puts photos added before the card was written into its photos screen. Without one,
+// a card made from scratch gets one before the message (or finale), and a ready-made
+// design gets one just before its finale, so the rest of it stays in its own order.
+function withPhotos(card: CardData, album: Album | undefined, title: string, fromScratch: boolean): CardData {
   if (!album?.photos.length) return card;
   const { photos, captions } = album;
   const at = card.screens.findIndex((s) => s.type === "photos");
   if (at >= 0) return { ...card, screens: card.screens.map((s, i) => (i === at && s.type === "photos" ? { ...s, photos, captions } : s)) };
-  if (!addScreen) return card;
-  const before = card.screens.findIndex((s) => s.type === "message" || s.type === "finale");
+  // A card can't hold more screens than this (lib/card.ts), and wouldn't save.
+  if (card.screens.length >= 12) return card;
+  const before = card.screens.findIndex((s) => (fromScratch ? s.type === "message" || s.type === "finale" : s.type === "finale"));
   const screens = [...card.screens];
   screens.splice(before > 0 ? before : screens.length, 0, { id: uid(), type: "photos", title, photos, captions });
   return { ...card, screens };
@@ -62,46 +76,12 @@ type Step = "choose" | "pick" | "quiz" | "describe" | "making" | "edit";
 type Mode = "premade" | "custom";
 export type Start = Mode;
 
-// An unfinished card is kept in localStorage so a refresh doesn't lose someone's work.
-function loadDraft(): CardData | null {
-  try {
-    const raw = localStorage.getItem(DRAFT_KEY);
-    return raw ? (JSON.parse(raw) as CardData) : null;
-  } catch {
-    return null;
-  }
-}
+// The most screens a card can have (see lib/card.ts).
+const MAX_SCREENS = 12;
 
-function clearDraft() {
-  try {
-    localStorage.removeItem(DRAFT_KEY);
-    localStorage.removeItem(MODE_KEY);
-  } catch {}
-}
-
-type SavedQuiz = { step: "quiz" | "describe"; answers: Answers; question: number; mode: Mode; templateSlug?: string; idea: string; to: string; from: string; at: number };
-
-function loadQuiz(): SavedQuiz | null {
-  try {
-    const saved = JSON.parse(sessionStorage.getItem(QUIZ_KEY) ?? "null") as SavedQuiz | null;
-    return saved && Date.now() - saved.at < 2 * 60 * 60_000 ? saved : null;
-  } catch {
-    return null;
-  }
-}
-
-function clearQuiz() {
-  try {
-    sessionStorage.removeItem(QUIZ_KEY);
-  } catch {}
-}
-
-function loadMode(draft: CardData): Mode {
-  try {
-    const saved = localStorage.getItem(MODE_KEY);
-    if (saved === "premade" || saved === "custom") return saved;
-  } catch {}
-  return cardTier(draft);
+// Added text boxes left empty would stop the card saving, and show nothing anyway.
+function withoutEmptyTexts(card: CardData): CardData {
+  return { ...card, screens: card.screens.map((s) => (s.style?.texts?.some((t) => !t.text.trim()) ? { ...s, style: { ...s.style, texts: s.style.texts.filter((t) => t.text.trim()) } } : s)) };
 }
 
 // Rendered client-only (see app/create/page.tsx), so reading localStorage on first render is safe.
@@ -115,29 +95,46 @@ type CreatorProps = {
   // Back from signing in with Google, to carry on with the questions.
   resume?: boolean;
   signInFailed?: boolean;
+  // A card in the basket to change.
+  initialEdit?: string;
 };
 
-export function Creator({ initialOccasion, initialTemplate, initialTo, initialFrom, initialTheme, initialStart, resume, signInFailed }: CreatorProps) {
+export function Creator({ initialOccasion, initialTemplate, initialTo, initialFrom, initialTheme, initialStart, resume, signInFailed, initialEdit }: CreatorProps) {
   const { t, currency } = useI18n();
   const c = t.create;
   const x = t.custom;
   const router = useRouter();
   // Fireworks only work as a finale effect, so they're not offered as a background.
   const chosen = getTemplate(initialTemplate);
-  const [saved] = useState(() => (resume ? loadQuiz() : null));
-  const [draft] = useState(() => (initialOccasion || chosen || initialStart || saved ? null : loadDraft()));
-  // A design picked elsewhere goes straight to the questions; an occasion opens the designs for it.
+  // Where to begin: a card or questions to carry on with, or what the link asks for.
+  const [begin] = useState(() => resumeFrom({ edit: initialEdit, resume, fresh: Boolean(initialOccasion || chosen || initialStart), search: window.location.search }));
+  const saved = begin.quiz;
+  const draft = begin.open;
+  // The basket card being changed, if it's one.
+  const [editingId, setEditingId] = useState(draft?.editing);
+  // What's offered to carry on with, until they pick something.
+  const [waiting, setWaiting] = useState<Waiting>(begin.waiting);
+  // An unfinished card that would otherwise be written over by the next one: it's set
+  // aside instead, and offered again once that one's done.
+  const keep = useRef<Draft | null>(begin.park ?? begin.waiting.draft ?? null);
+  // A set-aside change to a basket card that's been opened again, to take out of that list.
+  const taken = useRef(begin.take ? begin.open?.editing : undefined);
+  // A design picked elsewhere goes straight to the questions; an occasion opens the designs
+  // for it, unless it came with a personalised start (then it's filled in on the questions).
   const [step, setStep] = useState<Step>(
-    saved ? saved.step : draft ? "edit" : chosen ? "quiz" : initialOccasion || initialStart === "premade" ? "pick" : initialStart === "custom" ? "quiz" : "choose",
+    saved ? saved.step : draft ? "edit" : chosen || initialStart === "custom" ? "quiz" : initialOccasion || initialStart === "premade" ? "pick" : "choose",
   );
   const [mode, setMode] = useState<Mode>(() =>
-    saved ? saved.mode : draft ? loadMode(draft) : chosen || initialOccasion || initialStart === "premade" ? "premade" : "custom",
+    saved ? saved.mode : draft ? draft.mode : chosen || initialStart === "premade" || (initialOccasion && initialStart !== "custom") ? "premade" : "custom",
   );
   const [templateSlug, setTemplateSlug] = useState<string | undefined>(saved ? saved.templateSlug : chosen?.slug);
-  const [to, setTo] = useState(saved?.to ?? draft?.to ?? initialTo ?? "");
-  const [from, setFrom] = useState(saved?.from ?? draft?.from ?? initialFrom ?? "");
-  const [card, setCard] = useState<CardData | null>(draft);
-  const [selected, setSelected] = useState<string | undefined>(draft?.screens[0]?.id);
+  // The colour picked for a design on its product page. It's kept with the questions, so it
+  // survives signing in with Google (which comes back to a plain link) and carrying on later.
+  const [picked, setPicked] = useState<Picked | undefined>(() => pickedIn(saved) ?? (chosen && initialTheme ? { slug: chosen.slug, theme: initialTheme } : undefined));
+  const [to, setTo] = useState(saved?.to ?? draft?.card.to ?? initialTo ?? "");
+  const [from, setFrom] = useState(saved?.from ?? draft?.card.from ?? initialFrom ?? "");
+  const [card, setCard] = useState<CardData | null>(draft?.card ?? null);
+  const [selected, setSelected] = useState<string | undefined>(draft?.card.screens[0]?.id);
   const [showPreview, setShowPreview] = useState(false);
   // The full-screen preview on a phone covers the page, which mustn't scroll behind it.
   useEffect(() => {
@@ -150,7 +147,9 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     };
   }, [showPreview]);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // Why the card couldn't go in the basket, and the screen to fix if the server said which
+  // (with the screens' order then, since the message names it by its number).
+  const [error, setError] = useState<{ text: string; screenId?: string; order?: string; retry?: boolean } | null>(null);
   // Making a card by typing, and changing one by typing.
   const [idea, setIdea] = useState(saved?.idea ?? "");
   const [ask, setAsk] = useState("");
@@ -165,8 +164,15 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   const [past, setPast] = useState<CardData[]>([]);
   const [future, setFuture] = useState<CardData[]>([]);
   // The screens written so far while a card is being made, and a way to stop it.
-  const [progress, setProgress] = useState<ScreenType[]>([]);
+  const [progress, setProgress] = useState<Progress>(NO_PROGRESS);
   const making = useRef<AbortController | null>(null);
+  // The card being made, kept so "Try again" can ask for exactly the same again; its big
+  // idea once the writer has one; and how it ended ("ready" for a moment, or why it didn't).
+  const [job, setJob] = useState<MakeJob | null>(null);
+  const [concept, setConcept] = useState<string | null>(null);
+  const [outcome, setOutcome] = useState<"ready" | { error: string } | null>(null);
+  // Leaving the page (Back, say) stops a card being made, so its use of the allowance is given back.
+  useEffect(() => () => making.current?.abort(), []);
   // The live preview: on a phone or a computer, which screen it's showing, and a nudge
   // that makes it jump back to a screen after that screen changes.
   // It starts as the device they're on (see `shown` below); the other is a tap away.
@@ -174,8 +180,18 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   const [viewing, setViewing] = useState<string | undefined>();
   const [nudge, setNudge] = useState(0);
   const [screenAsk, setScreenAsk] = useState("");
-  // The eight-question quiz. Names from a product page and a design's occasion are filled in already.
-  const [answers, setAnswers] = useState<Answers>(saved?.answers ?? { ...NO_ANSWERS, to: initialTo ?? "", from: initialFrom ?? "", occasion: chosen?.occasion ?? "" });
+  // The questions. Names from a product page, the occasion (a design's, or one asked for),
+  // and the suggestions that follow from it are filled in already. A quiz saved before
+  // the questions last changed is topped up with the newer answers' blanks.
+  const [answers, setAnswers] = useState<Answers>(() =>
+    saved
+      ? { ...NO_ANSWERS, ...saved.answers }
+      : withSuggestions(
+          { ...NO_ANSWERS, to: initialTo ?? "", from: initialFrom ?? "", occasion: chosen?.occasion ?? (initialStart === "custom" ? (initialOccasion ?? "") : "") },
+          t.quiz.relations,
+          chosen,
+        ),
+  );
   const [question, setQuestion] = useState(saved?.question ?? 0);
   // Signing up comes before a new card is made, for anyone not signed in when they start.
   const [auth, setAuth] = useState<{ google: boolean; email: boolean; account: SignedIn | null; needed: boolean } | null>(null);
@@ -190,23 +206,52 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   const design = mode === "premade" ? getTemplate(templateSlug) : undefined;
   const ideaBox = useRef<HTMLTextAreaElement>(null);
 
+  // Back from signing in with Google, the card is made straight away (see afterGoogle).
+  const afterGoogle = useRef(() => {});
+  const wentOn = useRef(false);
   useEffect(() => {
     fetch("/api/account", { cache: "no-store" })
       .then((r) => r.json())
       .then((s: { enabled: boolean; google: boolean; email: boolean; account: SignedIn | null; left?: { change: number } }) => {
         setAuth({ google: s.google, email: s.email, account: s.account, needed: s.enabled && !s.account });
         if (s.left) setChangesLeft(s.left.change);
+        if (s.account && !wentOn.current) {
+          wentOn.current = true;
+          afterGoogle.current();
+        }
       })
       .catch(() => {});
   }, []);
 
-  // Keeps the questions (or the description) while Google signs them in.
-  const saveQuiz = () => {
-    try {
-      const keep: SavedQuiz = { step: step === "describe" ? "describe" : "quiz", answers, question, mode, templateSlug, idea, to, from, at: Date.now() };
-      sessionStorage.setItem(QUIZ_KEY, JSON.stringify(keep));
-    } catch {}
+  // The questions (or the description) as they are now, kept in this tab.
+  const quizNow = (): SavedQuiz => ({
+    step: step === "describe" ? "describe" : "quiz",
+    answers,
+    question,
+    mode,
+    templateSlug,
+    theme: picked && picked.slug === templateSlug ? picked.theme : undefined,
+    idea,
+    to,
+    from,
+    at: Date.now(),
+    search: window.location.search,
+  });
+  // Kept as they go, so a reload while they fetch a code from their email loses nothing.
+  // Questions from before that are on offer aren't written over until they've moved on.
+  useEffect(() => {
+    if ((step === "quiz" || step === "describe") && !(waiting.quiz && step === "quiz" && question === 0)) saveQuiz(quizNow());
+  });
+  // Signing up is the last thing asked, so once it's done the card is made, with nothing more to press.
+  const carryOnSignedIn = () => {
+    if (step === "quiz") makeFromQuiz();
+    else if (step === "describe" && idea.trim().length >= 3 && to.trim() && from.trim()) makeCard(idea.trim(), { to, from }, "describe");
   };
+  useEffect(() => {
+    afterGoogle.current = () => {
+      if (saved?.signingIn && !signInFailed && Date.now() - saved.at < 30 * 60_000) carryOnSignedIn();
+    };
+  });
   const signUp = auth?.needed
     ? {
         google: auth.google,
@@ -215,92 +260,204 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
         onSignedIn: (account: SignedIn) => {
           setAuth((a) => a && { ...a, account });
           setAiError(null);
+          carryOnSignedIn();
         },
-        onGoogle: saveQuiz,
+        // Kept while Google signs them in, which leaves the site.
+        onGoogle: () => saveQuiz({ ...quizNow(), signingIn: true }),
       }
     : undefined;
   const mustSignUp = Boolean(signUp && !signUp.account);
 
   useEffect(() => {
-    try {
-      if (card && step === "edit") {
-        localStorage.setItem(DRAFT_KEY, JSON.stringify(card));
-        localStorage.setItem(MODE_KEY, mode);
-      }
-    } catch {}
-  }, [card, step, mode]);
+    if (!card || step !== "edit") return;
+    if (keep.current) {
+      if (JSON.stringify(keep.current.card) !== JSON.stringify(card)) park(keep.current);
+      keep.current = null;
+    }
+    saveDraft({ card, mode, editing: editingId });
+    if (taken.current) {
+      forgetChanges(taken.current);
+      taken.current = undefined;
+    }
+    // From now on a reload comes back to this card, whatever the link first asked for, and
+    // the card put in the basket earlier is no longer the one to offer.
+    if (window.location.search) window.history.replaceState(null, "", window.location.pathname);
+    clearAdded();
+  }, [card, step, mode, editingId]);
 
   // The two ways: personalised goes to the questions, ready-made to the designs first.
   const chooseWay = (way: Mode) => {
+    setAiError(null);
     setMode(way);
     setQuestion(0);
     setStep(way === "premade" ? "pick" : "quiz");
     window.scrollTo({ top: 0 });
   };
 
-  // From the designs to the questions, with the design's occasion filled in.
-  const toQuestions = () => {
-    const tpl = getTemplate(templateSlug);
+  // From the designs to the questions. The design sets the occasion (so it isn't asked)
+  // and suggests its own feeling, unless they've already picked one. A design used straight
+  // from its preview comes as `slug`.
+  const toQuestions = (slug = templateSlug) => {
+    const tpl = getTemplate(slug);
     if (!tpl) return;
-    setAnswers((a) => (a.occasion || a.occasionOther ? a : { ...a, occasion: tpl.occasion }));
+    setAiError(null);
+    setTemplateSlug(tpl.slug);
+    setAnswers((a) => withSuggestions({ ...a, occasion: tpl.occasion, occasionOther: "" }, t.quiz.relations, tpl));
     setQuestion(0);
     setStep("quiz");
     window.scrollTo({ top: 0 });
   };
 
+  // Only after they've said yes (see ConfirmDialog). A card that was set aside for this one
+  // comes back, and is offered.
   const startOver = () => {
-    clearDraft();
+    setConfirmStart(false);
+    const back = dropDraft();
+    // Questions started meanwhile are newer work, offered rather than thrown away with this card.
+    const quiz = loadQuiz();
+    keep.current = back;
+    setWaiting({ ...(back ? { draft: back } : {}), ...(quiz && started(quiz) ? { quiz } : {}) });
+    setEditingId(undefined);
+    setDeleted(null);
+    setError(null);
     setCard(null);
     setTo("");
     setFrom("");
     setPast([]);
     setFuture([]);
     setAiDone(false);
+    setAiError(null);
+    setAiNote(null);
+    setAiHeld(false);
+    setAsk("");
+    setScreenAsk("");
+    setJob(null);
+    setPicked(undefined);
     setAnswers(NO_ANSWERS);
     setQuestion(0);
     setTemplateSlug(undefined);
     setMode("custom");
     setStep("choose");
+    window.scrollTo({ top: 0 });
+  };
+  const [confirmStart, setConfirmStart] = useState(false);
+
+  // Back into the editor with a card from before.
+  const openCard = (open: Draft) => {
+    setCard(open.card);
+    setMode(open.mode);
+    setEditingId(open.editing);
+    setSelected(open.card.screens[0]?.id);
+    setPast([]);
+    setFuture([]);
+    setAiError(null);
+    setAiHeld(false);
+    // Its favourite colour isn't known: the questions it was made from are long gone.
+    setJob(null);
+    setWaiting({});
+    clearQuiz();
+    setStep("edit");
+    window.scrollTo({ top: 0 });
+  };
+  const carryOnDraft = (open: Draft) => {
+    // It's the card now, so there's nothing to set aside.
+    keep.current = null;
+    openCard(open);
+  };
+  const carryOnAdded = (made: Made) => {
+    openCard({ card: made.card, mode: made.mode, editing: made.id });
+  };
+  const carryOnQuiz = (quiz: SavedQuiz) => {
+    setAnswers(quiz.answers);
+    setQuestion(quiz.question);
+    setMode(quiz.mode);
+    setTemplateSlug(quiz.templateSlug);
+    // A colour just picked on this design's page wins over the one saved with the questions.
+    setPicked((p) => (p && p.slug === quiz.templateSlug ? p : pickedIn(quiz)));
+    setIdea(quiz.idea);
+    setTo(quiz.to);
+    setFrom(quiz.from);
+    setWaiting({});
+    setStep(quiz.step);
+    window.scrollTo({ top: 0 });
+  };
+  // A new one: an unfinished card stays until the new card takes its place, and is set aside then.
+  const startNew = () => {
+    setWaiting({});
+    clearQuiz();
+    clearAdded();
   };
 
   // Asks for a new card from a description, or for a change to the current one. The
-  // reply streams in: a line for each screen as it's written, then the finished card.
+  // reply streams in: the card's big idea, a line for each screen as it's written, then
+  // the finished card. Whatever goes wrong comes out as an AiError in plain words, never
+  // the browser's own "Failed to fetch".
   const callAi = async (
-    body: { prompt: string; card?: CardData; focus?: string; template?: string; keepDesign?: boolean },
+    body: { prompt: string; card?: CardData; focus?: string; template?: string; keepDesign?: boolean; brief?: Brief; avoid?: string[] },
     names: { to: string; from: string },
-    onProgress?: (screens: ScreenType[]) => void,
+    on?: { progress?: (progress: Progress) => void; idea?: (idea: string) => void },
     signal?: AbortSignal,
-  ): Promise<{ card: CardData; note?: string; left?: number }> => {
-    const res = await fetch("/api/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...body, to: names.to.trim(), from: names.from.trim() }),
-      signal,
-    });
-    if (!res.ok || !res.body) {
-      const json = await res.json().catch(() => ({}));
-      throw new Error(json.error ?? x.errors.failed);
-    }
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = "";
-    for (;;) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      let end;
-      while ((end = buffer.indexOf("\n")) >= 0) {
-        const line = buffer.slice(0, end).trim();
-        buffer = buffer.slice(end + 1);
-        if (!line) continue;
-        const event = JSON.parse(line);
-        if (event.type === "progress") onProgress?.(event.screens);
-        else if (event.type === "card")
-          return { card: event.card as CardData, note: typeof event.note === "string" ? event.note : undefined, left: typeof event.left === "number" ? event.left : undefined };
-        else if (event.type === "error") throw new Error(event.error ?? x.errors.failed);
+  ): Promise<{ card: CardData; note?: string; left?: number; direction?: string }> => {
+    try {
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...body, to: names.to.trim(), from: names.from.trim() }),
+        signal,
+      });
+      if (!res.ok || !res.body) {
+        const json = await res.json().catch(() => ({}));
+        // Worth another go when the server had a bad moment; not for a limit, signing in or a switched-off service.
+        throw new AiError(typeof json.error === "string" ? json.error : x.errors.failed, res.status >= 500 && res.status !== 503);
       }
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      for (;;) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        let end;
+        while ((end = buffer.indexOf("\n")) >= 0) {
+          const line = buffer.slice(0, end).trim();
+          buffer = buffer.slice(end + 1);
+          if (!line) continue;
+          // A garbled line, or a kind of event this page doesn't know yet, is passed over.
+          let event;
+          try {
+            event = JSON.parse(line);
+          } catch {
+            continue;
+          }
+          if (!event || typeof event !== "object") continue;
+          if (event.type === "idea") {
+            if (typeof event.idea === "string" && event.idea.trim()) on?.idea?.(event.idea.trim().slice(0, 200));
+          } else if (event.type === "progress") {
+            if (!Array.isArray(event.screens)) continue;
+            const screens = event.screens.map((s: unknown) => (typeof s === "string" ? s : ""));
+            const titles: unknown[] = Array.isArray(event.titles) ? event.titles : [];
+            on?.progress?.({ screens, titles: screens.map((_: string, i: number) => (typeof titles[i] === "string" && titles[i].trim() ? titles[i].trim().slice(0, 80) : null)) });
+          } else if (event.type === "card") {
+            if (!Array.isArray(event.card?.screens) || !event.card.screens.length) throw new AiError(x.errors.failed, true);
+            return {
+              card: event.card as CardData,
+              note: typeof event.note === "string" ? event.note : undefined,
+              left: typeof event.left === "number" ? event.left : undefined,
+              direction: typeof event.direction === "string" ? event.direction : undefined,
+            };
+          } else if (event.type === "error") {
+            const error = typeof event.error === "string" ? event.error : x.errors.failed;
+            throw new AiError(error, error !== x.errors.refused);
+          }
+        }
+      }
+      // It ended without the card: the connection went part-way through.
+      throw new AiError(x.errors.connection, true);
+    } catch (e) {
+      if (e instanceof AiError || signal?.aborted) throw e;
+      // "Failed to fetch", "Load failed" and the like: the connection dropped.
+      throw new AiError(x.errors.connection, true);
     }
-    throw new Error(x.errors.failed);
   };
 
   const makeFromIdea = () => {
@@ -312,28 +469,57 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
 
   const makeFromQuiz = () => {
     const prompt = quizPrompt(answers, t, { design: Boolean(design) });
+    // The names carry over to "describe it in your own words"; the prompt itself is for the
+    // writer, so it isn't put in that box.
     setTo(answers.to.trim());
     setFrom(answers.from.trim());
-    setIdea(prompt);
-    makeCard(prompt, { to: answers.to, from: answers.from }, "quiz", { photos: answers.photos, captions: answers.captions }, design?.slug);
+    makeCard(prompt, { to: answers.to, from: answers.from }, "quiz", { photos: answers.photos, captions: answers.captions }, design?.slug, briefFrom(answers, { design: Boolean(design) }));
   };
 
   // Writes a new card, showing the loading screen; going back returns to where it was asked for.
   // With a design, only its words are written and everything else stays as the design has it.
-  const makeCard = async (prompt: string, names: { to: string; from: string }, source: "quiz" | "describe", album?: Album, template?: string) => {
+  const makeCard = async (prompt: string, names: { to: string; from: string }, source: "quiz" | "describe", album?: Album, template?: string, brief?: Brief) => {
     const controller = new AbortController();
     making.current = controller;
-    clearQuiz();
+    setJob((j) => ({ prompt, names, source, album, template, brief, attempt: (j?.attempt ?? 0) + 1 }));
     setBusy("make");
     setAiError(null);
-    setProgress([]);
+    setProgress(NO_PROGRESS);
+    setConcept(null);
+    setOutcome(null);
     setStep("making");
     window.scrollTo({ top: 0 });
+    // Straight from the tap, as some phones only allow it then.
+    const letGo = keepScreenOn();
     try {
-      const { card: written } = await callAi(template ? { prompt, template, keepDesign: true } : { prompt }, names, setProgress, controller.signal);
+      // The looks of their last few cards, for the writer to steer away from.
+      const avoid = recentLooks();
+      const { card: written, direction } = await callAi(
+        { ...(template ? { prompt, template, keepDesign: true, brief } : { prompt, brief }), ...(avoid.length ? { avoid } : {}) },
+        names,
+        {
+          // The list only grows: if the writer has a second go, it starts again from nothing.
+          progress: (p) => setProgress((was) => (p.screens.length >= was.screens.length ? p : was)),
+          idea: setConcept,
+        },
+        controller.signal,
+      );
+      rememberLook(direction);
       // A colour picked on the product page carries over, but only for that design.
-      const coloured = template && initialTheme && template === initialTemplate ? { ...written, theme: initialTheme } : written;
-      const made = withPhotos(coloured, album, t.labels.screens.photos, !template);
+      const coloured = template && picked?.slug === template ? withTheme(written, picked.theme) : written;
+      const filled = withPhotos(coloured, album, t.labels.screens.photos, !template);
+      // A ready-made design gets a gentle look of its own (new button and envelope colours,
+      // stickers, a font of the same kind), so no two people's copies look the same. Its theme
+      // and words stay as picked, and the shop's previews of it stay as designed.
+      const made = template ? restyle(filled, newSeed(), { gentle: true, favourite: brief?.accent ?? null }) : filled;
+      // A moment to say it's ready, with the envelope sealed, before it plays for them.
+      setOutcome("ready");
+      await new Promise((done) => setTimeout(done, 1200));
+      // Gone meanwhile (Back): the questions stay, so coming back brings them back.
+      if (controller.signal.aborted) return;
+      // Only now are the questions done with: until the card is here, a reload or Back brings them back.
+      clearQuiz();
+      setAiHeld(false);
       setCard(made);
       setSelected(made.screens[0]?.id);
       setMode(template ? "premade" : "custom");
@@ -343,29 +529,50 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       setFuture([]);
       window.scrollTo({ top: 0 });
     } catch (e) {
-      if (!controller.signal.aborted) setAiError(e instanceof Error ? e.message : x.errors.failed);
-      setStep(source);
+      if (controller.signal.aborted) setStep(source);
+      // Another go could work, so they stay here with a big button to try again.
+      else if (e instanceof AiError && e.retry) setOutcome({ error: e.message });
+      else {
+        setAiError(e instanceof Error ? e.message : x.errors.failed);
+        setStep(source);
+      }
+    } finally {
+      letGo();
     }
     making.current = null;
     setBusy(null);
   };
+  // The same card asked for again, after it didn't come through.
+  const makeAgain = () => job && makeCard(job.prompt, job.names, job.source, job.album, job.template, job.brief);
+  // Their favourite colour from the questions, which every new look keeps (null if they didn't
+  // pick one). Not known for a card made on an earlier visit.
+  const favourite = job?.brief ? (job.brief.accent ?? null) : undefined;
 
+  // The card as it is now, for undo steps begun by something that finishes later (a photo
+  // uploading, a typed change coming back), which would otherwise keep the card from when it started.
+  const cardNow = useRef(card);
+  useLayoutEffect(() => {
+    cardNow.current = card;
+  });
   const remember = () => {
-    if (!card) return;
-    setPast((p) => [...p.slice(-39), card]);
+    const now = cardNow.current;
+    if (!now) return;
+    setPast((p) => [...p.slice(-39), now]);
     setFuture([]);
   };
   const undoLast = () => {
     const prev = past.at(-1);
-    if (!prev || !card) return;
-    setFuture((f) => [card, ...f]);
+    const now = cardNow.current;
+    if (!prev || !now) return;
+    setFuture((f) => [now, ...f]);
     setPast(past.slice(0, -1));
     setCard(prev);
   };
   const redoNext = () => {
     const next = future[0];
-    if (!next || !card) return;
-    setPast((p) => [...p, card]);
+    const now = cardNow.current;
+    if (!next || !now) return;
+    setPast((p) => [...p, now]);
     setFuture(future.slice(1));
     setCard(next);
   };
@@ -374,8 +581,29 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     remember();
     setCard((c) => c && update(c));
   };
-  // The design panel's tab, and something just added for the card to select.
-  const [tab, setTab] = useState<Tab>("text");
+  // A screen just deleted from the strip, offered back for a few seconds.
+  const [deleted, setDeleted] = useState<{ screen: Screen; index: number; n: number } | null>(null);
+  const stripChange = (update: (c: CardData) => CardData) => {
+    if (card) {
+      const after = update(card);
+      const index = card.screens.findIndex((sc) => !after.screens.some((a) => a.id === sc.id));
+      if (after.screens.length < card.screens.length && index >= 0) setDeleted((d) => ({ screen: card.screens[index], index, n: (d?.n ?? 0) + 1 }));
+    }
+    change(update);
+  };
+  // Puts it back where it was, even if other things have changed since.
+  const restoreDeleted = () => {
+    if (!deleted) return;
+    const { screen, index } = deleted;
+    setDeleted(null);
+    if (!card || card.screens.length >= MAX_SCREENS) return;
+    change((c) => (c.screens.some((sc) => sc.id === screen.id) ? c : { ...c, screens: [...c.screens.slice(0, index), screen, ...c.screens.slice(index)] }));
+    goToScreen(screen.id);
+  };
+  const screenName = (screen: Screen) => (screen.type === "game" ? t.labels.games[screen.game] : t.labels.screens[screen.type]);
+  // The design panel's tab, and something just added for the card to select. It opens on
+  // the words, as a plain form: changing them is what most people come to do.
+  const [tab, setTab] = useState<Tab>("words");
   const [pick, setPick] = useState<{ key: string; nonce: number } | undefined>();
   // Bumped to open the settings of the screen being looked at.
   const [settings, setSettings] = useState(0);
@@ -398,9 +626,24 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
 
   // Words typed straight onto the preview.
   const editWords = (path: Path, value: string) => setCard((c) => c && setAt(c, path, value));
-  // Photos swapped, added or taken out by tapping them on the preview.
-  const editScreen = (index: number, update: (screen: Screen) => Screen) =>
-    setCard((c) => c && { ...c, screens: c.screens.map((s, j) => (j === index ? update(s) : s)) });
+  // In the phone preview's list of words, each box is one step for Undo, as in the Words tab.
+  const listBegun = useRef(false);
+  const editListWords = (path: Path, value: string) => {
+    if (!listBegun.current) {
+      listBegun.current = true;
+      remember();
+    }
+    editWords(path, value);
+  };
+  // Anything else on one screen (its look, photos, the Words tab's boxes), by the screen's id,
+  // so a photo still uploading lands on its own screen even if the screens are moved about meanwhile.
+  const editScreenById = (id: string, update: (screen: Screen) => Screen) =>
+    setCard((c) => c && { ...c, screens: c.screens.map((s) => (s.id === id ? update(s) : s)) });
+  // What a typed change did, shown over the card for a few seconds as it lands.
+  const [landed, setLanded] = useState<string | null>(null);
+  // A typed change that came back after the card had been changed by hand, so it wasn't used.
+  const [aiHeld, setAiHeld] = useState(false);
+  const fresh = useFreshTap();
   // The moment within a screen the arrows last went to (see lib/stages.ts).
   const [moment, setMoment] = useState<{ id: string; stage: number } | null>(null);
   const goToScreen = (id: string, stage = 0) => {
@@ -414,15 +657,30 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   // A change to the whole card, or (with focus) to the screen showing in the preview.
   const changeByTyping = async (prompt = ask, focus?: string) => {
     if (!card || prompt.trim().length < 3) return setAiError(x.errors.describe);
+    const sent = card;
     setBusy("change");
     setAiError(null);
     setAiDone(false);
+    setAiHeld(false);
+    setLanded(null);
+    // On a phone the typing box is below the card: bring the card up to watch the change land.
+    if (!wide && !showPreview) cardBox.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     // Typing changes are a custom-card thing.
     setMode("custom");
     try {
       const { card: changed, note, left } = await callAi({ prompt: prompt.trim(), card, focus }, { to: card.to, from: card.from });
-      setAiNote(note ?? null);
       if (left !== undefined) setChangesLeft(left);
+      // They changed the card while it was being worked on: their changes stay, and they're told.
+      if (cardNow.current !== sent) {
+        setAiHeld(true);
+        setBusy(null);
+        // Over the card too, where they're looking as it finishes: they were changing something
+        // elsewhere, away from the note under the typing box.
+        setLanded(c.changedMeanwhile);
+        setTimeout(() => setLanded((now) => (now === c.changedMeanwhile ? null : now)), 8000);
+        return;
+      }
+      setAiNote(note ?? null);
       remember();
       setCard(changed);
       if (!focus || prompt === ask) setAsk("");
@@ -433,6 +691,9 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
         setNudge((n) => n + 1);
       }
       setAiDone(true);
+      const said = `✓ ${note || x.changed}`;
+      setLanded(said);
+      setTimeout(() => setLanded((now) => (now === said ? null : now)), 4000);
     } catch (e) {
       setAiError(e instanceof Error ? e.message : x.errors.failed);
     }
@@ -445,26 +706,161 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   // a change landing while it's open (an AI change, say) can't leave it out of date.
   const [askToWrite, setAskToWrite] = useState(false);
   const basketButton = useRef<HTMLButtonElement>(null);
+  // Straight to the screen the server said has something missing, ready to change it.
+  const fixScreen = (id: string) => {
+    setError(null);
+    setShowPreview(false);
+    setWordMode("edit");
+    goToScreen(id);
+    requestAnimationFrame(() => cardBox.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+  };
+  const screenOrder = (of: CardData) => of.screens.map((sc) => sc.id).join(" ");
+  const fixFor = (id?: string) => {
+    const at = card && id ? card.screens.findIndex((sc) => sc.id === id) : -1;
+    return card && id && at >= 0 ? { label: fmt(c.fixScreen, { n: at + 1, name: screenName(card.screens[at]) }), onClick: () => fixScreen(id) } : undefined;
+  };
   const publish = async (anyway = false) => {
     if (!card) return;
-    if (!card.to.trim() || !card.from.trim()) return setError(c.needNames);
+    if (!card.to.trim() || !card.from.trim()) return setError({ text: c.needNames });
     if (!anyway && stillToWrite(card).length) return setAskToWrite(true);
     setAskToWrite(false);
+    const ready = withoutEmptyTexts(card);
+    // A basket card changed back to just how it was: it's in the basket already.
+    if (editingId && inBasket(editingId) && JSON.stringify(readMade(editingId)?.card) === JSON.stringify(ready)) {
+      markAdded(editingId);
+      dropDraft();
+      return router.push("/basket");
+    }
     setSaving(true);
     setError(null);
+    let json: { id?: string; error?: string; screen?: unknown };
     try {
-      const res = await fetch("/api/cards", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(card) });
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(json.error ?? c.failed);
-      // Saved but locked until it's paid for; the basket takes it from here.
-      addToBasket({ id: json.id, to: card.to, from: card.from, occasion: card.occasion, theme: card.theme, template: card.template, tier: cardTier(card), delivery: "self" });
-      clearDraft();
-      router.push("/basket");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : c.failed);
-      setSaving(false);
+      const res = await fetch("/api/cards", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(ready) });
+      json = await res.json().catch(() => ({}));
+      if (!res.ok || typeof json.id !== "string") {
+        // The server may say which screen has the problem, to go straight there.
+        const screen = typeof json.screen === "number" && Number.isInteger(json.screen) && json.screen >= 0 && json.screen < ready.screens.length ? ready.screens[json.screen] : undefined;
+        setError({ text: json.error ?? c.failed, ...(screen ? { screenId: screen.id, order: screenOrder(ready) } : {}), retry: res.ok || res.status >= 500 });
+        return setSaving(false);
+      }
+    } catch {
+      setError({ text: c.saveOffline, retry: true });
+      return setSaving(false);
     }
+    const id = json.id;
+    // Saved but locked until it's paid for; the basket takes it from here. A changed card
+    // takes the old one's place.
+    const item = { id, to: ready.to, from: ready.from, occasion: ready.occasion, theme: ready.theme, template: ready.template, tier: cardTier(ready), delivery: "self" as const };
+    if (editingId) replaceInBasket(editingId, item);
+    else addToBasket(item);
+    // A copy stays in this browser, so it can be changed from the basket. Any change to it
+    // that was set aside is done with now.
+    saveMade(id, ready, mode, editingId);
+    if (editingId) forgetChanges(id);
+    // A full basket (or full storage) can't take it: the card stays here rather than vanishing.
+    if (!inBasket(id)) {
+      setError({ text: fmt(c.basketFull, { n: MAX_BASKET }) });
+      return setSaving(false);
+    }
+    markAdded(id);
+    dropDraft();
+    router.push("/basket");
   };
+
+  // The design panel: beside the card on a computer, under the card and its screens on a phone.
+  const studio = card && (
+    <div ref={panel} className="scroll-mt-4">
+      <StudioPanel
+        card={card}
+        screenIndex={Math.max(card.screens.findIndex((sc) => sc.id === viewing), 0)}
+        tab={tab}
+        setTab={setTab}
+        change={stripChange}
+        editScreen={editScreenById}
+        editWords={editWords}
+        remember={remember}
+        keepDesign={mode === "premade"}
+        onAdded={onAdded}
+        ai={
+          <section className="space-y-3 rounded-2xl border-2 border-brand/40 bg-panel p-4">
+            <h2 className="font-brand text-xl font-bold">✨ {t.studio.askTitle}</h2>
+            <p className="text-base leading-relaxed opacity-80">{t.studio.askHow}</p>
+            <form
+              className="space-y-3"
+              onSubmit={(e) => {
+                e.preventDefault();
+                // About the screen they're looking at, unless it's clearly about the whole card.
+                changeByTyping(ask, viewing);
+              }}
+            >
+              <textarea
+                value={ask}
+                onChange={(e) => {
+                  setAsk(e.target.value);
+                  setAiDone(false);
+                }}
+                rows={4}
+                maxLength={1000}
+                dir="auto"
+                aria-label={t.studio.askTitle}
+                placeholder={x.changePlaceholder}
+                className="w-full resize-y rounded-xl border-2 border-line bg-background px-3 py-2.5 text-base outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+              />
+              <LookingAt card={card} viewing={viewing} />
+              <div className="flex flex-wrap items-center gap-3">
+                <button disabled={busy !== null || ask.trim().length < 3} className="min-h-12 rounded-full bg-brand px-6 py-3 text-base font-semibold text-on-brand disabled:opacity-50">
+                  {busy === "change" ? <Making lines={[x.changing]} /> : t.studio.askButton}
+                </button>
+                {past.length > 0 && busy === null && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      undoLast();
+                      setAiDone(false);
+                    }}
+                    className="min-h-11 px-2 text-base font-semibold underline underline-offset-4"
+                  >
+                    {x.undo}
+                  </button>
+                )}
+              </div>
+              {changesLeft !== null && <p className="text-sm font-semibold opacity-75">{fmt(x.changesLeft, { n: changesLeft })}</p>}
+              {aiDone && (
+                <p role="status" className="rounded-xl bg-emerald-50 px-3 py-2.5 text-base font-semibold text-emerald-900 ring-1 ring-emerald-200">
+                  ✓ {aiNote || x.changed}
+                </p>
+              )}
+              {aiHeld && !showPreview && (
+                <p role="status" className="rounded-xl bg-background px-3 py-2.5 text-base font-semibold ring-1 ring-line">
+                  {c.changedMeanwhile}
+                </p>
+              )}
+              {/* On a phone's full-screen preview it shows there instead. */}
+              {aiError && !showPreview && <ErrorNotice message={aiError} onRetry={canRetry(aiError, t) && ask.trim().length >= 3 ? () => changeByTyping(ask, viewing) : undefined} />}
+            </form>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-base opacity-75">{x.quickTitle}</span>
+              {x.quick.map((q) => (
+                <button
+                  key={q}
+                  type="button"
+                  disabled={busy !== null}
+                  onClick={(e) => {
+                    if (!fresh(e)) return;
+                    setAsk(q);
+                    changeByTyping(q);
+                  }}
+                  className="min-h-11 rounded-full border-2 border-line bg-background px-4 py-2 text-base font-semibold transition hover:border-brand hover:text-brand disabled:opacity-50"
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
+          </section>
+        }
+      />
+    </div>
+  );
 
   return (
     <div className="min-h-dvh">
@@ -472,20 +868,31 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       <header className="flex items-center justify-between border-b border-line px-4 py-3 sm:px-6">
         <Logo textClass="text-foreground" />
         <div className="flex items-center gap-4">
+          {/* On a phone it's at the bottom of the page instead, away from Help. */}
           {step === "edit" && (
-            <button onClick={startOver} className="text-sm font-semibold opacity-70 hover:opacity-100">
+            <button onClick={() => setConfirmStart(true)} className="hidden min-h-11 items-center px-2 text-sm font-semibold opacity-70 hover:opacity-100 lg:inline-flex">
               {c.startOver}
             </button>
           )}
           {/* On phones the help chat opens from here rather than floating over the page. */}
-          <button onClick={openChat} className="flex items-center gap-1.5 rounded-full border-2 border-foreground/80 px-3 py-1.5 text-sm font-bold lg:hidden">
+          <button onClick={openChat} className="flex min-h-11 items-center gap-1.5 rounded-full border-2 border-foreground/80 px-3 py-1.5 text-sm font-bold lg:hidden">
             <span aria-hidden>💬</span> {t.chat.help}
           </button>
         </div>
       </header>
 
+      {(waiting.draft || waiting.quiz || waiting.added || waiting.cantOpen) && (step === "choose" || step === "pick" || step === "describe" || (step === "quiz" && question === 0)) && (
+        <CarryOn waiting={waiting} onDraft={carryOnDraft} onAdded={carryOnAdded} onQuiz={carryOnQuiz} onNew={startNew} />
+      )}
+
       {step === "quiz" && (
         <>
+          {/* At the top, where they'll be looking when they come back from the making screen. */}
+          {aiError && (
+            <div className="mx-auto max-w-2xl px-4 pt-6">
+              <ErrorNotice message={aiError} onRetry={canRetry(aiError, t) && !mustSignUp ? makeFromQuiz : undefined} />
+            </div>
+          )}
           <Quiz
             answers={answers}
             setAnswers={setAnswers}
@@ -493,18 +900,33 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
             setIndex={setQuestion}
             onGenerate={makeFromQuiz}
             onBack={() => setStep(design ? "pick" : "choose")}
-            onDescribe={design ? undefined : () => setStep("describe")}
+            onDescribe={
+              design
+                ? undefined
+                : () => {
+                    // The names typed on the first question come too.
+                    setTo((v) => answers.to.trim() || v);
+                    setFrom((v) => answers.from.trim() || v);
+                    setStep("describe");
+                  }
+            }
             design={design}
             onChangeDesign={() => setStep("pick")}
             signUp={signUp}
           />
-          {aiError && <p className="mx-auto -mt-6 max-w-2xl px-4 pb-8 text-sm font-semibold text-red-600">{aiError}</p>}
         </>
       )}
 
       {step === "describe" && (
         <section className="mx-auto max-w-3xl px-4 py-10">
-          <button onClick={() => setStep("quiz")} className="text-sm font-semibold opacity-70">
+          <button
+            onClick={() => {
+              // And names typed here go back to the questions.
+              setAnswers((a) => ({ ...a, to: to.trim() || a.to, from: from.trim() || a.from }));
+              setStep("quiz");
+            }}
+            className="text-sm font-semibold opacity-70"
+          >
             {x.back}
           </button>
           <div className="mt-4">
@@ -541,11 +963,11 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                     <SignIn google={signUp.google} email={signUp.email} next="/create?resume=1" onSignedIn={signUp.onSignedIn} onGoogle={signUp.onGoogle} />
                   </div>
                 )}
-                <button disabled={busy !== null || mustSignUp} className="w-full rounded-full bg-brand py-3.5 font-brand text-lg font-semibold text-white shadow-lg disabled:opacity-70">
+                <button disabled={busy !== null || mustSignUp} className="w-full rounded-full bg-brand py-3.5 font-brand text-lg font-semibold text-on-brand shadow-lg disabled:opacity-70">
                   {x.make} ✨
                 </button>
-                <p className="text-center text-sm opacity-60">{x.takesAMoment}</p>
-                {aiError && <p className="text-sm font-semibold text-red-600">{aiError}</p>}
+                <p className="text-center text-sm opacity-75">{x.takesAMoment}</p>
+                {aiError && <ErrorNotice message={aiError} onRetry={canRetry(aiError, t) && !mustSignUp ? makeFromIdea : undefined} />}
               </form>
 
               <h2 className="mt-10 font-brand text-xl font-bold">{x.examplesTitle}</h2>
@@ -582,35 +1004,26 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
         </section>
       )}
 
-      {step === "making" && (
-        <section className="mx-auto flex min-h-[calc(100dvh-4.5rem)] max-w-xl flex-col items-center justify-center px-4 py-10 text-center">
-          <WritingEnvelope />
-          <h1 className="mt-6 font-brand text-4xl font-bold sm:text-5xl">{x.makingTitle}</h1>
-          <p className="mt-2 min-h-6 opacity-70">
-            <RotatingLine lines={x.making} />
-          </p>
-          <div className="mt-5 h-2 w-full max-w-sm overflow-hidden rounded-full bg-line">
-            <div className="h-full rounded-full bg-brand transition-[width] duration-700" style={{ width: `${Math.min(92, 8 + progress.length * 12)}%` }} />
-          </div>
-          <div className="mt-8 w-full rounded-3xl border border-line bg-panel p-5 text-start shadow-sm">
-            <p className="text-xs font-bold uppercase tracking-wide opacity-50">{x.yourIdea}</p>
-            <p dir="auto" className="mt-1 line-clamp-4 font-hand text-xl leading-snug">“{idea.trim()}”</p>
-            <ul className="mt-4 space-y-2 border-t border-line pt-4 text-sm font-semibold" aria-live="polite">
-              {progress.map((type, i) => (
-                <li key={i} className="flex animate-screen-in items-center gap-2">
-                  <span className="grid h-5 w-5 place-items-center rounded-full bg-brand text-[11px] text-white">✓</span>
-                  {t.labels.screens[type]}
-                </li>
-              ))}
-              <li className="flex items-center gap-2 opacity-50">
-                <span aria-hidden className="h-5 w-5 animate-spin rounded-full border-2 border-brand/25 border-t-brand" />…
-              </li>
-            </ul>
-          </div>
-          <button onClick={() => making.current?.abort()} className="mt-6 text-sm font-semibold opacity-60 hover:opacity-100">
-            {x.back}
-          </button>
-        </section>
+      {step === "making" && job && (
+        <MakingScreen
+          key={job.attempt}
+          to={job.names.to}
+          from={job.names.from}
+          brief={job.brief}
+          template={job.template}
+          theme={job.template && picked?.slug === job.template ? picked.theme : undefined}
+          typed={job.source === "describe" ? job.prompt : undefined}
+          photos={job.album?.photos.length ?? 0}
+          concept={concept}
+          progress={progress}
+          outcome={outcome}
+          onStop={() => making.current?.abort()}
+          onRetry={makeAgain}
+          onBack={() => {
+            setOutcome(null);
+            setStep(job.source);
+          }}
+        />
       )}
 
       {step === "choose" && (
@@ -624,163 +1037,62 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       )}
 
       {step === "pick" && (
-        <section className="mx-auto max-w-6xl px-4 pb-32 pt-10">
-          <button onClick={() => setStep("choose")} className="text-sm font-semibold opacity-70">
-            {x.back}
-          </button>
-          <h1 className="mt-4 font-brand text-4xl font-bold sm:text-5xl">{c.pickTitle}</h1>
-          <p className="mt-2 max-w-2xl opacity-70">{c.pickIntro}</p>
-          <div className="mt-6 flex flex-wrap gap-2">
-            {(["all", ...OCCASIONS] as const).map((o) => (
-              <button
-                key={o}
-                onClick={() => setPickOccasion(o)}
-                aria-pressed={pickOccasion === o}
-                className={`rounded-full border-2 px-3.5 py-1.5 text-sm font-semibold transition ${pickOccasion === o ? "border-brand bg-brand text-white" : "border-line bg-panel hover:border-brand"}`}
-              >
-                {o === "all" ? x.allOccasions : `${occasions[o].emoji} ${t.occasions[o].label}`}
-              </button>
-            ))}
-          </div>
-          <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {TEMPLATES.filter((tpl) => pickOccasion === "all" || tpl.occasion === pickOccasion).map((tpl) => {
-              const on = tpl.slug === templateSlug;
-              return (
-                <div
-                  key={tpl.slug}
-                  className={`relative overflow-hidden rounded-3xl border-2 bg-panel shadow-sm transition ${on ? "border-brand ring-4 ring-brand/20" : "border-line hover:-translate-y-1 hover:border-brand hover:shadow-md"}`}
-                >
-                  <button onClick={() => setTemplateSlug(tpl.slug)} aria-pressed={on} className="block w-full text-start">
-                    <ProductThumb template={tpl} />
-                    <div className="p-3">
-                      <p className="font-brand font-bold leading-tight">{tpl.name}</p>
-                      <p className="mt-1 text-xs opacity-70">
-                        {occasions[tpl.occasion].emoji} {t.occasions[tpl.occasion].label} · {toneInfo[tpl.tone].emoji} {t.tones[tpl.tone]}
-                      </p>
-                    </div>
-                  </button>
-                  {on && <span className="pointer-events-none absolute start-3 top-3 rounded-full bg-brand px-2.5 py-1 text-xs font-bold text-white">✓ {c.chosen}</span>}
-                  <a href={`/cards/${tpl.slug}`} target="_blank" rel="noreferrer" className="block border-t border-line px-3 py-2 text-xs font-semibold text-brand">
-                    {c.previewIt}
-                  </a>
-                </div>
-              );
-            })}
-          </div>
-          {/* Always in reach while scrolling the designs. Kept to the left, clear of the chat button. */}
-          <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-background/95 px-4 py-3 backdrop-blur">
-            <div className="mx-auto flex max-w-6xl items-center gap-4">
-              <button
-                onClick={toQuestions}
-                disabled={!getTemplate(templateSlug)}
-                className="shrink-0 rounded-full bg-brand px-6 py-3 font-brand text-lg font-semibold text-white shadow-lg disabled:opacity-40"
-              >
-                {c.pickNext} →
-              </button>
-              <p className="min-w-0 truncate text-sm font-semibold opacity-70">{getTemplate(templateSlug)?.name ?? c.pickHint}</p>
-            </div>
-          </div>
-        </section>
+        <DesignPicker
+          occasion={pickOccasion}
+          onOccasion={setPickOccasion}
+          chosen={templateSlug}
+          onChoose={setTemplateSlug}
+          onNext={toQuestions}
+          onBack={() => setStep("choose")}
+          onScratch={() => chooseWay("custom")}
+          to={answers.to.trim() || undefined}
+          from={answers.from.trim() || undefined}
+        />
       )}
 
       {step === "edit" && card && (
         <div className="mx-auto grid max-w-7xl gap-8 px-4 py-6 sm:px-6 lg:grid-cols-[380px_minmax(0,1fr)]">
-          <div className="min-w-0 space-y-6 pb-28 lg:pb-10">
-            <div>
+          <div className={`min-w-0 space-y-6 lg:pb-10 ${error && (!error.order || error.order === screenOrder(card)) ? "pb-64" : "pb-28"}`}>
+            {/* On a phone the welcome has said this and the card comes first, so it's only for screen readers there. */}
+            <div className="sr-only lg:not-sr-only">
               <h1 className="font-brand text-3xl font-bold">{c.editTitle}</h1>
-              <p className="mt-1 opacity-70">{c.editIntro}</p>
+              <p className="mt-1 opacity-75">{t.studio.intro}</p>
             </div>
 
-            <div ref={panel} className="scroll-mt-4">
-              <StudioPanel
-                card={card}
-                screenIndex={Math.max(card.screens.findIndex((sc) => sc.id === viewing), 0)}
-                tab={tab}
-                setTab={setTab}
-                change={change}
-                onAdded={onAdded}
-                ai={
-            <section className="space-y-3 rounded-2xl border-2 border-brand/40 bg-panel p-4">
-                <h2 className="font-brand text-xl font-bold">✨ {x.changeTitle}</h2>
-                <p className="text-sm leading-relaxed opacity-80">{x.changeHow}</p>
-                <form
-                  className="space-y-3"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    // About the screen they're looking at, unless it's clearly about the whole card.
-                    changeByTyping(ask, viewing);
-                  }}
-                >
-                  <textarea
-                    value={ask}
-                    onChange={(e) => {
-                      setAsk(e.target.value);
-                      setAiDone(false);
-                    }}
-                    rows={4}
-                    maxLength={1000}
-                    dir="auto"
-                    aria-label={x.changeTitle}
-                    placeholder={x.changePlaceholder}
-                    className="w-full resize-y rounded-xl border border-line bg-background px-3 py-2.5 outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+            {/* On a computer the design panel is beside the card; on a phone it's under the card (below). */}
+            {wide && studio}
+
+            {/* On a phone, starting again is down here, well away from Help. */}
+            <button type="button" onClick={() => setConfirmStart(true)} className="mx-auto block min-h-11 px-4 text-base font-semibold underline underline-offset-4 opacity-70 lg:hidden">
+              {c.startDifferent}
+            </button>
+
+            <div className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-background/95 p-4 backdrop-blur lg:static lg:border-0 lg:bg-transparent lg:p-0">
+              {/* Right above the button they pressed: in the bar along the bottom of a phone, in the column on a computer. */}
+              {/* A problem with a screen, named by its number, no longer fits once the screens are
+                  moved or deleted: Add to basket again says what's wrong now. */}
+              {error && (!error.order || error.order === screenOrder(card)) && (
+                <div className="mb-3">
+                  <ErrorNotice
+                    compact={!wide}
+                    message={error.text}
+                    onClose={() => setError(null)}
+                    onRetry={error.retry ? () => publish(true) : undefined}
+                    fix={fixFor(error.screenId)}
                   />
-                  <LookingAt card={card} viewing={viewing} />
-                  <div className="flex flex-wrap items-center gap-3">
-                    <button disabled={busy !== null || ask.trim().length < 3} className="rounded-full bg-brand px-5 py-2.5 font-semibold text-white disabled:opacity-50">
-                      {busy === "change" ? <Making lines={[x.changing]} /> : x.change}
-                    </button>
-                    {past.length > 0 && busy === null && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          undoLast();
-                          setAiDone(false);
-                        }}
-                        className="text-sm font-semibold underline underline-offset-4"
-                      >
-                        {x.undo}
-                      </button>
-                    )}
-                  </div>
-                  {changesLeft !== null && <p className="text-xs font-semibold opacity-60">{fmt(x.changesLeft, { n: changesLeft })}</p>}
-                  {aiDone && (
-                    <p role="status" className="rounded-xl bg-emerald-50 px-3 py-2.5 text-sm font-semibold text-emerald-900 ring-1 ring-emerald-200">
-                      ✓ {aiNote || x.changed}
-                    </p>
-                  )}
-                  {aiError && <p className="text-sm font-semibold text-red-600">{aiError}</p>}
-                </form>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-sm opacity-60">{x.quickTitle}</span>
-                  {x.quick.map((q) => (
-                    <button
-                      key={q}
-                      type="button"
-                      disabled={busy !== null}
-                      onClick={() => {
-                        setAsk(q);
-                        changeByTyping(q);
-                      }}
-                      className="rounded-full border border-line bg-background px-3 py-1.5 text-sm font-semibold transition hover:border-brand hover:text-brand disabled:opacity-50"
-                    >
-                      {q}
-                    </button>
-                  ))}
                 </div>
-              </section>
-                }
-              />
+              )}
+              {/* Under the sheet of controls on a phone, so the second tap of a double tap on its
+                  Delete or Done can land here: that tap doesn't count (one-tap.ts). */}
+              <div className="flex gap-3">
+                <button onClick={(e) => fresh(e) && setShowPreview(true)} className="flex-1 rounded-full border-2 border-line py-3.5 font-semibold lg:hidden">
+                  {c.fullScreen}
+                </button>
+                <button ref={basketButton} onClick={(e) => fresh(e) && publish()} disabled={saving} className="flex-[2] rounded-full bg-brand py-3.5 font-brand text-lg font-semibold text-on-brand shadow-lg disabled:opacity-50 lg:w-full">
+                  {saving ? c.adding : fmt(c.addToBasket, { price: formatMoney(tierPrice(cardTier(card), currency), currency) })}
+                </button>
+              </div>
             </div>
-
-            <div className="fixed inset-x-0 bottom-0 z-20 flex gap-3 border-t border-line bg-background/95 p-4 backdrop-blur lg:static lg:border-0 lg:bg-transparent lg:p-0">
-              <button onClick={() => setShowPreview(true)} className="flex-1 rounded-full border-2 border-line py-3.5 font-semibold lg:hidden">
-                {c.fullScreen}
-              </button>
-              <button ref={basketButton} onClick={() => publish()} disabled={saving} className="flex-[2] rounded-full bg-brand py-3.5 font-brand text-lg font-semibold text-white shadow-lg disabled:opacity-50 lg:w-full">
-                {saving ? c.adding : fmt(c.addToBasket, { price: formatMoney(tierPrice(cardTier(card), currency), currency) })}
-              </button>
-            </div>
-            {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
           </div>
 
           {/* The card itself. On a phone it's first on the page, before the typing box; it never grows wider than the screen, so the screens strip scrolls instead. */}
@@ -794,17 +1106,13 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                   <div className="lg:hidden">
                     <DeviceSwitch view={shown} setView={setView} compact />
                   </div>
-                  {/* Only while designing, so in Preview mode the card sits higher on a phone. */}
-                  {wordMode === "edit" && (
-                    <>
-                      <button type="button" onClick={undoLast} disabled={!past.length} className="rounded-full border-2 border-line px-3 py-2 text-sm font-bold disabled:opacity-35">
-                        {t.studio.undo}
-                      </button>
-                      <button type="button" onClick={redoNext} disabled={!future.length} className="rounded-full border-2 border-line px-3 py-2 text-sm font-bold disabled:opacity-35">
-                        {t.studio.redo}
-                      </button>
-                    </>
-                  )}
+                  {/* In both modes, so there's always a way back after a change. */}
+                  <button type="button" onClick={undoLast} disabled={!past.length} className="min-h-11 rounded-full border-2 border-line px-4 py-2 text-base font-bold disabled:opacity-35">
+                    {t.studio.undo}
+                  </button>
+                  <button type="button" onClick={redoNext} disabled={!future.length} className="min-h-11 rounded-full border-2 border-line px-4 py-2 text-base font-bold disabled:opacity-35">
+                    {t.studio.redo}
+                  </button>
                 </div>
                 <div className="hidden items-center gap-2 lg:flex">
                 <DeviceSwitch view={shown} setView={setView} />
@@ -813,35 +1121,13 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                 </button>
                 </div>
               </div>
-              <div className="order-3 space-y-3 lg:order-none">
+              <div className="order-3 lg:order-none">
                 <PreviewControls card={card} viewing={viewing} stage={stageShown} onGo={goToScreen} wordMode={wordMode} />
-                {/* On a phone the design panel is further down the page; these jump to it. */}
-                <div className="lg:hidden">
-                  <p className="text-sm font-semibold opacity-70">{t.studio.addTitle}</p>
-                  <div className="mt-1.5 grid grid-cols-5 gap-1.5">
-                    {STUDIO_TABS.map(({ key, icon }) => (
-                      <button
-                        key={key}
-                        type="button"
-                        onClick={() => {
-                          setTab(key);
-                          panel.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-                        }}
-                        className="flex flex-col items-center gap-1 rounded-2xl border-2 border-line bg-panel py-2.5 text-sm font-bold"
-                      >
-                        <span aria-hidden className="text-xl leading-none">
-                          {icon}
-                        </span>
-                        {t.studio.tabs[key]}
-                      </button>
-                    ))}
-                  </div>
-                </div>
               </div>
               {/* Its own layer: stickers on the card stay under the bar at the bottom of a phone, and
                   the controls for what's selected can hang over the screens strip. */}
               <div ref={cardBox} className="relative z-10 order-2 scroll-mt-4 lg:order-none">
-                <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onScreen={editScreen} onBegin={remember} pick={pick} openSettings={settings}>
+                <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onScreen={editScreenById} onBegin={remember} pick={pick} openSettings={settings} stage={stageShown} onNewLook={(next) => change(() => next)} favourite={favourite}>
                   {!wide && shown === "computer" ? (
                     // On a phone, the card laid out as on a laptop and shrunk to fit.
                     <BrowserFrame className="aspect-[16/10]">
@@ -873,19 +1159,25 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                 </EditableCard>
                 {busy === "change" && (
                   <div className="absolute inset-0 z-50 grid place-items-center">
-                    <span className="rounded-full bg-black/75 px-5 py-3 text-sm font-semibold text-white shadow-lg">
+                    <span className="rounded-full bg-black/75 px-5 py-3 text-base font-semibold text-white shadow-lg">
                       <Making lines={[x.changing]} />
                     </span>
                   </div>
                 )}
+                {/* What a typed change did, as it lands. */}
+                {landed && busy === null && (
+                  <p role="status" className="pointer-events-none absolute inset-x-0 bottom-4 z-50 mx-auto w-fit max-w-[90%] rounded-2xl bg-black/80 px-5 py-3 text-center text-base font-semibold text-white shadow-lg">
+                    {landed}
+                  </p>
+                )}
               </div>
-              {/* The card's screens, like a presentation's slides. */}
-              <div className="order-4 space-y-3 lg:order-none">
+              {/* The card's screens, like a presentation's slides, then (on a phone) the design panel. */}
+              <div className="order-4 space-y-4 lg:order-none">
                 <ScreenStrip
                   card={card}
                   screenIndex={Math.max(card.screens.findIndex((sc) => sc.id === viewing), 0)}
                   onGo={(id) => goToScreen(id)}
-                  change={change}
+                  change={stripChange}
                   onAdd={() => {
                     setTab("screens");
                     panel.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -895,7 +1187,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                     setSettings((n) => n + 1);
                   }}
                 />
-                {wordMode === "edit" && <AllWords card={card} screenId={viewing} onChange={editWords} />}
+                {!wide && studio}
               </div>
             </div>
           </aside>
@@ -903,14 +1195,23 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       )}
 
       {welcome && card && step === "edit" && (
-        <Welcome
+        <FirstLook
           card={card}
-          onClose={() => setWelcome(false)}
-          onWatch={() => {
+          onFinish={() => {
             setWelcome(false);
-            setWordMode("play");
+            publish();
+          }}
+          onEdit={() => {
+            setWelcome(false);
+            setWordMode("edit");
             goToScreen(card.screens[0].id);
           }}
+          onNewLook={(restyled) => {
+            remember();
+            setCard(restyled);
+          }}
+          onUndo={past.length ? undoLast : undefined}
+          favourite={favourite}
         />
       )}
 
@@ -934,13 +1235,35 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
 
       {bigView && card && <FullScreenView card={card} startAt={viewing} closeLabel={c.closePreview} onClose={() => setBigView(false)} />}
 
+      {confirmStart && card && step === "edit" && (
+        <ConfirmDialog
+          title={c.startOverTitle}
+          body={fmt(editingId && inBasket(editingId) ? c.startOverEditBody : c.startOverBody, { name: card.to.trim() || t.quiz.them })}
+          keep={c.startOverKeep}
+          yes={c.startOverYes}
+          onKeep={() => setConfirmStart(false)}
+          onYes={startOver}
+        />
+      )}
+
+      {deleted && card && step === "edit" && !card.screens.some((sc) => sc.id === deleted.screen.id) && (
+        <UndoToast
+          key={deleted.n}
+          text={fmt(c.deleted, { n: deleted.index + 1, name: screenName(deleted.screen) })}
+          undo={t.studio.undo}
+          closeLabel={c.dismiss}
+          onUndo={restoreDeleted}
+          onClose={() => setDeleted(null)}
+        />
+      )}
+
       {showPreview && card && (
         <div className="fixed inset-0 z-50 flex flex-col bg-background lg:hidden">
           <div className="relative min-h-0 flex-1">
-            <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onScreen={editScreen} onBegin={remember} pick={pick} className="h-full">
+            <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onScreen={editScreenById} onBegin={remember} pick={pick} stage={stageShown} onNewLook={(next) => change(() => next)} favourite={favourite} className="h-full">
               <CardPlayer card={card} preview sound editing={wordMode === "edit"} focusScreenId={selected} focusNonce={nudge} focusStage={focusStage} onScreenChange={setViewing} />
             </EditableCard>
-            <button onClick={() => setShowPreview(false)} className="absolute start-4 top-4 z-50 rounded-full bg-black/70 px-4 py-2 text-sm font-semibold text-white">
+            <button onClick={() => setShowPreview(false)} className="absolute start-4 top-4 z-50 min-h-11 rounded-full bg-black/70 px-4 py-2 text-sm font-semibold text-white">
               {c.closePreview}
             </button>
             {busy === "change" && (
@@ -954,7 +1277,19 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
           <div className="space-y-3 border-t border-line p-3">
             <ModeSwitch wordMode={wordMode} setWordMode={setWordMode} />
             <PreviewControls card={card} viewing={viewing} stage={stageShown} onGo={goToScreen} wordMode={wordMode} />
-            {wordMode === "edit" && <AllWords card={card} screenId={viewing} onChange={editWords} />}
+            {wordMode === "edit" && (
+              <div onFocusCapture={() => (listBegun.current = false)} onBlurCapture={() => (listBegun.current = false)}>
+                <AllWords card={card} screenId={viewing} onChange={editListWords} />
+              </div>
+            )}
+            {aiHeld && (
+              <p role="status" className="rounded-xl bg-panel px-3 py-2.5 text-base font-semibold ring-1 ring-line">
+                {c.changedMeanwhile}
+              </p>
+            )}
+            {aiError && (
+              <ErrorNotice compact message={aiError} onClose={() => setAiError(null)} onRetry={canRetry(aiError, t) && screenAsk.trim().length >= 3 ? () => changeByTyping(screenAsk, viewing) : undefined} />
+            )}
             <ScreenAsk
               card={card}
               viewing={viewing}
@@ -1041,53 +1376,11 @@ function StillToWrite({ card, onGo, onAnyway, onClose }: { card: CardData; onGo:
           </div>
           {/* On a phone, Go back is at the bottom, where the Add to basket button was. */}
           <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row-reverse">
-            <button type="button" onClick={once(onClose)} className="flex-1 rounded-full bg-brand py-3 font-semibold text-white">
+            <button type="button" onClick={once(onClose)} className="flex-1 rounded-full bg-brand py-3 font-semibold text-on-brand">
               {c.toWriteBack}
             </button>
             <button type="button" onClick={once(onAnyway)} className="flex-1 rounded-full border-2 border-line py-3 font-semibold">
               {c.toWriteAnyway}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// When the card has just been made: the card, playing, and how to make it their own.
-function Welcome({ card, onClose, onWatch }: { card: CardData; onClose: () => void; onWatch: () => void }) {
-  const { t } = useI18n();
-  const s = t.studio;
-  return (
-    // Centred while it fits; on a small phone it starts at the top and scrolls, never cut off.
-    <div role="dialog" aria-modal="true" aria-labelledby="welcome-title" className="fixed inset-0 z-[70] overflow-y-auto bg-black/50">
-      <div className="flex min-h-full items-center justify-center p-4">
-        <div className="w-full max-w-3xl rounded-3xl border-2 border-foreground bg-background p-5 shadow-2xl sm:p-8">
-          <h2 id="welcome-title" className="font-brand text-3xl font-bold sm:text-4xl">
-            {s.welcomeTitle}
-          </h2>
-          <p className="mt-2 text-lg opacity-80">{fmt(s.welcomeIntro, { name: card.to })}</p>
-          <div className="mt-5 grid items-center gap-6 sm:grid-cols-[240px_1fr]">
-            <div className="mx-auto h-[300px] w-[185px] overflow-hidden rounded-[2rem] border-4 border-foreground shadow-xl sm:h-[360px] sm:w-[220px]">
-              <AtPhoneSize>
-                <CardPlayer card={card} preview bare />
-              </AtPhoneSize>
-            </div>
-            <ol className="space-y-3">
-              {s.welcomeSteps.map((step, i) => (
-                <li key={step} className="flex items-start gap-3 text-lg">
-                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-brand font-bold text-white">{i + 1}</span>
-                  <span>{fmt(step, { name: card.to })}</span>
-                </li>
-              ))}
-            </ol>
-          </div>
-          <div className="mt-6 flex flex-wrap justify-end gap-3">
-            <button type="button" onClick={onWatch} className="rounded-full border-2 border-foreground px-6 py-3 text-lg font-semibold">
-              ▶ {t.custom.play.replace(/^▶\s*/, "")}
-            </button>
-            <button type="button" autoFocus onClick={onClose} className="rounded-full bg-brand px-8 py-3 font-brand text-xl font-semibold text-white shadow-lg">
-              {s.startDesigning} →
             </button>
           </div>
         </div>
@@ -1157,15 +1450,15 @@ function PreviewControls({ card, viewing, stage, onGo, wordMode }: PreviewContro
   };
   const stages = card.screens[i] ? stagesOf(card.screens[i]) : [];
   const current = stages[Math.min(stage, stages.length - 1)];
-  const arrow = "grid h-9 w-9 place-items-center rounded-full border border-line bg-panel font-bold transition hover:border-brand disabled:opacity-30";
+  const arrow = "grid h-12 w-12 place-items-center rounded-full border-2 border-line bg-panel text-xl font-bold transition hover:border-brand disabled:opacity-30";
   return (
     <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
-      <p className="text-xs opacity-60">{wordMode === "edit" ? x.clickHint : t.create.livePreview}</p>
+      <p className="text-sm opacity-80">{wordMode === "edit" ? x.clickHint : t.studio.watchHint}</p>
       <div className="flex items-center gap-1.5">
         <button onClick={() => go(-1)} disabled={at === 0} aria-label={x.prevScreen} className={arrow}>
           <span className="rtl:rotate-180">←</span>
         </button>
-        <span className="min-w-12 text-center text-sm font-semibold tabular-nums opacity-70">
+        <span className="min-w-12 text-center text-base font-semibold tabular-nums opacity-80">
           {i + 1} / {card.screens.length}
         </span>
         <button onClick={() => go(1)} disabled={at === steps.length - 1} aria-label={x.nextScreen} className={arrow}>
@@ -1173,7 +1466,7 @@ function PreviewControls({ card, viewing, stage, onGo, wordMode }: PreviewContro
         </button>
       </div>
       {stages.length > 1 && current && (
-        <p data-stage className="flex w-full items-center justify-end gap-1.5 text-xs font-semibold opacity-70">
+        <p data-stage className="flex w-full items-center justify-end gap-1.5 text-sm font-semibold opacity-80">
           {stages.map((_, k) => (
             <span key={k} className={`h-1.5 rounded-full transition-all ${k === Math.min(stage, stages.length - 1) ? "w-4 bg-brand" : "w-1.5 bg-current opacity-30"}`} />
           ))}
@@ -1184,10 +1477,9 @@ function PreviewControls({ card, viewing, stage, onGo, wordMode }: PreviewContro
   );
 }
 
-// Edit mode (tap any words to change them) or preview mode (the card reacts as it will for them).
+// Change it (tap anything to change it) or Watch it (the card reacts as it will for them).
 function ModeSwitch({ wordMode, setWordMode }: { wordMode: "edit" | "play"; setWordMode: (mode: "edit" | "play") => void }) {
   const { t } = useI18n();
-  const x = t.custom;
   return (
     <div role="tablist" className="flex w-fit gap-1 rounded-full border-2 border-foreground/80 bg-panel p-1">
       {(["edit", "play"] as const).map((m) => (
@@ -1197,9 +1489,9 @@ function ModeSwitch({ wordMode, setWordMode }: { wordMode: "edit" | "play"; setW
           aria-selected={wordMode === m}
           onClick={() => setWordMode(m)}
           // A little narrower on a phone, so the 📱/💻 switch fits beside it.
-          className={`rounded-full px-2.5 py-2 text-sm font-bold transition sm:px-4 ${wordMode === m ? "bg-foreground text-background" : "opacity-70 hover:opacity-100"}`}
+          className={`min-h-11 rounded-full px-2.5 py-2 text-base font-bold transition sm:px-4 ${wordMode === m ? "bg-foreground text-background" : "opacity-75 hover:opacity-100"}`}
         >
-          {m === "edit" ? x.editWords : x.play}
+          {t.studio.modes[m]}
         </button>
       ))}
     </div>
@@ -1224,8 +1516,9 @@ function DeviceSwitch({ view, setView, compact = false }: { view: "phone" | "com
             aria-label={compact ? words.join(" ") : undefined}
             title={compact ? words.join(" ") : undefined}
             onClick={() => setView(v)}
-            // Compact, it's as tall as the mode switch beside it.
-            className={`rounded-full text-sm font-semibold transition ${compact ? "grid h-9 w-8 place-items-center text-base leading-none" : "px-4 py-1.5"} ${view === v ? "bg-foreground text-background" : "opacity-70 hover:opacity-100"}`}
+            // Compact, it's as tall as the mode switch beside it, and narrow so they fit side by
+            // side on a small phone, with a finger-sized space around it that catches the tap too.
+            className={`rounded-full text-sm font-semibold transition ${compact ? "relative grid h-11 w-9 place-items-center text-lg leading-none before:absolute before:-inset-x-1 before:inset-y-0" : "px-4 py-1.5"} ${view === v ? "bg-foreground text-background" : "opacity-75 hover:opacity-100"}`}
           >
             {compact ? icon : label}
           </button>
@@ -1251,7 +1544,7 @@ function LookingAt({ card, viewing }: { card: CardData; viewing: string | undefi
   const i = Math.max(card.screens.findIndex((s) => s.id === viewing), 0);
   const screen = card.screens[i];
   if (!screen) return null;
-  return <p className="text-sm opacity-70">{fmt(t.custom.lookingAt, { n: i + 1, name: t.labels.screens[screen.type] })}</p>;
+  return <p className="text-sm opacity-75">{fmt(t.custom.lookingAt, { n: i + 1, name: t.labels.screens[screen.type] })}</p>;
 }
 
 // On a phone the preview covers the typing box, so it has its own box for the screen showing.
@@ -1280,69 +1573,13 @@ function ScreenAsk({ card, viewing, value, onChange, busy, onSubmit }: ScreenAsk
           maxLength={1000}
           dir="auto"
           placeholder={x.thisScreenPlaceholder}
-          className="min-w-0 flex-1 rounded-full border border-line bg-background px-4 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+          className="min-w-0 flex-1 rounded-full border-2 border-line bg-background px-4 py-2.5 text-base outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
         />
-        <button disabled={busy || value.trim().length < 3} className="shrink-0 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+        <button disabled={busy || value.trim().length < 3} className="min-h-11 shrink-0 rounded-full bg-brand px-5 py-2.5 text-base font-semibold text-on-brand disabled:opacity-50">
           {x.go}
         </button>
       </div>
     </form>
-  );
-}
-
-// An envelope with a card rising out of it while its lines are written.
-function WritingEnvelope() {
-  return (
-    <svg viewBox="0 0 200 170" className="w-56 text-brand sm:w-64" aria-hidden>
-      {[
-        [26, 40, 0],
-        [176, 30, 0.6],
-        [160, 96, 1.2],
-        [36, 104, 0.9],
-      ].map(([cx, cy, delay]) => (
-        <path
-          key={`${cx}-${cy}`}
-          d={`M${cx} ${cy - 7}l2 5 5 2-5 2-2 5-2-5-5-2 5-2z`}
-          fill="currentColor"
-          className="animate-twinkle"
-          style={{ animationDelay: `${delay}s`, transformBox: "fill-box", transformOrigin: "center" }}
-        />
-      ))}
-      <path d="M40 78 L100 40 L160 78 Z" fill="var(--panel)" stroke="var(--foreground)" strokeWidth="2.5" strokeLinejoin="round" opacity="0.9" />
-      <g className="animate-letter">
-        <rect x="56" y="44" width="88" height="74" rx="4" fill="var(--panel)" stroke="var(--foreground)" strokeWidth="2.5" />
-        {[60, 72, 84].map((y, i) => (
-          <path
-            key={y}
-            d={`M68 ${y} H${i === 2 ? 112 : 132}`}
-            stroke="currentColor"
-            strokeWidth="3"
-            strokeLinecap="round"
-            pathLength={100}
-            strokeDasharray="100"
-            className="animate-write"
-            style={{ animationDelay: `${i * 0.25}s` }}
-          />
-        ))}
-        <path d="M118 98 c0-5 7-5 7 0 c0-5 7-5 7 0 c0 5-7 9-7 9 s-7-4-7-9z" fill="currentColor" />
-      </g>
-      <path d="M40 78 V150 H160 V78 L100 116 Z" fill="var(--panel)" stroke="var(--foreground)" strokeWidth="2.5" strokeLinejoin="round" />
-      <path d="M40 150 L88 108 M160 150 L112 108" stroke="var(--foreground)" strokeWidth="2" opacity="0.35" />
-    </svg>
-  );
-}
-
-// Shows one line at a time, moving on every few seconds and stopping on the last.
-function RotatingLine({ lines }: { lines: readonly string[] }) {
-  const [i, setI] = useState(0);
-  useEffect(() => {
-    const timer = setInterval(() => setI((n) => Math.min(n + 1, lines.length - 1)), 4000);
-    return () => clearInterval(timer);
-  }, [lines.length]);
-  return (
-    <span key={i} className="inline-block animate-screen-in" aria-live="polite">
-      {lines[i]}
-    </span>
   );
 }
 

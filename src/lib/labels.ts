@@ -26,7 +26,7 @@ export const TEXTS = {
   coupon: "Coupon",
   couponTap: "Tap to redeem",
   couponDone: "Redeemed ✓",
-  couponClaim: "Screenshot this to claim it",
+  couponClaim: "Now let them know you're cashing in",
   jarTap: "Tap the jar",
   jarCount: "Reason #{i} of {n}",
   jarEmpty: "That's all of them… for now.",
@@ -60,6 +60,21 @@ export const TEXTS = {
   hugHolding: "Keep holding…",
   hugLetGo: "Don't let go!",
   hugDone: "Hug delivered!",
+  // Games
+  // On a phone the heart hops about instead of running from a mouse.
+  chaseTouchTip: "Tip: tap it before it hops away",
+  // Help to finish, Back, the letter, sending coupons, a screen that won't load
+  helpFinish: "Need a hand? Tap here to finish",
+  helpReveal: "Need a hand? Tap here to show it",
+  helpAnswer: "Need a hand? Show me the answer",
+  back: "Back",
+  messageSkip: "Tap the letter to read it all now",
+  couponSend: "Send it to {name}",
+  couponMessage: "🎟️ I'm cashing in: {coupons}",
+  screenBroken: "Sorry, this part of the card didn't load.",
+  screenSkip: "Skip this screen",
+  // The envelope and the finale
+  soundHint: "Best with the sound on 🔊",
 };
 
 export const LISTS = {
@@ -81,18 +96,18 @@ export const isList = (key: string): key is ListKey => key in LISTS;
 
 // Which of them each kind of screen shows, and on a game screen, each game.
 export const LABELS_ON: Record<ScreenType, LabelKey[]> = {
-  intro: ["gotMail", "tapEnvelope"],
+  intro: ["gotMail", "tapEnvelope", "soundHint"],
   question: ["next", "noLines"],
   photos: ["next", "photosTap"],
-  message: ["next"],
-  game: ["next"],
-  quiz: ["next", "quizCount", "quizPerfect", "quizMissedOne", "quizMissed", "wrongLines"],
-  scratch: ["next", "scratchHere", "scratchDone"],
-  typeit: ["next", "typeStart", "typeHint"],
+  message: ["next", "messageSkip"],
+  game: ["next", "helpFinish"],
+  quiz: ["next", "quizCount", "quizPerfect", "quizMissedOne", "quizMissed", "wrongLines", "helpAnswer"],
+  scratch: ["next", "scratchHere", "scratchDone", "helpReveal"],
+  typeit: ["next", "typeStart", "typeHint", "helpAnswer"],
   wheel: ["next", "spin", "spinning", "spinAgain"],
-  coupons: ["next", "coupon", "couponTap", "couponDone", "couponClaim"],
+  coupons: ["next", "coupon", "couponTap", "couponDone", "couponClaim", "couponSend", "couponMessage"],
   reasons: ["next", "jarTap", "jarCount", "jarEmpty"],
-  slider: ["next", "sliderLines", "sliderDrag"],
+  slider: ["next", "sliderLines", "sliderDrag", "helpFinish"],
   timeline: ["next", "timelineMore"],
   boxes: ["next", "boxesPicked"],
   finale: ["playAgain"],
@@ -102,7 +117,7 @@ export const GAME_LABELS: Partial<Record<Game, LabelKey[]>> = {
   "light-diyas": ["diyaTap"],
   "memory-match": ["memoryScore"],
   "shake-it": ["shakeStart", "shaking", "shakeTap"],
-  "cursor-chase": ["chaseScore", "chaseTip"],
+  "cursor-chase": ["chaseScore", "chaseTip", "chaseTouchTip"],
   "loves-me-not": ["petalStart", "lovesMe", "lovesMeNot", "petalsLeft", "petalsDone"],
   "whack-ghosts": ["boo"],
   "launch-fireworks": ["skyTap"],

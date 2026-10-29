@@ -6,11 +6,13 @@ import { BrowserFrame } from "@/components/BrowserFrame";
 import { CardPlayer } from "@/components/card/CardPlayer";
 import { fmt } from "@/i18n/config";
 import { useI18n } from "@/i18n/client";
-import type { Dict } from "@/i18n/en";
+import type { ClientDict } from "@/i18n/en";
 import { PhoneFrame } from "@/components/PhoneFrame";
+import { StickyMakeBar } from "@/components/StickyMakeBar";
 import { THEMES, type Screen, type ThemeName } from "@/lib/card";
 import { buildTemplateDemo, templatesBySlug, toneInfo } from "@/lib/catalog";
 import { price } from "@/lib/pricing";
+import { withTheme } from "@/lib/recolour";
 import { occasions } from "@/lib/templates";
 import { themes } from "@/lib/themes";
 
@@ -32,7 +34,7 @@ const SCREEN_ICONS: Record<Screen["type"], string> = {
   finale: "🎆",
 };
 
-function describe(s: Screen, t: Dict): string {
+function describe(s: Screen, t: ClientDict): string {
   const d = t.product.describe;
   switch (s.type) {
     case "intro":
@@ -76,7 +78,8 @@ export function ProductView({ slug }: { slug: string }) {
   const [to, setTo] = useState("");
   const [from, setFrom] = useState("");
   const [theme, setTheme] = useState<ThemeName>(template.theme);
-  const card = useMemo(() => ({ ...buildTemplateDemo(template, { to: to.trim(), from: from.trim() }), theme }), [template, to, from, theme]);
+  // Another colour takes the design's own screen colours off, so the picked one shows.
+  const card = useMemo(() => withTheme(buildTemplateDemo(template, { to: to.trim(), from: from.trim() }), theme), [template, to, from, theme]);
   const screens = useMemo(() => template.screens("them", "you"), [template]);
   const hasPhotos = screens.some((s) => s.type === "photos");
   const hasQuiz = screens.some((s) => s.type === "quiz");
@@ -117,9 +120,10 @@ export function ProductView({ slug }: { slug: string }) {
           {card.music && card.music !== "none" && (
             <p className="-mt-4 text-sm font-semibold text-ink/50">{fmt(p.soundOn, { tune: t.labels.music[card.music] })}</p>
           )}
-          <a href={`/cards/${slug}/play`} target="_blank" rel="noreferrer" className="text-sm font-bold underline decoration-hot decoration-2 underline-offset-4">
+          {/* Same tab: a new one loses older visitors, and the full-screen page has its own Back button. */}
+          <Link href={`/cards/${slug}/play`} className="btn btn-paper px-5 py-2.5 text-base">
             {p.fullScreen}
-          </a>
+          </Link>
         </div>
       </div>
 
@@ -156,15 +160,13 @@ export function ProductView({ slug }: { slug: string }) {
                 onClick={() => setTheme(x)}
                 aria-label={t.themes[x]}
                 title={t.themes[x]}
-                className={`h-8 w-8 rounded-full ring-2 ring-offset-2 transition ${theme === x ? "ring-ink" : "ring-transparent hover:ring-ink/20"}`}
+                aria-pressed={theme === x}
+                className={`h-11 w-11 rounded-full ring-2 ring-offset-2 transition ${theme === x ? "ring-ink" : "ring-transparent hover:ring-ink/20"}`}
                 style={{ background: themes[x].background }}
               />
             ))}
           </div>
-          <Link
-            href={`/create?${params.toString()}`}
-            className="btn btn-red mt-5 w-full py-3.5 text-lg"
-          >
+          <Link id="product-cta" href={`/create?${params.toString()}`} className="btn btn-red mt-5 w-full py-3.5 text-lg">
             {p.customise}
           </Link>
           <p className="mt-2 text-center text-xs text-ink/50">{p.noSignup}</p>
@@ -203,6 +205,8 @@ export function ProductView({ slug }: { slug: string }) {
           </div>
         </div>
       </div>
+      {/* On phones, a way on to making it stays in reach once "Customise" has scrolled away. */}
+      <StickyMakeBar href={`/create?${params.toString()}`} label={fmt(p.stickyCta, { price: price("card", currency) })} watchId="product-cta" />
     </div>
   );
 }

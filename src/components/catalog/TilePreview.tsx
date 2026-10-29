@@ -5,6 +5,7 @@ import { CardPlayer } from "@/components/card/CardPlayer";
 import { AutoPlay } from "@/components/landing/AutoPlay";
 import { buildTemplateDemo, templatesBySlug } from "@/lib/catalog";
 import { ProductThumb } from "./ProductThumb";
+import { useSheetOpen } from "./PreviewSheet";
 
 // The card is laid out at this phone-ish size, then scaled to fit the tile.
 const WIDTH = 340;
@@ -18,7 +19,10 @@ export function TilePreview({ slug }: { slug: string }) {
   const box = useRef<HTMLDivElement>(null);
   const [live, setLive] = useState(false);
   const [scale, setScale] = useState(1);
-  const card = useMemo(() => (live ? buildTemplateDemo(template) : null), [live, template]);
+  // Not while a preview covers the page: nobody can see it, and the preview's own card needs the phone.
+  const covered = useSheetOpen();
+  const playing = live && !covered;
+  const card = useMemo(() => (playing ? buildTemplateDemo(template) : null), [playing, template]);
 
   useEffect(() => {
     const el = box.current;

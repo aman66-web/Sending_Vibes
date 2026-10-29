@@ -4,10 +4,13 @@ import type { Theme } from "./themes";
 // Turns a screen's own look (colours, fonts, pattern) into the colours and CSS the card
 // is drawn with, starting from the card's theme. Whatever colours the AI picks, the
 // words stay readable: text that's too close to its background is swapped for dark or
-// light ink, and so is a button colour that would disappear.
+// light ink, and so is a button colour that would disappear. A button whose own words
+// wouldn't read on it is taken a shade darker or lighter.
 
 const INK = "#1f1b16";
 const PAPER = "#fdfbf6";
+// The least contrast for words people have to read (WCAG's 4.5:1 for normal text).
+const READABLE = 4.5;
 
 type Rgb = [number, number, number];
 
@@ -44,6 +47,21 @@ const worst = (colour: string, backgrounds: string[]) => Math.min(...backgrounds
 // Dark ink or light paper, whichever reads better on these colours.
 export function readableOn(backgrounds: string[]) {
   return worst(INK, backgrounds) >= worst(PAPER, backgrounds) ? INK : PAPER;
+}
+
+// A button colour its own words read on at 4.5:1, as they're everyday-sized. A mid-tone
+// neither ink reaches (often the AI's) is taken a shade darker or lighter, whichever stands
+// out more from the background. Our own designs pass as written (scripts/check-art-*.ts).
+function legibleAccent(accent: string, against: string[]) {
+  const reads = (c: string) => contrast(c, readableOn([c])) >= READABLE;
+  if (reads(accent)) return accent;
+  // Never so far towards the background that the button stops standing out.
+  const standsOut = (c: string) => worst(c, against) >= Math.min(2, worst(accent, against));
+  for (const amount of [0.04, 0.08, 0.12, 0.16, 0.2, 0.25, 0.3, 0.4, 0.5]) {
+    const shades = [mix(accent, "#000000", amount), mix(accent, "#ffffff", amount)].filter((c) => reads(c) && standsOut(c));
+    if (shades.length) return shades.sort((a, b) => worst(b, against) - worst(a, against))[0];
+  }
+  return accent;
 }
 
 function gradient(colours: string[], kind: ScreenStyle["gradient"]) {
@@ -112,23 +130,24 @@ export function screenLook(base: Theme, style: ScreenStyle | undefined): ScreenL
     theme.surface = dark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.62)";
     theme.secondary = dark ? "rgba(255,255,255,0.11)" : mix(mid, "#ffffff", 0.85);
   }
-  // Without a background of its own, check against the theme's (light themes are light at the top).
-  const against = backgrounds?.length ? backgrounds : [hexIn(base.background) ?? PAPER];
+  // Without a background of its own, check against every colour in the theme's.
+  const against = backgrounds?.length ? backgrounds : hexesIn(base.background);
   const wanted = style.text ?? (backgrounds?.length ? base.text : undefined);
   if (wanted) {
-    // 3:1, the standard for large text: keeps a design's white on hot pink, but not navy on black.
-    const text = worst(wanted, against) >= 3 ? wanted : readableOn(against);
+    // 4.5:1, the standard for everyday text, as the letters and instructions are in it too.
+    const text = worst(wanted, against) >= READABLE ? wanted : readableOn(against);
     theme.text = text;
-    theme.muted = mix(text, against[0], 0.28);
+    // The softer ink for instructions and subtitles: as soft as it can be and still read.
+    theme.muted = [0.28, 0.2, 0.12].map((amount) => mix(text, against[0], amount)).find((m) => worst(m, against) >= READABLE) ?? text;
   }
   if (style.accent) {
     // A button that's nearly the background colour is no use; fall back to the text colour.
     const accent = worst(style.accent, against) >= 2 ? style.accent : theme.text;
-    theme.accent = accent;
-    theme.accentText = readableOn([accent]);
+    theme.accent = legibleAccent(accent, against);
+    theme.accentText = readableOn([theme.accent]);
   } else if (backgrounds?.length && worst(theme.accent, against) < 2) {
-    theme.accent = theme.text;
-    theme.accentText = readableOn([theme.text]);
+    theme.accent = legibleAccent(theme.text, against);
+    theme.accentText = readableOn([theme.accent]);
   }
 
   if (style.heading && style.heading !== "classic") css["--card-display"] = `var(${FONT_VARS[style.heading]})`;
@@ -139,9 +158,10 @@ export function screenLook(base: Theme, style: ScreenStyle | undefined): ScreenL
   return { theme, css, envelope, pattern: pattern(style.pattern, theme.text) ?? undefined };
 }
 
-// The first hex colour in a CSS background, for checking contrast against a theme.
-function hexIn(background: string) {
-  return /#[0-9a-fA-F]{6}/.exec(background)?.[0];
+// Every hex colour in a CSS background (each stop of a gradient), for checking contrast against a theme.
+function hexesIn(background: string) {
+  const found = background.match(/#[0-9a-fA-F]{6}/g);
+  return found?.length ? found : [PAPER];
 }
 
 // Shows the part of a photo chosen for its frame (see Crop in lib/card.ts). The photo's

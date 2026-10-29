@@ -11,26 +11,32 @@ import {
   HoldHug,
   LaunchFireworks,
   LovesMeNot,
+  PhotoFill,
   Pinata,
+  Progress,
   ReleaseLanterns,
   SlotMachine,
   ThrowColours,
+  useAssist,
   WhackGhosts,
 } from "./more-games";
 import { Motif } from "./motifs";
 import { HeartMark, Laurel } from "./ornaments";
+import { bySize, initialOf, type PersonalPhoto, usePersonal } from "./personal";
 import { useSfx } from "./sound";
 import { USUAL_GOAL, useTune } from "./tune";
-import { BalloonSprite, GameIcon, GiftSprite, HeartSprite, OCCASION_ICONS, SnowflakeSprite, StarSprite, SweetSprite } from "./sprites";
+import { BalloonSprite, GameIcon, GiftSprite, HeartSprite, type IconName, OCCASION_ICONS, SnowflakeSprite, StarSprite, SweetSprite } from "./sprites";
 
 export function GameView({ game, occasion, ...props }: GameProps & { game: Game; occasion: Occasion }) {
+  const { photos } = usePersonal();
   switch (game) {
     case "light-diyas":
       return <LightDiyas {...props} />;
     case "blow-candles":
       return <BlowCandles {...props} />;
     case "memory-match":
-      return <MemoryMatch {...props} occasion={occasion} />;
+      // Dealt afresh when their photos change (one added in the editor, say).
+      return <MemoryMatch key={photos.map((p) => p.src).join(" ")} {...props} occasion={occasion} photos={photos} />;
     case "unwrap-gift":
       return <UnwrapGift {...props} />;
     case "shake-it":
@@ -62,7 +68,7 @@ export function GameView({ game, occasion, ...props }: GameProps & { game: Game;
   }
 }
 
-const TARGET = USUAL_GOAL["catch-hearts"];
+const TARGET: Record<string, number> = USUAL_GOAL;
 
 // Balloons and sweets take turns between the card's colours.
 const TINTS = ["var(--c-accent)", "var(--c-muted)", "color-mix(in srgb, var(--c-accent) 55%, white)"];
@@ -94,7 +100,9 @@ function Catcher({ onWin, won, kind }: GameProps & { kind: string }) {
   const config = CATCHERS[kind] ?? CATCHERS["catch-hearts"];
   const sfx = useSfx();
   const tune = useTune();
-  const target = tune.goal(TARGET);
+  const target = tune.goal(TARGET[kind] ?? TARGET["catch-hearts"]);
+  const assist = useAssist(won);
+  const speed = tune.speed * assist.speed;
   const from = tune.from ?? (config.rise ? "bottom" : "top");
   const across = from === "left" || from === "right";
   // With animations switched off, things sit still for a moment instead of falling.
@@ -110,12 +118,12 @@ function Catcher({ onWin, won, kind }: GameProps & { kind: string }) {
     if (won) return;
     const spawn = () => {
       const id = nextId.current++;
-      setDrops((d) => [...d, { id, left: 6 + Math.random() * 80, top: 6 + Math.random() * 74, duration: (3.2 + Math.random() * 1.8) / tune.speed }]);
+      setDrops((d) => [...d, { id, left: 6 + Math.random() * 80, top: 6 + Math.random() * 74, duration: (3.2 + Math.random() * 1.8) / speed }]);
     };
     spawn();
-    const t = setInterval(spawn, 650 / tune.speed);
+    const t = setInterval(spawn, 650 / speed);
     return () => clearInterval(t);
-  }, [won, tune.speed]);
+  }, [won, speed]);
 
   useEffect(() => {
     if (!still) return;
@@ -138,7 +146,7 @@ function Catcher({ onWin, won, kind }: GameProps & { kind: string }) {
   return (
     <div className="w-full">
       <div className="mb-2 flex items-center justify-center gap-2 font-display text-lg font-semibold">
-        {Math.min(score, target)} / {target} {config.icon}
+        {won ? target : Math.min(score, target)} / {target} {config.icon}
       </div>
       {/* Caught with a tap, so a swipe across it can still scroll the page. */}
       <div className="relative h-72 w-full touch-pan-y select-none overflow-hidden rounded-3xl bg-[var(--c-secondary)]/40 ring-1 ring-black/5">
@@ -149,14 +157,15 @@ function Catcher({ onWin, won, kind }: GameProps & { kind: string }) {
             aria-label="Catch it"
             onPointerDown={(e) => grab(d, e)}
             onAnimationEnd={() => !still && setDrops((all) => all.filter((x) => x.id !== d.id))}
-            className={`absolute p-2 leading-none drop-shadow-sm ${still ? "" : MOVES[from]}`}
+            // A ring around each piece catches too, for a tap that's a little off.
+            className={`absolute p-2 leading-none drop-shadow-sm after:absolute after:-inset-2.5 after:rounded-full ${still ? "" : MOVES[from]}`}
             style={{
               left: across && !still ? undefined : `${d.left}%`,
               top: still ? `${10 + ((d.id * 37) % 70)}%` : across || from === "everywhere" ? `${d.top}%` : undefined,
               animationDuration: `${d.duration}s`,
             }}
           >
-            <span className="inline-block" style={{ scale: tune.size }}>
+            <span className="inline-block" style={{ scale: tune.size * assist.size }}>
               {config.piece(d.id)}
             </span>
           </button>
@@ -229,44 +238,70 @@ const CANDLES = USUAL_GOAL["blow-candles"];
 const WAX =
   "repeating-linear-gradient(-35deg, transparent 0 5px, color-mix(in srgb, var(--c-muted) 55%, transparent) 5px 6.5px), linear-gradient(90deg, #e9dfcb 0%, #fbf7ef 45%, #e2d5bc 100%)";
 
+// Each candle is a 2.75rem-wide target. Up to five stand in a row. More stand in a
+// zigzag half a target apart, every other one taller and further back, so twelve still
+// fit a phone: the tall ones are tapped above the short ones' flames.
+const CANDLE_STEP = { row: 44, zigzag: 22 };
+const CANDLE_H = { row: 96, short: 88, tall: 132 };
+
 function BlowCandles({ onWin, won }: GameProps) {
   const tune = useTune();
   const total = tune.goal(CANDLES, 12);
   const sfx = useSfx();
+  const { to } = usePersonal();
   const [out, setOut] = useState<boolean[]>(() => Array(total).fill(false));
+  const zigzag = total > 5;
+  const step = zigzag ? CANDLE_STEP.zigzag : CANDLE_STEP.row;
 
   const blow = (i: number) => {
-    if (out[i] || won) return;
-    const next = out.map((v, j) => (j === i ? true : v));
+    if (won) return;
+    // In the zigzag a tap on one already out goes to a lit neighbour it overlaps, so no tap is wasted.
+    const at = !out[i] ? i : zigzag ? [i - 1, i + 1].find((j) => out[j] === false) : undefined;
+    if (at === undefined) return;
+    const next = out.map((v, j) => (j === at ? true : v));
     setOut(next);
     sfx("whoosh");
     if (next.every(Boolean)) onWin();
   };
 
   return (
-    <div className="flex flex-col items-center py-4">
-      <div className="flex gap-5">
-        {out.map((isOut, i) => (
-          <button
-            key={i}
-            aria-label={isOut ? "Candle blown out" : "Blow out this candle"}
-            onClick={() => blow(i)}
-            className="relative flex h-24 w-8 flex-col items-center justify-end"
-          >
-            {isOut ? (
-              <svg viewBox="0 0 20 40" className="absolute top-0 h-10 w-5 animate-smoke" aria-hidden fill="none" stroke="currentColor" strokeOpacity="0.5" strokeWidth="1.4" strokeLinecap="round">
-                <path d="M10 38c-4-5 4-9 0-14s4-9 0-14-2-6 1-8" />
-              </svg>
-            ) : (
-              <span className="absolute top-1 h-7 w-4 origin-bottom animate-flicker rounded-[50%_50%_50%_50%/60%_60%_40%_40%] bg-gradient-to-t from-amber-500 via-amber-200 to-white shadow-[0_0_18px_6px_rgba(255,214,140,0.45)]" />
-            )}
-            <span className="absolute top-8 h-2 w-px bg-neutral-800/70" />
-            <span className="h-14 w-3 rounded-[2px] shadow-sm" style={{ background: WAX }} />
-          </button>
-        ))}
+    <div className="flex w-full flex-col items-center py-4">
+      <div className="relative" style={{ width: (total - 1) * step + CANDLE_STEP.row, height: zigzag ? CANDLE_H.tall : CANDLE_H.row }}>
+        {out.map((isOut, i) => {
+          const tall = zigzag && i % 2 === 1;
+          const height = !zigzag ? CANDLE_H.row : tall ? CANDLE_H.tall : CANDLE_H.short;
+          return (
+            <button
+              key={i}
+              aria-label={isOut ? "Candle blown out" : "Blow out this candle"}
+              onClick={() => blow(i)}
+              className={`absolute bottom-0 flex w-11 flex-col items-center justify-end ${tall ? "" : "z-10"}`}
+              style={{ left: i * step, height }}
+            >
+              {isOut ? (
+                <svg viewBox="0 0 20 40" className="absolute top-0 h-10 w-5 animate-smoke" aria-hidden fill="none" stroke="currentColor" strokeOpacity="0.5" strokeWidth="1.4" strokeLinecap="round">
+                  <path d="M10 38c-4-5 4-9 0-14s4-9 0-14-2-6 1-8" />
+                </svg>
+              ) : (
+                <span className="absolute top-1 h-7 w-4 origin-bottom animate-flicker rounded-[50%_50%_50%_50%/60%_60%_40%_40%] bg-gradient-to-t from-amber-500 via-amber-200 to-white shadow-[0_0_18px_6px_rgba(255,214,140,0.45)]" />
+              )}
+              <span className="absolute top-8 h-2 w-px bg-neutral-800/70" />
+              {/* Wax from just under the wick (2.5rem down) to the cake. */}
+              <span className="w-3 rounded-[2px] shadow-sm" style={{ background: WAX, height: height - 40 }} />
+            </button>
+          );
+        })}
       </div>
-      {/* Two tiers of cream icing, trimmed in the card's own colours */}
-      <div className="relative h-14 w-56 rounded-t-md bg-[#f6efe3] shadow-[inset_0_-6px_10px_rgba(0,0,0,0.06)] ring-1 ring-black/5">
+      {/* Two tiers of cream icing, trimmed in the card's own colours, with their name piped on top */}
+      <div className={`relative h-14 max-w-[80%] rounded-t-md bg-[#f6efe3] shadow-[inset_0_-6px_10px_rgba(0,0,0,0.06)] ring-1 ring-black/5 ${total > 10 ? "w-64" : "w-56"}`}>
+        {to && (
+          <span
+            dir="auto"
+            className={`absolute inset-x-2 top-1 truncate text-center font-hand leading-[1.15] text-[var(--c-accent)] [text-shadow:0_1px_0_rgba(255,255,255,0.9)] ${bySize(to, ["text-2xl", "text-xl", "text-lg"])}`}
+          >
+            {to}
+          </span>
+        )}
         <div className="absolute inset-x-0 bottom-2 h-2 bg-[var(--c-accent)]" />
         <div className="absolute inset-x-3 bottom-[18px] flex justify-between">
           {Array.from({ length: 11 }, (_, i) => (
@@ -274,11 +309,11 @@ function BlowCandles({ onWin, won }: GameProps) {
           ))}
         </div>
       </div>
-      <div className="relative h-16 w-72 rounded-b-md bg-[#efe5d4] shadow-[inset_0_-8px_12px_rgba(0,0,0,0.07)] ring-1 ring-black/5">
+      <div className="relative h-16 w-72 max-w-[90%] rounded-b-md bg-[#efe5d4] shadow-[inset_0_-8px_12px_rgba(0,0,0,0.07)] ring-1 ring-black/5">
         <div className="absolute inset-x-0 bottom-3 h-2.5 bg-[var(--c-accent)]" />
         <div className="absolute inset-x-0 bottom-[22px] h-px bg-[var(--c-muted)] opacity-60" />
       </div>
-      <div className="h-2.5 w-80 rounded-full bg-[var(--c-muted)] opacity-40" />
+      <div className="h-2.5 w-80 max-w-full rounded-full bg-[var(--c-muted)] opacity-40" />
     </div>
   );
 }
@@ -295,12 +330,21 @@ function shuffled<T>(items: T[]): T[] {
   return out;
 }
 
-function MemoryMatch({ onWin, won, occasion }: GameProps & { occasion: Occasion }) {
+// A memory card's face: one of the occasion's pictures, or "photo:2" for their third photo.
+const photoFace = (face: string) => (face.startsWith("photo:") ? Number(face.slice(6)) : -1);
+
+function MemoryMatch({ onWin, won, occasion, photos }: GameProps & { occasion: Occasion; photos: PersonalPhoto[] }) {
   const sfx = useSfx();
   const { text } = useWords();
+  // Their initial on the back of every card.
+  const initial = initialOf(usePersonal().to);
   // As many pairs as asked for (style.tune.goal), up to the occasion's set of pictures.
   const pairs = useTune().goal(OCCASION_ICONS[occasion].length, OCCASION_ICONS[occasion].length);
-  const [deck] = useState(() => shuffled([...OCCASION_ICONS[occasion].slice(0, pairs), ...OCCASION_ICONS[occasion].slice(0, pairs)]));
+  // Their photos are dealt first, then the occasion's pictures make up the rest.
+  const [deck] = useState(() => {
+    const faces = [...photos.map((_, k) => `photo:${k}`), ...OCCASION_ICONS[occasion]].slice(0, pairs);
+    return shuffled([...faces, ...faces]);
+  });
   const [open, setOpen] = useState<number[]>([]);
   const [matched, setMatched] = useState<number[]>([]);
   const [moves, setMoves] = useState(0);
@@ -326,29 +370,43 @@ function MemoryMatch({ onWin, won, occasion }: GameProps & { occasion: Occasion 
   return (
     <div className="w-full">
       <div className="mb-3 text-center font-display text-lg font-semibold">
-        {text("memoryScore", { i: matched.length / 2, n: deck.length / 2, moves })}
+        {text("memoryScore", { i: won ? deck.length / 2 : matched.length / 2, n: deck.length / 2, moves })}
       </div>
       <div className="mx-auto grid max-w-sm grid-cols-4 gap-2.5 @2xl:max-w-lg">
         {deck.map((symbol, i) => {
           const shown = open.includes(i) || matched.includes(i);
+          const photo = photos[photoFace(symbol)];
           return (
             <button
               key={i}
               data-symbol={symbol}
-              aria-label={shown ? symbol : "Hidden card"}
+              aria-label={!shown ? "Hidden card" : photo ? `Photo ${photoFace(symbol) + 1}` : symbol}
               onClick={() => flip(i)}
               className={`relative grid aspect-square place-items-center rounded-xl shadow-sm ring-1 ring-black/10 transition duration-300 ${
                 shown ? "bg-[#fbf8f2] text-[var(--c-accent)] [transform:rotateY(0)]" : "bg-[var(--c-accent)] text-[var(--c-accent-text)] [transform:rotateY(180deg)]"
               } ${matched.includes(i) ? "ring-2 ring-[var(--c-muted)]" : ""}`}
             >
               {shown ? (
-                <GameIcon name={symbol} className="h-3/5 w-3/5" />
+                photo ? (
+                  <span className="absolute inset-1 overflow-hidden rounded-lg">
+                    <PhotoFill photo={photo} />
+                  </span>
+                ) : (
+                  <GameIcon name={symbol as IconName} className="h-3/5 w-3/5" />
+                )
               ) : (
                 <>
                   <span aria-hidden className="absolute inset-1.5 rounded-lg border border-current opacity-35" />
-                  <svg viewBox="0 0 16 16" className="h-4 w-4 opacity-70" aria-hidden>
-                    <path d="M8 1l4 7-4 7-4-7z" fill="currentColor" />
-                  </svg>
+                  {initial ? (
+                    // Turned back the other way, as the card's back is shown flipped over.
+                    <span aria-hidden className="block font-display text-2xl font-semibold leading-none opacity-80 [transform:rotateY(180deg)] @2xl:text-3xl">
+                      {initial}
+                    </span>
+                  ) : (
+                    <svg viewBox="0 0 16 16" className="h-4 w-4 opacity-70" aria-hidden>
+                      <path d="M8 1l4 7-4 7-4-7z" fill="currentColor" />
+                    </svg>
+                  )}
                 </>
               )}
             </button>
@@ -365,6 +423,9 @@ function UnwrapGift({ onWin, won }: GameProps) {
   const tune = useTune();
   const total = tune.goal(UNWRAP_TAPS, 30);
   const sfx = useSfx();
+  const { to, photos } = usePersonal();
+  // Inside: one of their photos (another than the hug's, if there are two), or a heart.
+  const photo = photos[1] ?? photos[0];
   const [taps, setTaps] = useState(0);
   const tap = () => {
     if (won) return;
@@ -380,19 +441,37 @@ function UnwrapGift({ onWin, won }: GameProps) {
         onClick={tap}
         className="relative grid h-48 w-48 place-items-center"
       >
-        {won ? (
+        {won && photo ? (
+          <span className="relative block h-48 w-40 animate-pop bg-white p-2 pb-9 shadow-xl ring-1 ring-black/5 rotate-[-3deg]">
+            <span className="block h-full w-full overflow-hidden">
+              <PhotoFill photo={photo} />
+            </span>
+            {to && (
+              <span dir="auto" className="absolute inset-x-7 bottom-1.5 truncate text-center font-hand text-xl leading-tight text-neutral-700">
+                {to}
+              </span>
+            )}
+            <HeartMark className="absolute bottom-2.5 right-2 h-5 w-5 text-[var(--c-accent)]" />
+          </span>
+        ) : won ? (
           <HeartMark className="h-32 w-32 animate-pop text-[var(--c-accent)]" />
         ) : (
-          <span key={taps} className={`block ${taps > 0 ? "animate-shake" : ""}`} style={{ transform: `scale(${1 + taps * 0.05})` }}>
+          // It swells as it's torn at, the same whether it takes 3 taps or 30.
+          <span key={taps} className={`relative block ${taps > 0 ? "animate-shake" : ""}`} style={{ transform: `scale(${1 + (taps / total) * 0.3})` }}>
             <GiftSprite className="h-40 w-40 drop-shadow-md" />
+            {/* A gift tag with their name on it */}
+            {to && (
+              <span className="absolute left-1/2 top-[57%] flex max-w-[8.5rem] -translate-x-1/2 -rotate-6 items-center gap-1.5 rounded-md bg-white py-0.5 pe-2.5 ps-1.5 text-neutral-700 shadow-md ring-1 ring-black/10">
+                <span aria-hidden className="h-2 w-2 shrink-0 rounded-full bg-neutral-200 ring-1 ring-black/15" />
+                <span dir="auto" className={`truncate font-hand leading-tight ${bySize(to, ["text-xl", "text-lg", "text-base"])}`}>
+                  {to}
+                </span>
+              </span>
+            )}
           </span>
         )}
       </button>
-      <div className="flex gap-1.5">
-        {Array.from({ length: total }, (_, i) => (
-          <span key={i} className={`h-2.5 w-6 rounded-full transition ${i < taps ? "bg-[var(--c-accent)]" : "bg-current opacity-20"}`} />
-        ))}
-      </div>
+      <Progress done={won ? total : taps} total={total} />
     </div>
   );
 }
@@ -476,64 +555,132 @@ function ShakeIt({ onWin, won, occasion }: GameProps & { occasion: Occasion }) {
 }
 
 const CHASE_TARGET = USUAL_GOAL["cursor-chase"];
+// How near (px) a pointer scares the heart off, and how near a finger catches it: a touch
+// catches from a little way off, as a fingertip hides what it's aiming at.
+const CHASE_SCARE = 110;
+const CHASE_REACH = 56;
+// With no cursor to run from on a touch screen, it hops somewhere new this often (ms).
+const CHASE_HOP = 1600;
 
-// Built for a mouse: the heart runs from the cursor. Corner it to catch it.
+type Spot = { x: number; y: number };
+const inArea = (v: number) => Math.min(92, Math.max(8, v));
+const randomSpot = (): Spot => ({ x: 15 + Math.random() * 70, y: 15 + Math.random() * 70 });
+
+// Built for a mouse: the heart runs from the cursor. Corner it to catch it. On a touch
+// screen it hops about and darts away from a finger that lands nearby or slides after it.
 function CursorChase({ onWin, won }: GameProps) {
   const tune = useTune();
   const total = tune.goal(CHASE_TARGET, 20);
+  const assist = useAssist(won);
+  const speed = tune.speed * assist.speed;
+  const size = tune.size * assist.size;
+  const reduced = useReducedMotion();
   const sfx = useSfx();
   const { text } = useWords();
   const area = useRef<HTMLDivElement>(null);
-  const [pos, setPos] = useState({ x: 50, y: 50 });
+  const [pos, setPos] = useState<Spot>({ x: 50, y: 50 });
+  // Kept in step with pos, so quick moves between renders go from where it really is.
+  const at = useRef<Spot>(pos);
   const [caught, setCaught] = useState(0);
+  const count = useRef(0);
+  // Whether they're playing by touch, and whether a finger is down (and if it landed on the heart).
+  const [touch, setTouch] = useState(false);
+  const finger = useRef<"up" | "down" | "heart">("up");
 
-  const flee = (e: React.PointerEvent) => {
-    if (e.pointerType !== "mouse" || won || !area.current) return;
-    const box = area.current.getBoundingClientRect();
-    const hx = box.left + (pos.x / 100) * box.width;
-    const hy = box.top + (pos.y / 100) * box.height;
-    const dx = hx - e.clientX;
-    const dy = hy - e.clientY;
-    const dist = Math.hypot(dx, dy);
-    if (dist > 110 || dist === 0) return;
-    const clamp = (v: number) => Math.min(92, Math.max(8, v));
-    setPos({
-      x: clamp(((hx + (dx / dist) * 70 * tune.speed - box.left) / box.width) * 100),
-      y: clamp(((hy + (dy / dist) * 70 * tune.speed - box.top) / box.height) * 100),
-    });
+  const moveTo = (spot: Spot) => {
+    at.current = spot;
+    setPos(spot);
+  };
+
+  // Playing by touch, it hops somewhere new every so often, though not while a finger's down.
+  useEffect(() => {
+    if (!touch || won) return;
+    const hop = () => {
+      if (finger.current !== "up") return;
+      at.current = randomSpot();
+      setPos(at.current);
+    };
+    const t = setInterval(hop, (CHASE_HOP * (reduced ? 1.5 : 1)) / speed);
+    return () => clearInterval(t);
+  }, [touch, won, speed, reduced]);
+
+  // Where the pointer is from the heart, in the area's own pixels (it may be shown scaled down).
+  const fromHeart = (e: React.PointerEvent, el: HTMLDivElement) => {
+    const box = el.getBoundingClientRect();
+    const scale = box.width / el.offsetWidth || 1;
+    const dx = (box.left + (at.current.x / 100) * box.width - e.clientX) / scale;
+    const dy = (box.top + (at.current.y / 100) * box.height - e.clientY) / scale;
+    return { dx, dy, dist: Math.hypot(dx, dy), width: el.offsetWidth, height: el.offsetHeight };
   };
 
   const grab = () => {
-    if (won) return;
-    const next = caught + 1;
-    setCaught(next);
+    if (won || count.current >= total) return;
+    count.current += 1;
+    setCaught(count.current);
     sfx("pop");
-    setPos({ x: 15 + Math.random() * 70, y: 15 + Math.random() * 70 });
-    if (next === total) onWin();
+    moveTo(randomSpot());
+    if (count.current === total) onWin();
+  };
+
+  // Close enough to a finger, it's caught; a little further off, it runs.
+  const near = (e: React.PointerEvent) => {
+    const el = area.current;
+    if (won || !el) return;
+    const { dx, dy, dist, width, height } = fromHeart(e, el);
+    if (e.pointerType !== "mouse" && dist <= CHASE_REACH * Math.max(1, size)) return grab();
+    if (dist > CHASE_SCARE || dist === 0) return;
+    const away = 70 * speed;
+    moveTo({ x: inArea(at.current.x + ((dx / dist) * away * 100) / width), y: inArea(at.current.y + ((dy / dist) * away * 100) / height) });
+  };
+
+  const down = (e: React.PointerEvent) => {
+    if (e.pointerType === "mouse") return;
+    if (!touch) setTouch(true);
+    // A tap on the heart itself is caught by its click.
+    const onHeart = !!(e.target as Element).closest("[data-chase]");
+    finger.current = onHeart ? "heart" : "down";
+    if (!onHeart) near(e);
+  };
+
+  const move = (e: React.PointerEvent) => {
+    // A cursor scares it off as it comes near; so does a finger sliding about, until it's close enough to catch.
+    if (e.pointerType === "mouse" || finger.current === "down") near(e);
+  };
+
+  const up = () => {
+    finger.current = "up";
   };
 
   return (
     <div className="w-full">
       <div className="mb-2 flex items-center justify-center gap-2 font-display text-lg font-semibold">
-        {text("chaseScore", { i: caught, n: total })} <HeartSprite className="h-5 w-5" />
+        {text("chaseScore", { i: won ? total : caught, n: total })} <HeartSprite className="h-5 w-5" />
       </div>
       <div
         ref={area}
-        onPointerMove={flee}
-        className="relative h-72 w-full cursor-crosshair select-none overflow-hidden rounded-3xl bg-[var(--c-secondary)]/40 ring-1 ring-black/5 @2xl:h-96"
+        onPointerDown={down}
+        onPointerMove={move}
+        onPointerUp={up}
+        onPointerCancel={up}
+        className="relative h-72 w-full cursor-crosshair touch-none select-none overflow-hidden rounded-3xl bg-[var(--c-secondary)]/40 ring-1 ring-black/5 @2xl:h-96"
       >
         {!won && (
           <button
+            data-chase
             aria-label="Catch the heart"
             onClick={grab}
-            className="absolute -translate-x-1/2 -translate-y-1/2 p-2 transition-[left,top] duration-150 ease-out"
+            className={`absolute -translate-x-1/2 -translate-y-1/2 p-2 transition-[left,top] ease-out ${touch ? "duration-300" : "duration-150"}`}
             style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
           >
-            <HeartSprite className="h-12 w-12 drop-shadow-md" />
+            <span className="block" style={{ scale: size }}>
+              <HeartSprite className="h-12 w-12 drop-shadow-md" />
+            </span>
           </button>
         )}
-        <p className="pointer-events-none absolute inset-x-0 bottom-3 text-center text-xs font-semibold uppercase tracking-widest opacity-50">
-          {text("chaseTip")}
+        <p className="pointer-events-none absolute inset-x-0 bottom-3 text-center text-sm font-semibold uppercase tracking-widest opacity-75">
+          {/* Until they touch it, the screen's own kind of pointer picks the tip. */}
+          <span className={touch ? "hidden" : "pointer-coarse:hidden"}>{text("chaseTip")}</span>
+          <span className={touch ? "" : "hidden pointer-coarse:inline"}>{text("chaseTouchTip")}</span>
         </p>
       </div>
     </div>

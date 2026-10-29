@@ -3,11 +3,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ProductTile } from "@/components/catalog/ProductTile";
 import { ProductView } from "@/components/catalog/ProductView";
+import { JsonLd } from "@/components/JsonLd";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+import { TrustStrip } from "@/components/TrustStrip";
 import { TEMPLATES, getTemplate } from "@/lib/catalog";
 import { plainAmount, tierPrice } from "@/lib/pricing";
-import { occasions } from "@/lib/templates";
+import { absolute, breadcrumbs, seller } from "@/lib/structured-data";
 import { fmt } from "@/i18n/config";
 import { getI18n } from "@/i18n/server";
 
@@ -21,7 +23,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const t = getTemplate((await params).slug);
   if (!t) return {};
   const { t: d } = await getI18n();
-  return { title: fmt(d.product.metaTitle, { name: t.name, occasion: d.occasions[t.occasion].label }), description: t.blurb };
+  const occasion = d.occasions[t.occasion].label;
+  return {
+    title: fmt(d.product.metaTitle, { name: t.name, occasion }),
+    description: `${t.blurb} ${fmt(d.product.metaSuffix, { occasion })}`,
+    alternates: { canonical: `/cards/${t.slug}` },
+  };
 }
 
 export default async function ProductPage({ params }: Props) {
@@ -32,29 +39,49 @@ export default async function ProductPage({ params }: Props) {
   const { t: d, currency } = await getI18n();
   const occasionLabel = d.occasions[t.occasion].label;
 
-  // Lets search engines show the price and description with the result.
+  // Lets search engines show the price, picture and description with the result. The price
+  // is in the currency this copy of the page is in. A card is digital, so it's always in stock.
+  const url = absolute(`/cards/${t.slug}`);
   const productJson = {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: `${t.name}: interactive ${occasions[t.occasion].label} card`,
+    name: fmt(d.product.schemaName, { name: t.name, occasion: occasionLabel }),
     description: t.blurb,
+    url,
+    image: absolute(`/cards/${t.slug}/opengraph-image`),
+    sku: t.slug,
+    category: "Interactive e-cards",
     brand: { "@type": "Brand", name: "Envelette" },
-    offers: { "@type": "Offer", price: plainAmount(tierPrice("premade", currency), currency), priceCurrency: currency.toUpperCase(), availability: "https://schema.org/InStock" },
+    offers: {
+      "@type": "Offer",
+      url,
+      price: plainAmount(tierPrice("premade", currency), currency),
+      priceCurrency: currency.toUpperCase(),
+      availability: "https://schema.org/InStock",
+      seller: seller(),
+    },
   };
+  const trail = breadcrumbs([{ name: d.common.allCards, path: "/cards" }, { name: occasionLabel, path: `/occasions/${t.occasion}` }, { name: t.name }]);
 
   return (
     <div className="grain min-h-dvh overflow-x-clip bg-cream text-ink">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJson).replace(/</g, "\\u003c") }} />
+      <JsonLd data={productJson} />
+      <JsonLd data={trail} />
       <SiteHeader />
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-        <nav className="mb-6 text-sm font-semibold text-ink/50">
-          <Link href="/cards" className="hover:text-ink">{d.common.allCards}</Link>
-          <span className="mx-2">/</span>
-          <Link href={`/occasions/${t.occasion}`} className="hover:text-ink">{occasionLabel}</Link>
-          <span className="mx-2">/</span>
+      <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+        <nav className="mb-4 flex flex-wrap items-center text-sm font-semibold text-ink/50">
+          <Link href="/cards" className="inline-flex min-h-11 items-center hover:text-ink">
+            {d.common.allCards}
+          </Link>
+          <span aria-hidden className="mx-2">/</span>
+          <Link href={`/occasions/${t.occasion}`} className="inline-flex min-h-11 items-center hover:text-ink">
+            {occasionLabel}
+          </Link>
+          <span aria-hidden className="mx-2">/</span>
           <span className="text-ink">{t.name}</span>
         </nav>
         <ProductView slug={t.slug} />
+        <TrustStrip className="mt-14 rounded-2xl border-2 border-dashed border-ink/25 p-6 sm:p-8" />
 
         <section className="mt-24">
           <div className="flex items-end justify-between gap-4">

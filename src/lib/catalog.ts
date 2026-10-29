@@ -1,5 +1,12 @@
-import type { CardData, Effect, Game, Layout, Music, Occasion, QuizQuestion, Screen, ThemeName, TimelineEvent } from "./card";
+import type { CardData, Effect, Layout, Music, Occasion, Screen, ThemeName } from "./card";
 import type { Tier } from "./pricing";
+import * as B from "./design-styles-b";
+import { MORE_DESIGNS } from "./catalog-more";
+import { OCCASION_DESIGNS } from "./catalog-occasions";
+import { DESIGN_SCREENS } from "./design-history";
+import { BLANK, arcade, bloom, blush, bout, candle, crown, dusk, fizz, flight, gallery, garden, golden, groan, gulal, hush, lilac, lullaby, memo, oak, reveal, splash, stick, sunny, thread, ticket, voyage, zine } from "./design-styles-c";
+import { P, at, boxes, coupons, finale, game, intro, message, photos, q, question, quiz, reasons, scratch, slider, timeline, typeit, wheel } from "./design-kit";
+import { dress, sticker } from "./design-styles-a";
 
 // The card designs people can browse and start from. Each one is a preset list
 // of building-block screens plus a look; everything stays editable afterwards.
@@ -36,26 +43,7 @@ export type Template = {
   demo: { to: string; from: string; photos?: DemoPhoto[] };
 };
 
-// Small builders so each design reads like a script.
-const intro = (title: string, subtitle: string, button = "Open it"): Screen => ({ id: "intro", type: "intro", title, subtitle, button });
-const question = (q: string, yes: string, no: string, afterYes: string, id = "question"): Screen => ({ id, type: "question", question: q, yes, no, afterYes });
-const photos = (title: string, id = "photos"): Screen => ({ id, type: "photos", title, photos: [], captions: [] });
-const message = (title: string, body: string, id = "message"): Screen => ({ id, type: "message", title, body });
-const game = (g: Game, title: string, instructions: string, winText: string, id = "game"): Screen => ({ id, type: "game", game: g, title, instructions, winText });
-const quiz = (title: string, questions: QuizQuestion[], winText: string, id = "quiz"): Screen => ({ id, type: "quiz", title, questions, winText });
-const scratch = (title: string, instructions: string, hidden: string, id = "scratch"): Screen => ({ id, type: "scratch", title, instructions, hidden });
-const typeit = (title: string, instructions: string, phrase: string, winText: string, id = "typeit"): Screen => ({ id, type: "typeit", title, instructions, phrase, winText });
-const finale = (title: string, body: string, effect: Effect): Screen => ({ id: "finale", type: "finale", title, body, effect });
-const q = (text: string, options: string[], answer: number): QuizQuestion => ({ question: text, options, answer });
-const wheel = (title: string, instructions: string, options: string[], winText: string, landOn = -1, id = "wheel"): Screen => ({ id, type: "wheel", title, instructions, options, landOn, winText });
-const coupons = (title: string, instructions: string, list: string[], id = "coupons"): Screen => ({ id, type: "coupons", title, instructions, coupons: list });
-const reasons = (title: string, instructions: string, list: string[], id = "reasons"): Screen => ({ id, type: "reasons", title, instructions, reasons: list });
-const slider = (title: string, low: string, high: string, winText: string, id = "slider"): Screen => ({ id, type: "slider", title, low, high, winText });
-const timeline = (title: string, events: TimelineEvent[], id = "timeline"): Screen => ({ id, type: "timeline", title, events });
-const boxes = (title: string, instructions: string, prizes: string[], id = "boxes"): Screen => ({ id, type: "boxes", title, instructions, prizes });
-const at = (when: string, what: string): TimelineEvent => ({ when, what });
-
-const OCCASION_MUSIC: Record<Occasion, Music> = {
+export const OCCASION_MUSIC: Record<Occasion, Music> = {
   valentine: "love",
   birthday: "birthday",
   diwali: "festive",
@@ -77,36 +65,11 @@ const OCCASION_MUSIC: Record<Occasion, Music> = {
   missyou: "love",
   friendship: "festive",
   leaving: "auld",
+  graduation: "joy",
+  retirement: "auld",
+  newhome: "festive",
 };
 
-const P = {
-  sunset: { src: "/demo/sunset.svg", caption: "Golden hour with you" },
-  coffee: { src: "/demo/coffee.svg", caption: "Where it all started" },
-  lights: { src: "/demo/lights.svg", caption: "Fairy-light nights" },
-  rangoli: { src: "/demo/rangoli.svg", caption: "Our rangoli this year" },
-  diyas: { src: "/demo/lights.svg", caption: "Diwali at home" },
-  fireworks: { src: "/demo/fireworks.svg", caption: "Fireworks from the roof" },
-  cake: { src: "/demo/cake.svg", caption: "Cake o'clock" },
-  balloons: { src: "/demo/balloons.svg", caption: "Up, up and away" },
-  summer: { src: "/demo/sunset.svg", caption: "Last summer" },
-  tree: { src: "/demo/tree.svg", caption: "Tree goals" },
-  crescent: { src: "/demo/crescent.svg", caption: "Chaand raat" },
-  grad: { src: "/demo/grad.svg", caption: "The big day" },
-  bouquet: { src: "/demo/bouquet.svg", caption: "For you" },
-  toast: { src: "/demo/toast.svg", caption: "Cheers to us" },
-  pumpkin: { src: "/demo/pumpkin.svg", caption: "Our spooky pumpkin" },
-  baby: { src: "/demo/baby.svg", caption: "Tiny feet" },
-  rings: { src: "/demo/rings.svg", caption: "The rings" },
-  holi: { src: "/demo/holi.svg", caption: "Holi hai!" },
-  rakhi: { src: "/demo/rakhi.svg", caption: "This year's rakhi" },
-  dad: { src: "/demo/dad.svg", caption: "World's best dad" },
-  friends: { src: "/demo/friends.svg", caption: "Milkshake dates" },
-  teacup: { src: "/demo/teacup.svg", caption: "Tea fixes everything" },
-  desk: { src: "/demo/desk.svg", caption: "Your desk (we'll miss it)" },
-  clock: { src: "/demo/clock.svg", caption: "The countdown" },
-  newyear: { src: "/demo/fireworks.svg", caption: "Midnight fireworks" },
-  mum: { src: "/demo/bouquet.svg", caption: "Flowers for you" },
-};
 
 export const TEMPLATES: Template[] = [
   // ---------- Valentine's ----------
@@ -121,13 +84,38 @@ export const TEMPLATES: Template[] = [
     headline: "Will you be my Valentine?",
     blurb: "The classic. They try to say no, the button runs away, and they end up smiling at their phone.",
     featured: true,
+    // Blush and raspberry in a flowing script, with deep wine for the big question and the ending.
     screens: (to, from) => [
-      intro(`Hey ${to}`, `${from} made you something. Tap when you're ready.`),
-      question(`${to}, will you be my Valentine?`, "Yes!", "No", "I knew you'd say yes"),
-      photos("Some of my favourite moments with you"),
-      game("catch-hearts", "Catch my love", "Tap 10 falling hearts to unlock your surprise", "You caught all my love!"),
-      message("Just so you know…", `Every day with you is my favourite day. Thank you for being you.\n\nLove, ${from}`),
-      finale("Happy Valentine's Day", "Now screenshot this and send it back to me", "hearts"),
+      dress(intro(`Hey ${to}`, `${from} made you something. Tap when you're ready.`), {
+        background: ["#fff0f3", "#f9cfda"], gradient: "glow", text: "#4f0d27", accent: "#b4234f", envelope: "#f7b6c8",
+        heading: "script", body: "storybook", burst: "hearts", transition: "fade",
+        stickers: [sticker("💌", 9, 9, 12, "float", -12), sticker("🌹", 8, 90, 12, "sway"), sticker("💕", 92, 90, 10, "pulse")],
+      }, { gotMail: "Special delivery for you" }),
+      dress(question(`${to}, will you be my Valentine?`, "Yes!", "No", "I knew you'd say yes"), {
+        background: ["#4f0d27", "#7a1838"], gradient: "down", text: "#fff0f3", accent: "#ff8fab",
+        heading: "script", body: "storybook", burst: "hearts", transition: "zoom",
+        stickers: [sticker("💘", 9, 14, 12, "bounce", -8), sticker("🌹", 8, 90, 11, "sway"), sticker("💖", 92, 90, 11, "pulse")],
+      }, { noLines: ["Are you sure?", "Pretty please?", "That one's broken", "Try the pink one", "Not an option, sorry", "I'll just wait here", "Nope, try again", "Yes is right there"] }),
+      dress(photos("Some of my favourite moments with you"), {
+        background: ["#fff0f3"], pattern: "dots", text: "#4f0d27", accent: "#b4234f",
+        heading: "script", body: "storybook", transition: "slide",
+        stickers: [sticker("✨", 9, 12, 9, "pulse"), sticker("💕", 92, 90, 11, "float")],
+      }),
+      dress(game("catch-hearts", "Catch my love", "Tap 10 falling hearts to unlock your surprise", "You caught all my love!"), {
+        background: ["#f9cfda", "#f3a6bb"], gradient: "down", text: "#4f0d27", accent: "#b4234f",
+        heading: "script", body: "storybook", burst: "sparkles", transition: "bounce",
+        stickers: [sticker("💗", 8, 90, 11, "bounce"), sticker("🌹", 92, 90, 11, "sway", 10)],
+      }),
+      dress(message("Just so you know…", `Every day with you is my favourite day. You make me laugh, you make me braver, and you make the boring bits fun.\n\nThank you for being you.\n\nLove, ${from}`), {
+        background: ["#fff7f9", "#fde3ea"], gradient: "down", text: "#4f0d27", accent: "#b4234f",
+        heading: "script", body: "storybook", transition: "fade",
+        stickers: [sticker("💌", 9, 13, 10, "float", -8), sticker("🌹", 92, 90, 10, "sway")],
+      }),
+      dress(finale("Happy Valentine's Day", "Now screenshot this and send it back to me", "hearts"), {
+        background: ["#4f0d27", "#2c0716"], gradient: "glow", text: "#fff0f3", accent: "#ff8fab",
+        heading: "script", body: "storybook", transition: "zoom",
+        stickers: [sticker("💖", 9, 14, 12, "pulse"), sticker("💕", 8, 90, 11, "float"), sticker("🌹", 92, 90, 12, "sway", 8)],
+      }),
     ],
     demo: { to: "Olivia", from: "Sam", photos: [P.sunset, P.coffee, P.lights] },
   },
@@ -140,24 +128,64 @@ export const TEMPLATES: Template[] = [
     ambient: "hearts",
     emoji: "🙅",
     headline: "Saying no is not an option",
-    blurb: "A Valentine's card with absolutely no respect for the word no, plus a quiz they can't get wrong.",
+    blurb: "A Valentine's card with absolutely no respect for the word no, a quiz they can't get wrong and some very fine print.",
     featured: true,
+    // A legal notice: cream paper, navy ink and a red stamp, all on a typewriter.
     screens: (to, from) => [
-      intro(`Official notice for ${to}`, `${from} has a very serious question. Legally you have to answer.`, "Proceed"),
-      question("Will you be my Valentine?", "Fine, yes", "No", "Great choice. Very mature of you."),
-      quiz(
-        "Quick quiz",
-        [
-          q(`Who's the best-looking person you know?`, [from, `Also ${from}`, `Definitely ${from}`], 2),
-          q(`What does ${from} deserve this Valentine's?`, ["Chocolate", "A nice dinner", "Both, obviously"], 2),
-          q("How lucky are you?", ["Quite lucky", "Very lucky", "The luckiest person alive"], 2),
-        ],
-        "You passed! Your prize is me.",
+      dress(intro(`Official notice for ${to}`, `${from} has a very serious question. Legally you have to answer.`, "Proceed"), {
+        background: ["#f7f1e3", "#ead9b0"], gradient: "down", pattern: "stripes", text: "#1d2a44", accent: "#b3261e", envelope: "#d9b97a",
+        heading: "typewriter", body: "typewriter", transition: "fade",
+        stickers: [sticker("📜", 9, 9, 12, "sway", -10), sticker("🔏", 8, 90, 11), sticker("⚖️", 92, 90, 12, "float")],
+      }, { gotMail: "Official notice", tapEnvelope: "Tap to open. You have no choice." }),
+      dress(question("Will you be my Valentine?", "Fine, yes", "No", "Great choice. Very mature of you."), {
+        background: ["#fbf7ee"], text: "#1d2a44", accent: "#b3261e",
+        heading: "typewriter", body: "typewriter", burst: "hearts", transition: "drop",
+        stickers: [sticker("✅", 9, 14, 12, "bounce"), sticker("🖋️", 8, 90, 11, "sway", -20), sticker("💘", 92, 90, 12, "pulse")],
+      }, { noLines: ["Objection overruled", "Denied", "Not legally binding", "Read the fine print", "Motion dismissed", "Inadmissible", "Request rejected", "The court says yes"] }),
+      dress(
+        quiz(
+          "Quick quiz",
+          [
+            q(`Who's the best-looking person you know?`, [from, `Also ${from}`, `Definitely ${from}`], 2),
+            q(`What does ${from} deserve this Valentine's?`, ["Chocolate", "A nice dinner", "Both, obviously"], 2),
+            q("How lucky are you?", ["Quite lucky", "Very lucky", "The luckiest person alive"], 2),
+          ],
+          "You passed! Your prize is me.",
+        ),
+        {
+          background: ["#1d2a44", "#121b30"], gradient: "down", pattern: "grid", text: "#f7f1e3", accent: "#e5533d",
+          heading: "typewriter", body: "typewriter", burst: "confetti", transition: "slide",
+          stickers: [sticker("📋", 9, 13, 11, "none", -8), sticker("⚖️", 8, 90, 12, "sway"), sticker("✅", 92, 90, 10, "bounce")],
+        },
+        {
+          wrongLines: ["Objection!", "Overruled.", "Strike that from the record.", "Incorrect, counsel.", "The court is offended."],
+          quizPerfect: "Full marks. The court is satisfied.",
+          quizMissedOne: "1 wrong answer. Noted for the record.",
+          quizMissed: "{n} wrong answers. Noted for the record.",
+        },
       ),
-      message("The fine print", `By opening this card you have agreed to:\n• Share your food with me\n• Laugh at my jokes (even the bad ones)\n• Be my Valentine, forever and ever\n\nNo refunds. Love, ${from}`),
-      finale("Happy Valentine's!", "There was never a No button. There was only destiny.", "confetti"),
+      dress(photos("Supporting evidence"), {
+        background: ["#f7f1e3"], text: "#1d2a44", accent: "#b3261e",
+        heading: "typewriter", body: "typewriter", transition: "slide",
+        stickers: [sticker("📎", 9, 14, 12, "none", -15), sticker("🔍", 92, 90, 11, "float")],
+      }),
+      dress(message("The fine print", `By opening this card you have agreed to:\n• Share your food with me\n• Laugh at my jokes (even the bad ones)\n• Be my Valentine, forever and ever\n\nNo refunds.`), {
+        background: ["#fbf7ee", "#f1e6cc"], gradient: "down", pattern: "grid", text: "#1d2a44", accent: "#b3261e",
+        heading: "typewriter", body: "typewriter", transition: "fade",
+        stickers: [sticker("📜", 8, 90, 12, "sway", 8), sticker("🔏", 92, 90, 11)],
+      }, { next: "I agree to the terms" }),
+      dress(message("Off the record", `Okay, no more legal talk.\n\nI made a whole court case out of this because asking you properly makes me nervous. So, plainly: you make my days better, and I'd choose you every single time.\n\nLove, ${from}`, "message2"), {
+        background: ["#1d2a44", "#2a3a5e"], gradient: "glow", text: "#f7f1e3", accent: "#e5533d",
+        heading: "typewriter", body: "typewriter", transition: "blur",
+        stickers: [sticker("💘", 9, 13, 11, "pulse"), sticker("🤍", 92, 90, 10, "float")],
+      }),
+      dress(finale("Happy Valentine's!", "Case closed. There was only ever one answer.", "confetti"), {
+        background: ["#f7f1e3", "#ead9b0"], gradient: "glow", text: "#1d2a44", accent: "#b3261e",
+        heading: "typewriter", body: "typewriter", transition: "zoom",
+        stickers: [sticker("✅", 9, 14, 12, "bounce"), sticker("💘", 8, 90, 12, "pulse"), sticker("📜", 92, 90, 11, "sway", 10)],
+      }),
     ],
-    demo: { to: "Olivia", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam", photos: [P.coffee, P.sunset, P.lights] },
   },
   {
     slug: "love-letter",
@@ -168,16 +196,45 @@ export const TEMPLATES: Template[] = [
     ambient: "petals",
     emoji: "🌹",
     headline: "Words I don't say enough",
-    blurb: "Slow, elegant and a little bit soppy. A letter that writes itself out, your photos, and falling petals.",
+    blurb: "Slow, elegant and a little bit soppy. A letter that writes itself out, your photos, three little notes in a jar and lanterns to wish on.",
+    // Old parchment and deep burgundy with a touch of gold, set like a printed letter.
     screens: (to, from) => [
-      intro(`My dearest ${to}`, "Find somewhere quiet. This one's just for you.", "Read my letter"),
-      message(
-        "Words I don't say enough",
-        `${to},\n\nI don't always say it out loud, so here it is in writing. You make ordinary days feel like something worth remembering. You're my favourite person to do nothing with.\n\nThank you for choosing me.\n\nYours, ${from}`,
+      dress(intro(`My dearest ${to}`, "Find somewhere quiet. This one's just for you.", "Read my letter"), {
+        background: ["#2a0c14", "#4a1424"], gradient: "glow", text: "#f6e8cf", accent: "#c9a24a", envelope: "#f3e6cc",
+        heading: "classic", body: "storybook", burst: "petals", transition: "blur",
+        stickers: [sticker("🌹", 8, 90, 11, "sway", -8), sticker("🕯️", 92, 90, 10, "float")],
+      }, { gotMail: "A letter for you" }),
+      dress(
+        message(
+          "Words I don't say enough",
+          `${to},\n\nI don't always say it out loud, so here it is in writing. You make ordinary days feel like something worth remembering. You're my favourite person to do nothing with.\n\nThank you for choosing me.\n\nYours, ${from}`,
+        ),
+        {
+          background: ["#f8f0e1", "#efe0c4"], gradient: "down", text: "#4a1422", accent: "#8c2a3c",
+          heading: "classic", body: "storybook", transition: "fade",
+          stickers: [sticker("🖋️", 9, 13, 10, "none", -20), sticker("🌹", 92, 90, 10, "sway")],
+        },
       ),
-      photos("Us, so far"),
-      message("Three things I love about you", "Your laugh, especially when you're trying not to.\nThe way you look after everyone.\nThat you're still here, putting up with me.", "message2"),
-      finale(`Happy Valentine's Day, ${to}`, "Always yours.", "petals"),
+      dress(photos("Us, so far"), {
+        background: ["#2a0c14"], text: "#f6e8cf", accent: "#c9a24a",
+        heading: "classic", body: "storybook", transition: "blur",
+        stickers: [sticker("✨", 9, 12, 8, "pulse"), sticker("🌹", 8, 90, 10, "sway", 10)],
+      }),
+      dress(reasons("Three things I love about you", "Tap the jar for each one", ["Your laugh, especially when you're trying not to.", "The way you look after everyone.", "That you're still here, putting up with me."]), {
+        background: ["#f8f0e1", "#f3e3c9"], gradient: "glow", text: "#4a1422", accent: "#8c2a3c",
+        heading: "classic", body: "storybook", burst: "petals", transition: "fade",
+        stickers: [sticker("💌", 9, 13, 10, "float", -10), sticker("🌹", 92, 90, 10, "sway")],
+      }, { jarEmpty: "That's all three. For now." }),
+      dress(game("release-lanterns", "Make a wish for us", "Tap each lantern and make a wish", "May every one of them come true"), {
+        background: ["#1a0a12", "#3a1020"], gradient: "down", text: "#f6e8cf", accent: "#c9a24a",
+        heading: "classic", body: "storybook", effect: "stars", burst: "stars", transition: "blur",
+        stickers: [sticker("🌙", 9, 13, 11, "float"), sticker("✨", 92, 90, 9, "pulse")],
+      }),
+      dress(finale(`Happy Valentine's Day, ${to}`, "Always yours.", "petals"), {
+        background: ["#2a0c14", "#120509"], gradient: "glow", text: "#f6e8cf", accent: "#c9a24a",
+        heading: "classic", body: "storybook", transition: "blur",
+        stickers: [sticker("🌹", 9, 13, 11, "sway"), sticker("💌", 8, 90, 11, "float", -10), sticker("🕊️", 92, 90, 11, "float")],
+      }),
     ],
     demo: { to: "Olivia", from: "Sam", photos: [P.sunset, P.lights, P.coffee] },
   },
@@ -192,12 +249,38 @@ export const TEMPLATES: Template[] = [
     emoji: "🖱️",
     headline: "My heart runs from your cursor",
     blurb: "Built for a laptop. My heart literally runs away from their mouse until they trap it in a corner.",
+    // An arcade at night: deep violet, neon pink and a flash of cyan, in a felt-tip scrawl.
     screens: (to, from) => [
-      intro(`${to}, grab your mouse`, `${from} has made you work for this one.`, "I'm ready"),
-      game("cursor-chase", "Catch my heart", "It runs from your cursor. Catch it 5 times.", "Okay, you've got it. It's yours now"),
-      question("So… will you be my Valentine?", "Yes", "No", "Good, because you can't return it."),
-      photos("Exhibit A: we're cute"),
-      finale("Happy Valentine's Day", `Love, ${from} (and my heart, which you caught fair and square)`, "hearts"),
+      dress(intro(`${to}, grab your mouse`, `${from} has made you work for this one.`, "I'm ready"), {
+        background: ["#0b0420", "#22104a"], gradient: "glow", pattern: "grid", text: "#f6f0ff", accent: "#ff4f9a", envelope: "#4fe3ff",
+        heading: "marker", body: "modern", burst: "stars", transition: "fade",
+        stickers: [sticker("🖱️", 8, 9, 12, "bounce", -15), sticker("🕹️", 8, 90, 12, "sway"), sticker("💘", 92, 90, 12, "pulse")],
+      }, { gotMail: "Incoming: one heart" }),
+      dress(game("cursor-chase", "Catch my heart", "It runs from your cursor. Catch it 5 times.", "Okay, you've got it. It's yours now"), {
+        background: ["#12062e"], pattern: "grid", text: "#f6f0ff", accent: "#ff4f9a",
+        heading: "marker", body: "modern", burst: "hearts", transition: "slide",
+        stickers: [sticker("💨", 8, 90, 11, "float"), sticker("🏃", 92, 90, 12, "bounce")],
+      }),
+      dress(question("So… will you be my Valentine?", "Yes", "No", "Good, because you can't return it."), {
+        background: ["#22104a", "#0b0420"], gradient: "down", text: "#f6f0ff", accent: "#4fe3ff",
+        heading: "marker", body: "modern", effect: "stars", burst: "fireworks", transition: "zoom",
+        stickers: [sticker("💘", 8, 14, 12, "pulse"), sticker("⭐", 8, 90, 10, "spin"), sticker("💖", 92, 90, 11, "float")],
+      }, { noLines: ["Too slow!", "Catch me first", "Nope, it ran off", "Over here!", "Missed!", "Corner it, then", "Try the other one"] }),
+      dress(photos("Exhibit A: we're cute"), {
+        background: ["#0b0420"], text: "#f6f0ff", accent: "#ff4f9a",
+        heading: "marker", body: "modern", transition: "flip",
+        stickers: [sticker("📸", 8, 13, 11, "none", -10), sticker("💞", 92, 90, 11, "float")],
+      }),
+      dress(message("Okay, seriously", `You didn't need to chase it. It's been yours for ages.\n\nThank you for being my favourite person to laugh with, to annoy and to be ridiculous with.\n\n${from} x`), {
+        background: ["#1a0b3a", "#2c1660"], gradient: "diagonal", text: "#f6f0ff", accent: "#4fe3ff",
+        heading: "marker", body: "modern", transition: "fade",
+        stickers: [sticker("💌", 8, 13, 11, "float", -8), sticker("💗", 92, 90, 11, "pulse")],
+      }),
+      dress(finale("Happy Valentine's Day", `Love, ${from} (and my heart, which you caught fair and square)`, "hearts"), {
+        background: ["#0b0420", "#3a1270"], gradient: "glow", text: "#f6f0ff", accent: "#ff4f9a",
+        heading: "marker", body: "modern", transition: "zoom",
+        stickers: [sticker("🕹️", 8, 14, 12, "sway"), sticker("💘", 8, 90, 12, "pulse"), sticker("⭐", 92, 90, 11, "spin")],
+      }),
     ],
     demo: { to: "Olivia", from: "Sam", photos: [P.sunset, P.coffee, P.lights, P.balloons, P.fireworks, P.cake] },
   },
@@ -211,14 +294,40 @@ export const TEMPLATES: Template[] = [
     emoji: "🪙",
     headline: "Scratch to reveal the question",
     blurb: "Made for a phone: they scratch the silver panel with a finger to reveal the big question.",
+    // A lucky scratch card: cream, gold and lipstick pink, with plum for the reveal.
     screens: (to, from) => [
-      intro(`${to}, you've won something`, `${from} hid a question under this scratch card.`, "Let me see"),
-      scratch("Scratch to find out", "Rub the silver panel with your finger", "Will you be my Valentine?"),
-      question("Well? What's your answer?", "YES", "No", "Best scratch card ever"),
-      message("You won!", `Your prize: me, forever. No cash alternative.\n\nLove, ${from}`),
-      finale("Happy Valentine's Day", "Jackpot.", "hearts"),
+      dress(intro(`${to}, you've won something`, `${from} hid a question under this scratch card.`, "Let me see"), {
+        background: ["#fff6e5", "#ffe1ea"], gradient: "glow", text: "#3d0b26", accent: "#cc3a70", envelope: "#f2c14e",
+        heading: "rounded", body: "rounded", burst: "sparkles", transition: "zoom",
+        stickers: [sticker("🎟️", 9, 9, 12, "sway", -14), sticker("🍀", 8, 90, 11, "float"), sticker("🪙", 92, 90, 12, "spin")],
+      }, { gotMail: "You've got a scratch card" }),
+      dress(scratch("Scratch to find out", "Rub the silver panel with your finger", "Will you be my Valentine?"), {
+        background: ["#3d0b26", "#5c1238"], gradient: "down", pattern: "dots", text: "#fff6e5", accent: "#f2c14e",
+        heading: "rounded", body: "rounded", burst: "hearts", transition: "zoom",
+        stickers: [sticker("🪙", 8, 13, 11, "spin"), sticker("✨", 8, 90, 9, "pulse"), sticker("🍀", 92, 90, 11, "sway")],
+      }, { scratchHere: "Scratch to win", scratchDone: "It's a winner!" }),
+      dress(question("Well? What's your answer?", "YES", "No", "Best scratch card ever"), {
+        background: ["#fff6e5", "#fde3c0"], gradient: "down", text: "#3d0b26", accent: "#cc3a70",
+        heading: "rounded", body: "rounded", burst: "fireworks", transition: "bounce",
+        stickers: [sticker("💖", 9, 14, 12, "pulse"), sticker("🎰", 8, 90, 11, "bounce"), sticker("🍀", 92, 90, 11, "sway")],
+      }, { noLines: ["Not a winning ticket", "No refunds", "Try again", "Wrong number", "The house always wins", "Scratch that", "Lucky guess? Try Yes"] }),
+      dress(photos("Previous winners"), {
+        background: ["#ffe8ef"], pattern: "dots", text: "#3d0b26", accent: "#cc3a70",
+        heading: "rounded", body: "rounded", transition: "flip",
+        stickers: [sticker("🏆", 9, 13, 11, "float"), sticker("✨", 92, 90, 9, "pulse")],
+      }),
+      dress(message("You won!", `Your prize: me, forever. No cash alternative.\n\nHonestly, though, I'm the one who won the day I met you.\n\nLove, ${from}`), {
+        background: ["#fff6e5", "#fbe7c6"], gradient: "glow", text: "#3d0b26", accent: "#cc3a70",
+        heading: "rounded", body: "rounded", transition: "fade",
+        stickers: [sticker("🎟️", 9, 13, 10, "sway", -10), sticker("💖", 92, 90, 10, "pulse")],
+      }),
+      dress(finale("Happy Valentine's Day", "Jackpot.", "fireworks"), {
+        background: ["#3d0b26", "#1f0514"], gradient: "glow", text: "#fff6e5", accent: "#f2c14e",
+        heading: "rounded", body: "rounded", transition: "zoom",
+        stickers: [sticker("🪙", 9, 14, 12, "spin"), sticker("🍀", 8, 90, 11, "sway"), sticker("💖", 92, 90, 12, "pulse")],
+      }),
     ],
-    demo: { to: "Olivia", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam", photos: [P.sunset, P.toast, P.coffee] },
   },
 
   {
@@ -231,14 +340,45 @@ export const TEMPLATES: Template[] = [
     emoji: "🎡",
     headline: "Spin for our next date",
     blurb: "They spin a wheel to pick your next date night, then redeem date coupons. The No button still runs away.",
+    // Dinner by candlelight: midnight blue, candle gold and rose, with a chunky night-out headline.
     screens: (to, from) => [
-      intro(`${to}, let's leave it to fate`, `${from} couldn't decide what we're doing for Valentine's. So you're spinning for it.`, "Let's spin"),
-      question("First things first. Will you be my Valentine?", "Obviously", "No", "Correct answer. Now spin."),
-      wheel("Spin for our date", "Whatever it lands on, we're doing it", ["Pizza & a film", "Fancy dinner", "Takeaway in PJs", "Mini golf", "A picnic", "Cook together"], "It's a date!"),
-      coupons("Your date coupons", "Tap to redeem. Valid forever.", ["You pick the restaurant", "I pay. All of it.", "Dessert is on me", "No phones all night"]),
-      finale("Happy Valentine's Day", `It's a date. Love, ${from}`, "hearts"),
+      dress(intro(`${to}, let's leave it to fate`, `${from} couldn't decide what we're doing for Valentine's. So you're spinning for it.`, "Let's spin"), {
+        background: ["#121735", "#1e2654"], gradient: "glow", text: "#fbf3e4", accent: "#f2c46d", envelope: "#ef7a95",
+        heading: "bold", body: "modern", burst: "stars", transition: "fade",
+        stickers: [sticker("🍝", 8, 9, 11, "float"), sticker("🍷", 8, 90, 11, "sway"), sticker("🎬", 92, 90, 11, "none", 8)],
+      }, { gotMail: "Your table is ready" }),
+      dress(question("First things first. Will you be my Valentine?", "Obviously", "No", "Correct answer. Now spin."), {
+        background: ["#fbf3e4", "#f4dfc0"], gradient: "down", text: "#121735", accent: "#c8436a",
+        heading: "bold", body: "modern", burst: "hearts", transition: "drop",
+        stickers: [sticker("🌹", 8, 13, 11, "sway"), sticker("🕯️", 8, 90, 11, "float"), sticker("💘", 92, 90, 11, "pulse")],
+      }, { noLines: ["Not tonight?", "Is that a no to dessert?", "Booking it anyway", "I'll get the bill", "Rain check denied", "Table for two, please", "Wrong button, gorgeous"] }),
+      dress(wheel("Spin for our date", "Whatever it lands on, we're doing it", ["Pizza & a film", "Fancy dinner", "Takeaway in PJs", "Mini golf", "A picnic", "Cook together"], "It's a date!"), {
+        background: ["#121735", "#1e2654"], gradient: "glow", text: "#fbf3e4", accent: "#f2c46d",
+        heading: "bold", body: "modern", burst: "confetti", transition: "zoom",
+        stickers: [sticker("🎡", 9, 14, 12, "spin"), sticker("🍿", 8, 90, 11, "bounce"), sticker("🍕", 92, 90, 11, "sway", 10)],
+      }, { spin: "Spin it!" }),
+      dress(coupons("Your date coupons", "Tap to redeem. Valid forever.", ["You pick the restaurant", "I pay. All of it.", "Dessert is on me", "No phones all night"]), {
+        background: ["#fbf3e4"], pattern: "dots", text: "#121735", accent: "#c8436a",
+        heading: "bold", body: "modern", transition: "slide",
+        stickers: [sticker("🎟️", 8, 13, 11, "sway", -10), sticker("🍰", 8, 90, 11, "float"), sticker("🥂", 92, 90, 11)],
+      }, { coupon: "Date coupon", couponClaim: "Show me this to claim it" }),
+      dress(photos("Our best dates so far"), {
+        background: ["#1e2654"], text: "#fbf3e4", accent: "#ef7a95",
+        heading: "bold", body: "modern", transition: "flip",
+        stickers: [sticker("📸", 9, 13, 11, "none", -10), sticker("🍷", 92, 90, 11, "sway")],
+      }),
+      dress(message("Wherever it lands", `Pizza in our pyjamas or dinner somewhere fancy, it doesn't really matter. The best bit of any date is that it's with you.\n\nHappy Valentine's Day, ${to}.\n${from} x`), {
+        background: ["#fbf3e4", "#f4dfc0"], gradient: "glow", text: "#121735", accent: "#c8436a",
+        heading: "bold", body: "modern", transition: "fade",
+        stickers: [sticker("🕯️", 9, 13, 10, "float"), sticker("🌹", 92, 90, 11, "sway")],
+      }),
+      dress(finale("Happy Valentine's Day", `It's a date. Love, ${from}`, "stars"), {
+        background: ["#121735", "#2c2f6b"], gradient: "glow", text: "#fbf3e4", accent: "#ef7a95",
+        heading: "bold", body: "modern", transition: "zoom",
+        stickers: [sticker("🥂", 8, 14, 12, "sway"), sticker("🌹", 8, 90, 11, "float"), sticker("✨", 92, 90, 10, "pulse")],
+      }),
     ],
-    demo: { to: "Olivia", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam", photos: [P.coffee, P.toast, P.sunset] },
   },
   {
     slug: "loves-me-loves-me-not",
@@ -250,14 +390,40 @@ export const TEMPLATES: Template[] = [
     emoji: "🌼",
     headline: "Loves me, loves me not…",
     blurb: "They pluck the petals off a daisy (it always ends on 'loves me'), then try to slide the love-o-meter down. It only goes up.",
+    // A daisy in a meadow: buttercup yellow and leaf green, with pink for love, written by hand.
     screens: (to, from) => [
-      intro(`${to}, a little flower for you`, `${from} wants to know something. The flower will decide.`, "Pick it"),
-      game("loves-me-not", "Loves me, loves me not", "Pluck every petal to find out", "LOVES ME! The flower never lies"),
-      slider(`How much do you love ${from}?`, "A little", "Too much", "Off the charts. As expected"),
-      message("Just so you know", `It was always going to be 'loves me'. I made sure of it.\n\nHappy Valentine's, ${to}.\n${from} x`),
-      finale("Happy Valentine's Day", "You're stuck with me now.", "petals"),
+      dress(intro(`${to}, a little flower for you`, `${from} wants to know something. The flower will decide.`, "Pick it"), {
+        background: ["#fffbea", "#fff1b8"], gradient: "glow", text: "#2a3d1f", accent: "#c1466d", envelope: "#ffffff",
+        heading: "handwritten", body: "rounded", burst: "petals", transition: "fade",
+        stickers: [sticker("🌼", 9, 9, 13, "spin"), sticker("🌱", 8, 90, 11, "sway"), sticker("🐝", 92, 90, 10, "float")],
+      }),
+      dress(game("loves-me-not", "Loves me, loves me not", "Pluck every petal to find out", "LOVES ME! The flower never lies"), {
+        background: ["#eef7e6", "#d8eec9"], gradient: "down", text: "#1f3d23", accent: "#c1466d",
+        heading: "handwritten", body: "rounded", burst: "hearts", transition: "zoom",
+        stickers: [sticker("🌸", 8, 13, 10, "float"), sticker("🌼", 8, 90, 12, "sway"), sticker("🐞", 92, 90, 10, "bounce")],
+      }),
+      dress(slider(`How much do you love ${from}?`, "A little", "Too much", "Off the charts. As expected"), {
+        background: ["#fff3f6", "#ffd9e4"], gradient: "glow", text: "#4a1a2c", accent: "#c1466d",
+        heading: "handwritten", body: "rounded", burst: "hearts", transition: "bounce",
+        stickers: [sticker("💗", 9, 13, 11, "pulse"), sticker("🌼", 8, 90, 11, "spin"), sticker("🌷", 92, 90, 11, "sway")],
+      }, { sliderLines: ["The flower says otherwise…", "Getting warmer…", "That's more like it.", "Nearly there…"] }),
+      dress(photos("The evidence says: loves me"), {
+        background: ["#fffbea"], pattern: "dots", text: "#2a3d1f", accent: "#c1466d",
+        heading: "handwritten", body: "rounded", transition: "flip",
+        stickers: [sticker("🌼", 9, 13, 11, "spin"), sticker("💐", 92, 90, 11, "sway")],
+      }),
+      dress(message("Just so you know", `It was always going to be 'loves me'. I made sure of it.\n\nBut in case a flower isn't proof enough: I love you, ${to}. On the good days, the grumpy days and every day in between.\n\nHappy Valentine's Day.\n${from} x`), {
+        background: ["#eef7e6", "#fffbea"], gradient: "down", text: "#1f3d23", accent: "#c1466d",
+        heading: "handwritten", body: "rounded", transition: "fade",
+        stickers: [sticker("🌸", 9, 13, 10, "float"), sticker("🌼", 92, 90, 11, "sway")],
+      }),
+      dress(finale("Happy Valentine's Day", "You're stuck with me now.", "petals"), {
+        background: ["#fff1b8", "#ffd9e4"], gradient: "diagonal", text: "#2a3d1f", accent: "#c1466d",
+        heading: "handwritten", body: "rounded", transition: "zoom",
+        stickers: [sticker("🌼", 9, 14, 13, "spin"), sticker("💕", 8, 90, 11, "float"), sticker("🌷", 92, 90, 11, "sway")],
+      }),
     ],
-    demo: { to: "Olivia", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam", photos: [P.bouquet, P.sunset, P.coffee] },
   },
   {
     slug: "reasons-i-love-you",
@@ -268,22 +434,52 @@ export const TEMPLATES: Template[] = [
     ambient: "hearts",
     emoji: "🫙",
     headline: "A jar full of reasons",
-    blurb: "A jar of handwritten notes. They tap it to pull out every reason you love them, then see your photos.",
+    blurb: "A jar of handwritten notes. They tap it to pull out every reason you love them, fix the one that's smudged, then see your photos.",
     featured: true,
+    // Lavender notepaper and deep aubergine, in a soft storybook serif.
     screens: (to, from) => [
-      intro(`For ${to}, with love`, `${from} filled a jar with reasons. It wasn't hard.`, "Open the jar"),
-      reasons("Reasons I love you", "Tap the jar to pull out a note", [
-        "The way you laugh at your own jokes before you finish them",
-        "You always save me the last bite",
-        "How safe I feel when you hug me",
-        "Your terrible singing in the car",
-        "You make boring days fun",
-        "The way you look at me when you think I'm not looking",
-        "You're you. That's the main one.",
-      ]),
-      photos("Some of my favourite reasons"),
-      message("And one more thing", `I could fill a hundred jars and still not be done.\n\nHappy Valentine's Day.\nLove, ${from}`),
-      finale(`I love you, ${to}`, "Every single reason.", "hearts"),
+      dress(intro(`For ${to}, with love`, `${from} filled a jar with reasons. It wasn't hard.`, "Open the jar"), {
+        background: ["#f4effa", "#e3d7f2"], gradient: "glow", text: "#2e1f47", accent: "#7b4fa8", envelope: "#d9c7f0",
+        heading: "storybook", body: "storybook", burst: "hearts", transition: "fade",
+        stickers: [sticker("🫙", 9, 9, 12, "float", -8), sticker("💜", 8, 90, 11, "pulse"), sticker("✉️", 92, 90, 11, "sway")],
+      }, { gotMail: "A jar of love notes" }),
+      dress(
+        reasons("Reasons I love you", "Tap the jar to pull out a note", [
+          "The way you laugh at your own jokes before you finish them",
+          "You always save me the last bite",
+          "How safe I feel when you hug me",
+          "Your terrible singing in the car",
+          "You make boring days fun",
+          "The way you look at me when you think I'm not looking",
+          "You're you. That's the main one.",
+        ]),
+        {
+          background: ["#2a1940", "#3d2560"], gradient: "down", text: "#f6f0ff", accent: "#c9a7f0",
+          heading: "storybook", body: "storybook", burst: "hearts", transition: "zoom",
+          stickers: [sticker("💜", 8, 13, 11, "pulse"), sticker("💌", 8, 90, 11, "float", -10), sticker("✨", 92, 90, 9, "pulse")],
+        },
+        { jarEmpty: "Wait… one note's stuck at the bottom." },
+      ),
+      dress(typeit("The last note", "The ink's smudged on this one. It's three little words. Type them to read it.", "I love you", "That's the one. The main reason of all."), {
+        background: ["#f4effa"], pattern: "dots", text: "#2e1f47", accent: "#7b4fa8",
+        heading: "storybook", body: "storybook", burst: "hearts", transition: "fade",
+        stickers: [sticker("🔍", 9, 13, 11, "float"), sticker("💜", 92, 90, 11, "pulse")],
+      }, { typeStart: "Type the three words…" }),
+      dress(photos("Some of my favourite reasons"), {
+        background: ["#e3d7f2", "#f4effa"], gradient: "down", text: "#2e1f47", accent: "#7b4fa8",
+        heading: "storybook", body: "storybook", transition: "flip",
+        stickers: [sticker("💞", 9, 13, 10, "float"), sticker("🌙", 92, 90, 10, "sway")],
+      }),
+      dress(message("And one more thing", `I could fill a hundred jars and still not be done.\n\nThank you for every ordinary day you've turned into a good one.\n\nHappy Valentine's Day.\nLove, ${from}`), {
+        background: ["#2a1940", "#3d2560"], gradient: "glow", text: "#f6f0ff", accent: "#c9a7f0",
+        heading: "storybook", body: "storybook", transition: "blur",
+        stickers: [sticker("💌", 9, 13, 10, "float", -10), sticker("💜", 92, 90, 10, "pulse")],
+      }),
+      dress(finale(`I love you, ${to}`, "Every single reason.", "hearts"), {
+        background: ["#f4effa", "#e3d7f2"], gradient: "glow", text: "#2e1f47", accent: "#7b4fa8",
+        heading: "storybook", body: "storybook", transition: "zoom",
+        stickers: [sticker("🫙", 9, 14, 12, "float"), sticker("💜", 8, 90, 11, "pulse"), sticker("💌", 92, 90, 11, "sway", 8)],
+      }),
     ],
     demo: { to: "Olivia", from: "Sam", photos: [P.sunset, P.coffee, P.lights] },
   },
@@ -298,14 +494,40 @@ export const TEMPLATES: Template[] = [
     ambient: "confetti",
     emoji: "🎂",
     headline: "Make a wish!",
-    blurb: "Blow out the candles, flick through the memories, and get buried in confetti.",
+    blurb: "Blow out the candles, decide how much cake you're having, flick through the memories, and get buried in confetti.",
     featured: true,
+    // Sunshine yellow and hot pink against deep plum, in a chunky party headline.
     screens: (to, from) => [
-      intro(`It's your day, ${to}!`, `${from} has a surprise for you.`, "Let's party"),
-      game("blow-candles", "Make a wish…", "Tap every flame to blow out your candles", "Wish made! I hope it comes true"),
-      photos("Another year of great memories"),
-      message("Happy birthday!", `Here's to another year of being amazing. Can't wait to celebrate with you.\n\nLove, ${from}`),
-      finale(`Happy Birthday ${to}!`, "Go eat some cake. You've earned it.", "confetti"),
+      dress(intro(`It's your day, ${to}!`, `${from} has a surprise for you.`, "Let's party"), {
+        background: ["#fff4c7", "#ffe08a"], gradient: "glow", text: "#2b0f3a", accent: "#d42f66", envelope: "#f7a8c4",
+        heading: "bold", body: "rounded", burst: "confetti", transition: "zoom",
+        stickers: [sticker("🎈", 8, 10, 13, "float", -8), sticker("🎉", 8, 90, 12, "bounce"), sticker("🎂", 92, 90, 12)],
+      }, { gotMail: "Party invitation" }),
+      dress(game("blow-candles", "Make a wish…", "Tap every flame to blow out your candles", "Wish made! I hope it comes true"), {
+        background: ["#2b0f3a", "#47185e"], gradient: "down", text: "#fff4c7", accent: "#ffd23f",
+        heading: "bold", body: "rounded", burst: "balloons", transition: "zoom",
+        stickers: [sticker("🕯️", 8, 13, 11, "float"), sticker("🎈", 8, 90, 12, "float"), sticker("✨", 92, 90, 9, "pulse")],
+      }),
+      dress(slider("How much cake are you having today?", "A sliver", "The whole thing", "The whole cake it is. No judgement."), {
+        background: ["#fff4c7", "#ffd3e2"], gradient: "diagonal", text: "#2b0f3a", accent: "#d42f66",
+        heading: "bold", body: "rounded", burst: "confetti", transition: "bounce",
+        stickers: [sticker("🍰", 9, 14, 12, "bounce"), sticker("🧁", 8, 90, 11, "sway"), sticker("🍓", 92, 90, 10, "float")],
+      }, { sliderLines: ["Just a sliver? Really?", "A normal slice…", "A big slice…", "Nearly the whole cake…"] }),
+      dress(photos("Another year of great memories"), {
+        background: ["#2b0f3a"], pattern: "dots", text: "#fff4c7", accent: "#ffd23f",
+        heading: "bold", body: "rounded", transition: "flip",
+        stickers: [sticker("📸", 8, 13, 11, "none", -10), sticker("🎊", 92, 90, 12, "float")],
+      }),
+      dress(message("Happy birthday!", `Here's to another year of being amazing. Thank you for all the laughs, and for being exactly who you are.\n\nCan't wait to celebrate with you.\n\nLove, ${from}`), {
+        background: ["#fff9e3", "#fff4c7"], gradient: "down", text: "#2b0f3a", accent: "#d42f66",
+        heading: "bold", body: "rounded", transition: "fade",
+        stickers: [sticker("🎁", 9, 13, 11, "sway", -8), sticker("🎈", 92, 90, 12, "float")],
+      }),
+      dress(finale(`Happy Birthday ${to}!`, "Go eat some cake. You've earned it.", "confetti"), {
+        background: ["#2b0f3a", "#47185e"], gradient: "glow", text: "#fff4c7", accent: "#ffd23f",
+        heading: "bold", body: "rounded", transition: "zoom",
+        stickers: [sticker("🎂", 8, 14, 12, "bounce"), sticker("🎈", 8, 90, 13, "float"), sticker("🎉", 92, 90, 12, "sway")],
+      }),
     ],
     demo: { to: "Olivia", from: "Sam", photos: [P.cake, P.balloons, P.summer] },
   },
@@ -320,39 +542,102 @@ export const TEMPLATES: Template[] = [
     headline: "Admit it. You're old now.",
     blurb: "Gentle bullying about their age, a balloon-popping game, and a quiz about how old they feel.",
     featured: true,
+    // Old-fashioned: sepia cream, faded teal and mustard, like a granny's front room.
     screens: (to, from) => [
-      intro(`Happy birthday, ${to}!`, `${from} would like to discuss your age.`, "Ugh, fine"),
-      question("Be honest. Are you old now?", "Fine, yes", "Never", "Thank you for your honesty. Here's a balloon."),
-      game("pop-balloons", "Pop your birthday balloons", "Pop 10 balloons before your knees give out", "Nice! Still got it. Sort of"),
-      quiz(
-        "Age check",
-        [
-          q("What's the best part of a birthday?", ["The cake", "The presents", "Pretending you're not a year older"], 2),
-          q("What time is bedtime now?", ["Midnight", "Whenever", "9:30, with a cup of tea"], 2),
-        ],
-        "Officially certified: old, but fabulous.",
+      dress(intro(`Happy birthday, ${to}!`, `${from} would like to discuss your age.`, "Ugh, fine"), {
+        background: ["#f6ecd6", "#ecdcb8"], gradient: "glow", text: "#3b2a1a", accent: "#2f6f6a", envelope: "#e0a93a",
+        heading: "storybook", body: "modern", burst: "stars", transition: "fade",
+        stickers: [sticker("👵", 8, 9, 12, "sway"), sticker("🎂", 8, 90, 12), sticker("👓", 92, 90, 11, "float", -10)],
+      }, { gotMail: "Important birthday notice", tapEnvelope: "Tap the envelope (gently, at your age)" }),
+      dress(question("Be honest. Are you old now?", "Fine, yes", "Never", "Thank you for your honesty. Here's a balloon."), {
+        background: ["#173b38", "#1f4b47"], gradient: "down", text: "#f6ecd6", accent: "#e0a93a",
+        heading: "storybook", body: "modern", burst: "balloons", transition: "drop",
+        stickers: [sticker("🧓", 8, 14, 12, "bounce"), sticker("🫖", 8, 90, 11, "sway"), sticker("🕰️", 92, 90, 11)],
+      }, { noLines: ["Says who?", "Your knees say otherwise", "Check your birth certificate", "Sit down, you'll pull something", "Be honest now", "Denial won't help", "Lying at your age?"] }),
+      dress(game("pop-balloons", "Pop your birthday balloons", "Pop 10 balloons before your knees give out", "Nice! Still got it. Sort of"), {
+        background: ["#f6ecd6", "#f0d9a8"], gradient: "down", text: "#3b2a1a", accent: "#2f6f6a",
+        heading: "storybook", body: "modern", burst: "confetti", transition: "bounce",
+        stickers: [sticker("🎈", 8, 14, 12, "float"), sticker("🩹", 8, 90, 10, "none", -20), sticker("🎉", 92, 90, 11, "sway")],
+      }),
+      dress(
+        quiz(
+          "Age check",
+          [
+            q("What's the best part of a birthday?", ["The cake", "The presents", "Pretending you're not a year older"], 2),
+            q("What time is bedtime now?", ["Midnight", "Whenever", "9:30, with a cup of tea"], 2),
+          ],
+          "Officially certified: old, but fabulous.",
+        ),
+        {
+          background: ["#173b38"], pattern: "checks", text: "#f6ecd6", accent: "#e0a93a",
+          heading: "storybook", body: "modern", burst: "stars", transition: "slide",
+          stickers: [sticker("🧶", 8, 13, 11, "spin"), sticker("🍵", 8, 90, 11, "sway"), sticker("🛋️", 92, 90, 11)],
+        },
+        {
+          wrongLines: ["Speak up, dear.", "Have you got your glasses on?", "Wrong. Bless you.", "Try again, slowly.", "In my day that was wrong too."],
+          quizPerfect: "Full marks. Still sharp as a tack.",
+        },
       ),
-      message("Jokes aside…", `You're getting better with age. Like cheese. Or wine. Mostly cheese.\n\nHave the best day.\n${from}`),
-      finale(`Happy Birthday, ${to}!`, "Don't forget to take your vitamins.", "confetti"),
+      dress(photos("Then and now"), {
+        background: ["#ecdcb8"], text: "#3b2a1a", accent: "#2f6f6a",
+        heading: "storybook", body: "modern", transition: "flip",
+        stickers: [sticker("📸", 9, 13, 11, "none", -10), sticker("🕰️", 92, 90, 11, "sway")],
+      }),
+      dress(message("Jokes aside…", `You're getting better with age. Like cheese. Or wine. Mostly cheese.\n\nHonestly, though, every year with you in it is a good one. I hope this one's the best yet.\n\nHave the best day.\n${from}`), {
+        background: ["#fbf5e8", "#f6ecd6"], gradient: "glow", text: "#3b2a1a", accent: "#2f6f6a",
+        heading: "storybook", body: "modern", transition: "fade",
+        stickers: [sticker("🧀", 9, 13, 11, "sway"), sticker("🍷", 92, 90, 11, "float")],
+      }),
+      dress(finale(`Happy Birthday, ${to}!`, "Don't forget to take your vitamins.", "balloons"), {
+        background: ["#173b38", "#2f6f6a"], gradient: "glow", text: "#f6ecd6", accent: "#e0a93a",
+        heading: "storybook", body: "modern", transition: "zoom",
+        stickers: [sticker("🎂", 8, 14, 12, "bounce"), sticker("💊", 8, 90, 10, "none", -20), sticker("🎉", 92, 90, 12, "sway")],
+      }),
     ],
-    demo: { to: "Olivia", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam", photos: [P.cake, P.teacup, P.balloons] },
   },
   {
     slug: "shake-the-present",
     name: "Shake the Present",
     occasion: "birthday",
     tone: "funny",
-    theme: "party",
+    theme: "mint",
     ambient: "confetti",
     emoji: "📳",
     headline: "Shake your phone to open it",
-    blurb: "Made for a phone: they shake it like a present to burst it open. There's a tap option if they're on a laptop.",
+    blurb: "Made for a phone: they shake it like a present to burst it open, then catch the sweets that fly out. There's a tap option if they're on a laptop.",
+    // Fresh mint and deep teal with a magenta bow, scribbled in felt-tip.
     screens: (to, from) => [
-      intro(`${to}, there's a present for you`, `${from} wrapped it tightly. You'll need to shake it.`, "Ooh"),
-      game("shake-it", "Shake it open!", "Shake your phone as hard as you dare", "It burst open!"),
-      message("What's inside?", `A whole year of me being there for you. Plus cake, if you share.\n\nHappy birthday!\n${from}`),
-      photos("Look how far we've come"),
-      finale(`Happy Birthday ${to}!`, "You can stop shaking now.", "confetti"),
+      dress(intro(`${to}, there's a present for you`, `${from} wrapped it tightly. You'll need to shake it.`, "Ooh"), {
+        background: ["#e9fbf7", "#c8f3ea"], gradient: "glow", text: "#0b3b3a", accent: "#d02e7b", envelope: "#ffd6ea",
+        heading: "marker", body: "rounded", burst: "confetti", transition: "zoom",
+        stickers: [sticker("🎁", 8, 9, 13, "bounce"), sticker("📳", 8, 90, 12, "sway"), sticker("🎀", 92, 90, 11, "float")],
+      }, { gotMail: "Fragile: shake well" }),
+      dress(game("shake-it", "Shake it open!", "Shake your phone as hard as you dare", "It burst open!"), {
+        background: ["#0b3b3a", "#0b4744"], gradient: "down", text: "#e9fbf7", accent: "#f5428f",
+        heading: "marker", body: "rounded", burst: "confetti", transition: "zoom",
+        stickers: [sticker("💥", 8, 14, 12, "pulse"), sticker("🎁", 8, 90, 12, "bounce"), sticker("📳", 92, 90, 11, "sway")],
+      }, { shaking: "Harder! It's nearly open…" }),
+      dress(game("catch-candy", "Sweets everywhere!", "Catch 10 falling sweets", "You caught the lot. Sharing optional.", "game2"), {
+        background: ["#e9fbf7", "#fbe3f0"], gradient: "down", text: "#0b3b3a", accent: "#d02e7b",
+        heading: "marker", body: "rounded", burst: "balloons", transition: "bounce",
+        stickers: [sticker("🍬", 8, 13, 11, "spin"), sticker("🍭", 8, 90, 12, "sway"), sticker("🍫", 92, 90, 11, "bounce")],
+      }),
+      dress(photos("Look how far we've come"), {
+        background: ["#0b3b3a"], pattern: "dots", text: "#e9fbf7", accent: "#ff8ac0",
+        heading: "marker", body: "rounded", transition: "flip",
+        stickers: [sticker("📸", 8, 13, 11, "none", -10), sticker("🎉", 92, 90, 12, "bounce")],
+      }),
+      dress(message("What's inside?", `A whole year of me being there for you. Plus cake, if you share.\n\nHonestly, you're one of the best things in my life, and I'm so glad I get to celebrate you.\n\nHappy birthday!\n${from}`), {
+        background: ["#e9fbf7"], text: "#0b3b3a", accent: "#d02e7b",
+        heading: "marker", body: "rounded", transition: "fade",
+        stickers: [sticker("🎀", 9, 13, 11, "sway"), sticker("🎂", 92, 90, 11)],
+      }),
+      dress(finale(`Happy Birthday ${to}!`, "You can stop shaking now.", "confetti"), {
+        background: ["#0b3b3a", "#0e5450"], gradient: "glow", text: "#e9fbf7", accent: "#ff8ac0",
+        heading: "marker", body: "rounded", transition: "zoom",
+        stickers: [sticker("🎁", 8, 14, 12, "bounce"), sticker("📳", 8, 90, 11, "sway"), sticker("🎉", 92, 90, 12, "float")],
+      }),
     ],
     demo: { to: "Olivia", from: "Sam", photos: [P.cake, P.balloons, P.summer] },
   },
@@ -365,15 +650,55 @@ export const TEMPLATES: Template[] = [
     ambient: "sparkles",
     emoji: "💛",
     headline: "Things I want you to know",
-    blurb: "A warm, sincere birthday message with your photos. Perfect for parents, best friends and partners.",
+    blurb: "A warm, sincere birthday card: a flower that blooms for them, a jar of things you love about them, your photos and a heartfelt letter. Perfect for parents, best friends and partners.",
+    // Honey and warm rust with gold, in a flowing script.
     screens: (to, from) => [
-      intro(`Happy birthday, ${to}`, "I wanted to say this properly.", "Open"),
-      message(
-        "On your birthday",
-        `${to}, I hope today you feel even a fraction of how loved you are. You make everyone around you better, and I'm so grateful you're in my life.\n\nHere's to the year ahead.\n\n${from}`,
+      dress(intro(`Happy birthday, ${to}`, "I wanted to say this properly, so take your time.", "I'm ready"), {
+        background: ["#fdf3df", "#f7e2b8"], gradient: "glow", text: "#4a2412", accent: "#b7791f", envelope: "#fffaf0",
+        heading: "script", body: "storybook", burst: "sparkles", transition: "fade",
+        stickers: [sticker("💛", 8, 9, 11, "pulse"), sticker("🌻", 8, 90, 12, "sway"), sticker("🌼", 92, 90, 11, "float")],
+      }),
+      dress(game("grow-flower", "Watch this year bloom", "Water the plant until it blooms", "Here's to a year as lovely as you"), {
+        background: ["#3d1a0c", "#5a2a12"], gradient: "down", text: "#fdf3df", accent: "#f2c46d",
+        heading: "script", body: "storybook", burst: "petals", transition: "fade",
+        stickers: [sticker("🌱", 8, 13, 11, "sway"), sticker("💧", 8, 90, 10, "float"), sticker("🌼", 92, 90, 11, "spin")],
+      }),
+      dress(
+        reasons("Things I love about you", "Tap the jar for each one", [
+          "The way you make everyone feel at home",
+          "Your laugh, which is the best sound I know",
+          "How you always know what to say",
+          "Everything you've taught me without trying",
+          "That you're always there when it matters",
+          "You. Just as you are.",
+        ]),
+        {
+          background: ["#fdf3df", "#fbe9c8"], gradient: "down", text: "#4a2412", accent: "#b7791f",
+          heading: "script", body: "storybook", burst: "sparkles",
+          stickers: [sticker("💛", 8, 13, 11, "pulse"), sticker("🌻", 8, 90, 11, "sway"), sticker("✨", 92, 90, 9, "pulse")],
+        },
       ),
-      photos("A few of my favourite memories"),
-      finale(`Happy Birthday, ${to}`, "Wishing you a year as wonderful as you are.", "sparkles"),
+      dress(photos("A few of my favourite memories"), {
+        background: ["#3d1a0c"], text: "#fdf3df", accent: "#f2c46d",
+        heading: "script", body: "storybook", transition: "blur",
+        stickers: [sticker("🌻", 8, 13, 11, "sway"), sticker("💛", 92, 90, 10, "pulse")],
+      }),
+      dress(
+        message(
+          "On your birthday",
+          `${to}, I hope today you feel even a fraction of how loved you are. You make everyone around you better, and I'm so grateful you're in my life.\n\nHere's to the year ahead.\n\n${from}`,
+        ),
+        {
+          background: ["#fffaf0", "#fdf3df"], gradient: "down", text: "#4a2412", accent: "#b7791f",
+          heading: "script", body: "storybook", transition: "fade",
+          stickers: [sticker("🌼", 9, 13, 10, "float"), sticker("💛", 92, 90, 10, "pulse")],
+        },
+      ),
+      dress(finale(`Happy Birthday, ${to}`, "Wishing you a year as wonderful as you are.", "sparkles"), {
+        background: ["#3d1a0c", "#6b3416"], gradient: "glow", text: "#fdf3df", accent: "#f2c46d",
+        heading: "script", body: "storybook", transition: "zoom",
+        stickers: [sticker("🌻", 8, 14, 12, "sway"), sticker("💛", 8, 90, 11, "pulse"), sticker("✨", 92, 90, 10, "pulse")],
+      }),
     ],
     demo: { to: "Mum", from: "Ravi", photos: [P.summer, P.cake, P.balloons] },
   },
@@ -386,22 +711,58 @@ export const TEMPLATES: Template[] = [
     ambient: "confetti",
     emoji: "🧠",
     headline: "How well do you know me?",
-    blurb: "A birthday quiz with questions you write yourself, then a memory game and a party finale.",
+    blurb: "A birthday quiz with questions you write yourself, then a memory game, your photos and a party finale.",
+    // An exam: graph paper and red pen, then a green chalkboard, on a typewriter.
     screens: (to, from) => [
-      intro(`Happy birthday ${to}!`, `But first, ${from} needs to know if you've been paying attention.`, "Bring it on"),
-      quiz(
-        "Birthday quiz",
-        [
-          q(`What's ${from}'s favourite food?`, ["Pizza", "Sushi", "Anything you're eating"], 2),
-          q(`Where did we first meet?`, ["School", "Work", "A party"], 0),
-          q(`What's ${from}'s worst habit?`, ["Being late", "Snoring", `${from} has no bad habits`], 2),
-        ],
-        "You know me so well. Suspiciously well.",
+      dress(intro(`Happy birthday ${to}!`, `But first, ${from} needs to know if you've been paying attention.`, "Bring it on"), {
+        background: ["#f7fbf9", "#dff3ea"], gradient: "glow", pattern: "grid", text: "#14303a", accent: "#d03e2a", envelope: "#ffd166",
+        heading: "typewriter", body: "modern", burst: "stars", transition: "fade",
+        stickers: [sticker("🧠", 8, 9, 12, "pulse"), sticker("✏️", 8, 90, 11, "none", -30), sticker("📝", 92, 90, 11, "sway")],
+      }, { gotMail: "Pop quiz!" }),
+      dress(
+        quiz(
+          "Birthday quiz",
+          [
+            q(`What's ${from}'s favourite food?`, ["Pizza", "Sushi", "Anything you're eating"], 2),
+            q(`Where did we first meet?`, ["School", "Work", "A party"], 0),
+            q(`What's ${from}'s worst habit?`, ["Being late", "Snoring", `${from} has no bad habits`], 2),
+          ],
+          "You know me so well. Suspiciously well.",
+        ),
+        {
+          background: ["#1d3b33", "#24493f"], gradient: "down", text: "#f2f7f2", accent: "#ffd166",
+          heading: "typewriter", body: "modern", burst: "confetti", transition: "slide",
+          stickers: [sticker("🤔", 8, 14, 12, "bounce"), sticker("✏️", 8, 90, 11, "none", -20), sticker("💡", 92, 90, 11, "pulse")],
+        },
+        {
+          wrongLines: ["Wrong! See me after class.", "Excuse me?", "Were you even listening?", "Minus one point.", "I'm telling everyone."],
+          quizPerfect: "Full marks. Gold star for you.",
+          quizMissedOne: "1 wrong. We'll discuss it at your party.",
+          quizMissed: "{n} wrong. We'll discuss it at your party.",
+        },
       ),
-      game("memory-match", "Birthday memory", "Find all the matching pairs", "Sharp as ever!"),
-      finale(`Happy Birthday ${to}!`, "You passed. Now go celebrate.", "confetti"),
+      dress(game("memory-match", "Birthday memory", "Find all the matching pairs", "Sharp as ever!"), {
+        background: ["#f7fbf9"], pattern: "grid", text: "#14303a", accent: "#d03e2a",
+        heading: "typewriter", body: "modern", burst: "confetti", transition: "flip",
+        stickers: [sticker("🧠", 8, 13, 11, "pulse"), sticker("🎂", 8, 90, 11), sticker("⭐", 92, 90, 11, "spin")],
+      }),
+      dress(photos("Proof you were there"), {
+        background: ["#dff3ea", "#f7fbf9"], gradient: "down", text: "#14303a", accent: "#d03e2a",
+        heading: "typewriter", body: "modern", transition: "fade",
+        stickers: [sticker("📸", 8, 13, 11, "none", -10), sticker("🔍", 92, 90, 11, "float")],
+      }),
+      dress(message("Quiz aside", `However you scored, you know me better than almost anyone, and I'm lucky that you do.\n\nThank you for paying attention all these years. Have the best birthday.\n\n${from}`), {
+        background: ["#1d3b33", "#24493f"], gradient: "glow", text: "#f2f7f2", accent: "#ffd166",
+        heading: "typewriter", body: "modern", transition: "fade",
+        stickers: [sticker("🏆", 8, 13, 11, "float"), sticker("💚", 92, 90, 10, "pulse")],
+      }),
+      dress(finale(`Happy Birthday ${to}!`, "You passed. Now go celebrate.", "stars"), {
+        background: ["#f7fbf9", "#dff3ea"], gradient: "glow", pattern: "grid", text: "#14303a", accent: "#d03e2a",
+        heading: "typewriter", body: "modern", transition: "zoom",
+        stickers: [sticker("🏆", 8, 14, 12, "bounce"), sticker("🎂", 8, 90, 12), sticker("🎉", 92, 90, 12, "sway")],
+      }),
     ],
-    demo: { to: "Olivia", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam", photos: [P.friends, P.cake, P.balloons] },
   },
 
   {
@@ -415,12 +776,38 @@ export const TEMPLATES: Template[] = [
     headline: "Smash it for your surprise",
     blurb: "They whack a swinging piñata until it bursts with sweets, then spin a wheel for their birthday present.",
     featured: true,
+    // A fiesta: warm white and bright orange with deep purple, bubbly and round.
     screens: (to, from) => [
-      intro(`It's party time, ${to}!`, `${from} hung up a piñata just for you. Grab a stick.`, "Let's smash it"),
-      game("pinata", "Smash the piñata!", "Tap it 8 times to break it open", "Sweets everywhere!"),
-      wheel("Spin for your present", "What will it be?", ["Cake", "A big hug", "Breakfast in bed", "A day off chores", "A surprise trip", "Karaoke night"], "Happy birthday to you!"),
-      photos("Party memories"),
-      finale(`Happy Birthday, ${to}!`, `Love, ${from}. Now go and eat all those sweets.`, "confetti"),
+      dress(intro(`It's party time, ${to}!`, `${from} hung up a piñata just for you. Grab a stick.`, "Let's smash it"), {
+        background: ["#fff8ef", "#ffe2c2"], gradient: "glow", pattern: "zigzag", text: "#3a1150", accent: "#e85d04", envelope: "#ff8fb8",
+        heading: "rounded", body: "rounded", burst: "confetti", transition: "zoom",
+        stickers: [sticker("🪅", 8, 9, 13, "sway"), sticker("🎊", 8, 90, 12, "bounce"), sticker("🍬", 92, 90, 11, "spin")],
+      }, { gotMail: "You're invited!" }),
+      dress(game("pinata", "Smash the piñata!", "Tap it 8 times to break it open", "Sweets everywhere!"), {
+        background: ["#3a1150", "#561a72"], gradient: "down", text: "#fff8ef", accent: "#ffb703",
+        heading: "rounded", body: "rounded", burst: "confetti", transition: "zoom",
+        stickers: [sticker("🍭", 8, 90, 11, "bounce"), sticker("🍬", 92, 90, 11, "spin")],
+      }),
+      dress(wheel("Spin for your present", "What will it be?", ["Cake", "A big hug", "Breakfast in bed", "A day off chores", "A surprise trip", "Karaoke night"], "Happy birthday to you!"), {
+        background: ["#fff8ef", "#ffe8f0"], gradient: "diagonal", text: "#3a1150", accent: "#e85d04",
+        heading: "rounded", body: "rounded", burst: "balloons", transition: "spin",
+        stickers: [sticker("🎁", 8, 13, 11, "bounce"), sticker("🎉", 8, 90, 12, "sway"), sticker("🎈", 92, 90, 12, "float")],
+      }, { spin: "Spin it!" }),
+      dress(photos("Party memories"), {
+        background: ["#3a1150"], pattern: "dots", text: "#fff8ef", accent: "#ffb703",
+        heading: "rounded", body: "rounded", transition: "flip",
+        stickers: [sticker("📸", 8, 13, 11, "none", -10), sticker("🎊", 92, 90, 12, "float")],
+      }),
+      dress(message("Before you eat all the sweets…", `I hope your birthday is as much fun as smashing a piñata, and a lot less violent.\n\nThank you for being the person who makes every party better. Here's to you.\n\n${from}`), {
+        background: ["#fff8ef", "#fff1e0"], gradient: "down", text: "#3a1150", accent: "#e85d04",
+        heading: "rounded", body: "rounded", transition: "fade",
+        stickers: [sticker("🎂", 9, 13, 11), sticker("🧁", 92, 90, 11, "sway")],
+      }),
+      dress(finale(`Happy Birthday, ${to}!`, `Love, ${from}. Now go and eat all those sweets.`, "confetti"), {
+        background: ["#3a1150", "#561a72"], gradient: "glow", text: "#fff8ef", accent: "#ffb703",
+        heading: "rounded", body: "rounded", transition: "zoom",
+        stickers: [sticker("🪅", 8, 14, 13, "sway"), sticker("🍬", 8, 90, 11, "spin"), sticker("🎉", 92, 90, 12, "bounce")],
+      }),
     ],
     demo: { to: "Olivia", from: "Sam", photos: [P.balloons, P.cake, P.summer] },
   },
@@ -434,21 +821,51 @@ export const TEMPLATES: Template[] = [
     emoji: "🎟️",
     headline: "A book of birthday treats",
     blurb: "They blow out the candles, then get a book of birthday coupons to redeem all year: breakfast in bed, film picks and more.",
+    // Peach and sage with a coral stamp, handwritten like a homemade coupon book.
     screens: (to, from) => [
-      intro(`Happy birthday, ${to}!`, `${from} got you something you can actually use.`, "Ooh, what is it?"),
-      game("blow-candles", "Make a wish first", "Tap each flame to blow out your candles", "Wish made! Now for your present…"),
-      coupons("Your birthday coupons", "Tap one to redeem it. Screenshot it as proof!", [
-        "Breakfast in bed",
-        "You pick the film (no complaints)",
-        "One day off chores",
-        "Dinner of your choice",
-        "Unlimited hugs",
-        "I'll sing to you (sorry)",
-      ]),
-      message("Happy birthday", `I hope this year brings you everything you've been wishing for. And if it doesn't, you've got coupons.\n\n${from}`),
-      finale(`Happy Birthday, ${to}!`, "Coupons valid for one whole year.", "confetti"),
+      dress(intro(`Happy birthday, ${to}!`, `${from} got you something you can actually use.`, "Ooh, what is it?"), {
+        background: ["#fff1e6", "#ffd9c2"], gradient: "glow", text: "#23402c", accent: "#c34c39", envelope: "#dcebd9",
+        heading: "handwritten", body: "rounded", burst: "sparkles", transition: "fade",
+        stickers: [sticker("🎟️", 8, 9, 12, "sway", -12), sticker("🎂", 8, 90, 12), sticker("🎀", 92, 90, 11, "float")],
+      }),
+      dress(game("blow-candles", "Make a wish first", "Tap each flame to blow out your candles", "Wish made! Now for your present…"), {
+        background: ["#23402c", "#2e5239"], gradient: "down", text: "#fff1e6", accent: "#ffb39e",
+        heading: "handwritten", body: "rounded", burst: "stars", transition: "fade",
+        stickers: [sticker("🕯️", 8, 13, 11, "float"), sticker("✨", 8, 90, 9, "pulse"), sticker("🎂", 92, 90, 12)],
+      }),
+      dress(
+        coupons("Your birthday coupons", "Tap one to redeem it. Screenshot it as proof!", [
+          "Breakfast in bed",
+          "You pick the film (no complaints)",
+          "One day off chores",
+          "Dinner of your choice",
+          "Unlimited hugs",
+          "I'll sing to you (sorry)",
+        ]),
+        {
+          background: ["#dcebd9", "#eef6ec"], gradient: "down", pattern: "dots", text: "#23402c", accent: "#c34c39",
+          heading: "handwritten", body: "rounded", transition: "slide",
+          stickers: [sticker("✂️", 8, 13, 11, "none", -30), sticker("🎟️", 8, 90, 12, "sway"), sticker("💌", 92, 90, 11, "float")],
+        },
+        { coupon: "Birthday coupon", couponClaim: "Screenshot this and show me" },
+      ),
+      dress(photos("Memories worth keeping"), {
+        background: ["#fff1e6"], text: "#23402c", accent: "#c34c39",
+        heading: "handwritten", body: "rounded", transition: "flip",
+        stickers: [sticker("📸", 8, 13, 11, "none", -10), sticker("🌷", 92, 90, 11, "sway")],
+      }),
+      dress(message("Happy birthday", `I hope this year brings you everything you've been wishing for. And if it doesn't, you've got coupons.\n\nYou deserve every one of them, and plenty more. Thank you for being you.\n\n${from}`), {
+        background: ["#23402c", "#2e5239"], gradient: "glow", text: "#fff1e6", accent: "#ffb39e",
+        heading: "handwritten", body: "rounded", transition: "fade",
+        stickers: [sticker("💚", 8, 13, 10, "pulse"), sticker("🎀", 92, 90, 11, "sway")],
+      }),
+      dress(finale(`Happy Birthday, ${to}!`, "Coupons valid for one whole year.", "hearts"), {
+        background: ["#fff1e6", "#dcebd9"], gradient: "diagonal", text: "#23402c", accent: "#c34c39",
+        heading: "handwritten", body: "rounded", transition: "zoom",
+        stickers: [sticker("🎟️", 8, 14, 12, "sway"), sticker("🎂", 8, 90, 12, "bounce"), sticker("🎉", 92, 90, 11, "float")],
+      }),
     ],
-    demo: { to: "Olivia", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam", photos: [P.cake, P.friends, P.summer] },
   },
   {
     slug: "pick-your-present",
@@ -460,14 +877,40 @@ export const TEMPLATES: Template[] = [
     emoji: "🎁",
     headline: "Three boxes. One present. No pressure.",
     blurb: "They choose a mystery box (they're all the same, shh), then pull a slot machine until they hit the jackpot.",
+    // A game show: red velvet curtains and spotlight gold, in an elegant serif.
     screens: (to, from) => [
-      intro(`Happy birthday, ${to}!`, `${from} has three presents for you. You can only pick one.`, "Show me"),
-      boxes("Pick a present", "Choose wisely. No swapsies.", ["A hug", "A hug", "A hug"]),
-      game("slot-machine", "Bonus round!", "Pull the lever for the jackpot", "JACKPOT! Happy birthday"),
-      message("In all seriousness", `Happy birthday. You deserve the best day ever (and more than a hug, which is coming, I promise).\n\n${from}`),
-      finale(`Happy Birthday, ${to}!`, "The real present was me all along.", "confetti"),
+      dress(intro(`Happy birthday, ${to}!`, `${from} has three presents for you. You can only pick one.`, "Show me"), {
+        background: ["#5a0f1e", "#7a1428"], gradient: "glow", text: "#fff5e1", accent: "#f5c542", envelope: "#fff5e1",
+        heading: "classic", body: "modern", burst: "stars", transition: "fade",
+        stickers: [sticker("🎁", 8, 9, 12, "bounce"), sticker("🎤", 8, 90, 11, "sway"), sticker("✨", 92, 90, 10, "pulse")],
+      }, { gotMail: "Come on down!" }),
+      dress(boxes("Pick a present", "Choose wisely. No swapsies.", ["A hug", "A hug", "A hug"]), {
+        background: ["#fff5e1", "#fbe2a8"], gradient: "glow", text: "#3d0a14", accent: "#c0392b",
+        heading: "classic", body: "modern", burst: "confetti", transition: "zoom",
+        stickers: [sticker("🎁", 8, 14, 12, "bounce"), sticker("🤔", 8, 90, 11, "sway"), sticker("❓", 92, 90, 11, "pulse")],
+      }, { boxesPicked: "And the present is…" }),
+      dress(game("slot-machine", "Bonus round!", "Pull the lever for the jackpot", "JACKPOT! Happy birthday"), {
+        background: ["#5a0f1e", "#3d0a14"], gradient: "down", text: "#fff5e1", accent: "#d97706",
+        heading: "classic", body: "modern", burst: "fireworks", transition: "drop",
+        stickers: [sticker("🎰", 8, 14, 12), sticker("🍒", 8, 90, 11, "bounce"), sticker("⭐", 92, 90, 11, "spin")],
+      }),
+      dress(photos("Better than anything in a box"), {
+        background: ["#fff5e1"], text: "#3d0a14", accent: "#c0392b",
+        heading: "classic", body: "modern", transition: "flip",
+        stickers: [sticker("📸", 8, 13, 11, "none", -10), sticker("🎀", 92, 90, 11, "sway")],
+      }),
+      dress(message("In all seriousness", `Happy birthday. You deserve the best day ever (and more than a hug, which is coming, I promise).\n\nThank you for being you. Having you around is the best present I've had.\n\n${from}`), {
+        background: ["#3d0a14", "#5a0f1e"], gradient: "glow", text: "#fff5e1", accent: "#f5c542",
+        heading: "classic", body: "modern", transition: "fade",
+        stickers: [sticker("🎁", 8, 13, 11, "sway"), sticker("💛", 92, 90, 10, "pulse")],
+      }),
+      dress(finale(`Happy Birthday, ${to}!`, "The real present was me all along.", "fireworks"), {
+        background: ["#fff5e1", "#fbe2a8"], gradient: "glow", text: "#3d0a14", accent: "#c0392b",
+        heading: "classic", body: "modern", transition: "zoom",
+        stickers: [sticker("🎁", 8, 14, 12, "bounce"), sticker("🎉", 8, 90, 12, "sway"), sticker("🎈", 92, 90, 12, "float")],
+      }),
     ],
-    demo: { to: "Olivia", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam", photos: [P.balloons, P.cake, P.friends] },
   },
 
   // ---------- Diwali ----------
@@ -480,14 +923,40 @@ export const TEMPLATES: Template[] = [
     ambient: "sparkles",
     emoji: "🪔",
     headline: "Happy Diwali",
-    blurb: "They light the diyas one by one, see your festive photos, then the sky fills with fireworks.",
+    blurb: "They light the diyas one by one, play a Diwali memory game, see your festive photos, then the sky fills with fireworks.",
     featured: true,
+    // Deep plum nights and marigold, with saffron cream in between.
     screens: (to, from) => [
-      intro(`Happy Diwali, ${to}`, `${from} sent you a little festival of lights.`, "Let's begin"),
-      game("light-diyas", "Light the diyas", "Tap each diya to light it", "May your home always be this bright"),
-      photos("Memories that light me up"),
-      message("My Diwali wish for you", `Wishing you and your family love, light, laughter and lots of mithai this Diwali.\n\nWarmly, ${from}`),
-      finale("Shubh Deepavali", "May this year bring you light in every way.", "fireworks"),
+      dress(intro(`Happy Diwali, ${to}`, `${from} sent you a little festival of lights.`, "Let's begin"), {
+        background: ["#2a0c22", "#4a1a3c"], gradient: "glow", text: "#fdf0d5", accent: "#f4a300", envelope: "#c2410c",
+        heading: "classic", body: "modern", burst: "sparkles", transition: "fade",
+        stickers: [sticker("🪔", 8, 9, 12, "pulse"), sticker("🌼", 8, 90, 12, "spin"), sticker("✨", 92, 90, 10, "pulse")],
+      }, { gotMail: "A little festival of lights" }),
+      dress(game("light-diyas", "Light the diyas", "Tap each diya to light it", "May your home always be this bright"), {
+        background: ["#1c0717", "#2a0c22"], gradient: "down", text: "#fdf0d5", accent: "#f4a300",
+        heading: "classic", body: "modern", burst: "fireworks", transition: "fade",
+        stickers: [sticker("🌼", 8, 90, 11, "spin"), sticker("🪔", 92, 90, 11, "pulse")],
+      }),
+      dress(game("memory-match", "Diwali memory", "Find all the matching pairs", "All matched! Happy Diwali", "game2"), {
+        background: ["#fff4dc", "#ffe0a3"], gradient: "glow", pattern: "dots", text: "#4a1a3c", accent: "#c2410c",
+        heading: "classic", body: "modern", burst: "sparkles", transition: "flip",
+        stickers: [sticker("🌸", 8, 13, 11, "spin"), sticker("🪔", 8, 90, 11, "pulse"), sticker("🎆", 92, 90, 11)],
+      }),
+      dress(photos("Memories that light me up"), {
+        background: ["#2a0c22"], text: "#fdf0d5", accent: "#f4a300",
+        heading: "classic", body: "modern", effect: "lanterns", transition: "blur",
+        stickers: [sticker("🪔", 8, 13, 11, "pulse"), sticker("🌼", 92, 90, 11, "spin")],
+      }),
+      dress(message("My Diwali wish for you", `Wishing you and your family love, light, laughter and lots of mithai this Diwali.\n\nMay the year ahead be as bright as your smile, and may every diya you light bring something good your way.\n\nWarmly, ${from}`), {
+        background: ["#fff9ee", "#fff4dc"], gradient: "down", text: "#4a1a3c", accent: "#c2410c",
+        heading: "classic", body: "modern", transition: "fade",
+        stickers: [sticker("🪔", 8, 13, 10, "pulse"), sticker("🌼", 92, 90, 11, "spin")],
+      }),
+      dress(finale(`A very happy Diwali, ${to}`, "May this year bring you light in every way.", "fireworks"), {
+        background: ["#2a0c22", "#4a1a3c"], gradient: "glow", text: "#fdf0d5", accent: "#f4a300",
+        heading: "classic", body: "modern", transition: "zoom",
+        stickers: [sticker("🪔", 8, 14, 12, "pulse"), sticker("🎆", 8, 90, 12), sticker("✨", 92, 90, 10, "pulse")],
+      }),
     ],
     demo: { to: "Olivia", from: "Sam", photos: [P.rangoli, P.diyas, P.fireworks] },
   },
@@ -500,16 +969,56 @@ export const TEMPLATES: Template[] = [
     ambient: "sparkles",
     emoji: "🙏",
     headline: "Blessings for you and yours",
-    blurb: "A graceful card for family and elders, with heartfelt wishes and family photos.",
+    blurb: "A graceful card for family and elders: diyas to light, family photos, a jar of thank-yous and heartfelt blessings.",
+    // Maroon and gold on ivory, in a soft, easy-to-read serif for older eyes.
     screens: (to, from) => [
-      intro(`Happy Diwali, ${to}`, "With love and blessings.", "Open"),
-      message(
-        "Diwali blessings",
-        `May Maa Lakshmi bless your home with happiness, good health and prosperity. May every diya you light this year chase away the darkness.\n\nThank you for everything you do for our family.\n\nWith love, ${from}`,
+      dress(intro(`Happy Diwali, ${to}`, "With love and blessings.", "Light the first diya"), {
+        background: ["#5c1430", "#7a1f3d"], gradient: "glow", text: "#fbf1dc", accent: "#d4a24c", envelope: "#fbf1dc",
+        heading: "storybook", body: "storybook", burst: "sparkles", transition: "fade",
+        stickers: [sticker("🪔", 8, 9, 12, "pulse"), sticker("🌼", 8, 90, 12, "spin"), sticker("🙏", 92, 90, 11)],
+      }, { gotMail: "Shubh Deepavali" }),
+      dress(game("light-diyas", "Light a diya with me", "Tap each diya to light it", "The whole house is glowing"), {
+        background: ["#3e0c21", "#5c1430"], gradient: "down", text: "#fbf1dc", accent: "#d4a24c",
+        heading: "storybook", body: "storybook", burst: "sparkles", transition: "fade",
+        stickers: [sticker("🌼", 8, 90, 11, "spin"), sticker("✨", 92, 90, 9, "pulse")],
+      }),
+      dress(photos("Our family"), {
+        background: ["#fbf5e6", "#f3e3c0"], gradient: "glow", text: "#5c1430", accent: "#9a6a12",
+        heading: "storybook", body: "storybook", transition: "blur",
+        stickers: [sticker("🌼", 8, 13, 11, "spin"), sticker("🪔", 92, 90, 11, "pulse")],
+      }),
+      dress(
+        reasons("What you mean to our family", "Tap the jar for each one", [
+          "You hold our family together",
+          "Your blessings before every big day",
+          "Your kitchen at Diwali, the best place in the world",
+          "Your stories, which we never tire of",
+          "How you make every festival feel like home",
+          "Everything you have done for us",
+        ]),
+        {
+          background: ["#5c1430", "#7a1f3d"], gradient: "down", text: "#fbf1dc", accent: "#d4a24c",
+          heading: "storybook", body: "storybook", burst: "sparkles", transition: "fade",
+          stickers: [sticker("🙏", 8, 13, 11), sticker("💛", 8, 90, 10, "pulse"), sticker("🌼", 92, 90, 11, "spin")],
+        },
+        { jarEmpty: "And so much more." },
       ),
-      photos("Our family"),
-      game("light-diyas", "Light a diya with me", "Tap each diya to light it", "Shubh Deepavali"),
-      finale("Shubh Deepavali", "With love, today and always.", "fireworks"),
+      dress(
+        message(
+          "Diwali blessings",
+          `May Maa Lakshmi bless your home with happiness, good health and prosperity. May every diya you light this year chase away the darkness.\n\nThank you for everything you do for our family.\n\nWith love, ${from}`,
+        ),
+        {
+          background: ["#fffaf0", "#fbf5e6"], gradient: "down", text: "#5c1430", accent: "#9a6a12",
+          heading: "storybook", body: "storybook", transition: "fade",
+          stickers: [sticker("🪔", 8, 13, 10, "pulse"), sticker("🌸", 92, 90, 10, "float")],
+        },
+      ),
+      dress(finale("Shubh Deepavali", "With love, today and always.", "sparkles"), {
+        background: ["#5c1430", "#3e0c21"], gradient: "glow", text: "#fbf1dc", accent: "#d4a24c",
+        heading: "storybook", body: "storybook", transition: "blur",
+        stickers: [sticker("🪔", 8, 14, 12, "pulse"), sticker("🌼", 8, 90, 12, "spin"), sticker("✨", 92, 90, 10, "pulse")],
+      }),
     ],
     demo: { to: "Mum", from: "Ravi", photos: [P.rangoli, P.diyas, P.fireworks] },
   },
@@ -522,14 +1031,41 @@ export const TEMPLATES: Template[] = [
     ambient: "sparkles",
     emoji: "🎆",
     headline: "Shake your phone, launch fireworks",
-    blurb: "Made for a phone: they shake to light the fuse and set off their own fireworks show. Safer than the real thing.",
+    blurb: "Made for a phone: they shake to light the fuse, then launch their own fireworks across the sky. Safer than the real thing.",
+    // A night sky lit with magenta and gold, in a chunky poster headline.
     screens: (to, from) => [
-      intro(`${to}, it's fireworks time`, `${from} packed a whole fireworks show into your phone.`, "Light the fuse"),
-      game("shake-it", "Shake to launch!", "Shake your phone to light the fuse", "Kaboom! Happy Diwali"),
-      message("Happy Diwali!", `No burnt fingers, no scared dogs, all the sparkle.\n\nWishing you a bright one, ${from}`),
-      finale("Happy Diwali!", "Same time next year?", "fireworks"),
+      dress(intro(`${to}, it's fireworks time`, `${from} packed a whole fireworks show into your phone.`, "Light the fuse"), {
+        background: ["#0a0f2c", "#1b2257"], gradient: "glow", text: "#f3f4ff", accent: "#ffc23d", envelope: "#ff3d81",
+        heading: "bold", body: "modern", burst: "fireworks", transition: "zoom",
+        stickers: [sticker("🎆", 8, 9, 12, "pulse"), sticker("🧨", 8, 90, 11, "sway", -15), sticker("✨", 92, 90, 10, "pulse")],
+      }, { gotMail: "Contains fireworks" }),
+      dress(game("shake-it", "Shake to launch!", "Shake your phone to light the fuse", "Kaboom! And that's just the opening act"), {
+        background: ["#05081c", "#0a0f2c"], gradient: "down", text: "#f3f4ff", accent: "#ff3d81",
+        heading: "bold", body: "modern", burst: "fireworks", transition: "zoom",
+        stickers: [sticker("🧨", 8, 13, 11, "bounce"), sticker("🎇", 8, 90, 12, "pulse"), sticker("📳", 92, 90, 11, "sway")],
+      }, { shakeStart: "Light the fuse", shaking: "Keep shaking… the fuse is lit!" }),
+      dress(game("launch-fireworks", "Now you're in charge", "Tap the sky to launch 6 fireworks", "What a show! Take a bow", "game2"), {
+        background: ["#1b2257", "#0a0f2c"], gradient: "down", text: "#f3f4ff", accent: "#ffc23d",
+        heading: "bold", body: "modern", burst: "fireworks", transition: "slide",
+        stickers: [sticker("🎆", 8, 13, 11, "pulse"), sticker("🌟", 8, 90, 10, "spin"), sticker("🎇", 92, 90, 11, "pulse")],
+      }),
+      dress(photos("Brighter than any firework"), {
+        background: ["#f3f4ff", "#dfe3ff"], gradient: "glow", text: "#0a0f2c", accent: "#d61f69",
+        heading: "bold", body: "modern", transition: "flip",
+        stickers: [sticker("📸", 8, 13, 11, "none", -10), sticker("🎇", 92, 90, 11, "pulse")],
+      }),
+      dress(message("Happy Diwali!", `No burnt fingers, no scared dogs, all the sparkle.\n\nWishing you a Diwali full of light and a year full of good things. You deserve every one of them.\n\n${from}`), {
+        background: ["#1b2257", "#2a3170"], gradient: "diagonal", text: "#f3f4ff", accent: "#ffc23d",
+        heading: "bold", body: "modern", transition: "fade",
+        stickers: [sticker("🪔", 8, 13, 10, "pulse"), sticker("✨", 92, 90, 9, "pulse")],
+      }),
+      dress(finale("Happy Diwali!", "Same time next year?", "fireworks"), {
+        background: ["#0a0f2c", "#1b2257"], gradient: "glow", text: "#f3f4ff", accent: "#ff3d81",
+        heading: "bold", body: "modern", transition: "zoom",
+        stickers: [sticker("🎆", 8, 14, 12, "pulse"), sticker("🧨", 8, 90, 11, "sway"), sticker("🎇", 92, 90, 12, "pulse")],
+      }),
     ],
-    demo: { to: "Olivia", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam", photos: [P.fireworks, P.diyas, P.rangoli] },
   },
 
   {
@@ -542,14 +1078,40 @@ export const TEMPLATES: Template[] = [
     emoji: "🏮",
     headline: "Send a wish up into the sky",
     blurb: "They release glowing sky lanterns one by one, read your Diwali wishes, then light up the sky with fireworks.",
+    // Indigo night and lantern orange, in a flowing script.
     screens: (to, from) => [
-      intro(`Happy Diwali, ${to}`, `${from} saved you some lanterns. Make a wish with each one.`, "Let's go outside"),
-      game("release-lanterns", "Release the lanterns", "Tap each lantern and make a wish", "May every wish come true"),
-      message("My wishes for you", `Light to guide you, love to hold you, and sweets to keep you going.\n\nHappy Diwali, from ${from}`),
-      game("launch-fireworks", "Now the fireworks!", "Tap the sky to launch 6 fireworks", "What a show!", "game2"),
-      finale("Shubh Deepavali", "May your year shine as bright as tonight.", "fireworks"),
+      dress(intro(`Happy Diwali, ${to}`, `${from} saved you some lanterns. Make a wish with each one.`, "Let's go outside"), {
+        background: ["#141a3d", "#262d63"], gradient: "glow", text: "#fff3e0", accent: "#ff9f43", envelope: "#ffd9b0",
+        heading: "script", body: "storybook", burst: "lanterns", transition: "fade",
+        stickers: [sticker("🏮", 8, 9, 12, "float"), sticker("🌙", 8, 90, 11, "sway"), sticker("✨", 92, 90, 10, "pulse")],
+      }, { gotMail: "A lantern for you" }),
+      dress(game("release-lanterns", "Release the lanterns", "Tap each lantern and make a wish", "Your wishes are on their way"), {
+        background: ["#0d1230", "#141a3d"], gradient: "down", text: "#fff3e0", accent: "#ff9f43",
+        heading: "script", body: "storybook", burst: "lanterns", transition: "fade",
+        stickers: [sticker("🏮", 8, 90, 11, "float"), sticker("🌟", 92, 90, 10, "pulse")],
+      }),
+      dress(photos("Moments that glow"), {
+        background: ["#fff3e0", "#ffd9b0"], gradient: "glow", text: "#262d63", accent: "#ba541a",
+        heading: "script", body: "storybook", transition: "blur",
+        stickers: [sticker("🏮", 8, 13, 11, "float"), sticker("🪔", 92, 90, 11, "pulse")],
+      }),
+      dress(message("My wishes for you", `Light to guide you, love to hold you, and sweets to keep you going.\n\nWherever this year takes you, I hope you always find your way back to the people who love you.\n\nHappy Diwali, from ${from}`), {
+        background: ["#262d63", "#3a3f80"], gradient: "diagonal", text: "#fff3e0", accent: "#ff9f43",
+        heading: "script", body: "storybook", transition: "fade",
+        stickers: [sticker("🌙", 8, 13, 10, "sway"), sticker("🏮", 92, 90, 11, "float")],
+      }),
+      dress(game("launch-fireworks", "Now the fireworks!", "Tap the sky to launch 6 fireworks", "What a show!", "game2"), {
+        background: ["#141a3d"], text: "#fff3e0", accent: "#ff9f43",
+        heading: "script", body: "storybook", burst: "fireworks", transition: "zoom",
+        stickers: [sticker("🎆", 8, 13, 11, "pulse"), sticker("🎇", 92, 90, 11, "pulse")],
+      }),
+      dress(finale(`May every wish come true, ${to}`, "May your year shine as bright as tonight.", "lanterns"), {
+        background: ["#141a3d", "#3a3f80"], gradient: "glow", text: "#fff3e0", accent: "#ff9f43",
+        heading: "script", body: "storybook", transition: "blur",
+        stickers: [sticker("🏮", 8, 14, 12, "float"), sticker("🌙", 8, 90, 11, "sway"), sticker("✨", 92, 90, 10, "pulse")],
+      }),
     ],
-    demo: { to: "Olivia", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam", photos: [P.diyas, P.rangoli, P.fireworks] },
   },
   {
     slug: "mithai-mayhem",
@@ -561,22 +1123,60 @@ export const TEMPLATES: Template[] = [
     emoji: "🍬",
     headline: "How many laddoos is too many?",
     blurb: "A Diwali quiz about sweets with only one right answer, a spin of the mithai wheel and a fireworks finale.",
+    // A sweet shop: candy pink and pistachio with saffron, all round and bubbly.
     screens: (to, from) => [
-      intro(`Happy Diwali, ${to}!`, `${from} has some very important questions about sweets.`, "I'm ready"),
-      quiz(
-        "The Diwali sweets quiz",
-        [
-          q("How many laddoos is too many?", ["3", "10", "There's no such thing"], 2),
-          q("The best part of Diwali is…", ["The lights", "The family", "The mithai, obviously"], 2),
-          q("Who gets the last kaju katli?", [from, to, "We fight for it"], 2),
-        ],
-        "Correct. Sweets are life.",
+      dress(intro(`Happy Diwali, ${to}!`, `${from} has some very important questions about sweets.`, "I'm ready"), {
+        background: ["#ffe3ee", "#ffc2d9"], gradient: "glow", text: "#4a1030", accent: "#c0500a", envelope: "#cfe8b4",
+        heading: "rounded", body: "rounded", burst: "confetti", transition: "bounce",
+        stickers: [sticker("🍬", 8, 9, 12, "spin"), sticker("🍡", 8, 90, 12, "sway"), sticker("🪔", 92, 90, 11, "pulse")],
+      }, { gotMail: "Sweets inspection" }),
+      dress(
+        quiz(
+          "The Diwali sweets quiz",
+          [
+            q("How many laddoos is too many?", ["3", "10", "There's no such thing"], 2),
+            q("The best part of Diwali is…", ["The lights", "The family", "The mithai, obviously"], 2),
+            q("Who gets the last kaju katli?", [from, to, "We fight for it"], 2),
+          ],
+          "Correct. Sweets are life.",
+        ),
+        {
+          background: ["#4a1030", "#6b1846"], gradient: "down", text: "#ffe3ee", accent: "#ffb627",
+          heading: "rounded", body: "rounded", burst: "confetti", transition: "slide",
+          stickers: [sticker("🍬", 8, 13, 11, "spin"), sticker("🤤", 8, 90, 11, "bounce"), sticker("🍡", 92, 90, 11, "sway")],
+        },
+        {
+          wrongLines: ["Sacrilege.", "Wrong. More mithai for me.", "Who raised you?", "Your nani would be ashamed.", "Try again, sweetie."],
+          quizPerfect: "Full marks. You may have a laddoo.",
+        },
       ),
-      wheel("Spin for your mithai", "Whatever it lands on, I owe you a box", ["Kaju katli", "Gulab jamun", "Jalebi", "Laddoo", "Barfi", "Rasmalai"], "Your box of mithai is on its way"),
-      game("launch-fireworks", "Light up the sky", "Tap the sky to launch 6 fireworks", "Dhamaka!"),
-      finale("Happy Diwali!", "Save me a laddoo.", "fireworks"),
+      dress(wheel("Spin for your mithai", "Whatever it lands on, I owe you a box", ["Kaju katli", "Gulab jamun", "Jalebi", "Laddoo", "Barfi", "Rasmalai"], "Your box of mithai is on its way"), {
+        background: ["#f3f9ea", "#cfe8b4"], gradient: "glow", text: "#4a1030", accent: "#c0500a",
+        heading: "rounded", body: "rounded", burst: "sparkles", transition: "spin",
+        stickers: [sticker("🎁", 8, 13, 11, "bounce"), sticker("🍬", 8, 90, 11, "spin"), sticker("🍡", 92, 90, 11, "sway")],
+      }, { spin: "Spin for sweets" }),
+      dress(game("launch-fireworks", "Light up the sky", "Tap the sky to launch 6 fireworks", "Dhamaka!"), {
+        background: ["#4a1030"], text: "#ffe3ee", accent: "#ffb627",
+        heading: "rounded", body: "rounded", burst: "fireworks", transition: "zoom",
+        stickers: [sticker("🎆", 8, 13, 11, "pulse"), sticker("🎇", 92, 90, 11, "pulse")],
+      }),
+      dress(photos("Caught red-handed (with mithai)"), {
+        background: ["#ffe3ee"], pattern: "dots", text: "#4a1030", accent: "#c0500a",
+        heading: "rounded", body: "rounded", transition: "flip",
+        stickers: [sticker("📸", 8, 13, 11, "none", -10), sticker("🍬", 92, 90, 11, "spin")],
+      }),
+      dress(message("Sweeter than mithai", `I'll fight you for the last kaju katli, but I'd share everything else with you.\n\nHappy Diwali. I hope this year is full of light, laughter and far too many sweets.\n\n${from}`), {
+        background: ["#4a1030", "#6b1846"], gradient: "glow", text: "#ffe3ee", accent: "#ffb627",
+        heading: "rounded", body: "rounded", transition: "fade",
+        stickers: [sticker("🪔", 8, 13, 10, "pulse"), sticker("🍡", 92, 90, 10, "sway")],
+      }),
+      dress(finale("Happy Diwali! Pass the sweets.", "Save me a laddoo.", "fireworks"), {
+        background: ["#ffe3ee", "#cfe8b4"], gradient: "diagonal", text: "#4a1030", accent: "#c0500a",
+        heading: "rounded", body: "rounded", transition: "zoom",
+        stickers: [sticker("🍬", 8, 14, 12, "spin"), sticker("🪔", 8, 90, 11, "pulse"), sticker("🍡", 92, 90, 12, "sway")],
+      }),
     ],
-    demo: { to: "Olivia", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam", photos: [P.diyas, P.rangoli, P.fireworks] },
   },
 
   // ---------- Christmas ----------
@@ -591,13 +1191,38 @@ export const TEMPLATES: Template[] = [
     headline: "Merry Christmas!",
     blurb: "Unwrap a present, catch falling snowflakes and finish with a flurry of snow.",
     featured: true,
+    // Traditional Christmas: forest green, berry red and gold, in a festive script.
     screens: (to, from) => [
-      intro(`Merry Christmas, ${to}!`, `${from} left something under the tree for you.`, "Peek under the tree"),
-      game("unwrap-gift", "Unwrap your present", "Tap to tear off the wrapping paper", "It's love! The best present"),
-      game("catch-snowflakes", "Let it snow", "Catch 10 snowflakes", "Snow-mazing!", "game2"),
-      photos("Christmas memories"),
-      message("Merry Christmas", `Wishing you a cosy Christmas full of good food, bad jokes and people you love.\n\n${from}`),
-      finale("Merry Christmas!", "And a very happy New Year.", "snow"),
+      dress(intro(`Merry Christmas, ${to}!`, `${from} left something under the tree for you.`, "Peek under the tree"), {
+        background: ["#123024", "#1d4a37"], gradient: "glow", text: "#fbf3e3", accent: "#ef4b55", envelope: "#e9c46a",
+        heading: "script", body: "modern", burst: "snow", transition: "fade",
+        stickers: [sticker("🎄", 8, 9, 12, "sway"), sticker("🎁", 8, 90, 12, "bounce"), sticker("⭐", 92, 90, 10, "spin")],
+      }, { gotMail: "Something's under the tree" }),
+      dress(game("unwrap-gift", "Unwrap your present", "Tap to tear off the wrapping paper", "It's love! The best present"), {
+        background: ["#fbf6ec", "#f1e6cf"], gradient: "glow", text: "#123024", accent: "#c8102e",
+        heading: "script", body: "modern", burst: "confetti", transition: "zoom",
+        stickers: [sticker("🎀", 8, 13, 11, "sway"), sticker("🎄", 8, 90, 12), sticker("🔔", 92, 90, 11, "sway")],
+      }),
+      dress(game("catch-snowflakes", "Let it snow", "Catch 10 snowflakes", "Snow-mazing!", "game2"), {
+        background: ["#0d241b", "#123024"], gradient: "down", text: "#fbf3e3", accent: "#e9c46a",
+        heading: "script", body: "modern", burst: "snow", transition: "drop",
+        stickers: [sticker("❄️", 8, 13, 11, "spin"), sticker("⛄", 8, 90, 12, "sway"), sticker("❄️", 92, 90, 9, "spin")],
+      }),
+      dress(photos("Christmas memories"), {
+        background: ["#fbf6ec"], pattern: "dots", text: "#123024", accent: "#c8102e",
+        heading: "script", body: "modern", transition: "flip",
+        stickers: [sticker("📸", 8, 13, 11, "none", -10), sticker("🎄", 92, 90, 11, "sway")],
+      }),
+      dress(message("Merry Christmas", `Wishing you a cosy Christmas full of good food, bad jokes and people you love.\n\nThank you for making this year brighter just by being in it.\n\n${from}`), {
+        background: ["#7a0c1c", "#a3122a"], gradient: "down", text: "#fbf3e3", accent: "#e9c46a",
+        heading: "script", body: "modern", transition: "fade",
+        stickers: [sticker("🕯️", 8, 13, 10, "float"), sticker("🎄", 92, 90, 11, "sway")],
+      }),
+      dress(finale("Merry Christmas!", "And a very happy New Year.", "snow"), {
+        background: ["#123024", "#1d4a37"], gradient: "glow", text: "#fbf3e3", accent: "#ef4b55",
+        heading: "script", body: "modern", transition: "zoom",
+        stickers: [sticker("🎄", 8, 14, 12, "sway"), sticker("⭐", 8, 90, 10, "spin"), sticker("🎁", 92, 90, 12, "bounce")],
+      }),
     ],
     demo: { to: "Olivia", from: "Sam", photos: [P.tree, P.lights, P.fireworks] },
   },
@@ -611,21 +1236,59 @@ export const TEMPLATES: Template[] = [
     emoji: "🎅",
     headline: "Have you been naughty or nice?",
     blurb: "Santa's official investigation. The Naughty button runs away, so they're nice whether they like it or not.",
+    // Santa's case file: parchment, Santa red and holly green, typed up like a report.
     screens: (to, from) => [
-      intro(`Ho ho ho, ${to}`, `Santa's office (${from}) has some questions.`, "I'm innocent"),
-      question("Have you been nice this year?", "Nice, obviously", "Naughty", "That's what we thought. Approved for presents."),
-      quiz(
-        "Santa's investigation",
-        [
-          q("Who ate the last mince pie?", ["Me", "The dog", "It was like that when I found it"], 2),
-          q("How many presents do you deserve?", ["One", "A few", "All of them"], 2),
-        ],
-        "Investigation closed. You're on the nice list.",
+      dress(intro(`Ho ho ho, ${to}`, `Santa's office (${from}) has some questions.`, "I'm innocent"), {
+        background: ["#fbf3e0", "#f0dfba"], gradient: "glow", text: "#14301f", accent: "#b3121f", envelope: "#14301f",
+        heading: "storybook", body: "typewriter", burst: "snow", transition: "fade",
+        stickers: [sticker("🎅", 8, 9, 12, "bounce"), sticker("📜", 8, 90, 12, "sway"), sticker("🔍", 92, 90, 11, "float")],
+      }, { gotMail: "From the desk of Santa", tapEnvelope: "Tap to open your file" }),
+      dress(question("Have you been nice this year?", "Nice, obviously", "Naughty", "That's what we thought. Approved for presents."), {
+        background: ["#7a0c16", "#9e1220"], gradient: "down", text: "#fbf3e0", accent: "#ffd56b",
+        heading: "storybook", body: "typewriter", burst: "stars", transition: "drop",
+        stickers: [sticker("😇", 8, 14, 12, "float"), sticker("😈", 8, 90, 11, "bounce"), sticker("🎅", 92, 90, 12, "sway")],
+      }, { noLines: ["Santa is watching", "The elves saw that", "Coal it is", "Nice try", "That's going on your file", "Rudolph disagrees", "Think of the presents"] }),
+      dress(
+        quiz(
+          "Santa's investigation",
+          [
+            q("Who ate the last mince pie?", ["Me", "The dog", "It was like that when I found it"], 2),
+            q("How many presents do you deserve?", ["One", "A few", "All of them"], 2),
+          ],
+          "Investigation closed. You're on the nice list.",
+        ),
+        {
+          background: ["#fbf3e0"], pattern: "grid", text: "#14301f", accent: "#b3121f",
+          heading: "storybook", body: "typewriter", burst: "confetti", transition: "slide",
+          stickers: [sticker("📋", 8, 13, 11, "none", -10), sticker("🥧", 8, 90, 11), sticker("🦌", 92, 90, 11, "sway")],
+        },
+        {
+          wrongLines: ["The elves have noted that.", "Lying to Santa? Bold.", "That's going on your file.", "Try again. Santa knows.", "Coal is looking likely."],
+          quizPerfect: "Full marks. The elves are impressed.",
+        },
       ),
-      game("unwrap-gift", "Here's your present", "Tap to unwrap it", "Merry Christmas!"),
-      finale("Merry Christmas!", `Signed, Santa (definitely not ${from})`, "snow"),
+      dress(game("unwrap-gift", "Here's your present", "Tap to unwrap it", "Approved by Santa. Merry Christmas!"), {
+        background: ["#14301f", "#1f4a30"], gradient: "down", text: "#fbf3e0", accent: "#ef4b55",
+        heading: "storybook", body: "typewriter", burst: "confetti", transition: "zoom",
+        stickers: [sticker("🎁", 8, 14, 12, "bounce"), sticker("🎀", 8, 90, 11, "sway"), sticker("⭐", 92, 90, 10, "spin")],
+      }),
+      dress(photos("Evidence of niceness"), {
+        background: ["#fbf3e0", "#f0dfba"], gradient: "down", text: "#14301f", accent: "#b3121f",
+        heading: "storybook", body: "typewriter", transition: "flip",
+        stickers: [sticker("📸", 8, 13, 11, "none", -10), sticker("😇", 92, 90, 11, "float")],
+      }),
+      dress(message("Off the record", `Between you and me, you didn't need the investigation. You've been on my nice list all year.\n\nMerry Christmas, ${to}. Thank you for being you.\n\n${from}`), {
+        background: ["#7a0c16", "#9e1220"], gradient: "glow", text: "#fbf3e0", accent: "#ffd56b",
+        heading: "storybook", body: "typewriter", transition: "fade",
+        stickers: [sticker("🎄", 8, 13, 10, "sway"), sticker("❤️", 92, 90, 10, "pulse")],
+      }),
+      dress(finale("Merry Christmas!", `Signed, Santa (definitely not ${from})`, "stars"), {
+        background: ["#14301f", "#1f4a30"], gradient: "glow", text: "#fbf3e0", accent: "#ef4b55",
+        heading: "storybook", body: "typewriter", transition: "zoom",
+        stickers: [sticker("🎅", 8, 14, 12, "bounce"), sticker("🦌", 8, 90, 12, "sway"), sticker("🎁", 92, 90, 11, "bounce")],
+      }),
     ],
-    demo: { to: "Olivia", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam", photos: [P.tree, P.lights, P.teacup] },
   },
   {
     slug: "christmas-memories",
@@ -636,12 +1299,39 @@ export const TEMPLATES: Template[] = [
     ambient: "snow",
     emoji: "⛄",
     headline: "Home for Christmas",
-    blurb: "A quiet, cosy card with your photos and a heartfelt message as the snow falls.",
+    blurb: "A quiet, cosy card: your photos, a gentle memory game, a Christmas hug and a heartfelt message as the snow falls.",
+    // A winter's night by the fire: midnight blue, warm amber and cream, written by hand.
     screens: (to, from) => [
-      intro(`Merry Christmas, ${to}`, "Grab a hot chocolate first", "Open"),
-      photos("Christmases with you"),
-      message("This Christmas", `Whatever this year brought, I'm grateful I got to spend it knowing you. Here's to many more Christmases together.\n\nLove, ${from}`),
-      finale("Merry Christmas", "Warmest wishes for the season.", "snow"),
+      dress(intro(`Merry Christmas, ${to}`, "Grab a hot chocolate first. I'll wait.", "Got my hot chocolate"), {
+        background: ["#141a33", "#222b52"], gradient: "glow", text: "#fdf2e2", accent: "#f2b35b", envelope: "#fbf2e4",
+        heading: "handwritten", body: "storybook", burst: "snow", transition: "fade",
+        stickers: [sticker("☕", 8, 9, 12, "float"), sticker("❄️", 8, 90, 11, "spin"), sticker("🧣", 92, 90, 11, "sway")],
+      }, { gotMail: "For a cosy evening" }),
+      dress(photos("Christmases with you"), {
+        background: ["#1b2245"], text: "#fdf2e2", accent: "#f2b35b",
+        heading: "handwritten", body: "storybook", transition: "blur",
+        stickers: [sticker("🎄", 8, 13, 11, "sway"), sticker("🕯️", 92, 90, 10, "float")],
+      }),
+      dress(game("memory-match", "A little memory game", "Find all the matching pairs", "Every pair found. You never forget a thing."), {
+        background: ["#fbf2e4", "#f0dcc0"], gradient: "glow", text: "#141a33", accent: "#a8551a",
+        heading: "handwritten", body: "storybook", burst: "snow", transition: "fade",
+        stickers: [sticker("❄️", 8, 13, 10, "spin"), sticker("🔔", 8, 90, 11, "sway"), sticker("⭐", 92, 90, 10, "pulse")],
+      }),
+      dress(game("hold-hug", "A Christmas hug", "Press and hold to receive it", "Hug delivered. Merry Christmas", "game2"), {
+        background: ["#222b52", "#141a33"], gradient: "down", text: "#fdf2e2", accent: "#f2b35b",
+        heading: "handwritten", body: "storybook", burst: "hearts", transition: "zoom",
+        stickers: [sticker("🤗", 8, 14, 12, "float"), sticker("☕", 8, 90, 11, "sway"), sticker("🧦", 92, 90, 11, "sway")],
+      }),
+      dress(message("This Christmas", `Whatever this year brought, I'm grateful I got to spend it knowing you. Here's to many more Christmases together.\n\nLove, ${from}`), {
+        background: ["#fbf2e4", "#f6e6cf"], gradient: "down", text: "#141a33", accent: "#a8551a",
+        heading: "handwritten", body: "storybook", transition: "fade",
+        stickers: [sticker("🕯️", 8, 13, 10, "float"), sticker("❄️", 92, 90, 9, "spin")],
+      }),
+      dress(finale("Merry Christmas", "Warmest wishes for the season.", "snow"), {
+        background: ["#222b52", "#141a33"], gradient: "glow", text: "#fdf2e2", accent: "#f2b35b",
+        heading: "handwritten", body: "storybook", transition: "blur",
+        stickers: [sticker("⛄", 8, 14, 12, "sway"), sticker("☕", 8, 90, 11, "float"), sticker("❄️", 92, 90, 10, "spin")],
+      }),
     ],
     demo: { to: "Mum", from: "Ravi", photos: [P.tree, P.lights, P.coffee] },
   },
@@ -656,12 +1346,33 @@ export const TEMPLATES: Template[] = [
     emoji: "🎅",
     headline: "It's socks. It's always socks.",
     blurb: "They pick a present from under the tree (all three are socks), then pull a festive slot machine for the jackpot.",
+    // A candy cane: white and red stripes with pine green, scribbled in felt-tip.
     screens: (to, from) => [
-      intro(`Ho ho ho, ${to}!`, `Your Secret Santa (it's ${from}) has three presents for you.`, "Gimme"),
-      boxes("Pick a present", "Choose carefully…", ["Socks", "More socks", "A lovely jumper (it's socks)"]),
-      game("slot-machine", "Christmas jackpot", "Pull the lever for some festive luck", "Jackpot! Merry Christmas"),
-      message("Merry Christmas!", `Wishing you warm feet and a warm heart this Christmas.\n\n${from}`),
-      finale("Merry Christmas!", "Wear them with pride.", "snow"),
+      dress(intro(`Ho ho ho, ${to}!`, `Your Secret Santa (it's ${from}) has three presents for you.`, "Gimme"), {
+        background: ["#fff7f5", "#ffe3e3"], gradient: "glow", pattern: "stripes", text: "#0f3d2e", accent: "#d62839", envelope: "#0f3d2e",
+        heading: "marker", body: "rounded", burst: "snow", transition: "zoom",
+        stickers: [sticker("🎅", 8, 9, 12, "bounce"), sticker("🧦", 8, 90, 12, "sway"), sticker("🤫", 92, 90, 11, "float")],
+      }, { gotMail: "Top secret delivery" }),
+      dress(boxes("Pick a present", "Choose carefully…", ["Socks", "More socks", "A lovely jumper (it's socks)"]), {
+        background: ["#0f3d2e", "#145a43"], gradient: "down", text: "#fff7f5", accent: "#ff6b6b",
+        heading: "marker", body: "rounded", burst: "confetti", transition: "zoom",
+        stickers: [sticker("🎁", 8, 14, 12, "bounce"), sticker("🧦", 8, 90, 11, "sway"), sticker("🤔", 92, 90, 11)],
+      }, { boxesPicked: "Drumroll please…" }),
+      dress(game("slot-machine", "Christmas jackpot", "Pull the lever for some festive luck", "Jackpot! Merry Christmas"), {
+        background: ["#fff7f5"], pattern: "stripes", text: "#0f3d2e", accent: "#d62839",
+        heading: "marker", body: "rounded", burst: "stars", transition: "drop",
+        stickers: [sticker("🎰", 8, 13, 11), sticker("🔔", 8, 90, 11, "sway"), sticker("🧦", 92, 90, 11, "bounce")],
+      }, { slotWin: "Jackpot! (Still socks)", slotMiss: "No luck. Socks again!" }),
+      dress(message("All jokes aside", `Of everyone in the draw, I'm really glad I got you.\n\nThanks for making this year a bit brighter. Wishing you warm feet and a warm heart this Christmas.\n\n${from}`), {
+        background: ["#0f3d2e", "#145a43"], gradient: "glow", text: "#fff7f5", accent: "#ff6b6b",
+        heading: "marker", body: "rounded", transition: "fade",
+        stickers: [sticker("🎄", 8, 13, 10, "sway"), sticker("❤️", 92, 90, 10, "pulse")],
+      }),
+      dress(finale("Merry Christmas!", "Wear them with pride.", "snow"), {
+        background: ["#fff7f5", "#ffe3e3"], gradient: "glow", pattern: "stripes", text: "#0f3d2e", accent: "#d62839",
+        heading: "marker", body: "rounded", transition: "zoom",
+        stickers: [sticker("🧦", 8, 14, 12, "sway"), sticker("🎅", 8, 90, 12, "bounce"), sticker("🎁", 92, 90, 11, "bounce")],
+      }),
     ],
     demo: { to: "Olivia", from: "Sam" },
   },
@@ -670,29 +1381,60 @@ export const TEMPLATES: Template[] = [
     name: "12 Reasons of Christmas",
     occasion: "christmas",
     tone: "heartfelt",
-    theme: "gold",
+    theme: "noel",
     ambient: "snow",
     emoji: "✨",
     headline: "On the 12th day of Christmas…",
-    blurb: "A jar of twelve reasons you're thankful for them, your festive photos and a gentle snowfall.",
+    blurb: "A jar of twelve reasons you're thankful for them, a thirteenth hidden under the foil, your festive photos and a gentle snowfall.",
+    // Evergreen and old gold on ivory, set in an elegant serif.
     screens: (to, from) => [
-      intro(`Merry Christmas, ${to}`, `${from} has 12 things to tell you.`, "Open"),
-      reasons("12 reasons of Christmas", "Tap the jar for each one", [
-        "You make every Christmas feel like home",
-        "Your famous roast potatoes",
-        "You always find the perfect present",
-        "Your laugh at the cracker jokes",
-        "How you look after everyone",
-        "Christmas films with you",
-        "You let me have the last mince pie",
-        "The way you light up a room",
-        "Your patience with my wrapping",
-        "Every memory we've made",
-        "All the ones still to come",
-        "You. Just you.",
-      ]),
-      photos("Christmas memories"),
-      finale(`Merry Christmas, ${to}`, `With love, ${from}`, "snow"),
+      dress(intro(`Merry Christmas, ${to}`, `${from} has 12 things to tell you.`, "Tell me all 12"), {
+        background: ["#0f2a1f", "#173d2d"], gradient: "glow", text: "#fbf3dc", accent: "#d4af37", envelope: "#fbf6e8",
+        heading: "classic", body: "storybook", burst: "stars", transition: "fade",
+        stickers: [sticker("✨", 8, 9, 10, "pulse"), sticker("🎄", 8, 90, 12, "sway"), sticker("🌟", 92, 90, 11, "spin")],
+      }, { gotMail: "Twelve little notes" }),
+      dress(
+        reasons("12 reasons of Christmas", "Tap the jar for each one", [
+          "You make every Christmas feel like home",
+          "Your famous roast potatoes",
+          "You always find the perfect present",
+          "Your laugh at the cracker jokes",
+          "How you look after everyone",
+          "Christmas films with you",
+          "You let me have the last mince pie",
+          "The way you light up a room",
+          "Your patience with my wrapping",
+          "Every memory we've made",
+          "All the ones still to come",
+          "You. Just you.",
+        ]),
+        {
+          background: ["#fbf6e8", "#f1e5c3"], gradient: "glow", text: "#0f2a1f", accent: "#8a6d1d",
+          heading: "classic", body: "storybook", burst: "snow", transition: "zoom",
+          stickers: [sticker("🎄", 8, 13, 11, "sway"), sticker("🕯️", 8, 90, 10, "float"), sticker("⭐", 92, 90, 10, "spin")],
+        },
+        { jarCount: "Reason {i} of {n}", jarEmpty: "That's twelve. But wait…" },
+      ),
+      dress(scratch("And a thirteenth", "Rub the silver foil for one more", "If I could choose anyone to spend Christmas with, I'd choose you. Every year."), {
+        background: ["#0f2a1f", "#173d2d"], gradient: "down", text: "#fbf3dc", accent: "#d4af37",
+        heading: "classic", body: "storybook", burst: "stars", transition: "fade",
+        stickers: [sticker("🎁", 8, 13, 11, "bounce"), sticker("✨", 8, 90, 9, "pulse"), sticker("🌟", 92, 90, 11, "spin")],
+      }, { scratchDone: "Reason number 13" }),
+      dress(photos("Christmas memories"), {
+        background: ["#fbf6e8"], text: "#0f2a1f", accent: "#8a6d1d",
+        heading: "classic", body: "storybook", transition: "blur",
+        stickers: [sticker("🎄", 8, 13, 11, "sway"), sticker("🔔", 92, 90, 11, "sway")],
+      }),
+      dress(message("Thank you", `Twelve reasons wasn't nearly enough, but it's a start.\n\nThank you for every Christmas, every cup of tea and every ordinary day you've made better. I'm so lucky to have you.\n\nWith love, ${from}`), {
+        background: ["#0f2a1f", "#173d2d"], gradient: "glow", text: "#fbf3dc", accent: "#d4af37",
+        heading: "classic", body: "storybook", transition: "fade",
+        stickers: [sticker("🕯️", 8, 13, 10, "float"), sticker("✨", 92, 90, 9, "pulse")],
+      }),
+      dress(finale(`Merry Christmas, ${to}`, "Thirteen reasons, and counting.", "sparkles"), {
+        background: ["#173d2d", "#0f2a1f"], gradient: "glow", text: "#fbf3dc", accent: "#d4af37",
+        heading: "classic", body: "storybook", transition: "zoom",
+        stickers: [sticker("🌟", 8, 14, 12, "spin"), sticker("🎄", 8, 90, 12, "sway"), sticker("✨", 92, 90, 10, "pulse")],
+      }),
     ],
     demo: { to: "Olivia", from: "Sam", photos: [P.tree, P.lights, P.fireworks] },
   },
@@ -707,15 +1449,20 @@ export const TEMPLATES: Template[] = [
     ambient: "stars",
     emoji: "🌙",
     headline: "Eid Mubarak!",
-    blurb: "Catch the stars under the crescent moon, then share your Eid wishes and photos.",
+    blurb: "Catch the stars under the crescent moon, scratch the silver for an Eid wish, then your photos and Eid wishes.",
     featured: true,
-    screens: (to, from) => [
-      intro(`Eid Mubarak, ${to}`, `${from} sent you some Eid joy.`, "Open"),
-      game("catch-stars", "Catch the stars", "Catch 10 falling stars", "Your Eid is written in the stars"),
-      photos("Eid with the family"),
-      message("Eid Mubarak", `Wishing you and your family a joyful Eid full of peace, blessings and far too much food.\n\n${from}`),
-      finale("Eid Mubarak!", "May this Eid bring you happiness and peace.", "stars"),
-    ],
+    screens: (to, from) =>
+      B.dress(B.EID_MUBARAK, [
+        { ...intro(`Eid Mubarak, ${to}`, `${from} sent you some Eid joy.`, "See the stars"), labels: { gotMail: "An Eid card for you" } },
+        game("catch-stars", "Catch the stars", "Catch 10 falling stars", "Your Eid is written in the stars"),
+        scratch("A wish under the moon", "Scratch the silver to find your Eid wish", "May every dua you make be answered, and every day after Eid feel just as bright."),
+        photos("Eid with the family"),
+        message(
+          "Eid Mubarak",
+          `Wishing you and your family a joyful Eid, full of peace, blessings and far too much food.\n\nThank you for being such a bright part of my life. Eid is always better with you in it.\n\n${from}`,
+        ),
+        { ...finale("Eid Mubarak!", "May this Eid bring you happiness and peace.", "stars"), labels: { playAgain: "See the stars again" } },
+      ]),
     demo: { to: "Aisha", from: "Omar", photos: [P.crescent, P.lights, P.fireworks] },
   },
   {
@@ -723,20 +1470,32 @@ export const TEMPLATES: Template[] = [
     name: "Eid Blessings",
     occasion: "eid",
     tone: "heartfelt",
-    theme: "gold",
+    theme: "ivory",
     ambient: "stars",
     emoji: "🤲",
     headline: "Duas for you this Eid",
-    blurb: "An elegant Eid card for family and elders, with heartfelt duas and family photos.",
-    screens: (to, from) => [
-      intro(`Eid Mubarak, ${to}`, "With love and duas.", "Open"),
-      message(
-        "My duas for you",
-        `May Allah accept your prayers and fasts, fill your home with barakah and keep you and your loved ones in good health.\n\nThank you for always being there.\n\n${from}`,
-      ),
-      photos("Our family"),
-      finale("Eid Mubarak", "Today and always.", "stars"),
-    ],
+    blurb: "An elegant Eid card for family and elders: a garden of blessings to water, a jar of reasons Eid isn't Eid without them, family photos and heartfelt duas.",
+    screens: (to, from) =>
+      B.dress(B.EID_BLESSINGS, [
+        { ...intro(`Eid Mubarak, ${to}`, "Something for you, with love and duas.", "Read my duas"), labels: { gotMail: "Eid Mubarak" } },
+        game("grow-flower", "A garden of blessings", "Water the plant until it blooms", "May your home bloom with barakah"),
+        {
+          ...reasons("Why Eid isn't Eid without you", "Tap the jar, one at a time", [
+            "The way you make everyone feel at home",
+            "Your duas, which follow us everywhere",
+            "The stories you tell about Eids long ago",
+            "How there's always room for one more at your table",
+            "Your hugs at the door",
+          ]),
+          labels: { jarEmpty: "And so many more." },
+        },
+        photos("Our family"),
+        message(
+          "My duas for you",
+          `May Allah accept your prayers and good deeds, fill your home with barakah and keep you and your loved ones in good health.\n\nThank you for always being there.\n\n${from}`,
+        ),
+        finale("Eid Mubarak", "Today and always.", "stars"),
+      ]),
     demo: { to: "Ammi", from: "Omar", photos: [P.crescent, P.lights, P.coffee] },
   },
   {
@@ -744,44 +1503,72 @@ export const TEMPLATES: Template[] = [
     name: "Eidi, Please",
     occasion: "eid",
     tone: "funny",
-    theme: "crescent",
+    theme: "mint",
     ambient: "stars",
     emoji: "💸",
     headline: "Where's my Eidi?",
-    blurb: "A polite (not polite) request for Eidi. The No button runs away, so they don't really have a choice.",
-    screens: (to, from) => [
-      intro(`Eid Mubarak, ${to}!`, `${from} has one small question.`, "Uh oh"),
-      question("Will you be giving me Eidi this year?", "Of course", "No", "Wonderful. Bank transfers are accepted."),
-      quiz(
-        "Eidi calculator",
-        [
-          q("How much Eidi is appropriate?", ["£5", "£10", "Whatever's in your wallet"], 2),
-          q("Who is your favourite?", ["Everyone equally", "Hard to say", from], 2),
-        ],
-        "Calculation complete. Please pay promptly.",
-      ),
-      finale("Eid Mubarak!", "(I'm only half joking about the Eidi.)", "stars"),
-    ],
-    demo: { to: "Khala", from: "Omar" },
+    blurb: "A polite (not polite) request for Eidi. The No button runs away, the Eidi calculator does the maths, and there's a proper thank-you at the end.",
+    screens: (to, from) =>
+      B.dress(B.EIDI_PLEASE, [
+        intro(`Eid Mubarak, ${to}!`, `${from} has one small question.`, "Uh oh"),
+        {
+          ...question("Will you be giving me Eidi this year?", "Of course", "No", "Wonderful. Bank transfers are accepted."),
+          labels: { noLines: ["Eidi is tradition", "Check your pockets", "The aunties are watching", "That's not very Eid of you", "I've been very good", "Even a fiver is fine", "Wrong button"] },
+        },
+        {
+          ...quiz(
+            "Eidi calculator",
+            [
+              q("How much Eidi is appropriate?", ["£5", "£10", "Whatever's in your wallet"], 2),
+              q("Who is your favourite?", ["Everyone equally", "Hard to say", from], 2),
+            ],
+            "Calculation complete. Please pay promptly.",
+          ),
+          labels: { wrongLines: ["Recalculating…", "That's not a lot of Eidi.", "Try a bigger number.", "Hmm, no."], quizPerfect: "Full marks. Payment due today." },
+        },
+        photos("Exhibit A: why I deserve Eidi"),
+        message(
+          "Jokes aside",
+          `Eidi or no Eidi, you're one of my favourite people to celebrate with. Thank you for the duas, the sweets and the notes slipped into my hand when no one was looking.\n\nEid Mubarak.\n${from}`,
+        ),
+        finale("Eid Mubarak!", "(I'm only half joking about the Eidi.)", "stars"),
+      ]),
+    demo: {
+      to: "Khala",
+      from: "Omar",
+      photos: [
+        { ...P.balloons, caption: "Very well behaved" },
+        { ...P.cake, caption: "Shared my sweets (once)" },
+        { ...P.crescent, caption: "Eid best, as always" },
+      ],
+    },
   },
   {
     slug: "eid-hugs-and-feasts",
     name: "Eid Hugs & Feasts",
     occasion: "eid",
     tone: "cute",
-    theme: "crescent",
+    theme: "sunset",
     ambient: "stars",
     emoji: "🤗",
     headline: "Your Eid hug is waiting",
-    blurb: "An Eid hug they press and hold to receive, then a spin of the wheel to choose the Eid feast.",
-    screens: (to, from) => [
-      intro(`Eid Mubarak, ${to}!`, `${from} can't be there for an Eid hug, so here's the next best thing.`, "Open"),
-      game("hold-hug", "Your Eid hug", "Press and hold to receive it", "Eid hug delivered"),
-      wheel("Spin for the Eid feast", "Whatever it lands on, I'm bringing it", ["Biryani", "Sheer khurma", "Kebabs", "Samosas", "Dates", "Baklava"], "Feast secured"),
-      message("Eid Mubarak", `May Allah fill your home with peace, your table with food and your heart with happiness.\n\n${from}`),
-      finale("Eid Mubarak!", "Save me some sheer khurma.", "stars"),
-    ],
-    demo: { to: "Ammi", from: "Omar" },
+    blurb: "An Eid hug they press and hold to receive, a spin of the wheel to choose the Eid feast, and the moments you're missing.",
+    screens: (to, from) =>
+      B.dress(B.EID_HUGS_AND_FEASTS, [
+        intro(`Eid Mubarak, ${to}!`, `${from} can't be there for an Eid hug, so here's the next best thing.`, "Get my hug"),
+        game("hold-hug", "Your Eid hug", "Press and hold to receive it", "Eid hug delivered"),
+        {
+          ...wheel("Spin for the Eid feast", "Whatever it lands on, I'm bringing it", ["Biryani", "Sheer khurma", "Kebabs", "Samosas", "Dates", "Baklava"], "Feast secured"),
+          labels: { spin: "Spin for the feast" },
+        },
+        photos("Missing moments like these"),
+        message(
+          "Eid Mubarak",
+          `May Allah fill your home with peace, your table with food and your heart with happiness.\n\nI'm sorry I can't be there this year. Save me a seat and a plate, and I'll be there the moment I can.\n\n${from}`,
+        ),
+        finale("Eid Mubarak!", "Save me some sheer khurma.", "stars"),
+      ]),
+    demo: { to: "Ammi", from: "Omar", photos: [P.crescent, P.teacup, P.cake] },
   },
   {
     slug: "eid-family-gallery",
@@ -793,14 +1580,28 @@ export const TEMPLATES: Template[] = [
     ambient: "stars",
     emoji: "🖼️",
     headline: "Eid memories, all in one place",
-    blurb: "Built for a big screen: a wall of family photos from Eid, a memory game and your heartfelt wishes.",
-    screens: (to, from) => [
-      intro(`Eid Mubarak, ${to}`, `${from} put together our Eid memories.`, "Open the gallery"),
-      photos("Our Eid memories"),
-      game("memory-match", "A little Eid game", "Find all the matching pairs", "Mashallah, perfect memory"),
-      message("Eid Mubarak", `Wishing you and the whole family a blessed Eid, full of love, laughter and good food.\n\n${from}`),
-      finale("Eid Mubarak", "From our family to yours.", "stars"),
-    ],
+    blurb: "Built for a big screen: a wall of family photos from Eid, a memory game, a jar of Eid moments and your heartfelt wishes.",
+    screens: (to, from) =>
+      B.dress(B.EID_FAMILY_GALLERY, [
+        intro(`Eid Mubarak, ${to}`, `${from} put together our Eid memories.`, "Open the gallery"),
+        photos("Our Eid memories"),
+        game("memory-match", "A little Eid game", "Find all the matching pairs", "Mashallah, perfect memory"),
+        {
+          ...reasons("What makes our Eid", "Tap the jar for a memory", [
+            "Getting ready together on Eid morning",
+            "Everyone talking at once at dinner",
+            "The race for the last samosa",
+            "Eidi envelopes and big hugs",
+            "The family photo that takes twenty tries",
+          ]),
+          labels: { jarCount: "Memory {i} of {n}", jarEmpty: "And many more Eids to come." },
+        },
+        message(
+          "Eid Mubarak",
+          `Wishing you and the whole family a blessed Eid, full of love, laughter and good food.\n\nLooking back at these, I realise how lucky we are to have each other.\n\n${from}`,
+        ),
+        finale("Eid Mubarak", "From our family to yours.", "stars"),
+      ]),
     demo: { to: "Ammi", from: "Omar", photos: [P.crescent, P.lights, P.coffee, P.cake, P.bouquet, P.toast] },
   },
 
@@ -814,22 +1615,30 @@ export const TEMPLATES: Template[] = [
     ambient: "petals",
     emoji: "💍",
     headline: "Another year of us",
-    blurb: "Your story so far: photos, a quiz about your firsts, and a love letter.",
+    blurb: "Your story so far, like a storybook: photos, a quiz about your firsts, a love letter and one last question with a No that runs away.",
     featured: true,
-    screens: (to, from) => [
-      intro(`Happy anniversary, ${to}`, `${from} wrote down our story.`, "Read it"),
-      photos("Chapter one"),
-      quiz(
-        "Our firsts",
-        [
-          q("Where was our first date?", ["Coffee", "Dinner", "The cinema"], 0),
-          q(`Who said "I love you" first?`, [to, from, "We both did"], 1),
-        ],
-        "Still paying attention. I love that.",
-      ),
-      message("Happy anniversary", `Another year of laughing at the same jokes and stealing the covers. I'd choose you again in every version of my life.\n\n${from}`),
-      finale("Happy Anniversary", "Here's to the next chapter.", "petals"),
-    ],
+    screens: (to, from) =>
+      B.dress(B.OUR_STORY, [
+        intro(`Happy anniversary, ${to}`, `${from} wrote down our story.`, "Read it"),
+        photos("Chapter one"),
+        {
+          ...quiz(
+            "Our firsts",
+            [
+              q("Where was our first date?", ["Coffee", "Dinner", "The cinema"], 0),
+              q(`Who said "I love you" first?`, [to, from, "We both did"], 1),
+            ],
+            "Still paying attention. I love that.",
+          ),
+          labels: { wrongLines: ["Wrong chapter!", "Did you skip a page?", "Hmm. Read it again.", "Plot hole!"] },
+        },
+        message("Happy anniversary", `Another year of laughing at the same jokes and stealing the covers. I'd choose you again in every version of my life.\n\n${from}`),
+        {
+          ...question("Shall we keep writing it together?", "Always", "No", "Then let's turn the page."),
+          labels: { noLines: ["Plot twist?", "Wrong ending", "That's not how it ends", "Turn the page", "Read it again", "Try the other button"] },
+        },
+        { ...finale("Happy Anniversary", "Here's to the next chapter.", "petals"), labels: { playAgain: "Read it again" } },
+      ]),
     demo: { to: "Olivia", from: "Sam", photos: [P.toast, P.sunset, P.coffee] },
   },
   {
@@ -837,17 +1646,32 @@ export const TEMPLATES: Template[] = [
     name: "I'd Still Choose You",
     occasion: "anniversary",
     tone: "heartfelt",
-    theme: "gold",
+    theme: "ivory",
     ambient: "sparkles",
     emoji: "🥂",
     headline: "I'd still choose you",
-    blurb: "Understated and elegant. A letter, your photos, and a toast to the years ahead.",
-    screens: (to, from) => [
-      intro(`To ${to}`, "Happy anniversary. Open this when you have a minute.", "Open"),
-      message("Every time", `If I could go back to the day we met, I'd do it all again. The good days, the hard days, all of it. Because all of it led here.\n\n${from}`),
-      photos("Us"),
-      finale("Happy Anniversary", "To us.", "sparkles"),
-    ],
+    blurb: "Understated and elegant. A letter, a jar of reasons, your photos and a toast to the years ahead.",
+    screens: (to, from) =>
+      B.dress(B.STILL_CHOOSE_YOU, [
+        intro(`To ${to}`, "Happy anniversary. Open this when you have a minute.", "I have a minute"),
+        message("Every time", `If I could go back to the day we met, I'd do it all again. The good days, the hard days, all of it. Because all of it led here.\n\n${from}`),
+        {
+          ...reasons("Why I'd choose you again", "Tap the jar", [
+            "You make an ordinary Tuesday feel like ours",
+            "You hold my hand without thinking about it",
+            "You're the first person I want to tell everything",
+            "You make me braver",
+            "Home is wherever you are",
+          ]),
+          labels: { jarEmpty: "And a thousand more." },
+        },
+        photos("Us"),
+        {
+          ...slider("Would I choose you again?", "Probably", "Every time", "Every time. In every version of my life."),
+          labels: { sliderLines: ["Only probably? Keep going…", "Definitely…", "Without a doubt…", "Nearly there…"] },
+        },
+        finale("Happy Anniversary", "To us.", "sparkles"),
+      ]),
     demo: { to: "Olivia", from: "Sam", photos: [P.toast, P.sunset, P.lights] },
   },
   {
@@ -860,14 +1684,31 @@ export const TEMPLATES: Template[] = [
     ambient: "sparkles",
     emoji: "⌨️",
     headline: "Type the secret password",
-    blurb: "Built for a computer: they type the secret password on the keyboard to unlock a full gallery wall of your photos.",
-    screens: (to, from) => [
-      intro(`${to}, this card is locked`, `Only ${from}'s favourite person knows the password.`, "Unlock it"),
-      typeit("Enter the password", "Three little words. You know them.", "I love you", "Access granted"),
-      photos("Our gallery"),
-      message("Happy anniversary", `Every one of these pictures is a day I'm glad I spent with you.\n\n${from}`),
-      finale("Happy Anniversary", "Password changes next year. Hint: it won't.", "sparkles"),
-    ],
+    blurb: "Built for a computer: they pass a security check, type the secret password on the keyboard and unlock a full gallery wall of your photos.",
+    screens: (to, from) =>
+      B.dress(B.SECRET_PASSWORD, [
+        intro(`${to}, this card is locked`, `Only ${from}'s favourite person knows the password.`, "Unlock it"),
+        {
+          ...quiz(
+            "Security check",
+            [
+              q("Security question: who sent you this card?", [`Someone called ${from}`, "A secret admirer", "The bank"], 0),
+              q(`How much does ${from} love you?`, ["A bit", "Quite a lot", "More than words can say"], 2),
+            ],
+            "Identity confirmed. Welcome back.",
+          ),
+          labels: {
+            wrongLines: ["Access denied.", "Hmm. Suspicious.", "Try again, agent.", "Impostor alert!"],
+            quizPerfect: "Not one wrong answer. Very secure.",
+            quizMissedOne: "One wrong answer. We'll let it slide.",
+            quizMissed: "{n} wrong answers. Suspicious, but you're in.",
+          },
+        },
+        { ...typeit("Enter the password", "Three little words. You know them.", "I love you", "Access granted"), labels: { typeStart: "Type the password…" } },
+        photos("Our gallery"),
+        message("Happy anniversary", `Every one of these pictures is a day I'm glad I spent with you. Thank you for all of them, and for all the ones we haven't taken yet.\n\n${from}`),
+        finale("Happy Anniversary", "Password changes next year. Hint: it won't.", "sparkles"),
+      ]),
     demo: { to: "Olivia", from: "Sam", photos: [P.toast, P.sunset, P.coffee, P.lights, P.balloons, P.fireworks] },
   },
   {
@@ -879,14 +1720,19 @@ export const TEMPLATES: Template[] = [
     ambient: "hearts",
     emoji: "🃏",
     headline: "Match our memories",
-    blurb: "A sweet memory-match game, your photos and a little note. Cute, not cheesy (well, slightly cheesy).",
-    screens: (to, from) => [
-      intro(`Happy anniversary, ${to}!`, `${from} made you a little game.`, "Let's play"),
-      game("memory-match", "Memory lane", "Find all the matching pairs", "Perfect match. Like us"),
-      photos("The real memories"),
-      message("P.S.", `I'd play this game with you forever (and still let you win).\n\n${from}`),
-      finale("Happy Anniversary", "Many more matches to come.", "hearts"),
-    ],
+    blurb: "A sweet memory-match game, your photos, a mystery box for your next date and a little note. Cute, not cheesy (well, slightly cheesy).",
+    screens: (to, from) =>
+      B.dress(B.MEMORY_LANE, [
+        intro(`Happy anniversary, ${to}!`, `${from} made you a little game.`, "Let's play"),
+        game("memory-match", "Memory lane", "Find all the matching pairs", "Perfect match. Like us."),
+        photos("The real memories"),
+        {
+          ...boxes("What's our next memory?", "Pick a box. Whatever's inside, we're doing it.", ["A picnic in the park", "A weekend away", "Breakfast in bed"]),
+          labels: { boxesPicked: "Our next memory…" },
+        },
+        message("P.S.", `I'd play this game with you forever (and still let you win).\n\nThank you for every memory so far. My favourite place to be is anywhere with you.\n\n${from}`),
+        finale("Happy Anniversary", "Many more matches to come.", "hearts"),
+      ]),
     demo: { to: "Olivia", from: "Sam", photos: [P.coffee, P.sunset, P.toast] },
   },
 
@@ -895,24 +1741,33 @@ export const TEMPLATES: Template[] = [
     name: "Our Timeline",
     occasion: "anniversary",
     tone: "romantic",
-    theme: "gold",
+    theme: "ivory",
     ambient: "sparkles",
     emoji: "🗓️",
     headline: "Every chapter of us",
-    blurb: "Your story told moment by moment, from the day you met to today, then your photos and a jar of reasons.",
-    screens: (to, from) => [
-      intro(`Happy anniversary, ${to}`, `${from} wrote down our story. Every chapter of it.`, "Read our story"),
-      timeline("Our story so far", [
-        at("The beginning", "We met, and I couldn't stop smiling"),
-        at("First date", "I was so nervous I forgot my wallet"),
-        at("Our first trip", "Lost, sunburnt and completely happy"),
-        at("Moving in", "Too many cushions. Your idea."),
-        at("Today", "Still my favourite person in the world"),
+    blurb: "Your story told moment by moment, like a travel journal, from the day you met to today, then your photos, a jar of reasons and a letter.",
+    screens: (to, from) =>
+      B.dress(B.OUR_TIMELINE, [
+        intro(`Happy anniversary, ${to}`, `${from} wrote down our story. Every chapter of it.`, "Read our story"),
+        {
+          ...timeline("Our story so far", [
+            at("The beginning", "We met, and I couldn't stop smiling"),
+            at("First date", "I was so nervous I forgot my wallet"),
+            at("Our first trip", "Lost, sunburnt and completely happy"),
+            at("Moving in", "Too many cushions. Your idea."),
+            at("Today", "Still my favourite person in the world"),
+          ]),
+          labels: { timelineMore: "Next chapter… ({i}/{n})" },
+        },
+        photos("Our favourite chapters"),
+        reasons("Why I'd do it all again", "Tap the jar", ["You make me laugh every day", "You're my safe place", "We're a really good team", "You still give me butterflies"]),
+        {
+          ...slider("How much do I love you now?", "Loads", "More than ever", "More than the day we met. And still going."),
+          labels: { sliderLines: ["Only that much?", "More…", "Even more…", "Nearly…"] },
+        },
+        message("Every chapter with you", `Looking back at all of it, the only thing I'd change is meeting you sooner.\n\nThank you for every chapter so far. I can't wait to see what we write next.\n\n${from}`),
+        finale("Happy anniversary", "Here's to every chapter still to come.", "petals"),
       ]),
-      photos("Our favourite chapters"),
-      reasons("Why I'd do it all again", "Tap the jar", ["You make me laugh every day", "You're my safe place", "We're a really good team", "You still give me butterflies"]),
-      finale("Happy anniversary", "Here's to every chapter still to come.", "petals"),
-    ],
     demo: { to: "Olivia", from: "Sam", photos: [P.toast, P.sunset, P.coffee] },
   },
   {
@@ -920,25 +1775,34 @@ export const TEMPLATES: Template[] = [
     name: "Love Coupons",
     occasion: "anniversary",
     tone: "cute",
-    theme: "rose",
+    theme: "sunset",
     ambient: "hearts",
     emoji: "🎟️",
     headline: "Coupons, redeemable forever",
-    blurb: "A book of love coupons they can cash in whenever they like, plus a prize wheel that's secretly rigged to land on a kiss.",
-    screens: (to, from) => [
-      intro(`Happy anniversary, ${to}`, `${from} made you something you can cash in whenever you like.`, "Ooh"),
-      coupons("Your love coupons", "Tap to redeem. No expiry date.", [
-        "One back massage",
-        "Breakfast in bed",
-        "A night off cooking",
-        "You win the next argument",
-        "Movie night, your pick",
-        "One big hug, on demand",
+    blurb: "A book of love coupons they can cash in whenever they like, a prize wheel that's secretly rigged to land on a kiss, your photos and a love note.",
+    screens: (to, from) =>
+      B.dress(B.LOVE_COUPONS, [
+        intro(`Happy anniversary, ${to}`, `${from} made you something you can cash in whenever you like.`, "Ooh"),
+        {
+          ...coupons("Your love coupons", "Tap to redeem. No expiry date.", [
+            "One back massage",
+            "Breakfast in bed",
+            "A night off cooking",
+            "You win the next argument",
+            "Movie night, your pick",
+            "One big hug, on demand",
+          ]),
+          labels: { coupon: "Love coupon", couponClaim: "Screenshot this and show me to claim it" },
+        },
+        {
+          ...wheel("Bonus prize!", "Spin to see what else you've won", ["A kiss", "A hug", "A cuddle", "A dance", "A kiss", "A surprise"], "You won a kiss", 0),
+          labels: { spinAgain: "Spin again (it's still a kiss)" },
+        },
+        photos("Proof we're good together"),
+        message("No expiry date", `Every one of these coupons is a promise, and so is this: I'll keep choosing you, every day, for as long as you'll have me.\n\nHappy anniversary.\n${from}`),
+        finale("Happy anniversary!", `Love you always, ${from}`, "hearts"),
       ]),
-      wheel("Bonus prize!", "Spin to see what else you've won", ["A kiss", "A hug", "A cuddle", "A dance", "A kiss", "A surprise"], "You won a kiss", 0),
-      finale("Happy anniversary!", `Love you always, ${from}`, "hearts"),
-    ],
-    demo: { to: "Olivia", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam", photos: [P.coffee, P.sunset, P.toast] },
   },
 
   // ---------- Sorry ----------
@@ -951,32 +1815,50 @@ export const TEMPLATES: Template[] = [
     ambient: "hearts",
     emoji: "🥺",
     headline: "Do you forgive me?",
-    blurb: "An apology where the No button refuses to cooperate. Ideal for small crimes like eating their leftovers.",
+    blurb: "An apology where the No button refuses to cooperate and the forgiveness meter only goes up. Ideal for small crimes like eating their leftovers.",
     featured: true,
-    screens: (to, from) => [
-      intro(`${to}, I messed up`, `${from} is very, very sorry.`, "Go on…"),
-      question("Do you forgive me?", "Yes, fine", "No", "Thank you! I promise I've learnt my lesson. Probably."),
-      message("My official apology", `I'm sorry. You were right, I was wrong, and I'll never do it again (I will try very hard not to do it again).\n\nForgive me? ${from}`),
-      finale("Friends again?", "I'll buy the snacks.", "hearts"),
-    ],
-    demo: { to: "Olivia", from: "Sam" },
+    screens: (to, from) =>
+      B.dress(B.PLEASE_FORGIVE_ME, [
+        intro(`${to}, I messed up`, `${from} is very, very sorry.`, "Go on…"),
+        {
+          ...question("Do you forgive me?", "Yes, fine", "No", "Thank you! I promise I've learnt my lesson. Probably."),
+          labels: { noLines: ["I said sorry!", "I'll do the washing up", "Pretty please?", "Look at my sad face", "I brought snacks", "Forgiveness is free", "Wrong button"] },
+        },
+        {
+          ...slider("How much do you forgive me?", "A tiny bit", "Completely", "Fully forgiven. You're too kind."),
+          labels: { sliderLines: ["That's not much…", "Keep going…", "Nearly forgiven…", "So close…"] },
+        },
+        photos("Evidence of happier times"),
+        message(
+          "My official apology",
+          `I'm sorry. You were right, I was wrong, and I'll never do it again (I will try very hard not to do it again).\n\nJokes aside, I hate it when we're not okay. You mean a lot to me.\n\nForgive me? ${from}`,
+        ),
+        finale("Friends again?", "I'll buy the snacks.", "hearts"),
+      ]),
+    demo: { to: "Olivia", from: "Sam", photos: [P.friends, P.coffee, P.sunset] },
   },
   {
     slug: "im-really-sorry",
     name: "I'm Really Sorry",
     occasion: "sorry",
     tone: "heartfelt",
-    theme: "lavender",
+    theme: "sky",
     ambient: "petals",
     emoji: "🌷",
     headline: "I'm sorry",
-    blurb: "A sincere apology for when it matters. No jokes, just honest words and a few happier memories.",
-    screens: (to, from) => [
-      intro(`${to}`, "I owe you an apology, and I wanted to do it properly.", "Open"),
-      message("I'm sorry", `I know I hurt you, and I'm truly sorry. You didn't deserve that. I'm going to do better, because you matter to me more than being right.\n\n${from}`),
-      photos("Remember these?"),
-      finale("I'm sorry", "Whenever you're ready to talk, I'm here.", "petals"),
-    ],
+    blurb: "A sincere apology for when it matters. No jokes: honest words, what you'll do differently, a few happier memories and lanterns to light.",
+    screens: (to, from) =>
+      B.dress(B.IM_REALLY_SORRY, [
+        intro(`${to}`, "I owe you an apology, and I wanted to do it properly.", "Read it"),
+        message("I'm sorry", `I know I hurt you, and I'm truly sorry. You didn't deserve that. I'm going to do better, because you matter to me more than being right.\n\n${from}`),
+        {
+          ...reasons("What I'll do differently", "Tap the jar, one at a time", ["Listen before I answer", "Say sorry sooner", "Think about how my words land", "Make proper time for us"]),
+          labels: { jarCount: "Promise {i} of {n}", jarEmpty: "I mean every one of them." },
+        },
+        photos("Remember these?"),
+        { ...game("release-lanterns", "A little light", "Tap each lantern to send it up into the sky", "Thank you for hearing me out"), labels: { lanternTap: "Tap each lantern to let it go" } },
+        { ...finale("I'm sorry", "Whenever you're ready to talk, I'm here.", "petals"), labels: { playAgain: "Read it again" } },
+      ]),
     demo: { to: "Olivia", from: "Sam", photos: [P.bouquet, P.coffee, P.sunset] },
   },
   {
@@ -988,14 +1870,17 @@ export const TEMPLATES: Template[] = [
     ambient: "hearts",
     emoji: "🎟️",
     headline: "An apology, under the scratch card",
-    blurb: "They scratch away the silver panel to find your apology (and a peace offering).",
-    screens: (to, from) => [
-      intro(`${to}, special delivery`, `${from} hid something under this scratch card.`, "Show me"),
-      scratch("Scratch for a surprise", "Scratch the silver panel", "I'm sorry. Dinner's on me."),
-      question("Deal?", "Deal", "No", "Yay! Booking the table now."),
-      finale("Thank you for forgiving me", "You're the best.", "hearts"),
-    ],
-    demo: { to: "Olivia", from: "Sam" },
+    blurb: "They scratch away the silver panel to find your apology (and a peace offering), then a deal they can't refuse and a proper sorry.",
+    screens: (to, from) =>
+      B.dress(B.SCRATCH_MY_APOLOGY, [
+        intro(`${to}, special delivery`, `${from} hid something under this scratch card.`, "Show me"),
+        scratch("Scratch for a surprise", "Scratch the silver panel", "I'm sorry. Dinner's on me."),
+        { ...question("Deal?", "Deal", "No", "Yay! Booking the table now."), labels: { noLines: ["Dessert too?", "Fine, two desserts", "And I'll get the taxi", "Final offer…", "Pretty please?"] } },
+        photos("Us, before I messed up"),
+        message("I mean it", `Dinner's just the start. I'm sorry for what I did. You deserved better, and I'm going to do better.\n\n${from}`),
+        finale("Thank you for forgiving me", "You're the best.", "hearts"),
+      ]),
+    demo: { to: "Olivia", from: "Sam", photos: [P.coffee, P.friends, P.sunset] },
   },
 
   {
@@ -1003,24 +1888,30 @@ export const TEMPLATES: Template[] = [
     name: "Can We Hug It Out?",
     occasion: "sorry",
     tone: "cute",
-    theme: "lavender",
+    theme: "rose",
     ambient: "hearts",
     emoji: "🤗",
     headline: "Sorry. Hug?",
-    blurb: "An apology with a runaway No button, a press-and-hold hug and a book of make-it-up-to-you coupons.",
-    screens: (to, from) => [
-      intro(`${to}, I'm sorry`, `${from} knows they messed up. Please hear me out.`, "Okay…"),
-      question("Can you forgive me?", "Yes, fine", "No", "Thank you. Really."),
-      game("hold-hug", "Then let's hug it out", "Press and hold to send a hug", "Hug received. All better?"),
-      coupons("Making it up to you", "Redeem these whenever you like", [
-        "I'll do the washing up for a week",
-        "Your choice of takeaway",
-        "I'll admit you were right",
-        "One grovelling apology, on demand",
+    blurb: "An apology with a runaway No button, a press-and-hold hug, a book of make-it-up-to-you coupons and a proper sorry.",
+    screens: (to, from) =>
+      B.dress(B.HUG_IT_OUT, [
+        intro(`${to}, I'm sorry`, "I know I messed up. Please hear me out.", "Okay…"),
+        {
+          ...question("Can you forgive me?", "Yes, fine", "No", "Thank you. Really."),
+          labels: { noLines: ["Hug first, then decide", "Please?", "I'm really sorry", "I'll put the kettle on", "Don't make me beg", "Okay, I'm begging"] },
+        },
+        game("hold-hug", "Then let's hug it out", "Press and hold to send a hug", "Hug received. All better?"),
+        coupons("Making it up to you", "Redeem these whenever you like", [
+          "I'll do the washing up for a week",
+          "Your choice of takeaway",
+          "I'll admit you were right",
+          "One grovelling apology, on demand",
+        ]),
+        photos("Us, on a better day"),
+        message("Properly sorry", `I hate it when we fall out. I'm sorry for my part in it, and I'm going to listen more and talk less.\n\nLove, ${from}`),
+        finale("Hugs fix everything", `Sorry again. Love, ${from}`, "hearts"),
       ]),
-      finale("Friends again?", `Sorry again. Love, ${from}`, "hearts"),
-    ],
-    demo: { to: "Olivia", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam", photos: [P.friends, P.teacup, P.sunset] },
   },
 
   // ---------- Thank you ----------
@@ -1029,18 +1920,30 @@ export const TEMPLATES: Template[] = [
     name: "Thank You So Much",
     occasion: "thanks",
     tone: "heartfelt",
-    theme: "mint",
+    theme: "ivory",
     ambient: "sparkles",
     emoji: "🙏",
     headline: "Thank you, truly",
-    blurb: "A warm thank-you for teachers, friends, colleagues or anyone who went above and beyond.",
+    blurb: "A warm thank-you for teachers, friends, colleagues or anyone who went above and beyond: stars to catch, a jar of thank-yous, your photos and a heartfelt note.",
     featured: true,
-    screens: (to, from) => [
-      intro(`${to}, this is for you`, `${from} wanted to say something.`, "Open"),
-      message("Thank you", `Thank you for everything you've done. You went above and beyond, and it didn't go unnoticed. I'm so grateful.\n\n${from}`),
-      photos("Some good times"),
-      finale("Thank you!", "You're one of the good ones.", "sparkles"),
-    ],
+    screens: (to, from) =>
+      B.dress(B.THANK_YOU_SO_MUCH, [
+        intro(`${to}, this is for you`, `${from} wanted to say something.`, "See what it is"),
+        game("catch-stars", "A star for every kindness", "Catch the falling stars, one for every kind thing you did", "You're a star. Officially."),
+        {
+          ...reasons("Never forgotten", "Tap the jar", [
+            "How patient you were",
+            "The extra time you gave without being asked",
+            "The way you made everyone feel welcome",
+            "Your encouragement when it mattered most",
+            "Every kind word",
+          ]),
+          labels: { jarCount: "Thank you {i} of {n}", jarEmpty: "And that's only the start." },
+        },
+        photos("Some good times"),
+        message("Thank you", `Thank you for everything you've done. You went above and beyond, and it didn't go unnoticed. I'm so grateful.\n\n${from}`),
+        finale("Thank you!", "You're one of the good ones.", "sparkles"),
+      ]),
     demo: { to: "Ms Patel", from: "Class 4B", photos: [P.bouquet, P.coffee, P.balloons] },
   },
   {
@@ -1053,14 +1956,19 @@ export const TEMPLATES: Template[] = [
     ambient: "sparkles",
     emoji: "🖼️",
     headline: "A whole wall of thank yous",
-    blurb: "Built for a big screen: a gallery wall of up to six photos, a memory game and a big thank-you. Great for group cards.",
-    screens: (to, from) => [
-      intro(`Thank you, ${to}!`, `From ${from}. We made you a gallery.`, "Open the gallery"),
-      photos(`The ${to} appreciation gallery`),
-      game("memory-match", "A little game", "Find all the matching pairs", "Thank you for being a perfect match"),
-      message("From all of us", `We couldn't have done it without you. Thank you for your time, your patience and your kindness.\n\n${from}`),
-      finale("THANK YOU!", "You're appreciated more than you know.", "confetti"),
-    ],
+    blurb: "Built for a big screen: a gallery wall of up to six photos, a memory game, a gratitude meter and a big thank-you. Great for group cards.",
+    screens: (to, from) =>
+      B.dress(B.GALLERY_OF_THANKS, [
+        intro(`Thank you, ${to}!`, `From ${from}. We made you a gallery.`, "Open the gallery"),
+        photos(`The ${to} appreciation gallery`),
+        game("memory-match", "A little game", "Find all the matching pairs", "Thank you for being a perfect match"),
+        {
+          ...slider("How grateful are we?", "Very", "Beyond words", "Off the scale. Thank you!"),
+          labels: { sliderLines: ["Only that much?", "More than that…", "Much more…", "Nearly there…"] },
+        },
+        message("From all of us", `We couldn't have done it without you. Thank you for your time, your patience and your kindness.\n\n${from}`),
+        finale("THANK YOU!", "You're appreciated more than you know.", "confetti"),
+      ]),
     demo: { to: "Ms Patel", from: "Class 4B", photos: [P.bouquet, P.balloons, P.coffee, P.cake, P.sunset, P.grad] },
   },
 
@@ -1073,14 +1981,20 @@ export const TEMPLATES: Template[] = [
     ambient: "petals",
     emoji: "🌷",
     headline: "I grew you a thank you",
-    blurb: "They water a little plant until it blooms, then read your thank-you message. Lovely for teachers, nurses and neighbours.",
-    screens: (to, from) => [
-      intro(`Thank you, ${to}`, `${from} planted something for you.`, "Let's see"),
-      game("grow-flower", "Help it grow", "Water the plant until it blooms", "A thank you, in full bloom"),
-      message("Thank you", `What you did meant more than you know. Thank you for your kindness, your time and your patience.\n\nWith thanks, ${from}`),
-      finale("Thanks a bunch!", "You're one in a million.", "petals"),
-    ],
-    demo: { to: "Ms Patel", from: "Class 4B" },
+    blurb: "They water a little plant until it blooms, pick a bouquet, see your photos and read your thank-you message. Lovely for teachers, nurses and neighbours.",
+    screens: (to, from) =>
+      B.dress(B.THANKS_A_BUNCH, [
+        intro(`Thank you, ${to}`, `${from} planted something for you.`, "Let's see"),
+        game("grow-flower", "Help it grow", "Water the plant until it blooms", "A thank you, in full bloom"),
+        {
+          ...boxes("Pick a bouquet", "Choose a box. Every one is for you.", ["Sunflowers, for sunny days", "Tulips, for your kindness", "Roses, for being wonderful"]),
+          labels: { boxesPicked: "Your bouquet…" },
+        },
+        photos("Some blooming lovely memories"),
+        message("Thank you", `What you did meant more than you know. Thank you for your kindness, your time and your patience.\n\nWith thanks, ${from}`),
+        finale("Thanks a bunch!", "You're one in a million.", "petals"),
+      ]),
+    demo: { to: "Ms Patel", from: "Class 4B", photos: [P.bouquet, P.teacup, P.coffee] },
   },
 
   // ---------- Congrats ----------
@@ -1093,15 +2007,17 @@ export const TEMPLATES: Template[] = [
     ambient: "confetti",
     emoji: "🏆",
     headline: "You did it!",
-    blurb: "For graduations, new jobs, passed exams and big wins. Pop the balloons, then fireworks.",
+    blurb: "For graduations, new jobs, passed exams and big wins. Pop the balloons, pick a prize, then fireworks.",
     featured: true,
-    screens: (to, from) => [
-      intro(`Congratulations, ${to}!`, `${from} is so proud of you.`, "Celebrate"),
-      game("pop-balloons", "Victory balloons", "Pop 10 balloons to celebrate", "Woohoo!"),
-      photos("Look at you go"),
-      message("So proud of you", `All that hard work paid off. You deserve every bit of this.\n\nCongratulations!\n${from}`),
-      finale(`Congrats, ${to}!`, "Onwards and upwards.", "fireworks"),
-    ],
+    screens: (to, from) =>
+      B.dress(B.YOU_DID_IT, [
+        intro(`Congratulations, ${to}!`, `${from} is so proud of you.`, "Celebrate"),
+        game("pop-balloons", "Victory balloons", "Pop 10 balloons to celebrate", "Woohoo!"),
+        photos("Look at you go"),
+        { ...boxes("Pick your prize", "You've earned one. Choose a box.", ["A celebration dinner", "Bragging rights for life", "A massive hug"]), labels: { boxesPicked: "You've won…" } },
+        message("So proud of you", `All that hard work paid off. You deserve every bit of this.\n\nCongratulations!\n${from}`),
+        { ...finale(`Congrats, ${to}!`, "This is only the beginning.", "fireworks"), labels: { playAgain: "Celebrate again" } },
+      ]),
     demo: { to: "Olivia", from: "Sam", photos: [P.grad, P.balloons, P.cake] },
   },
   {
@@ -1109,26 +2025,35 @@ export const TEMPLATES: Template[] = [
     name: "Big Brain Energy",
     occasion: "congrats",
     tone: "funny",
-    theme: "party",
+    theme: "noel",
     ambient: "stars",
     emoji: "🤓",
     headline: "Are you a genius?",
-    blurb: "Congratulations, with a side of teasing. A genius test, a star-catching game and confetti.",
-    screens: (to, from) => [
-      intro(`Well well well, ${to}`, `${from} heard the news.`, "What news?"),
-      question("Are you, in fact, a genius?", "Yes, I am", "No", "Correct. Humble too."),
-      quiz(
-        "Genius test",
-        [
-          q("What's 2 + 2?", ["4", "22", "Fish"], 0),
-          q("Who's the cleverest person here?", [to, from, "The dog"], 0),
-        ],
-        "Genius confirmed. We're all very impressed.",
-      ),
-      game("catch-stars", "Gold stars for you", "Catch 10 gold stars", "Gold stars all round"),
-      finale(`Congratulations, ${to}!`, "Don't let it go to your head (too late).", "confetti"),
-    ],
-    demo: { to: "Olivia", from: "Sam" },
+    blurb: "Congratulations, with a side of teasing. A genius test, a star-catching game, your photos, a proper well done and confetti.",
+    screens: (to, from) =>
+      B.dress(B.BIG_BRAIN_ENERGY, [
+        intro(`Well well well, ${to}`, `${from} heard the news.`, "What news?"),
+        {
+          ...question("Are you, in fact, a genius?", "Yes, I am", "No", "Correct. Humble too."),
+          labels: { noLines: ["A genius would say yes", "Modesty detected", "Our records disagree", "Wrong, genius", "Think about it (you're clever)", "Even the dog says yes"] },
+        },
+        {
+          ...quiz(
+            "Genius test",
+            [
+              q("What's 2 + 2?", ["4", "22", "Fish"], 0),
+              q("Who's the cleverest person here?", [to, from, "The dog"], 0),
+            ],
+            "Genius confirmed. We're all very impressed.",
+          ),
+          labels: { wrongLines: ["A genius? Really?", "Recalculating…", "Even the dog knew that.", "Hmm. Recount."], quizPerfect: "Full marks. Big brain confirmed." },
+        },
+        game("catch-stars", "Gold stars for you", "Catch 10 gold stars", "Gold stars all round"),
+        photos("Exhibit A: the genius at work"),
+        message("Jokes aside", `I'm genuinely so proud of you. You worked hard for this and you deserve every bit of it.\n\n${from}`),
+        finale(`Congratulations, ${to}!`, "Don't let it go to your head (too late).", "confetti"),
+      ]),
+    demo: { to: "Olivia", from: "Sam", photos: [P.grad, P.desk, P.coffee] },
   },
   {
     slug: "you-hit-the-jackpot",
@@ -1139,15 +2064,20 @@ export const TEMPLATES: Template[] = [
     ambient: "stars",
     emoji: "🎰",
     headline: "Winner winner!",
-    blurb: "For promotions, new jobs and big wins. They pull a slot machine for the jackpot, then try (and fail) to rate how proud you are.",
-    screens: (to, from) => [
-      intro(`Big news, ${to}!`, `${from} heard you've been winning at life.`, "Spin to win"),
-      game("slot-machine", "Pull for the jackpot", "Pull the lever. Third time lucky?", "JACKPOT! Just like you"),
-      slider(`How proud is ${from} of you?`, "A bit", "Ridiculously", "Ridiculously proud. Officially."),
-      message("Congratulations!", `You worked so hard for this and you absolutely deserve it. Drinks are on you, though.\n\n${from}`),
-      finale(`Congrats, ${to}!`, "Onwards and upwards.", "fireworks"),
-    ],
-    demo: { to: "Olivia", from: "Sam" },
+    blurb: "For promotions, new jobs and big wins. They pull a slot machine for the jackpot, try (and fail) to rate how proud you are, then see the winner, pictured.",
+    screens: (to, from) =>
+      B.dress(B.YOU_HIT_THE_JACKPOT, [
+        intro(`Big news, ${to}!`, `${from} heard you've been winning at life.`, "Spin to win"),
+        game("slot-machine", "Pull for the jackpot", "Pull the lever. Third time lucky?", "JACKPOT! Just like you"),
+        {
+          ...slider(`How proud is ${from} of you?`, "A bit", "Ridiculously", "Ridiculously proud. Officially."),
+          labels: { sliderLines: ["A bit? Really?", "More than that…", "Way more…", "Off the charts…"] },
+        },
+        photos("The winner, pictured"),
+        message("Congratulations!", `You worked so hard for this and you absolutely deserve it. Drinks are on you, though.\n\n${from}`),
+        finale(`Congrats, ${to}!`, "Onwards and upwards.", "fireworks"),
+      ]),
+    demo: { to: "Olivia", from: "Sam", photos: [P.toast, P.desk, P.balloons] },
   },
   // ---------- Halloween ----------
   {
@@ -1159,34 +2089,45 @@ export const TEMPLATES: Template[] = [
     ambient: "spooky",
     emoji: "🎃",
     headline: "Trick or treat?",
-    blurb: "They try to pick 'trick' but the button runs away. Then they whack some ghosts and catch a bag of sweets.",
+    blurb: "They try to pick 'trick' but the button runs away. Then they whack some ghosts, catch a bag of sweets and see your spookiest photos.",
     featured: true,
-    screens: (to, from) => [
-      intro(`Happy Halloween, ${to}`, `${from} is at your door. Knock knock.`, "Open the door…"),
-      question("Trick or treat?", "Treat", "Trick", "Good choice. Nobody wants my tricks."),
-      game("whack-ghosts", "Ghosts in the garden!", "Whack 8 ghosts before they get you", "The ghosts have fled"),
-      game("catch-candy", "Fill your sweet bag", "Catch 10 falling sweets", "That's a lot of sugar", "game2"),
-      finale("Happy Halloween!", `Boo! Love, ${from}`, "spooky"),
-    ],
-    demo: { to: "Olivia", from: "Sam" },
+    screens: (to, from) =>
+      B.dress(B.TRICK_OR_TREAT, [
+        { ...intro(`Happy Halloween, ${to}`, `${from} is at your door. Knock knock.`, "Open the door…"), labels: { tapEnvelope: "Tap the envelope… if you dare" } },
+        {
+          ...question("Trick or treat?", "Treat", "Trick", "Good choice. Nobody wants my tricks."),
+          labels: { noLines: ["Too scared?", "BOO!", "This button is haunted", "The ghosts say treat", "Nice try", "Treats only", "Spooky, isn't it?"] },
+        },
+        game("whack-ghosts", "Ghosts in the garden!", "Whack the ghosts before they get you", "The ghosts have fled"),
+        game("catch-candy", "Fill your sweet bag", "Catch the falling sweets", "That's a lot of sugar", "game2"),
+        photos("Our spookiest photos"),
+        message("Happy Halloween", `Thanks for being my favourite partner in crime, on the spooky days and all the others.\n\n${from}`),
+        { ...finale("Happy Halloween!", `Boo! Love, ${from}`, "spooky"), labels: { playAgain: "Haunt me again" } },
+      ]),
+    demo: { to: "Olivia", from: "Sam", photos: [P.pumpkin, P.lights, P.friends] },
   },
   {
     slug: "boo-i-love-you",
     name: "Boo, I Love You",
     occasion: "halloween",
     tone: "cute",
-    theme: "spooky",
+    theme: "lavender",
     ambient: "spooky",
     emoji: "👻",
     headline: "You're my boo",
-    blurb: "A cute Halloween card for your other half: a jar of reasons they're your boo, your spookiest photos and a ghost hunt.",
-    screens: (to, from) => [
-      intro(`${to}, you're my boo`, `${from} has something spooky (and soppy) for you.`, "Eek, open it"),
-      reasons("Reasons you're my boo", "Tap the jar… if you dare", ["You hold my hand in scary films", "You eat all the sweets with me", "Your costume ideas", "You're cute even as a zombie", "You never ghost me"]),
-      photos("Our spookiest moments"),
-      game("whack-ghosts", "Protect our house", "Whack 8 ghosts", "Our house is safe. My hero"),
-      finale("Happy Halloween, boo", `Love, ${from} (your favourite ghoul)`, "spooky"),
-    ],
+    blurb: "A cute Halloween card for your other half: a jar of reasons they're your boo, your spookiest photos, a ghost hunt and a soppy note.",
+    screens: (to, from) =>
+      B.dress(B.BOO_I_LOVE_YOU, [
+        intro(`${to}, you're my boo`, `${from} has something spooky (and soppy) for you.`, "Eek, open it"),
+        {
+          ...reasons("Reasons you're my boo", "Tap the jar… if you dare", ["You hold my hand in scary films", "You eat all the sweets with me", "Your costume ideas", "You're cute even as a zombie", "You never ghost me"]),
+          labels: { jarCount: "Spooky reason {i} of {n}", jarEmpty: "That's all of them… for now." },
+        },
+        photos("Our spookiest moments"),
+        game("whack-ghosts", "Protect our house", "Whack the ghosts", "Our house is safe. My hero"),
+        message("My favourite boo", `Scary films, too many sweets and me hiding behind a cushion. There's no one I'd rather be spooked with.\n\nLove, ${from}`),
+        finale("Happy Halloween, boo", `Love, ${from} (your favourite ghoul)`, "spooky"),
+      ]),
     demo: { to: "Olivia", from: "Sam", photos: [P.pumpkin, P.lights, P.coffee] },
   },
   {
@@ -1199,14 +2140,22 @@ export const TEMPLATES: Template[] = [
     ambient: "spooky",
     emoji: "🏚️",
     headline: "Say the magic word to get in",
-    blurb: "Built for a laptop. They type the password to enter the haunted house, see a creepy photo wall and fight off the ghosts.",
-    screens: (to, from) => [
-      intro(`${to}, the haunted house awaits`, `${from} dares you to come inside.`, "Enter… if you dare"),
-      typeit("The door is locked", "Hint: what does a ghost say?", "Boo", "The door creaks open…"),
-      photos("The portrait gallery"),
-      game("whack-ghosts", "Ghosts everywhere!", "Whack 8 ghosts to escape", "You escaped! Barely."),
-      finale("Happy Halloween!", `You survived. ${from} is impressed.`, "spooky"),
-    ],
+    blurb: "Built for a laptop. They type the magic word to enter the haunted house, see a creepy photo wall and fight off the ghosts.",
+    screens: (to, from) =>
+      B.dress(B.HAUNTED_HOUSE, [
+        intro(`${to}, the haunted house awaits`, `${from} dares you to come inside.`, "Enter… if you dare"),
+        {
+          ...typeit("The door is locked", "Say the magic word. What does a ghost say? It starts with B.", "Boo", "The door creaks open…"),
+          labels: { typeStart: "Type the magic word…", next: "Step inside" },
+        },
+        { ...photos("The portrait gallery"), labels: { next: "Go deeper…" } },
+        { ...game("whack-ghosts", "Ghosts everywhere!", "Whack the ghosts to escape", "You escaped! Barely."), labels: { next: "Run!" } },
+        message(
+          "You made it out",
+          `Happy Halloween! Thanks for being brave enough to come in, and for being the best person to hide behind when things go bump in the night.\n\n${from}`,
+        ),
+        finale("Happy Halloween!", `You survived. ${from} is impressed.`, "spooky"),
+      ]),
     demo: { to: "Olivia", from: "Sam", photos: [P.pumpkin, P.lights, P.fireworks, P.coffee, P.sunset, P.balloons] },
   },
 
@@ -1220,34 +2169,51 @@ export const TEMPLATES: Template[] = [
     ambient: "sparkles",
     emoji: "🥂",
     headline: "3, 2, 1… Happy New Year!",
-    blurb: "They launch their own midnight fireworks, then spin the wheel for a New Year's resolution (it's rigged).",
+    blurb: "They launch their own midnight fireworks, spin the wheel for a New Year's resolution (it's rigged), then look back at the year's best bits.",
     featured: true,
-    screens: (to, from) => [
-      intro(`Happy New Year, ${to}!`, `${from} saved you a spot for the countdown.`, "Start the countdown"),
-      game("launch-fireworks", "It's midnight!", "Tap the sky to launch 6 fireworks", "Happy New Year!"),
-      wheel("Spin for your resolution", "Whatever it lands on, you have to do it", ["Drink more water", "Go to the gym", "Read more books", "Spend more time with me", "Learn to cook", "Sleep more"], "Great resolution. I'll hold you to it", 3),
-      message("Here's to the new year", `Thank you for being part of my year. Here's to more laughs, more adventures and fewer early mornings.\n\nCheers, ${from}`),
-      finale("Happy New Year!", "Same again next year?", "fireworks"),
-    ],
-    demo: { to: "Olivia", from: "Sam" },
+    screens: (to, from) =>
+      B.dress(B.HAPPY_NEW_YEAR, [
+        intro(`Happy New Year, ${to}!`, `${from} saved you a spot for the countdown.`, "Start the countdown"),
+        game("launch-fireworks", "It's midnight!", "Tap the sky to launch 6 fireworks", "Happy New Year!"),
+        {
+          ...wheel(
+            "Spin for your resolution",
+            "Whatever it lands on, you have to do it",
+            ["Drink more water", "Go to the gym", "Read more books", "See more of me", "Learn to cook", "Sleep more"],
+            "Great resolution. I'll hold you to it",
+            3,
+          ),
+          labels: { spinAgain: "Spin again (it'll still be me)" },
+        },
+        photos("The best bits of this year"),
+        message("Here's to the new year", `Thank you for being part of my year. Here's to more laughs, more adventures and fewer early mornings.\n\nCheers, ${from}`),
+        finale("Happy New Year!", "Same again next year?", "fireworks"),
+      ]),
+    demo: { to: "Olivia", from: "Sam", photos: [P.newyear, P.toast, P.friends] },
   },
   {
     slug: "year-in-review",
     name: "Our Year in Review",
     occasion: "newyear",
     tone: "heartfelt",
-    theme: "gold",
+    theme: "sky",
     ambient: "sparkles",
     emoji: "📅",
     headline: "What a year it's been",
-    blurb: "The best moments of the year, month by month, with your photos and a jar of highlights.",
-    screens: (to, from) => [
-      intro(`Happy New Year, ${to}`, `${from} looked back at the year. You're in all the best bits.`, "Let's look back"),
-      timeline("Our year", [at("Winter", "Cosy nights in and too much hot chocolate"), at("Spring", "That trip we nearly didn't take"), at("Summer", "Sunburn, ice cream and long evenings"), at("Autumn", "Rainy walks and good films"), at("Now", "Ready for whatever comes next, with you")]),
-      photos("Some highlights"),
-      reasons("Best bits of the year", "Tap the jar", ["Every time you made me laugh", "Our late-night chats", "You being there when it mattered", "All the food we ate"]),
-      finale("Happy New Year", "Here's to the next one.", "fireworks"),
-    ],
+    blurb: "The best moments of the year, season by season, with your photos, a jar of highlights, a peek at next year's plan and a letter.",
+    screens: (to, from) =>
+      B.dress(B.YEAR_IN_REVIEW, [
+        intro(`Happy New Year, ${to}`, `${from} looked back at the year. You're in all the best bits.`, "Let's look back"),
+        timeline("Our year", [at("Winter", "Cosy nights in and too much hot chocolate"), at("Spring", "That trip we nearly didn't take"), at("Summer", "Sunburn, ice cream and long evenings"), at("Autumn", "Rainy walks and good films"), at("Now", "Ready for whatever comes next, with you")]),
+        photos("Some highlights"),
+        { ...reasons("Best bits of the year", "Tap the jar", ["Every time you made me laugh", "Our late-night chats", "You being there when it mattered", "All the food we ate"]), labels: { jarCount: "Highlight {i} of {n}" } },
+        { ...scratch("Next year's plan", "Scratch the silver to see what's next", "More adventures, more laughs and more time with you."), labels: { scratchDone: "That's the plan!" } },
+        message(
+          "Thank you for this year",
+          `Whatever this year threw at us, you made it better. Thank you for every laugh, every late night and every ordinary day that turned out to be the best bit.\n\n${from}`,
+        ),
+        finale("Happy New Year", "Here's to the next one.", "fireworks"),
+      ]),
     demo: { to: "Olivia", from: "Sam", photos: [P.clock, P.newyear, P.toast] },
   },
   {
@@ -1259,14 +2225,34 @@ export const TEMPLATES: Template[] = [
     ambient: "sparkles",
     emoji: "🍾",
     headline: "Shake it to pop the cork",
-    blurb: "Made for a phone: they shake it like a bottle of bubbly until the cork pops at midnight.",
+    blurb: "Made for a phone: they shake it like a bottle of bubbly until the cork pops at midnight, then spin to see what their year holds.",
     screens: (to, from) => [
-      intro(`${to}, it's nearly midnight`, `${from} brought the bubbly. You're on cork duty.`, "Grab the bottle"),
-      game("shake-it", "Shake the bottle!", "Shake your phone to pop the cork", "POP! Happy New Year!"),
-      message("Cheers to you", `Here's to a year of good news, good food and good people.\n\n${from}`),
-      finale("Happy New Year!", "Mind the cork.", "fireworks"),
+      fizz(intro(`${to}, it's nearly midnight`, `${from} brought the bubbly. You're on cork duty.`, "Grab the bottle"), {
+        background: ["#14100b", "#2e2416"], gradient: "glow", envelope: "#ecdcb6", burst: "sparkles", transition: "zoom",
+        stickers: [stick("🍾", "open", 13, "sway", -14), stick("🥂", "br", 12, "float", 8), stick("✨", "bl", 9, "pulse"), stick("🕛", "lt", 8, "none", -6)],
+      }),
+      fizz(game("shake-it", "Shake the bottle!", "Shake your phone to pop the cork", "POP! Happy New Year!"), {
+        background: ["#1b150d", "#3b2c16"], gradient: "diagonal", pattern: "stripes", burst: "confetti", transition: "bounce",
+        stickers: [stick("🍾", "bl", 12, "sway", 12), stick("✨", "tl", 9, "pulse"), stick("🎉", "br", 11, "bounce")],
+      }, { shakeStart: "Shake the bottle", shaking: "Keep shaking… it's fizzing" }),
+      fizz(wheel("Spin for your year ahead", "Give it a whirl. The bubbles never lie.", ["Lots of lie-ins", "A big adventure", "Good news", "More dancing", "Fewer emails", "Excellent snacks"], "It's written in the bubbles."), {
+        background: ["#0e0c09", "#2b2216"], gradient: "glow", pattern: "dots", burst: "sparkles", transition: "zoom",
+        stickers: [stick("🔮", "tl", 10, "pulse"), stick("🥂", "br", 11, "sway", -8), stick("✨", "bl", 9, "float")],
+      }),
+      fizz(photos("Raise a glass to these"), {
+        background: ["#17120c", "#33281a"], gradient: "down", transition: "fade",
+        stickers: [stick("🥂", "tl", 11, "sway", -10), stick("📸", "br", 10, "float", 8), stick("✨", "bl", 8, "pulse")],
+      }),
+      fizz(message("Cheers to you", `Here's to a year of good news, good food and good people, and to you, for making the last one better just by being in it.\n\nHappy New Year.\n${from}`), {
+        background: ["#120f0a", "#2a2116"], gradient: "glow", transition: "fade",
+        stickers: [stick("🥂", "bl", 11, "float", 6), stick("✨", "tl", 9, "pulse")],
+      }),
+      fizz(finale("Happy New Year!", "Mind the cork.", "fireworks"), {
+        background: ["#0a0806", "#231b11"], gradient: "down", transition: "zoom",
+        stickers: [stick("🎆", "tl", 12, "pulse"), stick("🍾", "br", 13, "sway", 10), stick("✨", "bl", 9, "float"), stick("🥂", "tc", 8, "sway", -8)],
+      }),
     ],
-    demo: { to: "Olivia", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam", photos: [P.toast, P.newyear, P.lights] },
   },
 
   // ---------- Mother's Day ----------
@@ -1279,14 +2265,33 @@ export const TEMPLATES: Template[] = [
     ambient: "petals",
     emoji: "💐",
     headline: "I grew you a flower, Mum",
-    blurb: "She waters a little plant until it blooms, reads your message and sees your photos together. Have tissues ready.",
+    blurb: "She waters a little plant until it blooms, pulls what she taught you from a jar, reads your message and sees your photos together. Have tissues ready.",
     featured: true,
     screens: (to, from) => [
-      intro(`Happy Mother's Day, ${to}`, `${from} grew you something. It just needs a little water.`, "Open"),
-      game("grow-flower", "Help it bloom", "Water the plant until it flowers", "Just like you helped me grow"),
-      message("Thank you, Mum", `For every packed lunch, every lift, every worried phone call and every hug. I know I don't say it enough, so here it is: thank you, and I love you.\n\n${from}`),
-      photos("Us through the years"),
-      finale(`Happy Mother's Day ${to}`, "You're the best. Officially.", "petals"),
+      bloom(intro(`Happy Mother's Day, ${to}`, `${from} grew you something. It just needs a little water.`, "Grab the watering can"), {
+        background: ["#fdf1f2", "#f7d9de"], gradient: "glow", envelope: "#ecc3cb", burst: "petals", transition: "fade",
+        stickers: [stick("🌷", "open", 12, "sway", -10), stick("💐", "br", 13, "float", 6), stick("🌸", "bl", 10, "spin")],
+      }),
+      bloom(game("grow-flower", "Help it bloom", "Water the plant until it flowers", "Just like you helped me grow"), {
+        background: ["#f3f8f0", "#dcead5"], gradient: "glow", burst: "petals", transition: "rise",
+        stickers: [stick("🌱", "bl", 11, "sway"), stick("🦋", "tl", 10, "float", -12), stick("🌷", "br", 11, "sway", 8)],
+      }),
+      bloom(reasons("What you taught me", "Tap the jar for each one", ["To always say thank you", "That a cup of tea fixes most things", "How to stand up for myself", "To be kind, even when it's hard", "That home is wherever you are"]), {
+        background: ["#fdf4f4", "#f6dde1"], gradient: "down", pattern: "dots", burst: "hearts", transition: "blur",
+        stickers: [stick("💗", "tl", 10, "pulse"), stick("☕", "bl", 10, "float", -6), stick("🌸", "br", 11, "spin")],
+      }, { jarCount: "Lesson {i} of {n}", jarEmpty: "And so much more." }),
+      bloom(message("Thank you, Mum", `For every packed lunch, every lift, every worried phone call and every hug. I know I don't say it enough, so here it is: thank you, and I love you.\n\n${from}`), {
+        background: ["#fffaf7", "#f6e6e3"], gradient: "down", transition: "fade",
+        stickers: [stick("💐", "bl", 11, "float"), stick("🌸", "tl", 9, "sway", 10)],
+      }),
+      bloom(photos("Us through the years"), {
+        background: ["#fbecee", "#f1d2d8"], gradient: "diagonal", transition: "rise",
+        stickers: [stick("🌷", "tl", 10, "sway", -8), stick("💗", "br", 10, "pulse"), stick("📸", "bl", 9, "float")],
+      }),
+      bloom(finale(`Happy Mother's Day, ${to}`, "You're the best. Officially.", "petals"), {
+        background: ["#f9dfe4", "#f0c4cd"], gradient: "glow", transition: "zoom",
+        stickers: [stick("💐", "tl", 12, "float", -6), stick("🌷", "bl", 11, "sway"), stick("🌸", "br", 11, "spin"), stick("💗", "tc", 8, "pulse")],
+      }),
     ],
     demo: { to: "Mum", from: "Ravi", photos: [P.mum, P.summer, P.cake] },
   },
@@ -1299,14 +2304,34 @@ export const TEMPLATES: Template[] = [
     ambient: "hearts",
     emoji: "🎟️",
     headline: "Coupons for Mum",
-    blurb: "A book of coupons she can cash in all year, plus a big hug she has to press and hold to receive.",
+    blurb: "A book of coupons she can cash in all year, a big hug she has to press and hold to receive, your photos and the real present: a proper thank you.",
     screens: (to, from) => [
-      intro(`Happy Mother's Day, ${to}!`, `${from} has finally got you a useful present.`, "About time"),
-      coupons("Your coupon book", "Tap to redeem. No take-backs.", ["A cup of tea in bed", "I'll tidy my room (really)", "One day of no arguing", "A phone call, every week", "I'll cook dinner", "You pick the film"]),
-      game("hold-hug", "And one big hug", "Press and hold to send it", "Hug delivered"),
-      finale("Love you, Mum", `From your favourite child, ${from}`, "hearts"),
+      lilac(intro(`Happy Mother's Day, ${to}!`, `${from} has finally got you a useful present.`, "About time"), {
+        background: ["#f6f1fb", "#e6dbf3"], gradient: "glow", envelope: "#d2bcec", burst: "hearts", transition: "drop",
+        stickers: [stick("🎟️", "open", 12, "sway", -14), stick("💜", "br", 11, "pulse"), stick("🎀", "bl", 11, "float", 8)],
+      }),
+      lilac(coupons("Your coupon book", "Tap to redeem. No take-backs.", ["A cup of tea in bed", "I'll tidy my room (really)", "One day of no arguing", "A phone call, every week", "I'll cook dinner", "You pick the film"]), {
+        background: ["#fbf8fe", "#ece3f7"], gradient: "down", pattern: "dots", transition: "slide",
+        stickers: [stick("✂️", "tl", 10, "sway", -20), stick("🎟️", "bl", 10, "float", 10), stick("💜", "br", 9, "pulse")],
+      }, { coupon: "Mum coupon", couponTap: "Tap to cash in", couponDone: "Cashed in ✓", couponClaim: "Screenshot this and wave it at me" }),
+      lilac(game("hold-hug", "And one big hug", "Press and hold to send it", "Hug delivered"), {
+        background: ["#f0e6fa", "#dccbf0"], gradient: "glow", burst: "hearts", transition: "zoom",
+        stickers: [stick("🤗", "bl", 11, "bounce"), stick("💜", "br", 10, "pulse"), stick("✨", "tl", 8, "float")],
+      }),
+      lilac(photos("Mum and me"), {
+        background: ["#f4eefb", "#e2d5f2"], gradient: "diagonal", transition: "rise",
+        stickers: [stick("📸", "tl", 10, "float", -8), stick("💜", "br", 10, "pulse"), stick("🎀", "bl", 9, "sway")],
+      }),
+      lilac(message("The real present", `The coupons are a joke (mostly). The truth is, nothing I could give you comes close to everything you've given me.\n\nThank you for being my mum. I love you.\n\n${from}`), {
+        background: ["#fdfbff", "#efe7f8"], gradient: "down", transition: "fade",
+        stickers: [stick("☕", "bl", 10, "float"), stick("💐", "tl", 10, "sway", -8)],
+      }),
+      lilac(finale("Love you, Mum", `Coupons valid forever. Love, ${from}`, "hearts"), {
+        background: ["#e9dcf6", "#d5c1ee"], gradient: "glow", transition: "zoom",
+        stickers: [stick("🎟️", "tl", 11, "sway", -10), stick("💜", "bl", 10, "pulse"), stick("🎀", "br", 12, "float", 8)],
+      }),
     ],
-    demo: { to: "Mum", from: "Ravi" },
+    demo: { to: "Mum", from: "Ravi", photos: [P.mum, P.teacup, P.summer] },
   },
   {
     slug: "who-is-mums-favourite",
@@ -1317,15 +2342,37 @@ export const TEMPLATES: Template[] = [
     ambient: "petals",
     emoji: "👑",
     headline: "Settle it once and for all",
-    blurb: "A quiz with only one right answer (you), a slider that only goes up and a loving finale.",
+    blurb: "A quiz with only one right answer (you), a slider that only goes up, the evidence in photos and a loving finale.",
     screens: (to, from) => [
-      intro(`Happy Mother's Day, ${to}`, `${from} needs you to answer some questions. Honestly.`, "Uh oh"),
-      quiz("The favourite child quiz", [q("Who is your favourite child?", ["I love you all equally", "No comment", from], 2), q("Who calls you the most?", [from, "Not the others", "Both of those"], 2), q("Who made you this card?", ["Someone else", from, "A stranger"], 1)], "Confirmed: you have a favourite. It's me."),
-      slider(`How much do you love ${from}?`, "A normal amount", "The most", "Exactly as I thought"),
-      message("Jokes aside", `Thank you for everything, Mum. Even for loving my siblings (a bit).\n\n${from}`),
-      finale(`Happy Mother's Day!`, "Don't tell the others.", "petals"),
+      crown(intro(`Happy Mother's Day, ${to}`, `${from} needs you to answer some questions. Honestly.`, "Uh oh"), {
+        background: ["#fff1e6", "#ffd6bf"], gradient: "glow", envelope: "#f3c969", burst: "stars", transition: "drop",
+        stickers: [stick("👑", "open", 13, "sway", -15), stick("🤨", "br", 11, "bounce"), stick("💐", "bl", 10, "float", 6)],
+      }),
+      crown(quiz("The favourite child quiz", [q("Who is your favourite child?", ["I love you all equally", "No comment", from], 2), q("Who calls you the most?", [from, "Not the others", "Both of those"], 2), q("Who made you this card?", ["Someone else", from, "A stranger"], 1)], "Confirmed: you have a favourite. It's me."), {
+        background: ["#fff6ee", "#ffe2cf"], gradient: "down", pattern: "checks", burst: "confetti", transition: "slide",
+        stickers: [stick("🏆", "bl", 11, "bounce"), stick("👑", "br", 11, "sway", 12), stick("❓", "tl", 9, "pulse", -10)],
+      }, {
+        wrongLines: ["Mum! Really?", "I'll pretend I didn't see that", "Try again. Carefully.", "The others put you up to this", "Wrong, but I still love you"],
+        quizPerfect: "Full marks. You've always known.",
+      }),
+      crown(slider(`How much do you love ${from}?`, "A normal amount", "The most", "Exactly as I thought"), {
+        background: ["#ffe7d8", "#ffcab0"], gradient: "diagonal", burst: "hearts", transition: "bounce",
+        stickers: [stick("💯", "tl", 10, "pulse", -8), stick("💖", "br", 11, "float")],
+      }, { sliderLines: ["Mum. Be honest…", "Getting warmer…", "That's more like it.", "Nearly there…"] }),
+      crown(photos("Exhibit A: the favourite"), {
+        background: ["#fff3ea", "#ffdcc8"], gradient: "down", transition: "rise",
+        stickers: [stick("📸", "tl", 10, "float", -8), stick("👑", "br", 11, "sway", 10), stick("🥇", "bl", 10, "bounce")],
+      }),
+      crown(message("Jokes aside", `Thank you for everything, Mum. For the lifts, the dinners, the advice I ignored and later took, and for loving all of us more than we deserve. Even the others.\n\n${from}`), {
+        background: ["#fffaf5", "#fde8da"], gradient: "down", transition: "fade",
+        stickers: [stick("💐", "bl", 11, "float"), stick("💛", "tl", 9, "pulse")],
+      }),
+      crown(finale(`Happy Mother's Day!`, "Don't tell the others.", "petals"), {
+        background: ["#ffd8c0", "#ffb995"], gradient: "glow", transition: "zoom",
+        stickers: [stick("👑", "tl", 12, "sway", -12), stick("🤫", "br", 12, "bounce"), stick("🥇", "bl", 10, "float")],
+      }),
     ],
-    demo: { to: "Mum", from: "Ravi" },
+    demo: { to: "Mum", from: "Ravi", photos: [P.mum, P.cake, P.summer] },
   },
 
   // ---------- Father's Day ----------
@@ -1338,16 +2385,42 @@ export const TEMPLATES: Template[] = [
     ambient: "stars",
     emoji: "🤓",
     headline: "Why did the dad cross the road?",
-    blurb: "A quiz of terrible dad jokes, a slider that won't let you call his jokes unfunny and three mystery presents (all ties).",
+    blurb: "A quiz of terrible dad jokes, a slider that won't let you call his jokes unfunny, three mystery presents (all ties) and, jokes aside, a proper thank you.",
     featured: true,
     screens: (to, from) => [
-      intro(`Happy Father's Day, ${to}!`, `${from} has prepared a test of your dad jokes.`, "Hi test, I'm Dad"),
-      quiz("Dad joke quiz", [q("What do you call a fake noodle?", ["A spaghetto", "An impasta", "A fusilli-fake"], 1), q("Why don't eggs tell jokes?", ["They'd crack up", "They're shy", "Too yolky"], 0), q("What's Dad's favourite thing to say?", ["Ask your mother", "I'm not a taxi", "All of the above"], 2)], "You passed. Unfortunately."),
-      slider("How funny are Dad's jokes?", "Not at all", "Hilarious", "Hilarious. We all agree."),
-      boxes("Pick your present", "Go on, choose one", ["A tie", "Another tie", "A tie (different colour)"]),
-      finale(`Happy Father's Day!`, `Love, ${from}. (Please never stop the jokes.)`, "confetti"),
+      groan(intro(`Happy Father's Day, ${to}!`, `${from} has prepared a test of your dad jokes.`, "Hi test, I'm Dad"), {
+        background: ["#e6f1ff", "#c4dcf8"], gradient: "glow", envelope: "#fff8e7", burst: "stars", transition: "bounce",
+        stickers: [stick("🤓", "open", 13, "bounce", -8), stick("👔", "br", 12, "sway", 10), stick("😂", "bl", 10, "float")],
+      }),
+      groan(quiz("Dad joke quiz", [q("What do you call a fake noodle?", ["A spaghetto", "An impasta", "A fusilli-fake"], 1), q("Why don't eggs tell jokes?", ["They'd crack up", "They're shy", "Too yolky"], 0), q("What's Dad's favourite thing to say?", ["Ask your mother", "I'm not a taxi", "All of the above"], 2)], "You passed. Unfortunately."), {
+        background: ["#f0f7ff", "#d6e7fb"], gradient: "down", pattern: "dots", burst: "confetti", transition: "slide",
+        stickers: [stick("🥁", "bl", 11, "bounce"), stick("🤓", "br", 10, "sway"), stick("❓", "tl", 9, "pulse", -10)],
+      }, {
+        wrongLines: ["Wrong. Groan.", "Ba-dum… no.", "Not even a pun", "That answer's worse than his jokes", "Try again, champ"],
+        quizPerfect: "Full marks. Dad would be proud. Ish.",
+      }),
+      groan(slider("How funny are Dad's jokes?", "Not at all", "Hilarious", "Hilarious. We all agree."), {
+        background: ["#fff4e0", "#ffe0b5"], gradient: "diagonal", burst: "stars", transition: "bounce",
+        stickers: [stick("😂", "tl", 11, "bounce"), stick("🙄", "br", 11, "sway")],
+      }, { sliderLines: ["Be kind, he's sensitive…", "Getting warmer…", "That's more like it.", "Nearly at Dad level…"] }),
+      groan(boxes("Pick your present", "Go on, choose one", ["A tie", "Another tie", "A tie (different colour)"]), {
+        background: ["#eaf4ff", "#cfe3fb"], gradient: "glow", pattern: "grid", burst: "confetti", transition: "zoom",
+        stickers: [stick("👔", "tl", 11, "sway", -12), stick("🎁", "bl", 10, "bounce"), stick("👔", "br", 11, "sway", 14)],
+      }, { boxesPicked: "Drumroll please…" }),
+      groan(photos("Dad's greatest hits"), {
+        background: ["#f0f7ff", "#d6e7fb"], gradient: "down", transition: "rise",
+        stickers: [stick("📸", "tl", 10, "float", -8), stick("🏆", "br", 11, "bounce"), stick("😎", "bl", 10, "sway")],
+      }),
+      groan(message("Jokes aside, Dad", `Thank you for every lift, every bit of advice and every terrible joke told just to make me groan. They worked, by the way. Every single one.\n\nLove, ${from}`), {
+        background: ["#fbfdff", "#e4effc"], gradient: "down", transition: "fade",
+        stickers: [stick("💙", "bl", 10, "pulse"), stick("☕", "tl", 10, "float", -6)],
+      }),
+      groan(finale(`Happy Father's Day!`, "Please never stop the jokes.", "confetti"), {
+        background: ["#cfe3fb", "#a9cbf3"], gradient: "glow", transition: "zoom",
+        stickers: [stick("🤓", "tl", 12, "bounce"), stick("😂", "bl", 11, "float"), stick("👔", "br", 12, "sway", 10), stick("🥁", "tc", 8, "bounce")],
+      }),
     ],
-    demo: { to: "Dad", from: "Ravi" },
+    demo: { to: "Dad", from: "Ravi", photos: [P.dad, P.summer, P.coffee] },
   },
   {
     slug: "best-dad-ever",
@@ -1358,13 +2431,36 @@ export const TEMPLATES: Template[] = [
     ambient: "stars",
     emoji: "🏆",
     headline: "Thanks for everything, Dad",
-    blurb: "Growing up with Dad, moment by moment, with your photos and a proper thank you.",
+    blurb: "Growing up with Dad, moment by moment, the things he gave you pulled from a jar, your photos, a proper thank you and an award he scratches to reveal.",
     screens: (to, from) => [
-      intro(`Happy Father's Day, ${to}`, `${from} has a few things to say.`, "Open"),
-      timeline("Growing up with you", [at("Little me", "You taught me to ride a bike (and caught me every time)"), at("School years", "Every lift, every football match, every bad joke"), at("Growing up", "You let me make my own mistakes, then helped me fix them"), at("Now", "Still the first person I call")]),
-      photos("Me and my dad"),
-      message("Thank you, Dad", `You've always been there. I don't say it enough, but I'm so grateful you're my dad.\n\n${from}`),
-      finale("World's best dad", "Officially certified.", "stars"),
+      oak(intro(`Happy Father's Day, ${to}`, `${from} has a few things to say.`, "Let's hear it"), {
+        background: ["#f1f6ef", "#d9e8d6"], gradient: "glow", envelope: "#dcc49a", burst: "stars", transition: "fade",
+        stickers: [stick("🏆", "open", 12, "sway", -10), stick("💚", "br", 11, "pulse"), stick("🌳", "bl", 11, "sway")],
+      }),
+      oak(timeline("Growing up with you", [at("Little me", "You taught me to ride a bike (and caught me every time)"), at("School years", "Every lift, every football match, every bad joke"), at("Growing up", "You let me make my own mistakes, then helped me fix them"), at("Now", "Still the first person I call")]), {
+        background: ["#f5f9f3", "#e1ecdc"], gradient: "down", transition: "slide",
+        stickers: [stick("🚲", "bl", 11, "sway"), stick("⭐", "tl", 9, "pulse")],
+      }),
+      oak(reasons("Things I got from you", "Tap the jar for each one", ["My sense of humour (sorry, everyone)", "Never leaving a job half done", "Knowing it'll all be fine in the end", "How to look after the people I love", "My stubborn streak. Thanks for that."]), {
+        background: ["#eef5ec", "#d3e5cf"], gradient: "diagonal", pattern: "dots", burst: "sparkles", transition: "blur",
+        stickers: [stick("🔧", "tl", 10, "sway", -20), stick("☕", "bl", 10, "float"), stick("💚", "br", 10, "pulse")],
+      }, { jarCount: "Thing #{i} of {n}", jarEmpty: "And plenty more where those came from." }),
+      oak(photos("Me and my dad"), {
+        background: ["#f1f6ef", "#d9e8d6"], gradient: "down", transition: "rise",
+        stickers: [stick("📸", "tl", 10, "float", -8), stick("🌳", "br", 11, "sway")],
+      }),
+      oak(message("Thank you, Dad", `You've always been there. I don't say it enough, but I'm so grateful you're my dad.\n\n${from}`), {
+        background: ["#fbfcf8", "#e8f0e3"], gradient: "down", transition: "fade",
+        stickers: [stick("💚", "bl", 10, "pulse"), stick("✉️", "tl", 10, "float", -8)],
+      }),
+      oak(scratch("And the award goes to…", "Scratch the silver panel to see who won", "World's Best Dad. Again."), {
+        background: ["#fbf3dc", "#efd9a0"], gradient: "glow", text: "#3a2a0c", accent: "#7f5400", burst: "stars", transition: "zoom",
+        stickers: [stick("🏆", "tl", 12, "bounce"), stick("🎖️", "br", 11, "sway", 10), stick("✨", "bl", 9, "pulse")],
+      }),
+      oak(finale(`Happy Father's Day, ${to}`, "Officially certified. No recount.", "stars"), {
+        background: ["#dcebd8", "#bcd7b6"], gradient: "glow", transition: "zoom",
+        stickers: [stick("🏆", "tl", 12, "sway", -8), stick("💚", "bl", 10, "pulse"), stick("🎖️", "br", 11, "float")],
+      }),
     ],
     demo: { to: "Dad", from: "Ravi", photos: [P.dad, P.summer, P.grad] },
   },
@@ -1378,13 +2474,32 @@ export const TEMPLATES: Template[] = [
     ambient: "stars",
     emoji: "🖼️",
     headline: "A gallery of greatness",
-    blurb: "Built for a big screen. A wall of photos celebrating Dad, a memory game and a password only he'd know.",
+    blurb: "Built for a big screen. A wall of photos celebrating Dad, a memory game, a password only he'd know and a note in the visitors' book.",
     screens: (to, from) => [
-      intro(`Welcome to ${to}'s Hall of Fame`, `Curated by ${from}. Admission is free.`, "Enter the gallery"),
-      photos("The Hall of Fame"),
-      game("memory-match", "Dad's memory test", "Find all the matching pairs", "Sharp as ever, Dad"),
-      typeit("One last thing", "Type the thing you always say when we ask for money", "Ask your mother", "Classic."),
-      finale("Happy Father's Day!", `With love from ${from}`, "fireworks"),
+      gallery(intro(`Welcome to ${to}'s Hall of Fame`, `Curated by ${from}. Admission is free.`, "Enter the gallery"), {
+        background: ["#1a1714", "#2e2721"], gradient: "glow", envelope: "#efe4cc", burst: "sparkles", transition: "fade",
+        stickers: [stick("🏛️", "open", 12, "none"), stick("🖼️", "bl", 11, "sway", -6), stick("🎟️", "br", 11, "float", 12)],
+      }, { gotMail: "Now open" }),
+      gallery(photos("The Hall of Fame"), {
+        background: ["#2a1416", "#3e1f22"], gradient: "down", transition: "slide",
+        stickers: [stick("🖼️", "tl", 9, "sway", -6), stick("🏆", "br", 10, "float")],
+      }, { next: "On to the next room" }),
+      gallery(game("memory-match", "Dad's memory test", "Find all the matching pairs", "Sharp as ever, Dad"), {
+        background: ["#1d1a16", "#2c2620"], gradient: "down", pattern: "grid", burst: "stars", transition: "zoom",
+        stickers: [stick("🎖️", "bl", 10, "sway"), stick("👑", "br", 10, "float", 10), stick("✨", "tl", 8, "pulse")],
+      }),
+      gallery(typeit("One last thing", "Type what you say whenever someone leaves the door open", "Were you born in a barn", "Classic."), {
+        background: ["#14231d", "#20372d"], gradient: "glow", burst: "confetti", transition: "flip",
+        stickers: [stick("🔐", "tl", 10, "sway", -8), stick("🗝️", "br", 11, "float", 20), stick("✨", "bl", 8, "pulse")],
+      }, { typeHint: "Need a hint, Dad?" }),
+      gallery(message("From the visitors' book", `What an exhibition. Years of hard work, bad jokes and quiet kindness, all under one roof.\n\nThank you for everything, Dad. You're the best thing in the building.\n\n${from}`), {
+        background: ["#1d1915", "#2e2822"], gradient: "glow", transition: "fade",
+        stickers: [stick("🖋️", "tl", 10, "sway", -12), stick("📖", "bl", 10, "float")],
+      }),
+      gallery(finale("Happy Father's Day!", "The gallery is now closed. The love isn't.", "fireworks"), {
+        background: ["#0f0d0b", "#26201a"], gradient: "glow", transition: "zoom",
+        stickers: [stick("🏆", "tl", 12, "bounce"), stick("🖼️", "bl", 11, "sway", -6), stick("👑", "br", 12, "float", 8)],
+      }),
     ],
     demo: { to: "Dad", from: "Ravi", photos: [P.dad, P.summer, P.grad, P.coffee, P.cake, P.balloons] },
   },
@@ -1399,14 +2514,33 @@ export const TEMPLATES: Template[] = [
     ambient: "sparkles",
     emoji: "🎀",
     headline: "Will you always protect me?",
-    blurb: "A Raksha Bandhan card where 'No' isn't an option, a book of gift coupons they owe you, and your photos together.",
+    blurb: "A Raksha Bandhan card where 'No' isn't an option, a book of gift coupons they owe you, your photos together and a promise of your own.",
     featured: true,
     screens: (to, from) => [
-      intro(`Happy Raksha Bandhan, ${to}`, `${from} tied a rakhi on your wrist. Now there's a question.`, "Uh oh"),
-      question("Will you always protect me?", "Always", "No", "Promise made. No backing out."),
-      coupons("Rakhi gifts you owe me", "Tap to redeem. You have no choice.", ["One unlimited shopping trip", "Takeaway, your treat", "You take my side in every argument", "A lifetime of lifts"]),
-      photos("Us, growing up"),
-      finale("Happy Raksha Bandhan", `Love you (don't let it go to your head). ${from}`, "sparkles"),
+      thread(intro(`Happy Raksha Bandhan, ${to}`, `${from} tied a rakhi on your wrist. Now there's a question.`, "Uh oh"), {
+        background: ["#4a0e26", "#6e1838"], gradient: "glow", pattern: "dots", envelope: "#f28cb1", burst: "sparkles", transition: "zoom",
+        stickers: [stick("🎀", "open", 13, "sway", -12), stick("🪔", "bl", 11, "pulse"), stick("🌼", "br", 12, "spin"), stick("✨", "lb", 8, "float")],
+      }),
+      thread(question("Will you always protect me?", "Always", "No", "Promise made. No backing out."), {
+        background: ["#5c0b3b", "#80124f"], gradient: "diagonal", burst: "petals", transition: "bounce",
+        stickers: [stick("🎀", "bl", 11, "sway", 10), stick("✨", "tl", 9, "pulse"), stick("🌼", "br", 11, "spin")],
+      }, { noLines: ["Rakhi says otherwise", "You're tied in now", "No take-backs", "Think of the mithai", "Nice try", "Just press Always"] }),
+      thread(coupons("Rakhi gifts you owe me", "Tap to redeem. You have no choice.", ["One unlimited shopping trip", "Takeaway, your treat", "You take my side in every argument", "A lifetime of lifts"]), {
+        background: ["#4a0e26", "#6e1838"], gradient: "down", pattern: "dots", transition: "slide",
+        stickers: [stick("🎁", "tl", 10, "bounce", -8), stick("🍬", "br", 10, "sway", 20)],
+      }, { coupon: "Rakhi gift" }),
+      thread(photos("Us, growing up"), {
+        background: ["#5a1d06", "#7e3008"], gradient: "down", transition: "rise",
+        stickers: [stick("📸", "tl", 10, "float", -8), stick("🌼", "br", 11, "spin"), stick("🎀", "bl", 9, "sway")],
+      }),
+      thread(message("My promise to you", `You've had my back for as long as I can remember, and I'll always have yours.\n\nThank you for being my protector, my partner in crime and my very first friend.\n\n${from}`), {
+        background: ["#3f0b20", "#5c1430"], gradient: "glow", transition: "fade",
+        stickers: [stick("🪔", "bl", 11, "pulse"), stick("✨", "tl", 9, "float")],
+      }),
+      thread(finale("Happy Raksha Bandhan", `Love you (don't let it go to your head). ${from}`, "sparkles"), {
+        background: ["#6e1838", "#9c2650"], gradient: "glow", transition: "zoom",
+        stickers: [stick("🎀", "tl", 12, "sway", -10), stick("🪔", "bl", 11, "pulse"), stick("🌼", "br", 12, "spin"), stick("✨", "tc", 8, "float")],
+      }),
     ],
     demo: { to: "Arjun", from: "Olivia", photos: [P.rakhi, P.summer, P.cake] },
   },
@@ -1419,15 +2553,37 @@ export const TEMPLATES: Template[] = [
     ambient: "confetti",
     emoji: "🥊",
     headline: "Who's the favourite?",
-    blurb: "A quiz to settle who Mum loves most (it's you, obviously), a slot machine for your rakhi gift and a lot of love.",
+    blurb: "A quiz to settle who Mum loves most (it's you, obviously), a slot machine for your rakhi gift, the photo evidence and a lot of love.",
     screens: (to, from) => [
-      intro(`Happy Rakhi, ${to}!`, `${from} wants to settle some things once and for all.`, "Bring it on"),
-      quiz("The sibling quiz", [q("Who's Mum's favourite?", [to, from, "The dog"], 1), q("Who started every fight?", [to, from, "Definitely not me"], 0), q("Who's the best sibling?", [from, `Also ${from}`, `Still ${from}`], 2)], "The results are in. I win."),
-      game("slot-machine", "Spin for my rakhi gift", "Pull the lever to see what you're buying me", "Jackpot! You owe me big"),
-      message("But seriously", `You're annoying and you steal my food, but I wouldn't swap you for anything.\n\nHappy Raksha Bandhan.\n${from}`),
-      finale("Happy Raksha Bandhan!", "Now where's my present?", "confetti"),
+      bout(intro(`Happy Rakhi, ${to}!`, `${from} wants to settle some things once and for all.`, "Bring it on"), {
+        background: ["#fff6d6", "#ffe58f"], gradient: "glow", pattern: "stripes", envelope: "#3b6fd4", burst: "stars", transition: "bounce",
+        stickers: [stick("🥊", "open", 13, "bounce", -20), stick("🥊", "br", 13, "bounce", 20), stick("🔔", "bl", 10, "sway")],
+      }),
+      bout(quiz("The sibling quiz", [q("Who's Mum's favourite?", [to, from, "The dog"], 1), q("Who started every fight?", [to, from, "Definitely not me"], 0), q("Who's the best sibling?", [from, `Also ${from}`, `Still ${from}`], 2)], "The results are in. I win."), {
+        background: ["#fff0eb", "#ffd0c4"], gradient: "down", pattern: "checks", burst: "confetti", transition: "slide",
+        stickers: [stick("🏆", "bl", 11, "bounce"), stick("😤", "tl", 10, "pulse"), stick("🥊", "br", 11, "sway", 18)],
+      }, {
+        wrongLines: ["Wrong. Typical.", "I'm telling Mum", "Lies. All lies.", "Classic you", "Try again, if you dare"],
+        quizPerfect: "Full marks. I still win, though.",
+      }),
+      bout(game("slot-machine", "Spin for my rakhi gift", "Pull the lever to see what you're buying me", "Jackpot! You owe me big"), {
+        background: ["#eef3ff", "#cddcff"], gradient: "diagonal", burst: "fireworks", transition: "zoom",
+        stickers: [stick("🎰", "tl", 11, "bounce"), stick("💸", "br", 11, "float", 10), stick("🍕", "bl", 10, "sway", -14)],
+      }, { slotWin: "Pay up!" }),
+      bout(photos("Exhibit A: who started it"), {
+        background: ["#fff6d6", "#ffe58f"], gradient: "down", transition: "rise",
+        stickers: [stick("📸", "tl", 10, "float", -8), stick("🙄", "br", 11, "sway"), stick("🥊", "bl", 9, "bounce", -16)],
+      }),
+      bout(message("But seriously", `You're annoying and you steal my food, but I wouldn't swap you for anything.\n\nHappy Raksha Bandhan.\n${from}`), {
+        background: ["#fffbea", "#fff0bf"], gradient: "down", transition: "fade",
+        stickers: [stick("💛", "bl", 10, "pulse"), stick("🤝", "tl", 10, "float")],
+      }),
+      bout(finale("Happy Raksha Bandhan!", "Now where's my present?", "confetti"), {
+        background: ["#ffe58f", "#ffcf3f"], gradient: "glow", transition: "zoom",
+        stickers: [stick("🥊", "tl", 12, "bounce", -16), stick("🏆", "bl", 11, "float"), stick("🎁", "br", 12, "sway", 10)],
+      }),
     ],
-    demo: { to: "Arjun", from: "Olivia" },
+    demo: { to: "Arjun", from: "Olivia", photos: [P.rakhi, P.cake, P.summer] },
   },
 
   // ---------- Holi ----------
@@ -1440,14 +2596,33 @@ export const TEMPLATES: Template[] = [
     ambient: "colours",
     emoji: "🌈",
     headline: "Throw some colour!",
-    blurb: "They splash colour all over the screen with their finger, then see your Holi photos and wishes. No stains guaranteed.",
+    blurb: "They splash colour all over the screen with their finger, pull a wish for every colour from a jar, then see your Holi photos and wishes. No stains guaranteed.",
     featured: true,
     screens: (to, from) => [
-      intro(`Happy Holi, ${to}!`, `${from} brought the colours. Ready?`, "Let's play"),
-      game("throw-colours", "Throw the colours!", "Tap to splash 12 colours", "Holi hai!"),
-      photos("Colourful memories"),
-      message("Holi wishes", `May your life be as bright and colourful as today. Happy Holi!\n\n${from}`),
-      finale("Happy Holi!", "Bura na mano, Holi hai!", "colours"),
+      gulal(intro(`Happy Holi, ${to}!`, `${from} brought the colours. Ready?`, "Let's play"), {
+        background: ["#ffe9f2", "#ffd3e6"], gradient: "glow", pattern: "dots", envelope: "#ffe57a", burst: "colours", transition: "bounce",
+        stickers: [stick("🌈", "open", 13, "float", -8), stick("🎨", "br", 12, "sway", 10), stick("💛", "bl", 10, "pulse"), stick("💚", "lb", 8, "float")],
+      }),
+      gulal(game("throw-colours", "Throw the colours!", "Tap to splash 12 colours", "Holi hai!"), {
+        background: ["#fff8dc", "#ffeaa6"], gradient: "down", burst: "colours", transition: "zoom",
+        stickers: [stick("💦", "tl", 10, "bounce"), stick("🎨", "bl", 11, "sway", -10), stick("💙", "br", 10, "pulse")],
+      }),
+      gulal(reasons("A colour for every wish", "Tap the jar for each colour", ["Pink, for love and laughter", "Yellow, for sunny days", "Green, for fresh starts", "Blue, for calm when you need it", "Orange, for energy (and second helpings)", "Purple, for a little magic"]), {
+        background: ["#e7f8ef", "#c9eedb"], gradient: "glow", pattern: "dots", burst: "colours", transition: "bounce",
+        stickers: [stick("💚", "tl", 10, "pulse"), stick("💜", "br", 10, "float"), stick("🌸", "bl", 11, "spin")],
+      }, { jarCount: "Colour {i} of {n}", jarEmpty: "Every colour, just for you." }),
+      gulal(photos("Colourful memories"), {
+        background: ["#e8efff", "#cfdcff"], gradient: "down", transition: "rise",
+        stickers: [stick("📸", "tl", 10, "float", -8), stick("🌈", "br", 11, "sway")],
+      }),
+      gulal(message("Holi wishes", `May this year bring you as much colour as today: more laughter, more good food and more time with the people you love.\n\nHappy Holi!\n${from}`), {
+        background: ["#f4ecff", "#e3d3fb"], gradient: "down", transition: "fade",
+        stickers: [stick("💜", "bl", 10, "pulse"), stick("🌸", "tl", 10, "spin")],
+      }),
+      gulal(finale("Happy Holi!", "Here's to a colourful year ahead.", "colours"), {
+        background: ["#ffd3e6", "#fff1b8", "#c9eedb"], gradient: "diagonal", transition: "zoom",
+        stickers: [stick("🌈", "tl", 12, "float"), stick("🎨", "bl", 11, "sway", -8), stick("💦", "br", 11, "bounce"), stick("💛", "tc", 8, "pulse")],
+      }),
     ],
     demo: { to: "Olivia", from: "Sam", photos: [P.holi, P.summer, P.balloons] },
   },
@@ -1460,15 +2635,38 @@ export const TEMPLATES: Template[] = [
     ambient: "colours",
     emoji: "🎨",
     headline: "You're getting coloured either way",
-    blurb: "They try to say no to Holi (the button runs away), throw colours at the screen and spin for their colour.",
+    blurb: "They try to say no to Holi (the button runs away), throw colours at the screen, spin for their colour and, once it washes off, get a proper Holi wish.",
     screens: (to, from) => [
-      intro(`${to}, it's Holi!`, `${from} has a bucket of colour and isn't afraid to use it.`, "Oh no"),
-      question("Ready to get colourful?", "Yes!", "No", "You never had a choice"),
-      game("throw-colours", "Your turn!", "Tap to throw 12 colours", "Look at the state of you"),
-      wheel("Spin for your colour", "This is the colour you're wearing all day", ["Pink", "Yellow", "Green", "Blue", "Orange", "Purple"], "Looks great on you!"),
-      finale("Happy Holi!", "Bura na mano, Holi hai!", "colours"),
+      splash(intro(`${to}, it's Holi!`, `${from} has a bucket of colour and isn't afraid to use it.`, "Oh no"), {
+        background: ["#4d0b35", "#7a1553"], gradient: "glow", envelope: "#3fc6d8", burst: "colours", transition: "bounce",
+        stickers: [stick("🎨", "open", 13, "sway", -12), stick("💦", "br", 12, "bounce"), stick("😈", "bl", 11, "float"), stick("💛", "lt", 8, "pulse")],
+      }),
+      splash(question("Ready to get colourful?", "Yes!", "No", "You never had a choice"), {
+        background: ["#1f1452", "#33207a"], gradient: "diagonal", pattern: "zigzag", burst: "colours", transition: "zoom",
+        stickers: [stick("🙈", "tl", 10, "sway"), stick("💦", "bl", 11, "bounce"), stick("🎯", "br", 11, "spin")],
+      }, { noLines: ["You're already pink", "Bura na mano!", "Colours have spoken", "No escape on Holi", "You're green now", "Just press yes"] }),
+      splash(game("throw-colours", "Your turn!", "Tap to throw 12 colours", "Look at the state of you"), {
+        background: ["#08423f", "#0d625c"], gradient: "down", burst: "colours", transition: "bounce",
+        stickers: [stick("💦", "tl", 10, "bounce"), stick("🎨", "br", 11, "sway", 10), stick("🌈", "bl", 10, "float")],
+      }),
+      splash(wheel("Spin for your colour", "This is the colour you're wearing all day", ["Pink", "Yellow", "Green", "Blue", "Orange", "Purple"], "Looks great on you!"), {
+        background: ["#5a1f04", "#8a3507"], gradient: "glow", pattern: "zigzag", burst: "colours", transition: "zoom",
+        stickers: [stick("🌈", "tl", 10, "float"), stick("🎨", "bl", 10, "sway", -8), stick("🤞", "br", 11, "bounce")],
+      }),
+      splash(photos("The colourful evidence"), {
+        background: ["#3a0f5c", "#56187f"], gradient: "down", transition: "rise",
+        stickers: [stick("📸", "tl", 10, "float", -8), stick("💦", "br", 11, "bounce"), stick("😂", "bl", 10, "sway")],
+      }),
+      splash(message("Once the colour washes off", `Here's what stays: I'm so glad you're in my life. Wishing you a year full of laughter, sweets and good people.\n\nHappy Holi!\n${from}`), {
+        background: ["#2a0f3f", "#43175f"], gradient: "glow", transition: "fade",
+        stickers: [stick("💜", "bl", 10, "pulse"), stick("🌸", "tl", 10, "spin")],
+      }),
+      splash(finale("Happy Holi!", "Bura na mano, Holi hai!", "colours"), {
+        background: ["#4d0b35", "#2b1a6e", "#08423f"], gradient: "diagonal", transition: "zoom",
+        stickers: [stick("🎨", "tl", 12, "sway", -10), stick("🌈", "bl", 11, "float"), stick("💦", "br", 12, "bounce"), stick("😂", "tc", 8, "bounce")],
+      }),
     ],
-    demo: { to: "Olivia", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam", photos: [P.holi, P.balloons, P.friends] },
   },
 
   // ---------- New baby ----------
@@ -1481,14 +2679,33 @@ export const TEMPLATES: Template[] = [
     ambient: "bubbles",
     emoji: "👶",
     headline: "Welcome to the world",
-    blurb: "For new parents: a soft lullaby, wishes for the baby pulled from a jar, and a warm welcome message.",
+    blurb: "For new parents: a soft lullaby, wishes for the baby pulled from a jar, stars to catch for sweet dreams and a warm welcome message.",
     featured: true,
     screens: (to, from) => [
-      intro(`Congratulations, ${to}!`, `${from} is so happy for you.`, "Open"),
-      reasons("Wishes for the little one", "Tap the jar for each wish", ["Lots of cuddles", "Sweet dreams (for everyone)", "A lifetime of adventures", "Laughter every single day", "To be as loved as you are"]),
-      photos("The newest arrival"),
-      message("Welcome to the world", `What wonderful news. Your little one is so lucky to have you. Enjoy every moment (and get some sleep when you can).\n\nWith love, ${from}`),
-      finale("Welcome, little one", "The world just got a little sweeter.", "bubbles"),
+      lullaby(intro(`Congratulations, ${to}!`, `${from} is so happy for you.`, "Say hello"), {
+        background: ["#eef4fb", "#d9e6f5"], gradient: "glow", envelope: "#fbefc4", burst: "bubbles", transition: "fade",
+        stickers: [stick("🧸", "open", 12, "sway", -8), stick("🍼", "br", 11, "float", 12), stick("☁️", "bl", 11, "float")],
+      }, { gotMail: "Special delivery" }),
+      lullaby(reasons("Wishes for the little one", "Tap the jar for each wish", ["Lots of cuddles", "Sweet dreams (for everyone)", "A lifetime of adventures", "Laughter every single day", "To be as loved as you are"]), {
+        background: ["#fbf7ee", "#f1e7d2"], gradient: "down", pattern: "dots", burst: "stars", transition: "blur",
+        stickers: [stick("⭐", "tl", 9, "pulse"), stick("🎈", "br", 11, "float", 8), stick("🍼", "bl", 10, "sway")],
+      }, { jarCount: "Wish {i} of {n}", jarEmpty: "Every wish, sent with love." }),
+      lullaby(game("catch-stars", "Catch some sweet dreams", "Catch 10 falling stars for the little one", "Sweet dreams, little one"), {
+        background: ["#1b2645", "#2d3b66"], gradient: "glow", text: "#f3f1ea", accent: "#f4d58d", burst: "stars", transition: "fade",
+        stickers: [stick("🌙", "tl", 11, "sway", -10), stick("⭐", "bl", 9, "pulse"), stick("☁️", "br", 11, "float")],
+      }),
+      lullaby(photos("The newest arrival"), {
+        background: ["#eef4fb", "#d9e6f5"], gradient: "down", transition: "rise",
+        stickers: [stick("📸", "tl", 10, "float", -8), stick("🧸", "br", 11, "sway")],
+      }),
+      lullaby(message("Welcome to the world", `What wonderful news. Your little one is so lucky to have you. Enjoy every moment (and get some sleep when you can).\n\nWith love, ${from}`), {
+        background: ["#f7f9fd", "#e3ebf6"], gradient: "down", transition: "fade",
+        stickers: [stick("☁️", "tl", 10, "float"), stick("🤍", "bl", 9, "pulse")],
+      }),
+      lullaby(finale("Welcome, little one", "The world just got a little sweeter.", "bubbles"), {
+        background: ["#dfe9f6", "#c3d5ee"], gradient: "glow", transition: "zoom",
+        stickers: [stick("🌙", "tl", 11, "sway", -8), stick("🧸", "bl", 11, "float"), stick("⭐", "br", 10, "pulse"), stick("☁️", "tc", 8, "float")],
+      }),
     ],
     demo: { to: "Olivia & Sam", from: "Auntie Meera", photos: [P.baby, P.bouquet, P.balloons] },
   },
@@ -1501,15 +2718,34 @@ export const TEMPLATES: Template[] = [
     ambient: "balloons",
     emoji: "🎀",
     headline: "Scratch to reveal: boy or girl?",
-    blurb: "Made for a phone: a gender reveal they scratch off with a finger. Guess first, then scratch to find out.",
+    blurb: "Made for a phone: a gender reveal they scratch off with a finger. Guess first, then scratch to find out. You type the big news yourself.",
     screens: (to, from) => [
-      intro(`${to}, we have news!`, `${from} can finally tell you…`, "Tell me!"),
-      boxes("Take a guess first", "Boy, girl or surprise?", ["Boy?", "Girl?", "Surprise?"]),
-      scratch("Scratch to reveal", "Rub the silver panel with your finger", "It's a girl!"),
-      message("We can't wait", `We can't wait for you to meet our little one.\n\nLove, ${from}`),
-      finale("It's a girl!", "Get ready for lots of pink.", "balloons"),
+      reveal(intro(`${to}, we have news!`, `${from} can finally tell you…`, "Tell me!"), {
+        background: ["#ffe4ee", "#dde9ff"], gradient: "diagonal", envelope: "#c4ecd6", burst: "balloons", transition: "drop",
+        stickers: [stick("🎈", "open", 12, "float", -8), stick("❓", "br", 11, "bounce", 10), stick("🍼", "bl", 10, "sway")],
+      }),
+      reveal(boxes("Take a guess first", "Boy or girl? Pick a box", ["Boy?", "Girl?", "No idea!"]), {
+        background: ["#f4efff", "#e2d9fb"], gradient: "down", pattern: "dots", burst: "sparkles", transition: "bounce",
+        stickers: [stick("🤔", "tl", 10, "sway"), stick("💗", "bl", 10, "pulse"), stick("💙", "br", 10, "pulse")],
+      }, { boxesPicked: "Your guess…" }),
+      reveal(scratch("Scratch to reveal", "Rub the silver panel with your finger", BLANK.surprise), {
+        background: ["#dde9ff", "#ffe4ee"], gradient: "diagonal", burst: "balloons", transition: "zoom",
+        stickers: [stick("🎉", "bl", 11, "bounce"), stick("🎈", "br", 12, "float", 8), stick("✨", "tl", 9, "pulse")],
+      }),
+      reveal(photos("Our little one so far"), {
+        background: ["#f7f3ff", "#e6defb"], gradient: "down", transition: "rise",
+        stickers: [stick("📸", "tl", 10, "float", -8), stick("👣", "br", 10, "sway")],
+      }),
+      reveal(message("We can't wait", `We can't wait for you to meet our little one. They're already so lucky to have you in their life.\n\nLove, ${from}`), {
+        background: ["#fffafc", "#f1ebfb"], gradient: "down", transition: "fade",
+        stickers: [stick("🍼", "tl", 10, "sway", -8), stick("🤍", "bl", 9, "pulse")],
+      }),
+      reveal(finale("Now you know!", "Get ready for lots of cuddles.", "balloons"), {
+        background: ["#ffd9e7", "#e7dcff", "#d4e3ff"], gradient: "diagonal", transition: "zoom",
+        stickers: [stick("🎈", "tl", 12, "float", -8), stick("🍼", "bl", 10, "sway"), stick("🎉", "br", 12, "bounce"), stick("💗", "tc", 8, "pulse")],
+      }),
     ],
-    demo: { to: "Mum & Dad", from: "Olivia & Sam" },
+    demo: { to: "Mum & Dad", from: "Olivia & Sam", photos: [P.baby, P.balloons, P.bouquet] },
   },
   {
     slug: "big-news",
@@ -1520,15 +2756,34 @@ export const TEMPLATES: Template[] = [
     ambient: "hearts",
     emoji: "🍼",
     headline: "Scratch to find out our news",
-    blurb: "Made for a phone: announce a pregnancy with a scratch card. Perfect for telling grandparents-to-be.",
+    blurb: "Made for a phone: announce a pregnancy with a scratch card, then share their first look at the baby. Perfect for telling grandparents-to-be.",
     screens: (to, from) => [
-      intro(`${to}, sit down`, `${from} has some news. Big news.`, "What is it?!"),
-      question("Ready for the news?", "Yes, tell me!", "No", "Okay, here goes…"),
-      scratch("Scratch to find out", "Rub the silver panel with your finger", "You're going to be grandparents!"),
-      message("Surprise!", `Baby is due next summer and we couldn't wait to tell you.\n\nLove, ${from}`),
-      finale("Baby on board!", "Start practising the lullabies.", "hearts"),
+      hush(intro(`${to}, sit down`, `${from} has some news. Big news.`, "What is it?!"), {
+        background: ["#f5f0fc", "#e5dbf5"], gradient: "glow", envelope: "#f1dca6", burst: "sparkles", transition: "fade",
+        stickers: [stick("🤫", "open", 12, "bounce"), stick("🎁", "br", 11, "sway", 10), stick("✨", "bl", 9, "pulse")],
+      }),
+      hush(question("Ready for the news?", "Yes, tell me!", "No", "Okay, here goes…"), {
+        background: ["#f8f4fd", "#ebe2f7"], gradient: "down", burst: "sparkles", transition: "zoom",
+        stickers: [stick("🙈", "tl", 10, "sway"), stick("😮", "br", 11, "bounce"), stick("✨", "bl", 9, "pulse")],
+      }, { noLines: ["It's coming anyway", "Sit down first", "Trust me on this", "You'll love it", "Just press yes"] }),
+      hush(scratch("Scratch to find out", "Rub the silver panel with your finger", "We're having a baby!"), {
+        background: ["#fbf4e2", "#f2e2b8"], gradient: "glow", burst: "hearts", transition: "bounce",
+        stickers: [stick("🍼", "tl", 11, "sway", -10), stick("👣", "bl", 10, "float"), stick("🤍", "br", 10, "pulse")],
+      }, { scratchDone: "You heard it here first!" }),
+      hush(photos("Your first look at our little one"), {
+        background: ["#f5f0fc", "#e5dbf5"], gradient: "down", transition: "rise",
+        stickers: [stick("📸", "tl", 10, "float", -8), stick("👣", "br", 10, "sway")],
+      }),
+      hush(message("Surprise!", `Our little one is on the way, and we couldn't wait to tell you. You're one of the very first to know.\n\nLove, ${from}`), {
+        background: ["#fdfbff", "#efe8f8"], gradient: "down", transition: "fade",
+        stickers: [stick("🤍", "bl", 10, "pulse"), stick("💌", "tl", 10, "float", -8)],
+      }),
+      hush(finale("Baby on board!", "Start practising the lullabies.", "hearts"), {
+        background: ["#e9def7", "#d4c3ef"], gradient: "glow", transition: "zoom",
+        stickers: [stick("🍼", "tl", 11, "sway", -8), stick("🧸", "bl", 11, "float"), stick("✨", "br", 10, "pulse"), stick("👣", "tc", 8, "float")],
+      }),
     ],
-    demo: { to: "Mum & Dad", from: "Olivia & Sam" },
+    demo: { to: "Mum & Dad", from: "Olivia & Sam", photos: [P.baby, P.bouquet, P.balloons] },
   },
 
   // ---------- Wedding ----------
@@ -1541,14 +2796,37 @@ export const TEMPLATES: Template[] = [
     ambient: "sparkles",
     emoji: "💍",
     headline: "The big question",
-    blurb: "A proposal they'll never forget: your story so far, your photos, then the question. The No button runs away, of course.",
+    blurb: "A proposal they'll never forget: your story so far, your photos, every reason it's them, then the question. The No button runs away, of course.",
     featured: true,
     screens: (to, from) => [
-      intro(`${to}, I have something to ask you`, "Find somewhere quiet. This one's important.", "I'm ready"),
-      timeline("Our story so far", [at("The day we met", "I knew you were special"), at("Our first date", "I didn't want it to end"), at("Every day since", "You've made my life better"), at("Today", "I want forever with you")]),
-      photos("Us"),
-      question(`${to}, will you marry me?`, "YES!", "No", "You said yes!!!"),
-      finale("We're getting married!", `I love you. ${from}`, "fireworks"),
+      candle(intro(`${to}, I have something to ask you`, "Find somewhere quiet. This one's important.", "I'm ready"), {
+        background: ["#fcf8f0", "#f1e6d0"], gradient: "glow", envelope: "#e9c3b8", burst: "sparkles", transition: "fade",
+        stickers: [stick("💍", "open", 12, "pulse"), stick("🕯️", "bl", 11, "sway"), stick("🌹", "br", 12, "float", 10)],
+      }, { gotMail: "For your eyes only" }),
+      candle(timeline("Our story so far", [at("The day we met", "I knew you were special"), at("Our first date", "I didn't want it to end"), at("Every day since", "You've made my life better"), at("Today", "I want forever with you")]), {
+        background: ["#fdfaf3", "#f3eadb"], gradient: "down", transition: "slide",
+        stickers: [stick("✨", "tl", 9, "pulse"), stick("🌹", "bl", 11, "sway", -10)],
+      }),
+      candle(photos("Us"), {
+        background: ["#fbf1ec", "#f2dcd2"], gradient: "down", transition: "fade",
+        stickers: [stick("🤍", "tl", 10, "pulse"), stick("🌹", "br", 11, "float", 8)],
+      }),
+      candle(reasons("Why it's you", "Tap the jar for each reason", ["You make me laugh until I can't breathe", "You make the ordinary feel like an adventure", "You're kind to everyone, even when no one's looking", "I'm the best version of me when I'm with you", "I can't imagine a single day without you"]), {
+        background: ["#fcf8f0", "#f1e6d0"], gradient: "glow", burst: "hearts", transition: "blur",
+        stickers: [stick("💌", "tl", 10, "float", -8), stick("🕯️", "br", 11, "sway"), stick("✨", "bl", 9, "pulse")],
+      }, { jarCount: "Reason {i} of {n}", jarEmpty: "And a million more." }),
+      candle(message("Before I ask…", `${to},\n\nFrom the very start, you've been my favourite person. You make me braver, kinder and so much happier, and I don't want to spend a single day without you.\n\nSo I have one question.\n\n${from}`), {
+        background: ["#fffdf8", "#f5ecdc"], gradient: "down", transition: "fade", tune: { speed: 0.8 },
+        stickers: [stick("🕯️", "bl", 11, "sway"), stick("🌹", "tl", 10, "float", -8)],
+      }),
+      candle(question(`${to}, will you marry me?`, "YES!", "No", "You said yes!!!"), {
+        background: ["#1c1714", "#3a2c20"], gradient: "glow", text: "#f6ecd7", accent: "#d8b26a", burst: "fireworks", transition: "zoom",
+        stickers: [stick("💍", "tl", 12, "pulse"), stick("🕯️", "bl", 11, "sway"), stick("🕯️", "br", 11, "sway", 4)],
+      }, { noLines: ["Are you sure?", "My knee's killing me", "Look at the ring", "Think about it", "Please?", "One answer only"] }),
+      candle(finale("We're getting married!", `I love you. ${from}`, "fireworks"), {
+        background: ["#1a1512", "#302419"], gradient: "glow", text: "#f6ecd7", accent: "#d8b26a", transition: "zoom",
+        stickers: [stick("💍", "tl", 12, "pulse"), stick("🥂", "bl", 11, "sway", -8), stick("✨", "br", 10, "float"), stick("🌹", "tc", 8, "float")],
+      }),
     ],
     demo: { to: "Olivia", from: "Sam", photos: [P.rings, P.sunset, P.coffee] },
   },
@@ -1561,13 +2839,32 @@ export const TEMPLATES: Template[] = [
     ambient: "petals",
     emoji: "🥂",
     headline: "Congratulations, you two!",
-    blurb: "For wedding guests: a toast to the happy couple, their photos, a quiz about the big day and a shower of confetti.",
+    blurb: "For wedding guests: a toast to the happy couple, their photos, a quiz about the big day, a wheel of marriage advice and a shower of confetti.",
     screens: (to, from) => [
-      intro(`Congratulations, ${to}!`, `${from} raises a glass to you both.`, "Cheers!"),
-      photos("The happy couple"),
-      quiz("Wedding quiz", [q("Who cried first at the ceremony?", ["The bride", "The groom", "Everyone"], 2), q("What's the secret to a happy marriage?", ["Separate duvets", "Always saying sorry", "Both"], 2)], "Correct! You'll be fine"),
-      message("Wishing you both", `Wishing you a lifetime of love, laughter and someone to share the last slice of cake with. Congratulations!\n\n${from}`),
-      finale("Congratulations!", "To love and laughter.", "confetti"),
+      garden(intro(`Congratulations, ${to}!`, `${from} raises a glass to you both.`, "Cheers!"), {
+        background: ["#fdf2ef", "#f6dcd4"], gradient: "glow", envelope: "#cfdfc6", burst: "petals", transition: "fade",
+        stickers: [stick("🥂", "open", 12, "sway", -10), stick("💐", "bl", 11, "float"), stick("🎊", "br", 12, "bounce")],
+      }),
+      garden(photos("The happy couple"), {
+        background: ["#f2f6ef", "#dde8d6"], gradient: "down", transition: "slide",
+        stickers: [stick("📸", "tl", 10, "float", -8), stick("💒", "br", 11, "sway")],
+      }),
+      garden(quiz("Wedding quiz", [q("Who cried first at the ceremony?", ["One of you two", "The parents", "Everyone"], 2), q("What's the secret to a happy marriage?", ["Separate duvets", "Always saying sorry", "Both"], 2)], "Correct! You'll be fine"), {
+        background: ["#fdf6f3", "#f8e2db"], gradient: "down", pattern: "dots", burst: "petals", transition: "slide",
+        stickers: [stick("💍", "tl", 10, "pulse"), stick("🍰", "bl", 11, "sway"), stick("🎉", "br", 10, "bounce")],
+      }),
+      garden(wheel("Spin for some marriage advice", "Whatever it lands on, it's the law", ["Talk it out", "Share the chips", "Kitchen dancing", "Say sorry first", "Two remotes", "Laugh every day"], "Wise words. Frame them."), {
+        background: ["#f2f6ef", "#dde8d6"], gradient: "glow", burst: "confetti", transition: "zoom",
+        stickers: [stick("🔔", "tl", 10, "sway", -12), stick("🎉", "br", 11, "bounce"), stick("💐", "bl", 10, "float")],
+      }),
+      garden(message("Wishing you both", `Wishing you a lifetime of love, laughter and someone to share the last slice of cake with. Congratulations!\n\n${from}`), {
+        background: ["#fffcf8", "#f3ece2"], gradient: "down", transition: "fade",
+        stickers: [stick("💌", "tl", 10, "float", -8), stick("🤍", "bl", 9, "pulse")],
+      }),
+      garden(finale("Congratulations!", "To love and laughter.", "confetti"), {
+        background: ["#f6dcd4", "#dde8d6"], gradient: "diagonal", transition: "zoom",
+        stickers: [stick("🥂", "tl", 12, "sway", -10), stick("🎊", "bl", 11, "bounce"), stick("💐", "br", 12, "float"), stick("🍾", "tc", 8, "sway")],
+      }),
     ],
     demo: { to: "Olivia & Sam", from: "Meera", photos: [P.rings, P.toast, P.bouquet] },
   },
@@ -1580,13 +2877,32 @@ export const TEMPLATES: Template[] = [
     ambient: "petals",
     emoji: "👰",
     headline: "Will you be my bridesmaid?",
-    blurb: "Ask your best friend to be a bridesmaid (No runs away), with a book of bridesmaid perks to sweeten the deal.",
+    blurb: "Ask your best friend to be a bridesmaid (No runs away), with a book of bridesmaid perks to sweeten the deal and a few words on why it had to be them.",
     screens: (to, from) => [
-      intro(`${to}, I need you`, `${from} has a very important question.`, "What is it?"),
-      question("Will you be my bridesmaid?", "Of course!", "No", "YAY! I couldn't do it without you"),
-      coupons("Your bridesmaid perks", "Tap to redeem", ["Unlimited prosecco on the day", "First pick of the cake", "A spa day before the wedding", "I'll owe you forever"]),
-      photos("Us, before the big day"),
-      finale("It's official!", `Love you! ${from}`, "petals"),
+      blush(intro(`${to}, I need you`, `${from} has a very important question.`, "What is it?"), {
+        background: ["#fff0f3", "#fbd6df"], gradient: "glow", envelope: "#efd9b0", burst: "petals", transition: "drop",
+        stickers: [stick("👰", "open", 12, "sway", -8), stick("🎀", "br", 12, "float", 10), stick("💐", "bl", 11, "sway")],
+      }),
+      blush(question("Will you be my bridesmaid?", "Of course!", "No", "YAY! I couldn't do it without you"), {
+        background: ["#fff5f7", "#fde0e7"], gradient: "down", pattern: "dots", burst: "hearts", transition: "zoom",
+        stickers: [stick("💍", "tl", 10, "pulse"), stick("🥺", "br", 11, "bounce"), stick("🎀", "bl", 10, "sway", -10)],
+      }, { noLines: ["The dress is lovely", "There's prosecco", "I'll cry", "Please?", "Think of the cake", "Not taking no"] }),
+      blush(coupons("Your bridesmaid perks", "Tap to redeem", ["Unlimited prosecco on the day", "First pick of the cake", "A spa day before the wedding", "I'll owe you forever"]), {
+        background: ["#fff0f3", "#fbd6df"], gradient: "diagonal", transition: "slide",
+        stickers: [stick("🥂", "tl", 10, "sway", -10), stick("💅", "bl", 10, "float"), stick("🍰", "br", 10, "bounce")],
+      }, { coupon: "VIP perk" }),
+      blush(photos("Us, before the big day"), {
+        background: ["#fff5f7", "#fde0e7"], gradient: "down", transition: "rise",
+        stickers: [stick("📸", "tl", 10, "float", -8), stick("💖", "br", 10, "pulse")],
+      }),
+      blush(message("Why it had to be you", `I can't imagine the big day without you by my side. You've been there for every big moment so far, and this one wouldn't be the same without you.\n\nThank you for saying yes (you did say yes).\n\n${from}`), {
+        background: ["#fffafb", "#fbe8ec"], gradient: "down", transition: "fade",
+        stickers: [stick("💌", "tl", 10, "float", -8), stick("💐", "bl", 10, "sway")],
+      }),
+      blush(finale("It's official!", `Love you! ${from}`, "petals"), {
+        background: ["#fbd6df", "#f5b8c8"], gradient: "glow", transition: "zoom",
+        stickers: [stick("👰", "tl", 12, "sway", -8), stick("🎀", "bl", 11, "float"), stick("💖", "br", 11, "pulse"), stick("🥂", "tc", 8, "sway")],
+      }),
     ],
     demo: { to: "Meera", from: "Olivia", photos: [P.friends, P.bouquet, P.sunset] },
   },
@@ -1601,16 +2917,35 @@ export const TEMPLATES: Template[] = [
     ambient: "bubbles",
     emoji: "🌻",
     headline: "Sending you a big hug",
-    blurb: "A hug they can press and hold, some prescriptions from 'Dr You' and a warm get-well-soon message.",
+    blurb: "A hug they can press and hold, some prescriptions from 'Dr You', a few photos to make them smile and a warm get-well-soon message.",
     featured: true,
     screens: (to, from) => [
-      intro(`Get well soon, ${to}`, `${from} is sending you something to make you feel better.`, "Open"),
-      game("hold-hug", "Here's a hug", "Press and hold to receive it", "Hug delivered. Feeling better?"),
-      coupons("Your prescriptions", "Doctor's orders. Tap to redeem.", ["Unlimited naps", "Soup delivered to your door", "One full day of bad TV", "Ice cream, as needed"]),
-      message("Get well soon", `Rest up, drink lots of tea and let everyone look after you for once. We miss you!\n\n${from}`),
-      finale("Get well soon!", "Back on your feet in no time.", "bubbles"),
+      sunny(intro(`Get well soon, ${to}`, `${from} is sending you something to make you feel better.`, "Make me feel better"), {
+        background: ["#fffbe6", "#ffefb3"], gradient: "glow", envelope: "#e6f0fc", burst: "sparkles", transition: "fade",
+        stickers: [stick("🌻", "open", 13, "sway", -8), stick("🧸", "br", 12, "float"), stick("☀️", "bl", 10, "spin")],
+      }),
+      sunny(game("hold-hug", "Here's a hug", "Press and hold to receive it", "Hug delivered. Feeling better?"), {
+        background: ["#eef6ff", "#d6e8fd"], gradient: "glow", burst: "hearts", transition: "zoom",
+        stickers: [stick("🤗", "bl", 11, "bounce"), stick("💛", "br", 10, "pulse"), stick("🌻", "tl", 9, "sway")],
+      }),
+      sunny(coupons("Your prescriptions", "Doctor's orders. Tap to redeem.", ["Unlimited naps", "Soup delivered to your door", "One full day of bad TV", "Ice cream, as needed"]), {
+        background: ["#f6fbff", "#e2effd"], gradient: "down", pattern: "grid", transition: "slide",
+        stickers: [stick("🩹", "tl", 10, "sway", -25), stick("🍲", "bl", 10, "float"), stick("🍦", "br", 10, "bounce")],
+      }, { coupon: "Prescription", couponTap: "Tap to take", couponDone: "Taken ✓", couponClaim: "Doctor's orders: screenshot this" }),
+      sunny(photos("Something to make you smile"), {
+        background: ["#fffbe6", "#ffefb3"], gradient: "down", transition: "rise",
+        stickers: [stick("📸", "tl", 10, "float", -8), stick("🌻", "br", 11, "sway")],
+      }),
+      sunny(message("Get well soon", `Rest up, drink lots of tea and let everyone look after you for once. You look after everyone else, so it's your turn.\n\nMissing you lots, and here whenever you need anything.\n\n${from}`), {
+        background: ["#fffef8", "#fff3cc"], gradient: "down", transition: "fade",
+        stickers: [stick("🍵", "bl", 10, "float"), stick("🌻", "tl", 10, "sway", -8)],
+      }),
+      sunny(finale("Get well soon!", "Back on your feet in no time.", "bubbles"), {
+        background: ["#ffefb3", "#d6e8fd"], gradient: "diagonal", transition: "zoom",
+        stickers: [stick("🌻", "tl", 12, "sway", -8), stick("☀️", "bl", 10, "spin"), stick("🧸", "br", 12, "float"), stick("💛", "tc", 8, "pulse")],
+      }),
     ],
-    demo: { to: "Olivia", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam", photos: [P.teacup, P.bouquet, P.summer] },
   },
   {
     slug: "pop-the-boredom",
@@ -1621,15 +2956,34 @@ export const TEMPLATES: Template[] = [
     ambient: "bubbles",
     emoji: "🫧",
     headline: "Bubble wrap for the sofa",
-    blurb: "Made for a phone: a sheet of bubble wrap to pop in bed, a slot machine and a cheeky get-well-soon message.",
+    blurb: "Made for a phone: a sheet of bubble wrap to pop in bed, a slot machine, a few photos and a cheeky get-well-soon message.",
     screens: (to, from) => [
-      intro(`${to}, stuck in bed?`, `${from} sent you something to do.`, "Finally"),
-      game("bubble-wrap", "Pop the bubble wrap", "Pop every single bubble", "So satisfying. Feeling better already?"),
-      game("slot-machine", "Bonus round", "Pull the lever for a jackpot", "Jackpot! Your prize: getting better soon", "game2"),
-      message("Get well soon", `Hurry up and get better. It's boring without you.\n\n${from}`),
-      finale("Get well soon!", "Doctor's orders: more naps.", "bubbles"),
+      arcade(intro(`${to}, stuck in bed?`, `${from} sent you something to do.`, "Finally"), {
+        background: ["#e8fbf7", "#c6f0e8"], gradient: "glow", envelope: "#ffe3ee", burst: "bubbles", transition: "bounce",
+        stickers: [stick("🛋️", "open", 12, "sway", -6), stick("📺", "br", 12, "bounce"), stick("🍿", "bl", 10, "float")],
+      }),
+      arcade(game("bubble-wrap", "Pop the bubble wrap", "Pop every single bubble", "So satisfying. Feeling better already?"), {
+        background: ["#f0fdfa", "#d4f5ee"], gradient: "down", pattern: "dots", burst: "bubbles", transition: "zoom",
+        stickers: [stick("🤒", "tl", 10, "sway"), stick("😌", "br", 11, "float"), stick("✨", "bl", 8, "pulse")],
+      }),
+      arcade(game("slot-machine", "Bonus round", "Pull the lever for a jackpot", "Jackpot! Your prize: getting better soon", "game2"), {
+        background: ["#1a1035", "#2e1b5c"], gradient: "glow", text: "#f4f0ff", accent: "#ff6fa5", burst: "fireworks", transition: "flip",
+        stickers: [stick("🎰", "tl", 11, "bounce"), stick("🍒", "bl", 10, "sway"), stick("⭐", "br", 10, "pulse")],
+      }),
+      arcade(photos("Proof you're more fun when you're well"), {
+        background: ["#e8fbf7", "#c6f0e8"], gradient: "down", transition: "rise",
+        stickers: [stick("📸", "tl", 10, "float", -8), stick("😎", "br", 11, "bounce")],
+      }),
+      arcade(message("Get well soon", `Hurry up and get better. Everything's boring without you, and nobody laughs at my jokes like you do.\n\nRest, eat something nice and let people fuss over you. I'll be here.\n\n${from}`), {
+        background: ["#f7fefc", "#ddf6f0"], gradient: "down", transition: "fade",
+        stickers: [stick("💌", "tl", 10, "float", -8), stick("🍦", "bl", 10, "sway")],
+      }),
+      arcade(finale("Get well soon!", "Doctor's orders: more naps.", "bubbles"), {
+        background: ["#c6f0e8", "#ffd6e6"], gradient: "diagonal", transition: "zoom",
+        stickers: [stick("😴", "tl", 12, "float"), stick("🛌", "bl", 11, "sway"), stick("🍿", "br", 11, "bounce"), stick("💤", "tc", 8, "float")],
+      }),
     ],
-    demo: { to: "Olivia", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam", photos: [P.friends, P.teacup, P.summer] },
   },
 
   // ---------- Miss you ----------
@@ -1642,14 +2996,33 @@ export const TEMPLATES: Template[] = [
     ambient: "hearts",
     emoji: "🫶",
     headline: "Miles apart, still close",
-    blurb: "For long distance: a hug they press and hold, a jar of things you miss about them and your photos together.",
+    blurb: "For long distance: a hug they press and hold, a jar of things you miss about them, your photos together and a letter across the miles.",
     featured: true,
     screens: (to, from) => [
-      intro(`I miss you, ${to}`, `${from} is sending a hug all the way to you.`, "Open"),
-      game("hold-hug", "Here's a hug", "Press and hold. It's coming a long way.", "Hug delivered. Can you feel it?"),
-      reasons("Things I miss about you", "Tap the jar", ["Your laugh", "Your terrible jokes", "Our late-night chats", "Just being in the same room", "Your hugs (the real ones)"]),
-      photos("Until next time"),
-      finale("Not long now", `See you soon. Love, ${from}`, "hearts"),
+      dusk(intro(`I miss you, ${to}`, `${from} is sending a hug all the way to you.`, "Bring it in"), {
+        background: ["#f3effa", "#e1d8f2"], gradient: "glow", envelope: "#f9d9b8", burst: "hearts", transition: "fade",
+        stickers: [stick("✈️", "open", 12, "float", 15), stick("🌍", "bl", 11, "spin"), stick("💌", "br", 12, "sway", 8)],
+      }, { gotMail: "Sent across the miles" }),
+      dusk(game("hold-hug", "Here's a hug", "Press and hold. It's coming a long way.", "Hug delivered. Can you feel it?"), {
+        background: ["#2a2350", "#3d3170"], gradient: "glow", text: "#f3eefe", accent: "#f6c58f", burst: "hearts", transition: "zoom",
+        stickers: [stick("🤗", "bl", 11, "bounce"), stick("💜", "br", 10, "pulse"), stick("✨", "tl", 8, "float")],
+      }, { hugHolding: "Keep holding… it's on its way", hugLetGo: "Don't let go yet!" }),
+      dusk(reasons("Things I miss about you", "Tap the jar", ["Your laugh", "Your terrible jokes", "Our late-night chats", "Just being in the same room", "Your hugs (the real ones)"]), {
+        background: ["#f6f2fc", "#e7def5"], gradient: "down", burst: "hearts", transition: "blur",
+        stickers: [stick("💭", "tl", 10, "float"), stick("💜", "br", 10, "pulse"), stick("📞", "bl", 10, "sway", -10)],
+      }, { jarCount: "Thing {i} of {n}" }),
+      dusk(photos("Until next time"), {
+        background: ["#f3effa", "#e1d8f2"], gradient: "diagonal", transition: "rise",
+        stickers: [stick("📸", "tl", 10, "float", -8), stick("🌙", "br", 10, "sway")],
+      }),
+      dusk(message("Across the miles", `However far apart we are, you're never far from my thoughts. Every call and every message in between makes the miles feel a little smaller.\n\nI can't wait to see you.\n\n${from}`), {
+        background: ["#231d45", "#352b63"], gradient: "glow", text: "#f3eefe", accent: "#f6c58f", transition: "fade",
+        stickers: [stick("🌙", "tl", 10, "sway", -10), stick("✨", "bl", 8, "pulse")],
+      }),
+      dusk(finale("Not long now", `See you soon. Love, ${from}`, "hearts"), {
+        background: ["#3d3170", "#5f4590"], gradient: "diagonal", text: "#f3eefe", accent: "#f6c58f", transition: "zoom",
+        stickers: [stick("✈️", "tl", 12, "float", 15), stick("💜", "bl", 10, "pulse"), stick("🌍", "br", 11, "spin")],
+      }),
     ],
     demo: { to: "Olivia", from: "Sam", photos: [P.sunset, P.coffee, P.lights] },
   },
@@ -1662,14 +3035,34 @@ export const TEMPLATES: Template[] = [
     ambient: "stars",
     emoji: "✈️",
     headline: "When I see you next…",
-    blurb: "A slider for how much you miss them (it only goes up) and coupons for everything you'll do when you're together again.",
+    blurb: "A slider for how much you miss them (it only goes up), boarding passes for everything you'll do when you're together again, and your photos to tide them over.",
     screens: (to, from) => [
-      intro(`${to}, I'm counting the days`, `${from} misses you. A lot.`, "How much?"),
-      slider("How much do I miss you?", "A little bit", "Too much", "Way too much. Come back"),
-      coupons("When I see you next", "Tap to redeem when we're together", ["The biggest hug at arrivals", "Your favourite dinner", "A whole day of doing nothing together", "No phones, just us"]),
-      finale("See you soon", `Counting down, ${from}`, "stars"),
+      flight(intro(`${to}, I'm counting the days`, `${from} misses you. A lot.`, "How much?"), {
+        background: ["#0f1633", "#1d2a55"], gradient: "glow", envelope: "#f3ead6", burst: "stars", transition: "drop",
+        stickers: [stick("✈️", "open", 12, "float", 20), stick("🌙", "bl", 11, "sway"), stick("📅", "br", 11, "bounce", 8)],
+      }),
+      flight(slider("How much do I miss you?", "A little bit", "Too much", "Way too much. Come back"), {
+        background: ["#111a3d", "#24336a"], gradient: "down", burst: "stars", transition: "slide",
+        stickers: [stick("💫", "tl", 10, "spin"), stick("✈️", "br", 11, "float", 20), stick("🧳", "bl", 10, "sway")],
+      }, { sliderLines: ["A little bit…", "More than that…", "Much more than that…", "Nearly there…"] }),
+      flight(coupons("When I see you next", "Tap to redeem when we're together", ["The biggest hug at arrivals", "Your favourite dinner", "A whole day of doing nothing together", "No phones, just us"]), {
+        background: ["#0b2233", "#143f5a"], gradient: "down", pattern: "grid", transition: "slide",
+        stickers: [stick("🛫", "tl", 10, "float"), stick("🧳", "bl", 10, "sway", -8), stick("🌍", "br", 10, "spin")],
+      }, { coupon: "Boarding pass", couponTap: "Tap to check in", couponDone: "Checked in ✓", couponClaim: "Keep this for arrivals" }),
+      flight(photos("Until then, these will have to do"), {
+        background: ["#0f1633", "#1d2a55"], gradient: "down", transition: "rise",
+        stickers: [stick("📸", "tl", 10, "float", -8), stick("⭐", "br", 9, "pulse")],
+      }),
+      flight(message("Until I see you", `Every day without you feels a bit too long, but each one brings me closer to seeing you again.\n\nI'm counting them all, and I'll be the one at arrivals grinning from ear to ear.\n\n${from}`), {
+        background: ["#0d1430", "#1b264d"], gradient: "glow", transition: "fade",
+        stickers: [stick("🌙", "tl", 10, "sway", -10), stick("✨", "bl", 8, "pulse")],
+      }),
+      flight(finale("See you soon", `Counting down, ${from}`, "stars"), {
+        background: ["#1d2a55", "#3a3f7a"], gradient: "glow", transition: "zoom",
+        stickers: [stick("✈️", "tl", 12, "float", 20), stick("🌙", "bl", 11, "sway"), stick("⭐", "br", 10, "pulse"), stick("🧳", "tc", 8, "sway")],
+      }),
     ],
-    demo: { to: "Olivia", from: "Sam" },
+    demo: { to: "Olivia", from: "Sam", photos: [P.sunset, P.coffee, P.clock] },
   },
 
   // ---------- Best friends ----------
@@ -1682,14 +3075,36 @@ export const TEMPLATES: Template[] = [
     ambient: "confetti",
     emoji: "👯",
     headline: "Are you really my best friend?",
-    blurb: "A quiz to prove they're your bestie, a slider rating how good a friend you are (it only goes up) and your best photos.",
+    blurb: "A quiz to prove they're your bestie, a slider rating how good a friend you are (it only goes up), your best photos and a bit of real talk.",
     featured: true,
     screens: (to, from) => [
-      intro(`${to}, it's time`, `${from} needs to know if you're a real best friend.`, "Easy"),
-      quiz("The bestie test", [q(`What's ${from}'s go-to takeaway?`, ["Pizza", "Curry", "Whatever you're having"], 2), q("Who's the funny one?", [to, from, "Neither of us, honestly"], 1), q("Best friends forever?", ["Yes", "Obviously", "Do I have a choice?"], 1)], "Certified best friend. No refunds."),
-      slider(`How good a friend is ${from}?`, "Just okay", "The best", "Correct. The best."),
-      photos("Exhibit A: we're iconic"),
-      finale("Besties forever", `Love you, ${from}`, "confetti"),
+      zine(intro(`${to}, it's time`, `${from} needs to know if you're a real best friend.`, "Easy"), {
+        background: ["#fff8d6", "#ffeb99"], gradient: "glow", pattern: "zigzag", envelope: "#ffd1e3", burst: "confetti", transition: "bounce",
+        stickers: [stick("👯", "open", 12, "bounce"), stick("💅", "br", 11, "sway", 10), stick("😎", "bl", 11, "float")],
+      }),
+      zine(quiz("The bestie test", [q(`What's ${from}'s go-to takeaway?`, ["Pizza", "Curry", "Whatever you're having"], 2), q("Who's the funny one?", [to, from, "Neither of us, honestly"], 1), q("Best friends forever?", ["Yes", "Obviously", "Do I have a choice?"], 1)], "Certified best friend. No refunds."), {
+        background: ["#ffe6f0", "#ffc9de"], gradient: "down", pattern: "checks", burst: "confetti", transition: "slide",
+        stickers: [stick("🤔", "tl", 10, "sway"), stick("💯", "br", 11, "pulse"), stick("👀", "bl", 10, "bounce")],
+      }, {
+        wrongLines: ["Excuse me?!", "We're not speaking now", "Who even are you?", "I'm telling everyone", "Wow. Okay."],
+        quizPerfect: "Full marks. Bestie status confirmed.",
+      }),
+      zine(slider(`How good a friend is ${from}?`, "Just okay", "The best", "Correct. The best."), {
+        background: ["#fff8d6", "#ffe27a"], gradient: "diagonal", burst: "stars", transition: "bounce",
+        stickers: [stick("🏆", "tl", 10, "bounce"), stick("💖", "br", 11, "pulse")],
+      }, { sliderLines: ["Rude…", "Getting warmer…", "That's more like it.", "Nearly there…"] }),
+      zine(photos("Exhibit A: we're iconic"), {
+        background: ["#ffe6f0", "#ffc9de"], gradient: "glow", transition: "rise",
+        stickers: [stick("📸", "tl", 10, "float", -8), stick("✨", "br", 9, "pulse"), stick("😂", "bl", 10, "bounce")],
+      }),
+      zine(message("Real talk", `Jokes aside, I don't know what I'd do without you. You're the first person I tell everything to, and the one who makes even the worst days funny.\n\nThank you for being you.\n\n${from}`), {
+        background: ["#fffcee", "#fff2c2"], gradient: "down", transition: "fade",
+        stickers: [stick("💛", "bl", 10, "pulse"), stick("💌", "tl", 10, "float", -8)],
+      }),
+      zine(finale("Besties forever", `Love you, ${from}`, "confetti"), {
+        background: ["#ffc9de", "#ffeb99"], gradient: "diagonal", transition: "zoom",
+        stickers: [stick("👯", "tl", 12, "bounce"), stick("🎉", "bl", 11, "float"), stick("💖", "br", 11, "pulse"), stick("😎", "tc", 8, "sway")],
+      }),
     ],
     demo: { to: "Meera", from: "Olivia", photos: [P.friends, P.summer, P.coffee] },
   },
@@ -1702,14 +3117,34 @@ export const TEMPLATES: Template[] = [
     ambient: "sparkles",
     emoji: "🎟️",
     headline: "Coupons for my best friend",
-    blurb: "A book of best-friend coupons (2am chats, emergency snacks) plus a mystery box they get to pick.",
+    blurb: "A book of best-friend coupons (2am chats, emergency snacks), a mystery box they get to pick, your photos and a note that needs no coupon.",
     screens: (to, from) => [
-      intro(`For my best friend, ${to}`, `${from} got you something. You're welcome.`, "Ooh"),
-      coupons("Bestie coupons", "Redeem whenever you need me", ["One 2am chat, no questions asked", "Emergency snacks, delivered", "I'll be your plus-one", "One brutally honest outfit check"]),
-      boxes("Pick a box", "One of these is your real present", ["A hug", "Another hug", "Me, forever"]),
-      finale("Best friends forever", `Love, ${from}`, "sparkles"),
+      ticket(intro(`For my best friend, ${to}`, `${from} got you something. You're welcome.`, "Ooh"), {
+        background: ["#effaf4", "#d3f0e0"], gradient: "glow", envelope: "#ffd2b8", burst: "sparkles", transition: "drop",
+        stickers: [stick("🎟️", "open", 12, "sway", -14), stick("💚", "br", 11, "pulse"), stick("🍩", "bl", 11, "spin")],
+      }),
+      ticket(coupons("Bestie coupons", "Redeem whenever you need me", ["One 2am chat, no questions asked", "Emergency snacks, delivered", "I'll be your plus-one", "One brutally honest outfit check"]), {
+        background: ["#f6fdf9", "#dcf3e6"], gradient: "down", pattern: "dots", transition: "slide",
+        stickers: [stick("✂️", "tl", 10, "sway", -20), stick("🍕", "bl", 10, "float", 10), stick("🎟️", "br", 10, "sway", 12)],
+      }, { coupon: "Bestie coupon" }),
+      ticket(boxes("Pick a box", "One of these is your real present", ["A hug", "Another hug", "Me, forever"]), {
+        background: ["#fff2ea", "#ffdcc9"], gradient: "glow", burst: "sparkles", transition: "zoom",
+        stickers: [stick("🎁", "tl", 11, "bounce"), stick("🤭", "br", 11, "sway"), stick("💚", "bl", 9, "pulse")],
+      }, { boxesPicked: "Your real present…" }),
+      ticket(photos("Proof we're the best duo"), {
+        background: ["#effaf4", "#d3f0e0"], gradient: "diagonal", transition: "rise",
+        stickers: [stick("📸", "tl", 10, "float", -8), stick("😎", "br", 11, "bounce")],
+      }),
+      ticket(message("No coupon needed", `You don't need a coupon for any of this, really. I'll always be there, 2am or not.\n\nThank you for being the best friend anyone could ask for.\n\n${from}`), {
+        background: ["#fbfefc", "#e6f6ed"], gradient: "down", transition: "fade",
+        stickers: [stick("💌", "tl", 10, "float", -8), stick("💚", "bl", 9, "pulse")],
+      }),
+      ticket(finale("Best friends forever", `Love, ${from}`, "sparkles"), {
+        background: ["#d3f0e0", "#ffdcc9"], gradient: "diagonal", transition: "zoom",
+        stickers: [stick("🎟️", "tl", 11, "sway", -12), stick("🎉", "bl", 11, "bounce"), stick("💚", "br", 10, "pulse"), stick("🍩", "tc", 8, "spin")],
+      }),
     ],
-    demo: { to: "Meera", from: "Olivia" },
+    demo: { to: "Meera", from: "Olivia", photos: [P.friends, P.coffee, P.summer] },
   },
   {
     slug: "friendship-gallery",
@@ -1721,13 +3156,36 @@ export const TEMPLATES: Template[] = [
     ambient: "sparkles",
     emoji: "🖼️",
     headline: "Our friendship, framed",
-    blurb: "Built for a big screen: a wall of your best photos, your friendship story and a memory game.",
+    blurb: "Built for a big screen: a wall of your best photos, your friendship story, a memory game, a jar of reasons and the words you don't say enough.",
     screens: (to, from) => [
-      intro(`${to}, welcome to our gallery`, `Curated by ${from}. Mostly embarrassing photos.`, "Step inside"),
-      photos("The friendship gallery"),
-      timeline("How it happened", [at("Day one", "We met and just clicked"), at("The early days", "Inside jokes nobody else gets"), at("The hard times", "You were always there"), at("Now", "Still my favourite person to text")]),
-      game("memory-match", "A little game", "Find all the matching pairs", "We make a good team"),
-      finale("Friends forever", `Thank you for being you. ${from}`, "confetti"),
+      golden(intro(`${to}, welcome to our gallery`, `Curated by ${from}. Mostly embarrassing photos.`, "Step inside"), {
+        background: ["#fff4ea", "#fbdcc4"], gradient: "glow", envelope: "#f7d27e", burst: "sparkles", transition: "fade",
+        stickers: [stick("🖼️", "open", 12, "sway", -6), stick("🌅", "bl", 11, "float"), stick("📸", "br", 11, "bounce", 10)],
+      }, { gotMail: "Private view" }),
+      golden(photos("The friendship gallery"), {
+        background: ["#2b1a14", "#3f271d"], gradient: "glow", text: "#fbeee2", accent: "#f0a46c", transition: "slide",
+        stickers: [stick("🖼️", "tl", 9, "sway", -6), stick("✨", "br", 9, "pulse")],
+      }),
+      golden(timeline("How it happened", [at("Day one", "We met and just clicked"), at("The early days", "Inside jokes nobody else gets"), at("The hard times", "You were always there"), at("Now", "Still my favourite person to text")]), {
+        background: ["#fff8f1", "#f8e4d2"], gradient: "down", transition: "slide",
+        stickers: [stick("🌟", "tl", 9, "pulse"), stick("💛", "bl", 10, "float")],
+      }),
+      golden(game("memory-match", "A little game", "Find all the matching pairs", "We make a good team"), {
+        background: ["#fbe7d6", "#f5cfb1"], gradient: "glow", pattern: "dots", burst: "confetti", transition: "zoom",
+        stickers: [stick("🃏", "tl", 10, "sway", -10), stick("🤝", "br", 10, "bounce")],
+      }),
+      golden(reasons("Why you're my favourite", "Tap the jar for each one", ["You always know when something's wrong", "You laugh at my worst jokes", "You've seen me at my worst and stayed anyway", "Every plan is better with you in it", "You're the best kind of trouble"]), {
+        background: ["#fff4ea", "#fbdcc4"], gradient: "down", burst: "sparkles", transition: "blur",
+        stickers: [stick("💛", "tl", 10, "pulse"), stick("🌻", "br", 11, "sway"), stick("✨", "bl", 8, "float")],
+      }),
+      golden(message("What I don't say enough", `Thank you for every laugh, every late-night chat and every time you turned up when I needed you. I'm so lucky to have you.\n\n${from}`), {
+        background: ["#2b1a14", "#3f271d"], gradient: "glow", text: "#fbeee2", accent: "#f0a46c", transition: "fade",
+        stickers: [stick("💌", "tl", 10, "float", -8), stick("✨", "bl", 8, "pulse")],
+      }),
+      golden(finale("Friends forever", "Here's to all the photos we haven't taken yet.", "confetti"), {
+        background: ["#fbdcc4", "#f5b98f"], gradient: "glow", transition: "zoom",
+        stickers: [stick("🖼️", "tl", 11, "sway", -6), stick("🌅", "bl", 11, "float"), stick("💛", "br", 10, "pulse")],
+      }),
     ],
     demo: { to: "Meera", from: "Olivia", photos: [P.friends, P.summer, P.coffee, P.balloons, P.lights, P.cake] },
   },
@@ -1742,14 +3200,33 @@ export const TEMPLATES: Template[] = [
     ambient: "balloons",
     emoji: "👋",
     headline: "Good luck on your next adventure",
-    blurb: "For a colleague who's moving on: everything the team will miss, your photos and good luck wishes.",
+    blurb: "For a colleague who's moving on: everything the team will miss, your photos, lanterns of good luck to send off and a proper goodbye.",
     featured: true,
     screens: (to, from) => [
-      intro(`Good luck, ${to}!`, `From ${from}. We're not crying, you are.`, "Open"),
-      reasons("Things we'll miss", "Tap the jar", ["Your tea rounds", "How you always know the answer", "Your laugh across the office", "Friday afternoon chats", "You. Just you."]),
-      photos("Some memories"),
-      message("Good luck!", `It won't be the same without you. Thank you for everything, and good luck with what comes next. Keep in touch!\n\n${from}`),
-      finale(`Good luck, ${to}!`, "Don't forget us.", "balloons"),
+      voyage(intro(`Good luck, ${to}!`, `From ${from}. We're not crying, you are.`, "Pass the tissues"), {
+        background: ["#eef5fb", "#d6e6f4"], gradient: "glow", envelope: "#e7cfa3", burst: "balloons", transition: "fade",
+        stickers: [stick("👋", "open", 12, "sway", -10), stick("🎈", "bl", 11, "float"), stick("🧳", "br", 12, "bounce")],
+      }),
+      voyage(reasons("Things we'll miss", "Tap the jar", ["Your tea rounds", "How you always know the answer", "Your laugh across the office", "Friday afternoon chats", "You. Just you."]), {
+        background: ["#f5f9fc", "#e2ecf6"], gradient: "down", pattern: "dots", burst: "balloons", transition: "blur",
+        stickers: [stick("☕", "tl", 10, "float"), stick("💼", "bl", 10, "sway", -8), stick("💙", "br", 10, "pulse")],
+      }, { jarEmpty: "That's all we could fit in the jar." }),
+      voyage(photos("Some memories"), {
+        background: ["#eef5fb", "#d6e6f4"], gradient: "diagonal", transition: "rise",
+        stickers: [stick("📸", "tl", 10, "float", -8), stick("🎈", "br", 11, "float")],
+      }),
+      voyage(game("release-lanterns", "Send some luck with you", "Tap each lantern to send a wish for what's next", "Every wish is on its way"), {
+        background: ["#1d2540", "#2e3a5f"], gradient: "glow", text: "#f4efe3", accent: "#f2c46d", burst: "stars", transition: "fade",
+        stickers: [stick("🌙", "tl", 10, "sway", -10), stick("✨", "bl", 8, "pulse"), stick("⭐", "br", 9, "float")],
+      }),
+      voyage(message("Good luck!", `It won't be the same without you. Thank you for everything, and good luck with what comes next. Keep in touch!\n\n${from}`), {
+        background: ["#fbfcfe", "#e6eef7"], gradient: "down", transition: "fade",
+        stickers: [stick("✉️", "tl", 10, "float", -8), stick("💙", "bl", 9, "pulse")],
+      }),
+      voyage(finale(`Good luck, ${to}!`, "Don't forget us.", "balloons"), {
+        background: ["#d6e6f4", "#b9d2ec"], gradient: "glow", transition: "zoom",
+        stickers: [stick("👋", "tl", 12, "sway", -10), stick("🎈", "bl", 11, "float"), stick("🧳", "br", 11, "bounce"), stick("✈️", "tc", 8, "float", 15)],
+      }),
     ],
     demo: { to: "Olivia", from: "The team", photos: [P.desk, P.cake, P.coffee] },
   },
@@ -1762,68 +3239,53 @@ export const TEMPLATES: Template[] = [
     ambient: "confetti",
     emoji: "🙅",
     headline: "Please don't go (the No button won't let you)",
-    blurb: "A leaving card that refuses to accept they're leaving, a leaving present slot machine and a jokey goodbye.",
+    blurb: "A leaving card that refuses to accept they're leaving, a leaving present slot machine, the evidence in photos and a jokey goodbye.",
     screens: (to, from) => [
-      intro(`${to}, we heard the news`, `${from} would like a word.`, "Uh oh"),
-      question("Will you stay?", "Fine, I'll stay", "No", "Great, see you Monday! (We know you're still leaving.)"),
-      game("slot-machine", "Spin for your leaving present", "Pull the lever", "You won… a card. This one."),
-      message("In all seriousness", `We'll miss you loads. Good luck, and remember us when you're famous.\n\n${from}`),
-      finale("Good luck!", "Traitor. (We love you.)", "confetti"),
+      memo(intro(`${to}, we heard the news`, `${from} would like a word.`, "Uh oh"), {
+        background: ["#fbfaf6", "#efece2"], gradient: "glow", pattern: "grid", envelope: "#e6d3a8", burst: "confetti", transition: "drop",
+        stickers: [stick("📎", "open", 11, "sway", 30), stick("🗂️", "bl", 11, "float"), stick("☕", "br", 11, "bounce")],
+      }, { gotMail: "Internal memo" }),
+      memo(question("Will you stay?", "Fine, I'll stay", "No", "Great, see you Monday! (We know you're still leaving.)"), {
+        background: ["#fff9cf", "#fff0a0"], gradient: "down", burst: "confetti", transition: "zoom",
+        stickers: [stick("🙅", "tl", 11, "bounce"), stick("📌", "bl", 10, "none", -20), stick("🖇️", "br", 11, "sway", 15)],
+      }, { noLines: ["Request denied", "HR says no", "Who'll make the tea?", "Your desk needs you", "What about biscuits?", "Take the good chair", "Nice try", "Just press stay"] }),
+      memo(game("slot-machine", "Spin for your leaving present", "Pull the lever", "You won… a card. This one."), {
+        background: ["#eef3fb", "#d9e3f3"], gradient: "down", pattern: "grid", burst: "confetti", transition: "flip",
+        stickers: [stick("🎰", "tl", 11, "bounce"), stick("🎁", "br", 11, "sway", 10), stick("📎", "bl", 9, "none", -30)],
+      }, { slotWin: "Jackpot! Sort of." }),
+      memo(photos("Exhibit A: why you can't leave"), {
+        background: ["#fbfaf6", "#efece2"], gradient: "down", transition: "rise",
+        stickers: [stick("📸", "tl", 10, "float", -8), stick("📌", "br", 10, "none", 20)],
+      }),
+      memo(message("In all seriousness", `We'll miss you loads. Thank you for the laughs, the help and for making Mondays bearable.\n\nGood luck with everything that comes next, and remember us when you're famous.\n\n${from}`), {
+        background: ["#fffbe0", "#fff2b0"], gradient: "down", transition: "fade",
+        stickers: [stick("☕", "bl", 10, "float"), stick("✏️", "tl", 10, "sway", -20)],
+      }),
+      memo(finale("Good luck!", "Traitor. (We love you.)", "confetti"), {
+        background: ["#efece2", "#ddd6c4"], gradient: "glow", transition: "zoom",
+        stickers: [stick("👋", "tl", 12, "sway", -10), stick("🎉", "bl", 11, "bounce"), stick("📎", "br", 11, "sway", 30), stick("☕", "tc", 8, "float")],
+      }),
     ],
-    demo: { to: "Olivia", from: "The team" },
+    demo: { to: "Olivia", from: "The team", photos: [P.desk, P.coffee, P.cake] },
   },
+  // Added in their own files so they can be written alongside the ones above.
+  ...MORE_DESIGNS,
+  ...OCCASION_DESIGNS,
 ];
 
-// Shown with a "New" badge in the shop.
-export const NEW_DESIGNS = new Set([
-  "be-my-bridesmaid",
-  "best-dad-ever",
-  "bestie-quiz",
-  "big-news",
-  "birthday-coupon-book",
-  "boo-i-love-you",
-  "counting-the-days",
-  "dad-joke-quiz",
-  "dads-hall-of-fame",
-  "date-night-roulette",
-  "eid-family-gallery",
-  "eid-hugs-and-feasts",
-  "for-the-best-mum",
-  "friendship-coupons",
-  "friendship-gallery",
-  "get-well-soon",
-  "happy-holi",
-  "happy-new-year",
-  "haunted-house",
-  "holi-hai",
-  "hug-it-out",
+// Shown with a "New" badge in the shop: a handful of recent ones for the season ahead, and
+// every design added in catalog-more.ts and catalog-occasions.ts. Kept short so it means something.
+export const NEW_DESIGNS = new Set<string>([
   "lanterns-of-light",
-  "long-distance-hug",
-  "love-coupons",
-  "loves-me-loves-me-not",
   "mithai-mayhem",
-  "mums-coupon-book",
-  "our-timeline",
-  "pick-your-present",
-  "pinata-party",
-  "pop-the-boredom",
-  "pop-the-champagne",
-  "rakhi-promise",
-  "reasons-i-love-you",
-  "sad-to-see-you-go",
-  "scratch-to-reveal-baby",
   "secret-santa",
-  "sibling-rivalry",
-  "thanks-a-bunch",
-  "to-the-happy-couple",
-  "trick-or-treat",
   "twelve-reasons-of-christmas",
-  "welcome-little-one",
-  "who-is-mums-favourite",
-  "will-you-marry-me",
   "year-in-review",
-  "you-cant-leave",
-  "you-hit-the-jackpot",
+  "pop-the-champagne",
+  "pick-your-present",
+  "birthday-coupon-book",
+  ...MORE_DESIGNS.map((d) => d.slug),
+  ...OCCASION_DESIGNS.map((d) => d.slug),
 ]);
 
 export const templatesBySlug = Object.fromEntries(TEMPLATES.map((t) => [t.slug, t])) as Record<string, Template>;
@@ -1851,13 +3313,15 @@ export function buildCard(t: Template, to: string, from: string): CardData {
 // Premade: one of our designs with its screens as they come (every word, photo, colour
 // and tune can still change). Anything else is custom: a card written from a
 // description, or one with screens added, taken out or moved. The checkout works this
-// out from the saved card, so the price never depends on what the browser says.
+// out from the saved card, so the price never depends on what the browser says. A card
+// saved before its design changed still counts: it matches one of the design's earlier
+// lists of screens (lib/design-history.ts).
 export function cardTier(card: Pick<CardData, "template" | "screens">): Tier {
   const template = getTemplate(card.template);
   if (!template) return "custom";
-  const want = template.screens("", "").map((s) => s.type);
-  const got = card.screens.map((s) => s.type);
-  return want.length === got.length && want.every((type, i) => type === got[i]) ? "premade" : "custom";
+  const got = card.screens.map((s) => s.type).join(",");
+  const lists = [template.screens("", "").map((s) => s.type).join(","), ...(DESIGN_SCREENS[template.slug] ?? [])];
+  return lists.includes(got) ? "premade" : "custom";
 }
 
 // The card as shown in previews: sample names and illustrated photos.

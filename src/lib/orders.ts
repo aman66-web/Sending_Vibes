@@ -5,6 +5,8 @@ import { customAlphabet } from "nanoid";
 import type Stripe from "stripe";
 import type { Locale } from "@/i18n/config";
 import type { Occasion, ThemeName } from "./card";
+import { alertOwner } from "./alert";
+import { nothingLeft, pending, type EmailResult } from "./delivery";
 import { emailReady, sendOrderEmails } from "./email";
 import type { Currency, Tier } from "./pricing";
 import { DATA_DIR, adminSupabase, markCardsPaid, usingSupabase } from "./storage";
@@ -27,6 +29,15 @@ export type OrderItem = {
   // moment to email it (9am their time).
   sendOn?: string;
   sendAt?: string;
+  // The design it was made from, for "send this design to someone else". Older orders don't have it.
+  template?: string;
+  // How its emails went: the card to the recipient, and the buyer's receipt with its link.
+  // Kept as they go out, so a retry only sends what's still missing. Older orders don't have these.
+  cardEmail?: EmailResult;
+  receipt?: EmailResult;
+  // Set on orders placed since those results were kept. Without it, a claim with no
+  // results is an older order whose emails went out before results existed.
+  tracked?: true;
 };
 
 export type Order = {
@@ -104,7 +115,7 @@ async function writeLocal(order: Order) {
 }
 
 export async function createOrder(order: Omit<Order, "id" | "status" | "createdAt">): Promise<Order> {
-  const full: Order = { ...order, id: newOrderId(), status: "pending", createdAt: new Date().toISOString() };
+  const full: Order = { ...order, items: order.items.map((i) => ({ ...i, tracked: true as const })), id: newOrderId(), status: "pending", createdAt: new Date().toISOString() };
   if (usingSupabase()) {
     const { error } = await db().insert({
       id: full.id,
@@ -191,52 +202,124 @@ export async function markExpired(id: string) {
   if (order?.status === "pending") await writeLocal({ ...order, status: "expired" });
 }
 
-// Emails go out once per order: the first caller claims them. If sending fails the
-// claim is released, so the webhook's retry can try again.
-async function claimEmails(id: string): Promise<boolean> {
+// Emails go out once per order: the first caller claims them. If some fail in a way worth
+// another go, the claim is released, so the webhook's retry can try again. `stale` takes
+// over a claim left behind, but only if nobody else has since.
+async function claimEmails(id: string, leftBehind?: string): Promise<boolean> {
   const at = new Date().toISOString();
   if (usingSupabase()) {
-    const { data, error } = await db().update({ emailed_at: at }).eq("id", id).is("emailed_at", null).select("id");
+    const unclaimed = db().update({ emailed_at: at }).eq("id", id);
+    const { data, error } = await (leftBehind ? unclaimed.eq("emailed_at", leftBehind) : unclaimed.is("emailed_at", null)).select("id");
     if (error) throw new Error(`Could not update order: ${error.message}`);
     return (data?.length ?? 0) > 0;
   }
   const order = await readLocal(id);
-  if (!order || order.emailedAt) return false;
+  if (!order || order.emailedAt !== leftBehind) return false;
   await writeLocal({ ...order, emailedAt: at });
   return true;
 }
 
-async function releaseEmails(id: string) {
+// Keeps what happened to each email on the order. If anything is worth another go, the claim
+// is released in the same write, so the next attempt picks up only what's left.
+async function saveDelivery(id: string, items: OrderItem[], again: boolean) {
   if (usingSupabase()) {
-    await db().update({ emailed_at: null }).eq("id", id);
+    const { error } = await db().update(again ? { items, emailed_at: null } : { items }).eq("id", id);
+    if (error) throw new Error(`Could not save email results: ${error.message}`);
     return;
   }
   const order = await readLocal(id);
-  if (order) await writeLocal({ ...order, emailedAt: undefined });
+  if (order) await writeLocal({ ...order, items, ...(again ? { emailedAt: undefined } : {}) });
 }
 
-async function emailOrder(order: Order) {
-  if (!emailReady() || !(await claimEmails(order.id))) return;
-  try {
-    await sendOrderEmails(order);
-  } catch (e) {
-    await releaseEmails(order.id);
-    throw e;
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// The thank-you page is part-way through sending an order's emails. Nothing's wrong: the
+// webhook asks Stripe to come back later, without alerting the owner.
+export class StillSending extends Error {}
+
+// A claim older than any attempt can run for was left behind (it crashed, or couldn't save).
+const STALE = 10 * 60_000;
+const stale = (order: Order) => !!order.emailedAt && Date.now() - Date.parse(order.emailedAt) > STALE;
+
+// Whether someone else's claim has finished: everything sent or refused for good. Orders
+// from before results were kept have none, so theirs counts once it's old. Any newer one
+// left unfinished is taken over instead (an attempt that died mid-send).
+function finished(order: Order) {
+  if (!order.emailedAt) return false;
+  if (nothingLeft(pending(order))) return true;
+  return stale(order) && order.items.every((i) => !i.tracked && !i.cardEmail && !i.receipt);
+}
+
+// This attempt's failures are logged with the order, so the owner can see who to help.
+// One Resend refuses for good also emails the owner, since nothing will try it again;
+// the rest are retried, and the webhook's alert covers them if that keeps failing.
+async function report(id: string, sent: Awaited<ReturnType<typeof sendOrderEmails>>) {
+  const failed = [...Object.entries(sent.cards).map(([card, result]) => [`card ${card}`, result] as const), ["receipt", sent.receipt] as const];
+  for (const [what, result] of failed) {
+    if (!result || result.ok) continue;
+    console.error(`Order ${id}: ${what} couldn't be emailed (${result.retry ? "will retry" : "gave up"}): ${result.error}`);
+    if (!result.retry) await alertOwner("An order email couldn't be sent", { order: id, email: what, error: result.error });
   }
 }
 
-export type Fulfilment = { order: Order; state: "paid" | "processing" | "unpaid" };
+async function sendEmails(claimed: Order, strict: boolean): Promise<Order> {
+  // Read it again now it's ours: an earlier attempt may already have sent some.
+  const order = (await getOrder(claimed.id)) ?? claimed;
+  const todo = pending(order);
+  if (nothingLeft(todo)) return order;
+  const sent = await sendOrderEmails(order, todo);
+  const items = order.items.map((i) => ({ ...i, ...(sent.cards[i.cardId] ? { cardEmail: sent.cards[i.cardId] } : {}), ...(sent.receipt ? { receipt: sent.receipt } : {}) }));
+  const again = !nothingLeft(pending({ ...order, items }));
+  await report(order.id, sent);
+  try {
+    await saveDelivery(order.id, items, again);
+  } catch (e) {
+    // The claim is now left behind; after a while the next attempt takes it over.
+    if (strict) throw e;
+    console.error(`Order ${order.id}: emails sent but their results weren't saved`, e);
+  }
+  if (again && strict) throw new Error(`Some emails for order ${order.id} haven't gone yet; Stripe will try again`);
+  return { ...order, items, emailedAt: again ? undefined : order.emailedAt };
+}
+
+// Sends whatever emails the order still needs. Each email is tried on its own and never
+// stops the cards being shown. Strict callers (the webhook) throw while anything is left
+// worth retrying, so Stripe calls again later; final failures are kept and reported instead.
+async function deliver(order: Order, strict: boolean): Promise<Order> {
+  if (!emailReady()) return order;
+  for (let tries = 0; ; tries++) {
+    if (await claimEmails(order.id)) return sendEmails(order, strict);
+    // Someone else (the webhook or the thank-you page) has them, or they've all gone.
+    const now = (await getOrder(order.id)) ?? order;
+    if (finished(now)) return now;
+    if (stale(now) && (await claimEmails(order.id, now.emailedAt))) return sendEmails(order, strict);
+    if (!strict) return now;
+    // Give the other caller a few seconds to finish before asking Stripe to come back.
+    if (tries >= 3) throw new StillSending(`Emails for order ${order.id} are still being sent`);
+    if (now.emailedAt) await sleep(2000);
+  }
+}
+
+// "finishing": paid, but the cards couldn't be opened just yet (a database hiccup).
+export type Fulfilment = { order: Order; state: "paid" | "finishing" | "processing" | "unpaid" };
 
 // Checks a Checkout session with Stripe and, once it's paid, opens the cards and sends
 // the emails. Called by the webhook and by the thank-you page; every step is safe to repeat.
-export async function fulfilSession(sessionId: string): Promise<Fulfilment | null> {
+// Once paid, email trouble never hides the cards. Only `strict` (the webhook) throws for
+// anything left to finish, so that Stripe tries again.
+export async function fulfilSession(sessionId: string, { strict = false } = {}): Promise<Fulfilment | null> {
   const s = stripe();
   if (!s || !/^cs_[A-Za-z0-9_]+$/.test(sessionId)) return null;
   let session: Stripe.Checkout.Session;
   try {
     session = await s.checkout.sessions.retrieve(sessionId);
-  } catch {
-    return null;
+  } catch (e) {
+    // Only a session Stripe doesn't have is "no such order". Anything else (an outage, a
+    // limit, a key that's changed) throws, so the webhook gets a retry and the thank-you
+    // page offers "Check again".
+    const { code, statusCode } = (e ?? {}) as { code?: string; statusCode?: number };
+    if (code === "resource_missing" || statusCode === 404) return null;
+    throw e;
   }
   const orderId = session.metadata?.order_id;
   const order = orderId ? await getOrder(orderId) : null;
@@ -246,9 +329,19 @@ export async function fulfilSession(sessionId: string): Promise<Fulfilment | nul
     await markPaid(order.id, { buyerEmail: session.customer_details?.email ?? undefined, amountTotal: session.amount_total ?? undefined });
     const paid = (await getOrder(order.id))!;
     if (paid.status === "paid") {
-      await markCardsPaid(paid.items.map((i) => i.cardId));
-      await emailOrder(paid);
-      return { order: paid, state: "paid" };
+      try {
+        await markCardsPaid(paid.items.map((i) => i.cardId));
+      } catch (e) {
+        if (strict) throw e;
+        console.error(`Order ${paid.id}: paid, but the cards couldn't be opened yet`, e);
+        return { order: paid, state: "finishing" };
+      }
+      const delivered = await deliver(paid, strict).catch((e) => {
+        if (strict) throw e;
+        console.error(`Order ${paid.id}: couldn't send its emails`, e);
+        return paid;
+      });
+      return { order: delivered, state: "paid" };
     }
     return { order: paid, state: "unpaid" };
   }

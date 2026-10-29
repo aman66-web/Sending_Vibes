@@ -2,19 +2,20 @@ import type { Metadata } from "next";
 import { CatalogGrid } from "@/components/catalog/CatalogGrid";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
-import { OCCASIONS, type Occasion } from "@/lib/card";
 import { TEMPLATES } from "@/lib/catalog";
 import { fmt } from "@/i18n/config";
 import { getI18n } from "@/i18n/server";
 
+// The same page for everyone, served from the CDN (the filters in the address are read in
+// the browser). Made again hourly so what's coming up stays current.
+export const revalidate = 3600;
+
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getI18n();
-  return { title: t.cardsPage.metaTitle, description: fmt(t.cardsPage.metaDescription, { n: TEMPLATES.length }) };
+  return { title: t.cardsPage.metaTitle, description: fmt(t.cardsPage.metaDescription, { n: TEMPLATES.length }), alternates: { canonical: "/cards" } };
 }
 
-export default async function CardsPage({ searchParams }: { searchParams: Promise<{ occasion?: string }> }) {
-  const { occasion } = await searchParams;
-  const initial = OCCASIONS.find((o) => o === occasion) as Occasion | undefined;
+export default async function CardsPage() {
   const { t } = await getI18n();
   return (
     <div className="grain min-h-dvh overflow-x-clip bg-cream text-ink">
@@ -26,7 +27,7 @@ export default async function CardsPage({ searchParams }: { searchParams: Promis
         </p>
       </section>
       <main className="mx-auto max-w-6xl px-4 pb-24 sm:px-6">
-        <CatalogGrid allFilters initialOccasion={initial} />
+        <CatalogGrid allFilters fromUrl />
       </main>
       <SiteFooter />
     </div>

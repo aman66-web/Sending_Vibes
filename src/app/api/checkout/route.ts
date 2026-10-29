@@ -3,12 +3,15 @@ import type Stripe from "stripe";
 import { z } from "zod";
 import { DEFAULT_LOCALE, LOCALE_COOKIE, fmt, isLive, type Locale } from "@/i18n/config";
 import { DICTS } from "@/i18n/dictionaries";
+import { alertOwner } from "@/lib/alert";
 import { currentAccount } from "@/lib/auth";
 import { MAX_BASKET, MAX_SCHEDULE_DAYS } from "@/lib/basket";
 import { emailReady } from "@/lib/email";
 import { createOrder, ordersReady, setOrderSession, type OrderItem } from "@/lib/orders";
 import { cardTier } from "@/lib/catalog";
+import { errorFields } from "@/lib/log";
 import { CURRENCY_COOKIE, DEFAULT_CURRENCY, isCurrency, type Tier } from "@/lib/pricing";
+import { clientNetwork } from "@/lib/rate-limit";
 import { getCard } from "@/lib/storage";
 import { cardLineItem, stripe } from "@/lib/stripe";
 
@@ -54,7 +57,7 @@ export async function POST(req: NextRequest) {
   if (origin && (!URL.canParse(origin) || new URL(origin).host !== req.headers.get("host"))) return fail(errors.failed, 403);
   const s = stripe();
   if (!s || !ordersReady()) return fail(errors.notReady, 503);
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || req.headers.get("x-real-ip") || "unknown";
+  const ip = clientNetwork(req.headers);
   if (!allowed(ip)) return fail(errors.tooMany, 429);
 
   const parsed = bodySchema.safeParse(await req.json().catch(() => null));
@@ -78,14 +81,16 @@ export async function POST(req: NextRequest) {
         continue;
       }
       // Names and price come from the saved card, not the browser.
-      const item: OrderItem = { cardId: wanted.id, to: card.to, from: card.from, tier: cardTier(card), occasion: card.occasion, theme: card.theme, delivery: wanted.delivery };
+      const item: OrderItem = { cardId: wanted.id, to: card.to, from: card.from, tier: cardTier(card), occasion: card.occasion, theme: card.theme, template: card.template, delivery: wanted.delivery };
       if (wanted.delivery === "email") {
         if (!emailReady()) return fail(errors.noEmail, 400, { id: wanted.id });
         if (!wanted.email) return fail(fmt(errors.needEmail, { name: card.to }), 400, { id: wanted.id });
         item.email = wanted.email;
         if (wanted.sendAt) {
           const at = Date.parse(wanted.sendAt);
-          if (at > now + (MAX_SCHEDULE_DAYS + 1) * 86_400_000) return fail(fmt(errors.tooFar, { days: MAX_SCHEDULE_DAYS }), 400, { id: wanted.id });
+          // Resend books emails up to MAX_SCHEDULE_DAYS ahead; keep an hour's room, since
+          // it's booked when payment comes through, not now. The basket offers one day less.
+          if (at > now + MAX_SCHEDULE_DAYS * 86_400_000 - 3_600_000) return fail(fmt(errors.tooFar, { days: MAX_SCHEDULE_DAYS - 1 }), 400, { id: wanted.id });
           if (at > now + 2 * 60_000) Object.assign(item, { sendAt: new Date(at).toISOString(), sendOn: wanted.sendOn });
         }
       }
@@ -119,6 +124,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ url: session.url });
   } catch (e) {
     console.error("Checkout failed", e);
+    await alertOwner("Checkout failed", errorFields(e));
     return fail(errors.failed, 500);
   }
 }

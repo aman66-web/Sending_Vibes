@@ -272,6 +272,16 @@ const ICONS = {
   web: <path d="M24 6v36M6 24h36M11.3 11.3l25.4 25.4M36.7 11.3L11.3 36.7M24 15l6.4 2.6L33 24l-2.6 6.4L24 33l-6.4-2.6L15 24l2.6-6.4z" />,
   tie: <path d="M20 6h8l-1.6 6h-4.8zM21.6 12L17 33l7 8 7-8-4.6-21" />,
   drop: <path d="M24 6c-7 10-12 16-12 23a12 12 0 0 0 24 0c0-7-5-13-12-23zM18 29a6 6 0 0 0 6 6" />,
+  cap: <path d="M4 18 24 9l20 9-20 9zM12 21.6V31c0 3 5.4 5.5 12 5.5s12-2.5 12-5.5v-9.4M24 18l13 4.5V32M35 37l2-5 2 5z" />,
+  diploma: (
+    <>
+      <rect x="5" y="19" width="38" height="10" rx="5" transform="rotate(-28 24 24)" />
+      <circle cx="11.6" cy="30.6" r="2.4" />
+      <path d="M21.7 19.6l4.7 8.8M26.4 28.4 25 38l3-2.5 2.5 3L29.5 28" />
+    </>
+  ),
+  deckchair: <path d="M30 42 15 10M14 42l20-14M15 10c4.5 10 10 16.5 19 18M34 28h4M8 42h32" />,
+  plant: <path d="M14 30h20l-3 12H17zM24 30V17M24 23c-6.5 0-10-3.5-10-10 6.5 0 10 3.5 10 10zM24 19c0-6.5 3.5-10 10-10 0 6.5-3.5 10-10 10z" />,
 } as const;
 
 export type IconName = keyof typeof ICONS;
@@ -300,6 +310,9 @@ export const OCCASION_ICONS: Record<Occasion, IconName[]> = {
   missyou: ["plane", "envelope", "heart", "house", "moon", "star"],
   friendship: ["heart", "star", "cup", "glass", "sun", "key"],
   leaving: ["plane", "suitcase", "envelope", "star", "glass", "leaf"],
+  graduation: ["cap", "diploma", "star", "trophy", "glass", "crown"],
+  retirement: ["deckchair", "sun", "plant", "cup", "plane", "glass"],
+  newhome: ["house", "key", "plant", "cup", "heart", "gift"],
 };
 
 export function GameIcon({ name, className = "" }: { name: IconName; className?: string }) {

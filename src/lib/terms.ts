@@ -4,6 +4,16 @@
 
 export const CONTACT_EMAIL = "hello@envelette.com";
 
+// Who's behind the shop, as registered at Companies House. Shown here, in the site
+// footer and in the homepage's search-engine details, so they only live in one place.
+export const COMPANY = {
+  legalName: "MARTZEY LTD",
+  number: "14466643",
+  street: "86–90 Paul Street",
+  town: "London",
+  postcode: "EC2A 4NE",
+};
+
 export const TERMS = {
   metaTitle: "Terms and conditions · Envelette",
   metaDescription: "The terms for buying and sending Envelette cards: who we are, what you get, cancelling and refunds, and your rights.",
@@ -14,7 +24,7 @@ export const TERMS = {
     {
       title: "Who we are",
       paragraphs: [
-        "Envelette is a trading name of MARTZEY LTD, a company registered in England and Wales (company number 14466643). Our registered office is 86–90 Paul Street, London, EC2A 4NE, United Kingdom.",
+        `Envelette is a trading name of ${COMPANY.legalName}, a company registered in England and Wales (company number ${COMPANY.number}). Our registered office is ${COMPANY.street}, ${COMPANY.town}, ${COMPANY.postcode}, United Kingdom.`,
         `You can email us at ${CONTACT_EMAIL} about anything, including questions, problems with a card and refunds.`,
       ],
     },

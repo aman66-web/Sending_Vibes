@@ -7,9 +7,12 @@ import { GameView } from "./games";
 import { useRunaway } from "./runaway";
 import { Flourish, HeartMark, Laurel } from "./ornaments";
 import { useSfx } from "./sound";
-import { useTune } from "./tune";
+import { HELP_AFTER, useStuck, useTune } from "./tune";
 import { cropStyle } from "@/lib/screen-style";
+import { isRtl } from "./personal";
 import { useWords } from "./words";
+import { Envelope, TapHint, type EnvelopeColours } from "./Envelope";
+import { Keepsake } from "./Keepsake";
 
 type Of<T extends Screen["type"]> = Extract<Screen, { type: T }>;
 // `stage` starts the screen part-way through (see lib/stages.ts), for the editor.
@@ -29,13 +32,28 @@ export function usePressAt(stage: number, at: number, find: () => HTMLElement | 
   }, [stage, at]);
 }
 
-// Small capitals with generous spacing, like the button on a printed invitation.
+// A big pill in plain words (easier for older eyes than small capitals), tall enough to tap.
 export const BUTTON =
-  "rounded-full bg-[var(--c-accent)] px-8 py-3.5 text-[0.8rem] font-semibold uppercase tracking-[0.2em] text-[var(--c-accent-text)] shadow-[0_12px_28px_-14px_rgba(0,0,0,0.7)] transition hover:brightness-110 active:scale-95";
+  "min-h-14 rounded-full bg-[var(--c-accent)] px-8 py-3 text-[1.0625rem] font-semibold leading-snug tracking-[0.02em] text-[var(--c-accent-text)] shadow-[0_12px_28px_-14px_rgba(0,0,0,0.7)] transition hover:brightness-110 active:scale-95";
 
 export function PrimaryButton({ children, onClick, className = "" }: { children: React.ReactNode; onClick?: () => void; className?: string }) {
   return (
     <button data-primary onClick={onClick} className={`${BUTTON} ${className}`}>
+      {children}
+    </button>
+  );
+}
+
+// Offered on a screen that has to be won, once they seem stuck (see useStuck in tune.ts). It
+// sits where Next will appear and finishes the screen for them, so nobody is left unable
+// to reach the rest of their card.
+export function HelpButton({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      data-help
+      onClick={onClick}
+      className="min-h-14 animate-screen-in rounded-full bg-[var(--c-surface)] px-6 py-3 text-base font-semibold leading-snug text-[var(--c-text)] shadow-sm ring-1 ring-current/25 backdrop-blur"
+    >
       {children}
     </button>
   );
@@ -51,17 +69,26 @@ export function NextButton({ onClick, className = "" }: { onClick?: () => void; 
   );
 }
 
-const ENVELOPE = "#f6efe0";
-const ENVELOPE_SHADE = "#ebe1cb";
-
 export function IntroScreen({
   screen,
   onNext,
   stage = 0,
   to,
   from,
-  envelope = { paper: ENVELOPE, shade: ENVELOPE_SHADE, ink: "#3a3127" },
-}: ScreenProps<"intro"> & { to: string; from: string; envelope?: { paper: string; shade: string; ink: string } }) {
+  envelope,
+  occasion,
+  sentAt,
+  editing = false,
+}: ScreenProps<"intro"> & {
+  to: string;
+  from: string;
+  envelope?: EnvelopeColours;
+  // For the stamp and the postmark's date (see Envelope).
+  occasion?: Occasion;
+  sentAt?: string;
+  // The editor's edit mode, where the envelope keeps still so it's easy to pick.
+  editing?: boolean;
+}) {
   const sfx = useSfx();
   const { text } = useWords();
   const [open, setOpen] = useState(false);
@@ -70,7 +97,6 @@ export function IntroScreen({
   const after = useRef<HTMLDivElement>(null);
   const envelopeButton = useRef<HTMLButtonElement>(null);
   usePressAt(stage, 1, () => envelopeButton.current);
-  const initial = (from.trim()[0] ?? "").toUpperCase() || "\u2665";
 
   // Once it's open, bring the message and button into view: on a short screen (a small
   // phone, or the preview while making a card) they'd otherwise sit below the fold.
@@ -79,7 +105,7 @@ export function IntroScreen({
     const timer = setTimeout(() => {
       setOpened(true);
       after.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
-    }, 1100);
+    }, 1300);
     return () => clearTimeout(timer);
   }, [open]);
 
@@ -88,72 +114,37 @@ export function IntroScreen({
       {/* Nothing usually, unless the card has chosen something to burst out as it opens. */}
       {open && <Burst usual={null} />}
       <div className={`transition-opacity duration-500 ${open ? "opacity-0" : ""}`}>
-        <p className="text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-[var(--c-muted)]">{text("gotMail")}</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--c-muted)]">{text("gotMail")}</p>
         <Flourish className="mx-auto mt-3 text-[var(--c-muted)]" />
       </div>
-      {/* A cream envelope, hand-addressed, closed with a wax seal. It opens and the letter
-          slides up; tapping it again carries on, like the button underneath. */}
-      <button
+      <Envelope
         ref={envelopeButton}
-        data-envelope
-        aria-label={open ? screen.title : "Open the envelope"}
+        open={open}
+        label={open ? screen.title : "Open the envelope"}
+        title={screen.title}
+        to={to}
+        from={from}
+        colours={envelope}
+        occasion={occasion}
+        sentAt={sentAt}
+        still={editing}
         onClick={() => {
           if (opened) return onNext();
           if (open) return;
           setOpen(true);
-          sfx("whoosh");
-          setTimeout(() => sfx("sparkle"), 450);
+          // The seal cracks, the flap lifts, the letter comes out.
+          sfx("crack");
+          setTimeout(() => sfx("whoosh"), 180);
+          setTimeout(() => sfx("sparkle"), 800);
         }}
-        className="group relative mt-16 h-48 w-72 [perspective:900px]"
-      >
-        <span
-          className="absolute inset-0 rounded-md shadow-[0_22px_44px_-20px_rgba(0,0,0,0.6)]"
-          style={{ background: `repeating-linear-gradient(135deg, var(--c-accent) 0 7px, color-mix(in srgb, var(--c-accent) 78%, white) 7px 14px)` }}
-        />
-        <span
-          className={`absolute inset-x-4 bottom-3 top-3 flex flex-col items-center rounded-sm bg-[#fffdf8] px-5 pt-6 text-[#2b2318] shadow transition-transform duration-700 ease-out ${open ? "-translate-y-28 delay-300" : ""}`}
-          style={{ zIndex: 2 }}
-        >
-          <span className="font-display text-xl font-semibold italic leading-tight">{screen.title}</span>
-          <Flourish className="mt-2 w-24 text-[#a8894f]" />
-        </span>
-        <span
-          className="absolute inset-0 rounded-md [clip-path:polygon(0_0,50%_54%,100%_0,100%_100%,0_100%)]"
-          style={{ zIndex: 3, background: `linear-gradient(180deg, ${envelope.paper} 0%, ${envelope.shade} 100%)` }}
-        >
-          {to && (
-            <span className="absolute inset-x-0 bottom-2 truncate px-6 font-hand text-2xl" style={{ color: envelope.ink }}>
-              {to}
-            </span>
-          )}
-        </span>
-        <span
-          className={`absolute inset-x-0 top-0 h-[60%] origin-top rounded-t-md [clip-path:polygon(0_0,100%_0,50%_100%)] ${open ? "[transform:rotateX(180deg)]" : ""}`}
-          style={{
-            zIndex: open ? 1 : 4,
-            background: open ? "color-mix(in srgb, var(--c-accent) 85%, black)" : envelope.shade,
-            filter: "drop-shadow(0 2px 2px rgba(0,0,0,0.12))",
-            transition: "transform 0.5s ease-in-out, z-index 0s linear 0.25s, background 0s linear 0.25s",
-          }}
-        />
-        <span
-          className={`absolute left-1/2 top-[56%] grid h-14 w-14 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full font-display text-xl font-semibold italic text-white/90 transition duration-300 ${open ? "scale-0 opacity-0" : "group-hover:scale-105"}`}
-          style={{
-            zIndex: 5,
-            background: "radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--c-accent) 65%, white) 0%, var(--c-accent) 45%, color-mix(in srgb, var(--c-accent) 55%, black) 100%)",
-            boxShadow: "0 4px 10px rgba(0,0,0,0.35), inset 0 -3px 6px rgba(0,0,0,0.3), inset 0 2px 3px rgba(255,255,255,0.25)",
-          }}
-        >
-          <span className="grid h-10 w-10 place-items-center rounded-full ring-1 ring-white/35">{initial}</span>
-        </span>
-      </button>
+      />
       {open ? (
-        <div ref={after} className="flex animate-screen-in flex-col items-center gap-5 [animation-delay:800ms]">
+        <div ref={after} className="flex animate-screen-in flex-col items-center gap-5 [animation-delay:1100ms]">
           <p className="text-lg text-[var(--c-muted)]">{screen.subtitle}</p>
           <PrimaryButton onClick={onNext}>{screen.button}</PrimaryButton>
         </div>
       ) : (
-        <p className="animate-pulse text-xs font-semibold uppercase tracking-[0.25em] opacity-70">{text("tapEnvelope")}</p>
+        <TapHint tap={text("tapEnvelope")} sound={text("soundHint")} still={editing} />
       )}
     </div>
   );
@@ -183,7 +174,7 @@ export function QuestionScreen({ screen, onNext, stage = 0 }: ScreenProps<"quest
     <button
       {...noProps}
       data-no
-      className={`${moved ? "absolute transition-[left,top] duration-200 ease-out" : ""} whitespace-nowrap rounded-full bg-[var(--c-secondary)] px-6 py-3 text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-[var(--c-text)] shadow-sm ring-1 ring-current/20`}
+      className={`${moved ? "absolute transition-[left,top] duration-200 ease-out" : ""} min-h-14 whitespace-nowrap rounded-full bg-[var(--c-secondary)] px-6 py-3 text-[1.0625rem] font-semibold tracking-[0.02em] text-[var(--c-text)] shadow-sm ring-1 ring-current/20`}
     >
       {label(screen.no, list("noLines"))}
     </button>
@@ -231,14 +222,22 @@ export function PhotosScreen({ screen, onNext, stage = 0, wide = false }: Screen
         <div className="mx-auto grid w-full max-w-3xl grid-cols-2 gap-4 @2xl:grid-cols-3 @2xl:gap-6">
           {photos.map((src, i) => (
             <figure
-              key={src + i}
+              key={`${src}-${i}`}
               className="relative animate-pop rounded-md bg-white p-2 pb-9 shadow-xl transition duration-300 hover:z-10 hover:scale-105 hover:rotate-0 @2xl:p-3 @2xl:pb-12"
               style={{ transform: `rotate(${[-4, 3, -2, 5, -3, 2][i % 6]}deg)`, animationDelay: `${i * 120}ms` }}
             >
               <span className="absolute -top-2 left-1/2 h-4 w-4 -translate-x-1/2 rounded-full bg-[var(--c-accent)] shadow ring-2 ring-white" />
-              <div className="aspect-square w-full overflow-hidden rounded-sm">
+              <div className="aspect-square w-full overflow-hidden rounded-sm bg-neutral-100">
                 {/* eslint-disable-next-line @next/next/no-img-element -- user photos from our storage, already resized on upload */}
-                <img data-photo={i} src={src} alt="" className="h-full w-full object-cover" style={cropStyle(screen.crops?.[i])} draggable={false} />
+                <img
+                  data-photo={i}
+                  src={src}
+                  alt={screen.captions[i] || `Photo ${i + 1}`}
+                  decoding="async"
+                  className="h-full w-full object-cover"
+                  style={cropStyle(screen.crops?.[i])}
+                  draggable={false}
+                />
               </div>
               <figcaption className="absolute inset-x-2 bottom-1.5 truncate font-hand text-lg text-neutral-700 @2xl:bottom-3 @2xl:text-xl">
                 {screen.captions[i] ?? ""}
@@ -273,7 +272,8 @@ export function PhotosScreen({ screen, onNext, stage = 0, wide = false }: Screen
             const rotation = [-4, 5, -2, 3, -6, 2][i % 6];
             return (
               <figure
-                key={src}
+                // The same photo can be in twice.
+                key={`${src}-${i}`}
                 className="absolute inset-0 rounded-md bg-white p-3 pb-14 shadow-xl transition-all duration-500"
                 style={{
                   transform: `rotate(${offset === 0 ? rotation : rotation * 1.6}deg) translateY(${offset * 6}px) scale(${1 - offset * 0.04})`,
@@ -281,9 +281,19 @@ export function PhotosScreen({ screen, onNext, stage = 0, wide = false }: Screen
                   opacity: offset > 2 ? 0 : 1,
                 }}
               >
-                <div className="h-full w-full overflow-hidden rounded-sm">
+                {/* A soft paper colour, so a photo still on its way doesn't look like a hole. */}
+                <div className="h-full w-full overflow-hidden rounded-sm bg-neutral-100">
                   {/* eslint-disable-next-line @next/next/no-img-element -- user photos from our storage, already resized on upload */}
-                  <img data-photo={i} src={src} alt="" className="h-full w-full object-cover" style={cropStyle(screen.crops?.[i])} draggable={false} />
+                  <img
+                    data-photo={i}
+                    src={src}
+                    alt={screen.captions[i] || `Photo ${i + 1}`}
+                    decoding="async"
+                    fetchPriority={offset === 0 ? "high" : undefined}
+                    className="h-full w-full object-cover"
+                    style={cropStyle(screen.crops?.[i])}
+                    draggable={false}
+                  />
                 </div>
                 <figcaption className="absolute inset-x-3 bottom-3 truncate font-hand text-xl text-neutral-700">
                   {screen.captions[i] ?? ""}
@@ -293,7 +303,7 @@ export function PhotosScreen({ screen, onNext, stage = 0, wide = false }: Screen
           })}
         </button>
       )}
-      {total > 1 && <p className="text-sm text-[var(--c-muted)]">{text("photosTap", { i: index + 1, n: total })}</p>}
+      {total > 1 && <p className="text-base text-[var(--c-muted)]">{text("photosTap", { i: index + 1, n: total })}</p>}
       <NextButton onClick={onNext} />
     </div>
   );
@@ -301,22 +311,28 @@ export function PhotosScreen({ screen, onNext, stage = 0, wide = false }: Screen
 
 export function MessageScreen({ screen, onNext }: ScreenProps<"message">) {
   const reduced = useReducedMotion();
+  const { text } = useWords();
+  const body = screen.body;
   const [typed, setTyped] = useState(0);
   // Restart the typewriter when the text changes (e.g. while editing in the preview).
-  const [typedBody, setTypedBody] = useState(screen.body);
-  if (typedBody !== screen.body) {
-    setTypedBody(screen.body);
+  const [typedBody, setTypedBody] = useState(body);
+  if (typedBody !== body) {
+    setTypedBody(body);
     setTyped(0);
   }
-  const shown = reduced ? screen.body.length : typed;
-  const done = shown >= screen.body.length;
+  let shown = reduced ? body.length : Math.min(typed, body.length);
+  // Never half an emoji.
+  if (shown < body.length && /[\uD800-\uDBFF]/.test(body[shown - 1] ?? "")) shown += 1;
+  const done = shown >= body.length;
 
-  // Typed out letter by letter; faster or slower with style.tune.speed.
+  // Typed out letter by letter; faster or slower with style.tune.speed. A long letter types
+  // a few at a time, so even the longest is all there in about eight seconds.
   const { speed } = useTune();
+  const step = Math.max(1, Math.ceil(body.length / 280));
   useEffect(() => {
-    const t = setInterval(() => setTyped((s) => (s >= screen.body.length ? s : s + 1)), 28 / speed);
+    const t = setInterval(() => setTyped((s) => (s >= body.length ? s : s + step)), 28 / speed);
     return () => clearInterval(t);
-  }, [screen.body, speed]);
+  }, [body, speed, step]);
 
   return (
     <div className="flex w-full flex-col items-center gap-6 text-center">
@@ -325,13 +341,28 @@ export function MessageScreen({ screen, onNext }: ScreenProps<"message">) {
         <Flourish className="mx-auto mt-3 text-[var(--c-muted)]" />
       </div>
       <button
-        onClick={() => setTyped(screen.body.length)}
-        className="min-h-40 w-full whitespace-pre-line rounded-sm bg-[var(--c-surface)] p-7 text-left text-lg leading-relaxed shadow-[0_14px_30px_-20px_rgba(0,0,0,0.6)] ring-1 ring-current/10"
+        onClick={() => setTyped(body.length)}
+        className="min-h-40 w-full whitespace-pre-line rounded-sm bg-[var(--c-surface)] p-7 text-left text-xl leading-relaxed shadow-[0_14px_30px_-20px_rgba(0,0,0,0.6)] ring-1 ring-current/10"
       >
-        {screen.body.slice(0, shown)}
-        {!done && <span className="ml-0.5 inline-block h-5 w-0.5 animate-pulse bg-current align-middle" />}
+        {body.slice(0, shown)}
+        {/* The words still to come are already in place, unseen, and the cursor takes no
+            room, so the letter is its full size from the start and never pushes things down. */}
+        {!done && (
+          <>
+            <span aria-hidden className="relative">
+              <span className="absolute inset-y-0 left-0 w-0.5 animate-pulse bg-current" />
+            </span>
+            <span aria-hidden className="invisible">
+              {body.slice(shown)}
+            </span>
+          </>
+        )}
       </button>
-      <NextButton onClick={onNext} className={done ? "" : "invisible"} />
+      {done ? (
+        <NextButton onClick={onNext} className="animate-pop" />
+      ) : (
+        <p className="grid min-h-14 place-items-center text-base text-[var(--c-muted)]">{text("messageSkip")}</p>
+      )}
     </div>
   );
 }
@@ -340,7 +371,9 @@ const FIREWORK_GAMES: Game[] = ["light-diyas", "release-lanterns", "launch-firew
 
 export function GameScreen({ screen, onNext, stage = 0, occasion }: ScreenProps<"game"> & { occasion: Occasion }) {
   const sfx = useSfx();
+  const { text } = useWords();
   const [won, setWon] = useState(stage >= 1);
+  const stuck = useStuck(HELP_AFTER.game);
   const win = () => {
     setWon(true);
     sfx("win");
@@ -349,33 +382,56 @@ export function GameScreen({ screen, onNext, stage = 0, occasion }: ScreenProps<
     <div className="flex w-full flex-col items-center gap-3 text-center">
       {won && <Burst usual={FIREWORK_GAMES.includes(screen.game) || (screen.game === "shake-it" && occasion === "diwali") ? "fireworks" : "confetti"} />}
       <h2 className="font-display text-3xl font-semibold leading-tight">{screen.title}</h2>
-      <p className="text-[var(--c-muted)]">{won ? screen.winText : screen.instructions}</p>
+      <p className="text-lg text-[var(--c-muted)]">{won ? screen.winText : screen.instructions}</p>
       <GameView game={screen.game} occasion={occasion} won={won} onWin={win} />
-      <NextButton onClick={onNext} className={won ? "animate-pop" : "invisible"} />
+      {/* Finishing it for them still counts as a win: the burst, the sound, the win words. */}
+      {stuck && !won ? <HelpButton onClick={win}>{text("helpFinish")}</HelpButton> : <NextButton onClick={onNext} className={won ? "animate-pop" : "invisible"} />}
     </div>
   );
 }
 
-export function FinaleScreen({ screen, onReplay, footer }: { screen: Of<"finale">; onReplay: () => void; footer?: React.ReactNode }) {
+export function FinaleScreen({
+  screen,
+  onReplay,
+  footer,
+  from = "",
+}: {
+  screen: Of<"finale">;
+  onReplay: () => void;
+  footer?: React.ReactNode;
+  // The sender, to sign and seal the message (see Keepsake).
+  from?: string;
+}) {
   const sfx = useSfx();
   const { text } = useWords();
+  const sealed = from.trim() !== "";
   useEffect(() => {
     const timers = [setTimeout(() => sfx("win"), 150), setTimeout(() => sfx("sparkle"), 700)];
     if (screen.effect === "fireworks") for (let i = 0; i < 4; i++) timers.push(setTimeout(() => sfx("boom"), 900 + i * 800));
+    // A soft thud as the seal is pressed on at the end (keepsake-seal in globals.css).
+    if (sealed) timers.push(setTimeout(() => sfx("stamp"), 2650));
     return () => timers.forEach(clearTimeout);
-  }, [sfx, screen.effect]);
+  }, [sfx, screen.effect, sealed]);
   return (
     <>
       <FinaleEffect effect={screen.effect} />
       {/* Stacked above the effect so the words stay readable. */}
       <div className="relative z-10 flex flex-col items-center gap-6 text-center">
         <Flourish className="text-[var(--c-muted)]" />
-        <h1 className="animate-pop font-display text-5xl font-semibold italic leading-tight">{screen.title}</h1>
-        <p className="text-lg text-[var(--c-muted)]">{screen.body}</p>
-        <button onClick={onReplay} className="text-sm font-semibold underline underline-offset-4 opacity-80 hover:opacity-100">
-          {text("playAgain")}
-        </button>
-        {footer}
+        <h1 className="finale-title text-balance font-display text-[clamp(2.25rem,11cqw,3.25rem)] font-semibold italic leading-[1.1]">{screen.title}</h1>
+        <Keepsake body={screen.body} from={from} />
+        <div className="finale-later flex flex-col items-center gap-2">
+          <button
+            onClick={onReplay}
+            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--c-surface)] px-6 py-2 text-base font-semibold shadow-sm ring-1 ring-current/15 transition active:scale-95"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 12a8 8 0 1 0 2.4-5.7M4 4.5v4.2h4.2" />
+            </svg>
+            {text("playAgain")}
+          </button>
+          {footer}
+        </div>
       </div>
     </>
   );
@@ -388,9 +444,12 @@ export function QuizScreen({ screen, onNext, stage = 0 }: ScreenProps<"quiz">) {
   const [index, setIndex] = useState(stage <= 1 ? 0 : stage - 1);
   const [wrong, setWrong] = useState<number | null>(stage === 1 ? (screen.questions[0].answer === 0 ? 1 : 0) : null);
   const [misses, setMisses] = useState(stage === 1 ? 1 : 0);
+  // Wrong answers to this question, to offer the answer after a couple.
+  const [missesHere, setMissesHere] = useState(stage === 1 ? 1 : 0);
   const [right, setRight] = useState<number | null>(null);
   const done = index >= screen.questions.length;
   const q = screen.questions[Math.min(index, screen.questions.length - 1)];
+  const stuck = useStuck(HELP_AFTER.quiz, missesHere, 2, index);
 
   const pick = (i: number) => {
     if (right !== null) return;
@@ -401,10 +460,12 @@ export function QuizScreen({ screen, onNext, stage = 0 }: ScreenProps<"quiz">) {
       setTimeout(() => {
         setRight(null);
         setIndex((n) => n + 1);
+        setMissesHere(0);
       }, 650);
     } else {
       setWrong(i);
       setMisses((m) => m + 1);
+      setMissesHere((m) => m + 1);
       sfx("wrong");
     }
   };
@@ -415,7 +476,7 @@ export function QuizScreen({ screen, onNext, stage = 0 }: ScreenProps<"quiz">) {
         <Burst />
         <Laurel className={`h-20 w-28 animate-pop ${misses === 0 ? "text-[var(--c-accent)]" : "text-[var(--c-muted)]"}`} />
         <h2 className="font-display text-3xl font-semibold">{screen.winText}</h2>
-        <p className="text-[var(--c-muted)]">{misses === 0 ? text("quizPerfect") : misses === 1 ? text("quizMissedOne") : text("quizMissed", { n: misses })}</p>
+        <p className="text-lg text-[var(--c-muted)]">{misses === 0 ? text("quizPerfect") : misses === 1 ? text("quizMissedOne") : text("quizMissed", { n: misses })}</p>
         <NextButton onClick={onNext} />
       </div>
     );
@@ -423,7 +484,7 @@ export function QuizScreen({ screen, onNext, stage = 0 }: ScreenProps<"quiz">) {
 
   return (
     <div className="flex w-full flex-col items-center gap-5 text-center">
-      <p className="text-sm font-bold uppercase tracking-widest text-[var(--c-muted)]">
+      <p className="text-base font-semibold text-[var(--c-muted)]">
         <span>{screen.title}</span> · <span>{text("quizCount", { i: index + 1, n: screen.questions.length })}</span>
       </p>
       <h2 key={index} className="animate-screen-in font-display text-3xl font-semibold leading-tight">
@@ -447,10 +508,14 @@ export function QuizScreen({ screen, onNext, stage = 0 }: ScreenProps<"quiz">) {
           </button>
         ))}
       </div>
-      <p className="h-6 font-display font-semibold text-[var(--c-accent)]">{wrong !== null ? list("wrongLines")[(misses - 1) % list("wrongLines").length] : ""}</p>
+      <p className="h-7 font-display text-lg font-semibold">{wrong !== null ? list("wrongLines")[(misses - 1) % list("wrongLines").length] : ""}</p>
+      {stuck && right === null && <HelpButton onClick={() => pick(q.answer)}>{text("helpAnswer")}</HelpButton>}
     </div>
   );
 }
+
+// How wide a stroke scratches off, in pixels from the finger.
+const SCRATCH_BRUSH = 32;
 
 // A silver panel they rub away with a finger (or mouse) to reveal a hidden message.
 export function ScratchScreen({ screen, onNext, stage = 0 }: ScreenProps<"scratch">) {
@@ -461,10 +526,12 @@ export function ScratchScreen({ screen, onNext, stage = 0 }: ScreenProps<"scratc
   const drawing = useRef(false);
   const strokes = useRef(0);
   const [revealed, setRevealed] = useState(stage >= 1);
+  const stuck = useStuck(HELP_AFTER.scratch);
 
   useEffect(() => {
     const el = canvas.current;
-    const ctx = el?.getContext("2d");
+    // It's read back often to see how much is scratched off; the first call sets that up.
+    const ctx = el?.getContext("2d", { willReadFrequently: true });
     if (!el || !ctx) return;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     el.width = el.clientWidth * dpr;
@@ -498,7 +565,8 @@ export function ScratchScreen({ screen, onNext, stage = 0 }: ScreenProps<"scratc
     const scale = el.clientWidth / box.width || 1;
     ctx.globalCompositeOperation = "destination-out";
     ctx.beginPath();
-    ctx.arc((e.clientX - box.left) * scale, (e.clientY - box.top) * scale, 24, 0, Math.PI * 2);
+    // A broad brush, so a slow or shaky finger still clears plenty.
+    ctx.arc((e.clientX - box.left) * scale, (e.clientY - box.top) * scale, SCRATCH_BRUSH, 0, Math.PI * 2);
     ctx.fill();
     strokes.current += 1;
     if (strokes.current % 5 === 0) sfx("tick");
@@ -521,7 +589,7 @@ export function ScratchScreen({ screen, onNext, stage = 0 }: ScreenProps<"scratc
     <div className="flex w-full flex-col items-center gap-5 text-center">
       {revealed && <Burst />}
       <h2 className="font-display text-3xl font-semibold leading-tight">{screen.title}</h2>
-      <p className="text-[var(--c-muted)]">{revealed ? text("scratchDone") : screen.instructions}</p>
+      <p className="text-lg text-[var(--c-muted)]">{revealed ? text("scratchDone") : screen.instructions}</p>
       <div className="relative h-56 w-full max-w-sm overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-black/10">
         <div className="absolute inset-0 grid place-items-center p-6">
           <p className="font-display text-3xl font-semibold leading-tight text-[#3b0a1f]">{screen.hidden}</p>
@@ -541,45 +609,99 @@ export function ScratchScreen({ screen, onNext, stage = 0 }: ScreenProps<"scratc
           className={`absolute inset-0 h-full w-full touch-none transition-opacity duration-700 ${revealed ? "pointer-events-none opacity-0" : ""}`}
         />
       </div>
-      <NextButton onClick={onNext} className={revealed ? "animate-pop" : "invisible"} />
+      {stuck && !revealed ? (
+        <HelpButton
+          onClick={() => {
+            setRevealed(true);
+            sfx("win");
+          }}
+        >
+          {text("helpReveal")}
+        </HelpButton>
+      ) : (
+        <NextButton onClick={onNext} className={revealed ? "animate-pop" : "invisible"} />
+      )}
     </div>
   );
 }
 
-const normalise = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]/g, "").replace(/\s+/g, " ").trim();
+// Accents people rarely type: Latin ones (é, ü), Arabic vowel marks and the stretching
+// stroke, Hebrew points. Other marks stay, as in Hindi or Bengali they're part of the letter.
+const ACCENTS = /[\u0300-\u036f\u1ab0-\u1aff\u1dc0-\u1dff\u20d0-\u20ff\ufe20-\ufe2f\u0591-\u05c7\u0610-\u061a\u064b-\u065f\u0670\u0640]/g;
+
+// What counts when matching the phrase: letters and numbers in any script, ignoring case,
+// those accents, punctuation and extra spaces (and full-width or other look-alike forms).
+const normalise = (s: string) =>
+  s
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(ACCENTS, "")
+    .normalize("NFKC")
+    .replace(/[^\p{L}\p{N}\p{M}\s]/gu, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+// Each letter with the marks written on it, so a Hindi letter and its vowel sign share a tile.
+const lettersOf = (s: string) => s.match(/\P{M}\p{M}*|\p{M}+/gu) ?? [];
 
 // They have to type the secret phrase. Made for a keyboard, works with a phone keyboard too.
 export function TypeItScreen({ screen, onNext, stage = 0 }: ScreenProps<"typeit">) {
   const sfx = useSfx();
   const { text } = useWords();
-  const target = normalise(screen.phrase);
+  // A phrase with no letters or numbers at all (only emoji, say) is matched just as it is.
+  const loose = !normalise(screen.phrase);
+  const match = (s: string) => (loose ? s.trim().toLowerCase() : normalise(s));
+  const target = match(screen.phrase);
+  const tiles = lettersOf(target);
+  // Where each tile ends in the phrase, to show it once everything up to there is right.
+  const ends = tiles.reduce<number[]>((all, t) => [...all, (all.at(-1) ?? 0) + t.length], []);
+  const rtl = isRtl(screen.phrase);
   const [value, setValue] = useState(stage >= 1 ? screen.phrase : "");
   const [hints, setHints] = useState(0);
-  const typed = normalise(value);
+  // Times they've gone wrong while typing, to offer the answer after a few.
+  const [slips, setSlips] = useState(0);
+  const stuck = useStuck(HELP_AFTER.typeit, slips, 3);
+  const typed = match(value);
   const solved = typed === target;
   // How many leading characters are right so far.
   let correct = 0;
   while (correct < typed.length && typed[correct] === target[correct]) correct++;
   const wrongNow = typed.length > correct;
+  const solve = (phrase: string) => {
+    setValue(phrase);
+    sfx("unlock");
+    setTimeout(() => sfx("win"), 200);
+  };
+  // Each hint types the next letter in for them (putting right anything wrong before it),
+  // so pressing it enough times solves it.
+  const hint = () => {
+    let h = Math.min(Math.max(hints, ends.filter((end) => end <= correct).length) + 1, tiles.length);
+    while (h < tiles.length && tiles[h - 1] === " ") h++;
+    setHints(h);
+    const filled = tiles.slice(0, h).join("");
+    if (filled === target) return solve(filled);
+    setValue(filled);
+    sfx("tap");
+  };
 
   return (
     <div className="flex w-full flex-col items-center gap-5 text-center">
       {solved && <Burst />}
       <h2 className="font-display text-3xl font-semibold leading-tight">{screen.title}</h2>
-      <p className="text-[var(--c-muted)]">{solved ? screen.winText : screen.instructions}</p>
+      <p className="text-lg text-[var(--c-muted)]">{solved ? screen.winText : screen.instructions}</p>
       {/* The tiles show it a letter at a time (or not yet), so the editor reads it from here. */}
-      <div className={`flex flex-wrap justify-center gap-1.5 ${wrongNow ? "animate-shake" : ""}`} aria-hidden data-text={screen.phrase}>
-        {target.split("").map((ch, i) =>
+      <div dir={rtl ? "rtl" : "ltr"} className={`flex flex-wrap justify-center gap-1.5 ${wrongNow ? "animate-shake" : ""}`} aria-hidden data-text={screen.phrase}>
+        {tiles.map((ch, i) =>
           ch === " " ? (
             <span key={i} className="w-4" />
           ) : (
             <span
               key={i}
               className={`grid h-11 w-9 place-items-center rounded-lg font-display text-xl font-bold uppercase shadow-sm ring-1 ring-black/10 @2xl:h-14 @2xl:w-11 @2xl:text-2xl ${
-                i < correct || i < hints ? "bg-[var(--c-accent)] text-[var(--c-accent-text)]" : "bg-[var(--c-secondary)]"
+                ends[i] <= correct || i < hints ? "bg-[var(--c-accent)] text-[var(--c-accent-text)]" : "bg-[var(--c-secondary)]"
               }`}
             >
-              {i < correct || i < hints ? ch : ""}
+              {ends[i] <= correct || i < hints ? ch : ""}
             </span>
           ),
         )}
@@ -589,27 +711,33 @@ export function TypeItScreen({ screen, onNext, stage = 0 }: ScreenProps<"typeit"
           <input
             value={value}
             onChange={(e) => {
-              const next = normalise(e.target.value);
+              const next = match(e.target.value);
+              if (next === target) return solve(e.target.value);
               setValue(e.target.value);
-              if (next === target) {
-                sfx("unlock");
-                setTimeout(() => sfx("win"), 200);
-              } else if (next.length > typed.length) sfx(target.startsWith(next) ? "tap" : "wrong");
+              if (next.length > typed.length) {
+                const ok = target.startsWith(next);
+                sfx(ok ? "tap" : "wrong");
+                if (!ok && !wrongNow) setSlips((n) => n + 1);
+              }
             }}
             aria-label="Type the secret phrase"
             placeholder={text("typeStart")}
             data-text={text("typeStart")}
+            dir={rtl ? "rtl" : "auto"}
+            // The phone's keyboard mustn't "fix" the secret phrase into something else.
             autoComplete="off"
+            autoCorrect="off"
             autoCapitalize="off"
             spellCheck={false}
+            enterKeyHint="done"
             className="w-full max-w-sm rounded-2xl bg-[var(--c-secondary)] px-5 py-4 text-center font-display text-xl font-semibold text-[var(--c-text)] shadow-sm outline-none ring-1 ring-black/10 placeholder:opacity-50 focus:ring-2 focus:ring-[var(--c-accent)]"
           />
-          <button onClick={() => setHints((h) => Math.min(h + 1, target.length))} className="text-sm font-semibold underline underline-offset-4 opacity-75">
+          <button onClick={hint} className="min-h-11 px-4 text-base font-semibold underline underline-offset-4 opacity-80">
             {text("typeHint")}
           </button>
         </>
       )}
-      <NextButton onClick={onNext} className={solved ? "animate-pop" : "invisible"} />
+      {stuck && !solved ? <HelpButton onClick={() => solve(screen.phrase)}>{text("helpAnswer")}</HelpButton> : <NextButton onClick={onNext} className={solved ? "animate-pop" : "invisible"} />}
     </div>
   );
 }

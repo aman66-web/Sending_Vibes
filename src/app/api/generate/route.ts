@@ -2,15 +2,19 @@ import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { DEFAULT_LOCALE, LOCALE_COOKIE, fmt, isLive } from "@/i18n/config";
 import { DICTS } from "@/i18n/dictionaries";
-import { ALLOWANCE, allowanceLeft, spend, type Kind } from "@/lib/allowance";
+import { ALLOWANCE, claim, type Kind } from "@/lib/allowance";
 import { currentAccount, signInAvailable, type Account } from "@/lib/auth";
+import { briefSchema } from "@/lib/brief";
 import { cardSchema } from "@/lib/card";
 import { GenerateError, generateCard, generateReady } from "@/lib/generate";
+import { clientNetwork } from "@/lib/rate-limit";
 
 // Writes a card from a description, or makes a change to one.
 
-// A whole card can take half a minute to write, and a bad first try is retried once.
-export const maxDuration = 120;
+// A whole card can take a minute or two to write, and a bad first try is retried once if
+// there's time. lib/generate.ts gives up before this, so the visitor still hears back and
+// gets their go back.
+export const maxDuration = 300;
 
 const bodySchema = z.object({
   // All the answers to the questions can run to a few thousand characters.
@@ -21,6 +25,10 @@ const bodySchema = z.object({
   template: z.string().max(60).regex(/^[a-z0-9-]*$/).optional(),
   keepDesign: z.boolean().optional(),
   focus: z.string().max(40).optional(),
+  // The choices from the questions, for a new card.
+  brief: briefSchema.optional(),
+  // The creative directions of their last few cards, so the next one looks different.
+  avoid: z.array(z.string().max(40)).max(12).optional(),
 });
 
 // Each one costs real money, so keep it to a sensible rate per visitor. In memory, so
@@ -62,7 +70,7 @@ export async function POST(req: NextRequest) {
   const origin = req.headers.get("origin");
   if (origin && (!URL.canParse(origin) || new URL(origin).host !== req.headers.get("host"))) return fail(errors.failed, 403);
   if (!generateReady()) return fail(errors.off, 503);
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || req.headers.get("x-real-ip") || "unknown";
+  const ip = clientNetwork(req.headers);
   if (!allowed(ip)) return fail(errors.tooMany, 429);
 
   const parsed = bodySchema.safeParse(await req.json().catch(() => null));
@@ -77,20 +85,23 @@ export async function POST(req: NextRequest) {
   let left: number | undefined;
   if (account) {
     try {
-      const allowance = await allowanceLeft(account, kind);
-      if (allowance.left <= 0) {
-        const message = allowance.reason === "day" ? (kind === "card" ? errors.limitDayCards : errors.limitDayChanges) : kind === "card" ? errors.limitCards : errors.limitChanges;
-        return NextResponse.json({ error: fmt(message, { n: allowance.total, more: ALLOWANCE.perCardBought[kind] }), left: 0 }, { status: 429 });
+      // Checked and counted in one step, so two at once can't both get the last one.
+      const claimed = await claim(account, kind);
+      if (!claimed.ok) {
+        const message = claimed.reason === "day" ? (kind === "card" ? errors.limitDayCards : errors.limitDayChanges) : kind === "card" ? errors.limitCards : errors.limitChanges;
+        return NextResponse.json({ error: fmt(message, { n: claimed.total, more: ALLOWANCE.perCardBought[kind] }), left: 0 }, { status: 429 });
       }
-      refund = await spend(account, kind);
-      left = allowance.left - 1;
+      refund = claimed.refund;
+      left = claimed.left;
     } catch (e) {
       console.error("allowance check failed", e);
     }
   }
 
-  // Streams one JSON event per line: {type:"progress",screens} as each screen is written,
-  // then {type:"card",card} or {type:"error",error}.
+  // Streams one JSON event per line: {type:"idea",idea} with the card's big idea as soon as
+  // it's written (new cards only), {type:"progress",screens,titles} as each screen and its
+  // title are written (titles[i] is null until screen i's title is), then
+  // {type:"card",card,note,left,direction,idea} or {type:"error",error}.
   const encoder = new TextEncoder();
   const body = new ReadableStream<Uint8Array>({
     async start(controller) {
@@ -101,10 +112,18 @@ export async function POST(req: NextRequest) {
         } catch {}
       };
       try {
-        const { card, note } = await generateCard({ ...parsed.data, locale }, { signal: req.signal, onProgress: (screens) => send({ type: "progress", screens }) });
-        send({ type: "card", card, note, left });
+        const { card, note, direction, idea } = await generateCard(
+          { ...parsed.data, locale },
+          {
+            signal: req.signal,
+            onIdea: (idea) => send({ type: "idea", idea }),
+            onProgress: (screens, titles) => send({ type: "progress", screens, titles }),
+          },
+        );
+        send({ type: "card", card, note, left, direction, idea });
       } catch (e) {
-        await refund?.().catch(() => {});
+        // Whatever went wrong, they get their go back.
+        await refund?.().catch((r) => console.error("allowance refund failed", r));
         if (!req.signal.aborted) console.error("generate failed", e);
         send({ type: "error", error: errors[e instanceof GenerateError ? e.reason : "failed"] });
       }

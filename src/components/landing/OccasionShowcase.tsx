@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CardPlayer } from "@/components/card/CardPlayer";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import type { Occasion } from "@/lib/card";
 import { useI18n } from "@/i18n/client";
-import { buildDemo, occasions } from "@/lib/templates";
+import { buildDemo, defaultTemplate, occasions } from "@/lib/templates";
+import { themes } from "@/lib/themes";
 import { SHOWCASE, type ShowcaseOccasion } from "./showcase";
 
 // The homepage showcases a few flagship occasions; the full range lives in /cards.
@@ -51,6 +52,24 @@ export function OccasionShowcase({ order = SHOWCASE }: { order?: readonly Showca
   const demos = useMemo(() => Object.fromEntries(SHOWCASE.map((o) => [o, buildDemo(o)])) as Record<Occasion, ReturnType<typeof buildDemo>>, []);
   const style = STYLES[occasion];
   const copy = t.showcase[occasion];
+  // The card only starts once it's nearly on screen, so it doesn't slow the top of the page.
+  const phone = useRef<HTMLDivElement>(null);
+  const [near, setNear] = useState(false);
+  useEffect(() => {
+    const el = phone.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setNear(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "300px 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   return (
     <div>
@@ -71,10 +90,11 @@ export function OccasionShowcase({ order = SHOWCASE }: { order?: readonly Showca
 
       <div className={`sheet mt-6 grid items-center gap-10 overflow-hidden p-6 sm:p-10 md:grid-cols-[1fr_auto] lg:p-14 ${style.panel}`}>
         <div key={occasion} className={`animate-screen-in ${style.text}`}>
-          <div className="text-6xl">{occasions[occasion].emoji}</div>
-          <h3 className="mt-4 font-brand text-4xl font-bold sm:text-5xl">{t.occasions[occasion].label}</h3>
+          <div className="text-6xl max-md:hidden">{occasions[occasion].emoji}</div>
+          <h3 className="font-brand text-4xl font-bold sm:text-5xl md:mt-4">{t.occasions[occasion].label}</h3>
           <p className={`mt-3 max-w-md text-lg ${style.muted}`}>{copy.blurb}</p>
-          <ul className="mt-6 grid gap-2.5 sm:grid-cols-2">
+          {/* On phones the card itself shows what's in it, so the list waits for bigger screens. */}
+          <ul className="mt-6 grid gap-2.5 max-sm:hidden sm:grid-cols-2">
             {copy.includes.map((item) => (
               <li key={item} className="flex items-center gap-2.5 font-semibold">
                 <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-xs ${style.check}`}>✓</span>
@@ -82,8 +102,9 @@ export function OccasionShowcase({ order = SHOWCASE }: { order?: readonly Showca
               </li>
             ))}
           </ul>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link href={`/create?occasion=${occasion}`} className="btn btn-red">
+          <div className="mt-8 flex flex-wrap gap-3 max-sm:mt-6">
+            {/* The same design as the card being played, straight into its questions. */}
+            <Link href={`/create?template=${defaultTemplate(occasion).slug}`} className="btn btn-red">
               {t.showcase.make}
             </Link>
             <Link href={`/demo/${occasion}`} className="btn btn-paper">
@@ -91,9 +112,14 @@ export function OccasionShowcase({ order = SHOWCASE }: { order?: readonly Showca
             </Link>
           </div>
         </div>
-        <div className="mx-auto">
-          <PhoneFrame className="h-[600px] w-[292px]">
-            <CardPlayer key={occasion} card={demos[occasion]} preview />
+        {/* First on phones, so they play it and then find the button under it. */}
+        <div ref={phone} className="isolate mx-auto max-md:order-first">
+          <PhoneFrame className="h-[600px] w-[292px] max-w-full">
+            {near ? (
+              <CardPlayer key={occasion} card={demos[occasion]} preview />
+            ) : (
+              <div aria-hidden className="h-full w-full" style={{ background: themes[demos[occasion].theme].background }} />
+            )}
           </PhoneFrame>
           <p className={`mt-4 text-center font-hand text-2xl ${style.muted}`}>{t.showcase.live}</p>
         </div>

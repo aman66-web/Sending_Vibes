@@ -5,11 +5,15 @@ import { createPortal } from "react-dom";
 import { useI18n } from "@/i18n/client";
 import { fmt } from "@/i18n/config";
 import { DIRECTIONS, FONTS, FRAMES, TRANSITIONS, type CardData, type Crop, type Font, type Screen, type ScreenStyle, type Tune } from "@/lib/card";
-import { CATCHING, USUAL_GOAL } from "@/components/card/tune";
+import { CATCHING, GOAL_MAX, USUAL_GOAL } from "@/components/card/tune";
+import { hasGoal } from "@/lib/games";
 import { FONT_VARS } from "@/lib/screen-style";
-import { LISTS, TEXTS, isList, labelList, labelsOn, type LabelKey, type ListKey } from "@/lib/labels";
+import { LISTS, TEXTS, fill, isList, labelList, labelsOn, type LabelKey, type ListKey } from "@/lib/labels";
+import type { ClientDict } from "@/i18n/en";
 import { uploadPhoto } from "./image";
-import { isBlank } from "@/lib/blanks";
+import { blankMouse, selectBlank } from "./blank-focus";
+import { NewLookButton } from "./NewLook";
+import { useFreshTap } from "./one-tap";
 import { useWide } from "./use-wide";
 
 // Click the words on the live preview to change them, like editing a design.
@@ -24,16 +28,20 @@ type Field = { path: Path; value: string };
 // Words built into a screen (see lib/labels.ts) live at screens[i].labels[key].
 const labelOf = (path: Path): LabelKey | null => (path[0] === "screens" && path[2] === "labels" ? (path[3] as LabelKey) : null);
 
-const SKIP = new Set(["id", "type", "game", "effect", "photos", "style"]);
+// Words built into the screen (labels) are added after its own, below.
+const SKIP = new Set(["id", "type", "game", "effect", "photos", "style", "labels"]);
 
 // Every piece of text on one screen, plus the two names, with where each lives in the card.
 function textFields(card: CardData, screenId?: string, withEmpty = false): Field[] {
-  const out: Field[] = [
+  const out: Field[] = [];
+  // The names come after the screen's own words, so a quiz answer that is a name ("Lily")
+  // is that answer when tapped, not the card's To name.
+  const names: Field[] = [
     { path: ["to"], value: card.to },
     { path: ["from"], value: card.from },
   ];
   const i = card.screens.findIndex((s) => s.id === screenId);
-  if (i < 0) return out;
+  if (i < 0) return names;
   const walk = (value: unknown, path: Path) => {
     if (typeof value === "string") {
       if (value.trim() || withEmpty) out.push({ path, value });
@@ -45,6 +53,7 @@ function textFields(card: CardData, screenId?: string, withEmpty = false): Field
   };
   const screen = card.screens[i];
   walk(screen, ["screens", i]);
+  out.push(...names);
   // Then the words built into the screen, after its own so those win a tie.
   for (const key of labelsOn(screen)) {
     if (isList(key)) labelList(screen.labels, key).forEach((line, j) => out.push({ path: ["screens", i, "labels", key, j], value: line }));
@@ -52,32 +61,6 @@ function textFields(card: CardData, screenId?: string, withEmpty = false): Field
   }
   return out;
 }
-
-// Tapping into words that still say what goes there ("Type your question here") selects
-// them, so typing replaces them.
-type WordBox = HTMLInputElement | HTMLTextAreaElement;
-const selectBlank = (e: React.FocusEvent<WordBox>) => {
-  const el = e.currentTarget;
-  if (!isBlank(el.value)) return;
-  // Just the first line, so a message keeps its sign-off. Again a moment later, as iOS
-  // drops a selection made while it's still focusing.
-  const line = el.value.indexOf("\n");
-  const pick = () => el.setSelectionRange(0, line < 0 ? el.value.length : line);
-  pick();
-  setTimeout(pick, 0);
-};
-// A click that focuses a box selects on mousedown, then the mouseup puts the caret where
-// it was clicked (Safari, and Chrome sometimes). Keep the selection for that one click.
-let focusingByMouse = false;
-const blankMouse = {
-  onMouseDown: (e: React.MouseEvent<WordBox>) => {
-    focusingByMouse = document.activeElement !== e.currentTarget;
-  },
-  onMouseUp: (e: React.MouseEvent<WordBox>) => {
-    if (focusingByMouse && isBlank(e.currentTarget.value)) e.preventDefault();
-    focusingByMouse = false;
-  },
-};
 
 const labelValue = (own: unknown, usual: string) => (typeof own === "string" && own.trim() ? own : usual);
 
@@ -246,18 +229,28 @@ type Props = {
   enabled: boolean;
   onChange: (path: Path, value: string) => void;
   // Anything else on a screen: its look, its stickers, text and photos, a photos screen's photos.
-  onScreen: (index: number, update: (screen: Screen) => Screen) => void;
+  // By the screen's id, so a change that finishes later (a photo uploading) still lands on its
+  // own screen if the screens are moved about meanwhile.
+  onScreen: (id: string, update: (screen: Screen) => Screen) => void;
   // About to change something, so Undo can bring it back.
   onBegin?: () => void;
   // Selects something just added from the panel, like "text:2".
   pick?: { key: string; nonce: number };
   // Changing this opens the screen's own settings, as if its background were tapped.
   openSettings?: number;
+  // The moment of the screen on show (see lib/stages.ts), so a tapped quiz answer is the
+  // question on show's, even when another question has the same words.
+  stage?: number;
+  // A new look for the whole card (Try another look, in the screen's colours); the caller
+  // keeps the old one for Undo.
+  onNewLook?: (card: CardData) => void;
+  // Their favourite colour, kept by every new look (see NewLook.tsx).
+  favourite?: string | null;
   className?: string;
   children: React.ReactNode;
 };
 
-export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBegin, pick, openSettings = 0, className = "", children }: Props) {
+export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBegin, pick, openSettings = 0, stage = 0, onNewLook, favourite, className = "", children }: Props) {
   const { t } = useI18n();
   const x = t.custom;
   const s = t.studio;
@@ -286,9 +279,11 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
   const [photoError, setPhotoError] = useState<string | null>(null);
   const screenIndex = card.screens.findIndex((sc) => sc.id === screenId);
   const screen = card.screens[screenIndex];
+  const here = screen?.id ?? "";
   const style = screen?.style ?? {};
   // On a phone the controls come up from the bottom of the screen, so the card stays in view above them.
   const sheet = !useWide();
+  const fresh = useFreshTap();
 
   const begin = () => {
     if (begun.current) return;
@@ -321,7 +316,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
   };
   const restyle = (update: (st: ScreenStyle) => ScreenStyle) => {
     begin();
-    onScreen(screenIndex, (sc) => ({ ...sc, style: update(sc.style ?? {}) }));
+    onScreen(here, (sc) => ({ ...sc, style: update(sc.style ?? {}) }));
   };
   // How the screen plays (style.tune); a setting back at its usual value is dropped.
   const tune = style.tune ?? {};
@@ -330,8 +325,11 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
       const next = Object.fromEntries(Object.entries({ ...st.tune, ...change }).filter(([, v]) => v !== undefined));
       return { ...st, tune: Object.keys(next).length ? next : undefined };
     });
-  const usualGoal = screen?.type === "game" ? (USUAL_GOAL as Partial<Record<string, number>>)[screen.game] : undefined;
-  const goal = usualGoal === undefined ? undefined : (tune.goal ?? usualGoal);
+  const goalGame = screen?.type === "game" && hasGoal(screen.game) ? screen.game : null;
+  const usualGoal = goalGame ? USUAL_GOAL[goalGame] : undefined;
+  // The most the game will show (lib/games.ts), so the number here is the one they'll play.
+  const goalMax = goalGame ? GOAL_MAX[goalGame] : 40;
+  const goal = usualGoal === undefined ? undefined : Math.min(tune.goal ?? usualGoal, goalMax);
   const listOf = (deco: Deco) => (deco === "sticker" ? "stickers" : deco === "text" ? "texts" : "images") as "stickers" | "texts" | "images";
   const changeItem = (deco: Deco, index: number, update: (item: Record<string, unknown>) => Record<string, unknown> | null) =>
     restyle((st) => {
@@ -351,6 +349,8 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
     if (!el) return null;
     const below = document.elementsFromPoint(clientX, clientY).filter((e) => e !== layer.current && el.contains(e) && !e.closest("[data-edit-ui]"));
     const fields = textFields(card, screenId);
+    // The quiz question on show: the first one, or the first after a wrong answer, then the others in turn.
+    const asked = screen?.type === "quiz" ? Math.min(stage <= 1 ? 0 : stage - 1, screen.questions.length - 1) : -1;
     for (const e of below) {
       const deco = e.closest("[data-deco]");
       if (deco) {
@@ -362,8 +362,23 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
         const index = photo.getAttribute("data-photo");
         return { kind: "photo", index: index === "new" ? "new" : Number(index), el: photo };
       }
+      if (screen?.type === "quiz" && asked >= 0) {
+        // An answer button says which answer it is; its words may be the same as another's. The
+        // question on show is only trusted when its answer has the words that were tapped, as the
+        // card's own arrows can move on without telling the editor.
+        const option = e.closest("[data-quiz-option]");
+        const k = Number(option?.getAttribute("data-quiz-option"));
+        const value = screen.questions[asked]?.options[k];
+        if (option && value !== undefined && norm(option.textContent ?? "") === norm(value)) return { kind: "words", field: { path: ["screens", screenIndex, "questions", asked, "options", k], value }, el: option };
+      }
       const found = findField(e, el, fields);
-      if (found) return { kind: "words", ...found };
+      if (found) {
+        // A question with the same words as another ("Type something one of you said") is the one on show.
+        const [, , list, q, key] = found.field.path;
+        if (screen?.type === "quiz" && list === "questions" && key === "question" && q !== asked && screen.questions[asked] && norm(screen.questions[asked].question) === norm(found.field.value))
+          return { kind: "words", field: { path: ["screens", screenIndex, "questions", asked, "question"], value: screen.questions[asked].question }, el: found.el };
+        return { kind: "words", ...found };
+      }
       const envelope = e.closest("[data-envelope]");
       if (envelope) return { kind: "envelope", el: envelope };
     }
@@ -401,7 +416,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
     const nudge = (v: unknown) => Math.min(95, Number(v ?? 50) + 6);
     begun.current = false;
     onBegin?.();
-    onScreen(screenIndex, (sc) => {
+    onScreen(here, (sc) => {
       const st = sc.style ?? {};
       const key = listOf(deco);
       return { ...sc, style: { ...st, [key]: [...((st[key] as unknown[] | undefined) ?? []), { ...structuredClone(item), x: nudge(item.x), y: nudge(item.y) }] } };
@@ -545,7 +560,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
     if (g.mode === "move") {
       const nx = clamp(g.start.x + (dx / g.card.width) * 100, 0, 100);
       const ny = clamp(g.start.y + (dy / g.card.height) * 100, 0, 100);
-      onScreen(screenIndex, (sc) => {
+      onScreen(here, (sc) => {
         const st = sc.style ?? {};
         const key = listOf(g.deco);
         const list = [...((st[key] as { x: number; y: number }[] | undefined) ?? [])];
@@ -566,7 +581,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
       const [min, max] = SIZE[g.deco];
       const size = clamp(Math.round(g.start.size * factor * 10) / 10, min, max);
       const scale = size / g.start.size;
-      onScreen(screenIndex, (sc) => {
+      onScreen(here, (sc) => {
         const st = sc.style ?? {};
         const key = listOf(g.deco);
         const list = [...((st[key] as { size: number }[] | undefined) ?? [])];
@@ -629,7 +644,6 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
     // Copied first: clearing the input (so the same photo can be picked again) empties its list.
     const chosen = Array.from(list ?? []);
     if (!chosen.length || !screen) return;
-    const index = screenIndex;
     const replace = replacing;
     if (files.current) files.current.value = "";
     // Replacing a photo placed on the screen.
@@ -638,7 +652,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
       try {
         const url = await uploadPhoto(chosen[0]);
         begin();
-        onScreen(index, (sc) => ({ ...sc, style: { ...sc.style, images: (sc.style?.images ?? []).map((img, j) => (j === replace.index ? { ...img, src: url, crop: undefined } : img)) } }));
+        onScreen(here, (sc) => ({ ...sc, style: { ...sc.style, images: (sc.style?.images ?? []).map((img, j) => (j === replace.index ? { ...img, src: url, crop: undefined } : img)) } }));
       } catch {
         setPhotoError(t.editor.uploadFailed);
       } finally {
@@ -656,7 +670,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
       try {
         const url = await uploadPhoto(file);
         onBegin?.();
-        onScreen(index, (sc) => {
+        onScreen(here, (sc) => {
           if (sc.type !== "photos") return sc;
           // A new photo starts whole in its frame.
           if (replace && replace.index < sc.photos.length) return { ...sc, photos: sc.photos.map((p, j) => (j === replace.index ? url : p)), crops: sc.crops?.map((c, j) => (j === replace.index ? null : c)) };
@@ -673,7 +687,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
 
   const removePhoto = (i: number) => {
     onBegin?.();
-    onScreen(screenIndex, (sc) =>
+    onScreen(here, (sc) =>
       sc.type === "photos" ? { ...sc, photos: sc.photos.filter((_, j) => j !== i), captions: sc.captions.filter((_, j) => j !== i), crops: sc.crops?.filter((_, j) => j !== i) } : sc,
     );
     select(null);
@@ -689,34 +703,48 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
   // The controls go under what's selected or above it, wherever they fit in the window
   // without covering it (they may hang over the edge of the preview); else beside it.
   // On a computer the controls sit just left of the card, over the design panel, so they never
-  // cover what's being changed: level with it, and kept inside the window.
-  const place = (box: Box, tall: number) => ({
-    left: -316,
-    top: Math.max(12 - area.top, Math.min(box.top - 12, area.view - area.top - tall - 12)),
-  });
+  // cover what's being changed: level with it, and kept inside the window. `tall` is about how
+  // tall they are; they never reach past the bottom of the window, so Done can always be
+  // reached (what doesn't fit scrolls inside them).
+  const place = (box: Box, tall: number) => {
+    const top = Math.max(12 - area.top, Math.min(box.top - 12, area.view - area.top - tall - 12));
+    return { left: -316, top, maxHeight: area.view - area.top - top - 12 };
+  };
   const item = open?.kind === "deco" ? (style[listOf(open.deco)] as Record<string, unknown>[] | undefined)?.[open.index] : undefined;
+  const close = () => select(null);
+  const label = "text-sm font-bold opacity-75";
   // The controls for what's selected: beside it on a computer, a sheet at the bottom on a phone.
-  const controls = (at: { left: number; top: number }, body: React.ReactNode) =>
+  // On a phone the sheet scrolls, so its name and Done stay pinned at the top, always in reach.
+  const controls = (at: { left: number; top: number; maxHeight: number }, title: string, body: React.ReactNode) =>
     sheet ? (
       createPortal(
         <div
           data-edit-ui
           data-word-editor
-          className="fixed inset-x-0 bottom-0 z-[60] max-h-[55dvh] overflow-y-auto rounded-t-3xl border-t-2 border-line bg-panel p-4 pb-[max(1rem,env(safe-area-inset-bottom))] text-foreground shadow-[0_-12px_40px_rgba(0,0,0,0.25)]"
+          className="fixed inset-x-0 bottom-0 z-[60] max-h-[55dvh] overflow-y-auto rounded-t-3xl border-t-2 border-line bg-panel pb-[max(1rem,env(safe-area-inset-bottom))] text-foreground shadow-[0_-12px_40px_rgba(0,0,0,0.25)]"
         >
-          <div className="mx-auto max-w-lg space-y-3">{body}</div>
+          <div className="sticky top-0 z-10 border-b-2 border-line bg-panel px-4 py-2">
+            <div className="mx-auto flex max-w-lg items-center justify-between gap-3">
+              <p className="min-w-0 truncate text-lg font-bold">{title}</p>
+              <DoneButton label={s.done} onClick={(e) => fresh(e) && close()} />
+            </div>
+          </div>
+          <div className="mx-auto max-w-lg space-y-3 px-4 pt-3">{body}</div>
         </div>,
         document.body,
       )
     ) : (
       <div data-edit-ui data-word-editor className="absolute z-50 max-h-[calc(100dvh-24px)] w-[300px] space-y-3 overflow-y-auto rounded-2xl border border-line bg-panel p-3 text-foreground shadow-2xl" style={at}>
+        <p className={label}>{title}</p>
         {body}
+        <div className="flex justify-end">
+          <DoneButton label={s.done} onClick={(e) => fresh(e) && close()} />
+        </div>
       </div>
     );
-  const label = "text-xs font-bold uppercase tracking-wide opacity-60";
   // The turning handle sits above what's selected, or below it when that's at the very top.
-  const turnBelow = open !== null && open.box.top < 44;
-  const close = () => select(null);
+  const turnBelow = open !== null && open.box.top < 56;
+  const turnTop = open ? (turnBelow ? open.box.top + open.box.height + 12 : open.box.top - 56) : 0;
 
   return (
     <div ref={root} className={`relative ${className}`}>
@@ -776,7 +804,8 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
               return;
             }
             if (down && Math.hypot(e.clientX - down.x, e.clientY - down.y) > TAP_SLOP) return;
-            selectHit(under(e.clientX, e.clientY));
+            // Not the second tap of a double-tap on Done, landing on the card under the finger.
+            if (fresh(e)) selectHit(under(e.clientX, e.clientY));
           }}
           onPointerCancel={cancelGesture}
           onPointerLeave={() => setHover(null)}
@@ -809,7 +838,8 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
           role="slider"
           aria-label={s.bigger}
           aria-valuenow={Number(item?.size ?? 0)}
-          className="absolute z-[48] h-6 w-6 cursor-nwse-resize touch-none rounded-full border-[3px] border-white bg-brand shadow-lg"
+          // A small dot, with a finger-sized space around it that catches the touch too.
+          className="absolute z-[48] h-6 w-6 cursor-nwse-resize touch-none rounded-full border-[3px] border-white bg-brand shadow-lg before:absolute before:-inset-3 before:rounded-full"
           style={{ left: open.box.left + open.box.width - 8, top: open.box.top + open.box.height - 8 }}
           onPointerDown={(e) => {
             e.stopPropagation();
@@ -836,8 +866,8 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
           aria-label={s.turn}
           aria-valuenow={Number(item?.rotate ?? 0)}
           aria-valuetext={degrees(Number(item?.rotate ?? 0))}
-          className="absolute z-[48] grid h-8 w-8 cursor-grab touch-none place-items-center rounded-full border-2 border-brand bg-white text-lg font-bold text-brand shadow-lg active:cursor-grabbing"
-          style={{ left: open.box.left + open.box.width / 2 - 16, top: turnBelow ? open.box.top + open.box.height + 12 : open.box.top - 44 }}
+          className="absolute z-[48] grid h-11 w-11 cursor-grab touch-none place-items-center rounded-full border-2 border-brand bg-white text-xl font-bold text-brand shadow-lg active:cursor-grabbing"
+          style={{ left: open.box.left + open.box.width / 2 - 22, top: turnTop }}
           onPointerDown={(e) => {
             e.stopPropagation();
             const el = decoEl(open.deco, open.index);
@@ -855,10 +885,10 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
           aria-hidden
           className="pointer-events-none absolute z-[49] whitespace-nowrap rounded-full bg-foreground px-2.5 py-1 text-sm font-bold tabular-nums text-background shadow-lg"
           style={{
-            top: (turnBelow ? open.box.top + open.box.height + 12 : open.box.top - 44) + 4,
+            top: turnTop + 10,
             ...(open.box.left + open.box.width / 2 + 90 > open.area.width
-              ? { left: open.box.left + open.box.width / 2 - 24, transform: "translateX(-100%)" }
-              : { left: open.box.left + open.box.width / 2 + 24 }),
+              ? { left: open.box.left + open.box.width / 2 - 30, transform: "translateX(-100%)" }
+              : { left: open.box.left + open.box.width / 2 + 30 }),
           }}
         >
           {degrees(Number(item?.rotate ?? 0))}
@@ -868,8 +898,8 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
         <button
           type="button"
           data-edit-ui
-          onClick={paste}
-          className="absolute bottom-3 start-3 z-[49] rounded-full bg-foreground px-4 py-2 text-sm font-bold text-background shadow-lg"
+          onClick={(e) => fresh(e) && paste()}
+          className="absolute bottom-3 start-3 z-[49] min-h-11 rounded-full bg-foreground px-5 py-2.5 text-base font-bold text-background shadow-lg"
         >
           📋 {s.paste}
         </button>
@@ -889,10 +919,10 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
         open?.kind === "deco" &&
         item &&
         controls(
-          place(open.box, open.deco === "text" ? 520 : open.deco === "image" ? 560 : 380),
+          place(open.box, open.deco === "text" ? 740 : open.deco === "image" ? 710 : 570),
+          open.deco === "text" ? s.text : open.deco === "image" ? s.photo : s.element,
           <>
-          <p className={label}>{open.deco === "text" ? s.text : open.deco === "image" ? s.photo : s.element}</p>
-          <p className="text-xs opacity-60">{s.dragHint}</p>
+          <p className="text-base leading-snug opacity-75">{s.dragHint}</p>
           {open.deco === "text" && (
             <>
               <textarea
@@ -906,7 +936,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
                   changeItem("text", open.index, (it) => ({ ...it, text: e.target.value }));
                   remeasure("text", open.index);
                 }}
-                className="w-full resize-none rounded-xl border border-line bg-background px-3 py-2 text-sm outline-none focus:border-brand"
+                className="w-full resize-none rounded-xl border-2 border-line bg-background px-3 py-2.5 text-base outline-none focus:border-brand"
               />
               <FontRow
                 value={item.font as Font | undefined}
@@ -923,7 +953,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
               <p className={label}>{s.swap}</p>
               <div className="mt-1 flex flex-wrap gap-1">
                 {SWAPS.map((emoji) => (
-                  <button key={emoji} type="button" onClick={() => changeItem("sticker", open.index, (it) => ({ ...it, emoji }))} className="grid h-9 w-9 place-items-center rounded-lg text-xl hover:bg-brand-soft">
+                  <button key={emoji} type="button" onClick={() => changeItem("sticker", open.index, (it) => ({ ...it, emoji }))} className="grid h-12 w-12 place-items-center rounded-xl text-2xl hover:bg-brand-soft">
                     {emoji}
                   </button>
                 ))}
@@ -932,7 +962,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
           )}
           {open.deco === "image" && (
             <div className="space-y-2">
-              <button type="button" onClick={() => pickPhotos({ deco: true, index: open.index })} className="w-full rounded-full border-2 border-line px-4 py-2 text-sm font-semibold">
+              <button type="button" onClick={() => pickPhotos({ deco: true, index: open.index })} className="min-h-11 w-full rounded-full border-2 border-line px-4 py-2.5 text-base font-semibold">
                 {s.replace}
               </button>
               <div>
@@ -947,7 +977,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
                         changeItem("image", open.index, (it) => ({ ...it, frame }));
                         remeasure("image", open.index);
                       }}
-                      className={`flex-1 rounded-full border-2 px-2 py-1.5 text-sm font-semibold ${(item.frame ?? "polaroid") === frame ? "border-brand bg-brand-soft" : "border-line"}`}
+                      className={`min-h-11 flex-1 rounded-full border-2 px-2 py-2 text-base font-semibold ${(item.frame ?? "polaroid") === frame ? "border-brand bg-brand-soft" : "border-line"}`}
                     >
                       {s.frames[frame]}
                     </button>
@@ -958,10 +988,10 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
             </div>
           )}
           <div className="flex gap-2">
-            <button type="button" onClick={() => duplicate(open.deco, open.index)} className="flex-1 rounded-full border-2 border-line px-3 py-1.5 text-sm font-semibold">
+            <button type="button" onClick={(e) => fresh(e) && duplicate(open.deco, open.index)} className="min-h-11 flex-1 rounded-full border-2 border-line px-3 py-2 text-base font-semibold">
               ⧉ {s.duplicate}
             </button>
-            <button type="button" onClick={() => copy(open.deco, open.index)} className="flex-1 rounded-full border-2 border-line px-3 py-1.5 text-sm font-semibold">
+            <button type="button" onClick={() => copy(open.deco, open.index)} className="min-h-11 flex-1 rounded-full border-2 border-line px-3 py-2 text-base font-semibold">
               📋 {s.copy}
             </button>
           </div>
@@ -979,7 +1009,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
                   changeItem(open.deco, open.index, (it) => ({ ...it, rotate: straight(Number(it.rotate ?? 0) + by) }));
                   remeasure(open.deco, open.index);
                 }}
-                className="grid h-9 w-9 place-items-center rounded-full border-2 border-line text-lg font-bold"
+                className="grid h-11 w-11 place-items-center rounded-full border-2 border-line text-xl font-bold"
               >
                 {icon}
               </button>
@@ -992,7 +1022,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
                   changeItem(open.deco, open.index, (it) => ({ ...it, rotate: 0 }));
                   remeasure(open.deco, open.index);
                 }}
-                className="ms-auto rounded-full border-2 border-line px-3 py-1.5 text-sm font-semibold"
+                className="ms-auto min-h-11 rounded-full border-2 border-line px-3 py-2 text-base font-semibold"
               >
                 {s.straighten}
               </button>
@@ -1010,16 +1040,16 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
             />
             <button
               type="button"
-              onClick={() => {
+              onClick={(e) => {
+                if (!fresh(e)) return;
                 changeItem(open.deco, open.index, () => null);
                 close();
               }}
-              className="ms-auto rounded-full border-2 border-red-200 px-3 py-1.5 text-sm font-semibold text-red-600"
+              className="ms-auto min-h-11 rounded-full border-2 border-red-200 px-4 py-2 text-base font-semibold text-red-700 dark:border-red-800 dark:text-red-300"
             >
               🗑 {s.delete}
             </button>
           </div>
-          <DoneButton label={s.done} onClick={close} />
           </>,
         )}
 
@@ -1027,19 +1057,19 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
         open?.kind === "photo" &&
         screen?.type === "photos" &&
         controls(
-          place(open.box, 340),
+          place(open.box, 450),
+          x.photoTitle,
           <>
-          <p className={label}>{x.photoTitle}</p>
           <div className="grid gap-2">
-            <button type="button" onClick={() => pickPhotos({ deco: false, index: open.index })} className="rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white">
+            <button type="button" onClick={() => pickPhotos({ deco: false, index: open.index })} className="min-h-11 rounded-full bg-brand px-4 py-2.5 text-base font-semibold text-on-brand">
               {x.replacePhoto}
             </button>
             {screen.photos.length < MAX_PHOTOS && (
-              <button type="button" onClick={() => pickPhotos(null)} className="rounded-full border border-line px-4 py-2 text-sm font-semibold">
+              <button type="button" onClick={() => pickPhotos(null)} className="min-h-11 rounded-full border-2 border-line px-4 py-2.5 text-base font-semibold">
                 {x.morePhotos}
               </button>
             )}
-            <button type="button" onClick={() => removePhoto(open.index)} className="rounded-full border border-line px-4 py-2 text-sm font-semibold text-red-600">
+            <button type="button" onClick={(e) => fresh(e) && removePhoto(open.index)} className="min-h-11 rounded-full border-2 border-line px-4 py-2.5 text-base font-semibold text-red-700 dark:text-red-300">
               {x.removeThisPhoto}
             </button>
           </div>
@@ -1047,21 +1077,20 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
             crop={screen.crops?.[open.index] ?? undefined}
             onCrop={(crop) => {
               begin();
-              onScreen(screenIndex, (sc) =>
+              onScreen(here, (sc) =>
                 sc.type === "photos" ? { ...sc, crops: sc.photos.map((_, j) => (j === open.index ? (crop ?? null) : (sc.crops?.[j] ?? null))) } : sc,
               );
             }}
           />
-          <DoneButton label={s.done} onClick={close} />
           </>,
         )}
 
       {enabled &&
         open?.kind === "words" &&
         controls(
-          place(open.box, (long || lines.length > 1 ? 120 : 60) + 200 + (open.button ? 80 : 0)),
+          place(open.box, (lines.length > 1 ? 200 : long ? 130 : 60) + 380 + (open.button ? 180 : 0)),
+          list ? x.linesTitle : x.wordsTitle,
           <>
-          <p className={label}>{list ? x.linesTitle : x.wordsTitle}</p>
           {list ? (
             <div className="max-h-48 space-y-1.5 overflow-y-auto">
               {lines.map((line, j) => (
@@ -1074,7 +1103,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
                   onFocus={selectBlank}
                   {...blankMouse}
                   onChange={(e) => edit([...list.slice(0, 4), j], e.target.value)}
-                  className="w-full rounded-xl border border-line bg-background px-3 py-1.5 text-sm outline-none focus:border-brand"
+                  className="w-full rounded-xl border-2 border-line bg-background px-3 py-2.5 text-base outline-none focus:border-brand"
                 />
               ))}
             </div>
@@ -1089,7 +1118,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
               onFocus={selectBlank}
               {...blankMouse}
               onChange={(e) => edit(open.path, e.target.value)}
-              className="w-full resize-y rounded-xl border border-line bg-background px-3 py-2 text-sm outline-none focus:border-brand"
+              className="w-full resize-y rounded-xl border-2 border-line bg-background px-3 py-2.5 text-base outline-none focus:border-brand"
             />
           ) : (
             <input
@@ -1102,43 +1131,54 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
               {...blankMouse}
               onChange={(e) => edit(open.path, e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && close()}
-              className="w-full rounded-xl border border-line bg-background px-3 py-2 text-sm outline-none focus:border-brand"
+              className="w-full rounded-xl border-2 border-line bg-background px-3 py-2.5 text-base outline-none focus:border-brand"
             />
           )}
           {/* The colour and font of the words on this screen. */}
           <Swatches title={s.colour} value={style.text} onPick={(text) => restyle((st) => ({ ...st, text }))} />
           <FontRow value={open.heading ? style.heading : style.body} onPick={(font) => restyle((st) => (open.heading ? { ...st, heading: font } : { ...st, body: font }))} />
           {open.button && <Swatches title={s.buttonColour} value={style.accent} onPick={(accent) => restyle((st) => ({ ...st, accent }))} />}
-          <DoneButton label={s.done} onClick={close} />
           </>,
         )}
 
       {enabled &&
         open?.kind === "envelope" &&
         controls(
-          place(open.box, 150),
-          <>
-            <Swatches title={s.envelopeColour} value={style.envelope} onPick={(envelope) => restyle((st) => ({ ...st, envelope }))} />
-            <DoneButton label={s.done} onClick={close} />
-          </>,
+          place(open.box, 300),
+          s.envelopeTitle,
+          <Swatches title={s.envelopeColour} value={style.envelope} onPick={(envelope) => restyle((st) => ({ ...st, envelope }))} />,
         )}
 
       {enabled &&
         open?.kind === "background" &&
         controls(
-          place({ left: 0, top: 0, width: area.width, height: 0 }, 520),
+          place({ left: 0, top: 0, width: area.width, height: 0 }, screen?.type === "game" ? 1200 : 800),
+          s.screenSettings,
           <>
+          {/* A new look for the whole card, before this screen's own colours. */}
+          {onNewLook && (
+            <NewLookButton
+              card={card}
+              favourite={favourite}
+              className="w-full"
+              onChange={(next) => {
+                // Its own step for Undo, apart from any change to this screen before or after.
+                begun.current = false;
+                onNewLook(next);
+              }}
+            />
+          )}
           <Swatches title={s.backgroundColour} value={style.background?.length === 1 ? style.background[0] : undefined} onPick={(c) => restyle((st) => ({ ...st, background: [c] }))} />
           <div>
             <p className={label}>{s.blends}</p>
-            <div className="mt-1 flex flex-wrap gap-1.5">
+            <div className="mt-1 flex flex-wrap gap-2">
               {BLENDS.map((pair) => (
                 <button
                   key={pair.join()}
                   type="button"
                   aria-label={pair.join(" → ")}
                   onClick={() => restyle((st) => ({ ...st, background: pair, gradient: "diagonal" }))}
-                  className="h-8 w-8 rounded-full ring-1 ring-black/15"
+                  className="h-11 w-11 rounded-full ring-1 ring-black/15"
                   style={{ background: `linear-gradient(135deg, ${pair[0]}, ${pair[1]})` }}
                 />
               ))}
@@ -1169,11 +1209,11 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
           {goal !== undefined && (
             <div className="flex items-center gap-2">
               <p className={`${label} flex-1`}>{s.toWin}</p>
-              <button type="button" aria-label={s.fewer} disabled={goal <= 1} onClick={() => retune({ goal: goal - 1 })} className="grid h-9 w-9 place-items-center rounded-full border-2 border-line text-lg font-bold disabled:opacity-35">
+              <button type="button" aria-label={s.fewer} disabled={goal <= 1} onClick={() => retune({ goal: goal - 1 })} className="grid h-11 w-11 place-items-center rounded-full border-2 border-line text-xl font-bold disabled:opacity-35">
                 −
               </button>
               <span className="w-8 text-center text-lg font-bold tabular-nums">{goal}</span>
-              <button type="button" aria-label={s.more} disabled={goal >= 40} onClick={() => retune({ goal: goal + 1 })} className="grid h-9 w-9 place-items-center rounded-full border-2 border-line text-lg font-bold disabled:opacity-35">
+              <button type="button" aria-label={s.more} disabled={goal >= goalMax} onClick={() => retune({ goal: Math.min(goalMax, goal + 1) })} className="grid h-11 w-11 place-items-center rounded-full border-2 border-line text-xl font-bold disabled:opacity-35">
                 +
               </button>
             </div>
@@ -1199,7 +1239,6 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
               </div>
             </div>
           )}
-          <DoneButton label={s.done} onClick={close} />
           </>,
         )}
     </div>
@@ -1214,15 +1253,13 @@ const SPEEDS = [
   [2.5, "faster"],
 ] as const;
 
-const chip = (on: boolean) => `rounded-full border-2 px-3 py-1 text-sm font-semibold ${on ? "border-brand bg-brand-soft" : "border-line"}`;
+const chip = (on: boolean) => `min-h-11 rounded-full border-2 px-3.5 py-2 text-base font-semibold ${on ? "border-brand bg-brand-soft" : "border-line"}`;
 
-function DoneButton({ label, onClick }: { label: string; onClick: () => void }) {
+function DoneButton({ label, onClick }: { label: string; onClick: (e: React.MouseEvent) => void }) {
   return (
-    <div className="flex justify-end">
-      <button type="button" onClick={onClick} className="rounded-full bg-brand px-5 py-2 text-sm font-semibold text-white">
-        {label}
-      </button>
-    </div>
+    <button type="button" onClick={onClick} className="min-h-12 shrink-0 rounded-full bg-brand px-6 py-2.5 text-base font-bold text-on-brand">
+      <span aria-hidden>✓</span> {label}
+    </button>
   );
 }
 
@@ -1231,8 +1268,8 @@ function Swatches({ title, value, onPick }: { title: string; value?: string; onP
   const { t } = useI18n();
   return (
     <div>
-      <p className="text-xs font-bold uppercase tracking-wide opacity-60">{title}</p>
-      <div className="mt-1 flex flex-wrap gap-1.5">
+      <p className="text-sm font-bold opacity-75">{title}</p>
+      <div className="mt-1 flex flex-wrap gap-2">
         {PALETTE.map((c) => (
           <button
             key={c}
@@ -1240,11 +1277,11 @@ function Swatches({ title, value, onPick }: { title: string; value?: string; onP
             aria-label={c}
             aria-pressed={value?.toLowerCase() === c}
             onClick={() => onPick(c)}
-            className={`h-7 w-7 rounded-full ring-1 ring-black/15 ${value?.toLowerCase() === c ? "outline outline-2 outline-offset-2 outline-brand" : ""}`}
+            className={`h-11 w-11 rounded-full ring-1 ring-black/15 ${value?.toLowerCase() === c ? "outline outline-[3px] outline-offset-2 outline-brand" : ""}`}
             style={{ background: c }}
           />
         ))}
-        <label className="relative grid h-7 w-7 cursor-pointer place-items-center rounded-full text-sm ring-1 ring-black/15" style={{ background: "conic-gradient(#f43f5e, #f59e0b, #84cc16, #06b6d4, #8b5cf6, #f43f5e)" }}>
+        <label className="relative grid h-11 w-11 cursor-pointer place-items-center rounded-full text-sm ring-1 ring-black/15" style={{ background: "conic-gradient(#f43f5e, #f59e0b, #84cc16, #06b6d4, #8b5cf6, #f43f5e)" }}>
           <span className="sr-only">{t.studio.moreColours}</span>
           <input type="color" value={value ?? "#000000"} onChange={(e) => onPick(e.target.value)} className="absolute inset-0 cursor-pointer opacity-0" />
         </label>
@@ -1258,7 +1295,7 @@ function FontRow({ value, onPick }: { value?: Font; onPick: (font: Font) => void
   const { t } = useI18n();
   return (
     <div>
-      <p className="text-xs font-bold uppercase tracking-wide opacity-60">{t.studio.font}</p>
+      <p className="text-sm font-bold opacity-75">{t.studio.font}</p>
       <div className="mt-1 flex gap-1.5 overflow-x-auto pb-1">
         {FONTS.map((font) => (
           <button
@@ -1266,7 +1303,7 @@ function FontRow({ value, onPick }: { value?: Font; onPick: (font: Font) => void
             type="button"
             aria-pressed={value === font}
             onClick={() => onPick(font)}
-            className={`shrink-0 rounded-lg border-2 px-2.5 py-1 text-base ${value === font ? "border-brand bg-brand-soft" : "border-line"}`}
+            className={`min-h-11 shrink-0 rounded-xl border-2 px-3 py-2 text-lg ${value === font ? "border-brand bg-brand-soft" : "border-line"}`}
             style={{ fontFamily: `var(${FONT_VARS[font]})` }}
           >
             {t.studio.fonts[font]}
@@ -1284,17 +1321,17 @@ function CropControls({ crop, onCrop }: { crop?: Crop; onCrop: (crop: Crop | und
   const s = t.studio;
   const now = crop ?? { x: 50, y: 50, zoom: 1 };
   const slider = (name: string, key: keyof Crop, min: number, max: number, step: number) => (
-    <label className="flex items-center gap-3 text-sm">
-      <span className="w-20 shrink-0 font-semibold">{name}</span>
-      <input type="range" min={min} max={max} step={step} value={now[key]} onChange={(e) => onCrop({ ...now, [key]: Number(e.target.value) })} className="min-w-0 flex-1 accent-[var(--color-brand)]" />
+    <label className="flex items-center gap-3 text-base">
+      <span className="w-24 shrink-0 font-semibold">{name}</span>
+      <input type="range" min={min} max={max} step={step} value={now[key]} onChange={(e) => onCrop({ ...now, [key]: Number(e.target.value) })} className="h-11 min-w-0 flex-1 accent-[var(--color-brand)]" />
     </label>
   );
   return (
     <div className="space-y-1.5 rounded-xl bg-background p-2.5">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-bold uppercase tracking-wide opacity-60">{s.inFrame}</p>
+        <p className="text-sm font-bold opacity-75">{s.inFrame}</p>
         {crop && (
-          <button type="button" onClick={() => onCrop(undefined)} className="text-xs font-semibold underline underline-offset-2">
+          <button type="button" onClick={() => onCrop(undefined)} className="min-h-11 px-2 text-base font-semibold underline underline-offset-2">
             {s.resetCrop}
           </button>
         )}
@@ -1307,7 +1344,7 @@ function CropControls({ crop, onCrop }: { crop?: Crop; onCrop: (crop: Crop | und
 }
 
 function SizeButtons({ smaller, bigger, onSize }: { smaller: string; bigger: string; onSize: (factor: number) => void }) {
-  const button = "grid h-9 w-9 place-items-center rounded-full border-2 border-line text-lg font-bold";
+  const button = "grid h-11 w-11 place-items-center rounded-full border-2 border-line text-xl font-bold";
   return (
     <div className="flex items-center gap-1.5">
       <button type="button" aria-label={smaller} onClick={() => onSize(1 / 1.2)} className={button}>
@@ -1320,24 +1357,63 @@ function SizeButtons({ smaller, bigger, onSize }: { smaller: string; bigger: str
   );
 }
 
-// Every word on the screen showing, as a list: for words that only show for a moment
-// (a game's "Keep holding…") or are fiddly to tap.
-export function AllWords({ card, screenId, onChange }: { card: CardData; screenId?: string; onChange: (path: Path, value: string) => void }) {
+// What a box in the list of words is, in the words the Words tab uses for it.
+function fieldName(screen: Screen, path: Path, t: ClientDict): string {
+  const e = t.editor;
+  const label = labelOf(path);
+  if (label) return isList(label) ? `${t.studio.lineGroups[label]} ${Number(path[4]) + 1}` : fmt(t.studio.usually, { words: fill(TEXTS[label], { i: 1, n: 3, moves: 4 }) });
+  const n = Number(path[3]) + 1;
+  const type = screen.type;
+  switch (path[2]) {
+    case "title":
+      return type === "quiz" ? e.quizName : type === "slider" ? e.question : e.title;
+    case "body":
+      return type === "finale" ? e.finalWords : e.message;
+    case "instructions":
+      return type === "typeit" ? e.clue : e.instructions;
+    case "winText":
+      return type === "quiz" ? e.quizDone : type === "typeit" ? e.phraseDone : type === "wheel" ? e.wheelDone : type === "slider" ? e.sliderDone : e.winText;
+    case "options":
+      return `${e.wheelItems} ${n}`;
+    case "coupons":
+      return `${e.coupons} ${n}`;
+    case "reasons":
+      return `${e.notes} ${n}`;
+    case "prizes":
+      return `${e.boxes} ${n}`;
+    case "captions":
+      return fmt(t.studio.captionN, { n });
+    case "events":
+      return path[4] === "when" ? fmt(e.momentDate, { n }) : fmt(e.moment, { n });
+    case "questions":
+      return path[4] === "question" ? fmt(e.questionN, { n }) : `${fmt(e.questionN, { n })}: ${fmt(e.answerN, { n: Number(path[5]) + 1 })}`;
+  }
+  const own: Record<string, string> = { subtitle: e.subtitle, button: e.button, question: e.question, yes: e.yes, no: e.no, afterYes: e.afterYes, hidden: e.hidden, phrase: e.phrase, low: e.low, high: e.high };
+  return own[String(path[2])] ?? String(path.at(-1));
+}
+
+// Every word on the screen showing, as a list, each with its name above it: for words that
+// only show for a moment (a game's "Keep holding…") or are fiddly to tap. builtIn lists just
+// the words built into the screen (buttons and little hints), for under the Words tab's form.
+export function AllWords({ card, screenId, onChange, builtIn = false }: { card: CardData; screenId?: string; onChange: (path: Path, value: string) => void; builtIn?: boolean }) {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
-  const fields = textFields(card, screenId, true).filter((f) => f.path[0] === "screens");
-  if (!fields.length) return null;
+  const screen = card.screens.find((sc) => sc.id === screenId);
+  const fields = textFields(card, screenId, true).filter((f) => f.path[0] === "screens" && (!builtIn || labelOf(f.path)));
+  if (!screen || !fields.length) return null;
   return (
-    <div className="text-sm">
-      <button type="button" aria-expanded={open} onClick={() => setOpen((o) => !o)} className="font-semibold underline-offset-4 opacity-75 hover:underline hover:opacity-100">
-        {open ? "▾" : "▸"} {fmt(t.custom.allWords, { n: fields.length })}
+    <div>
+      <button type="button" aria-expanded={open} onClick={() => setOpen((o) => !o)} className="min-h-11 text-start text-base font-semibold underline-offset-4 opacity-80 hover:underline hover:opacity-100">
+        {open ? "▾" : "▸"} {fmt(builtIn ? t.studio.moreWords : t.custom.allWords, { n: fields.length })}
       </button>
       {open && (
-        <div data-all-words className="mt-2 max-h-80 space-y-1.5 overflow-y-auto rounded-2xl border border-line bg-panel p-3">
+        <div data-all-words className={`mt-2 space-y-3 rounded-2xl border-2 border-line bg-panel p-3 ${builtIn ? "" : "max-h-80 overflow-y-auto"}`}>
           {fields.map((f) => {
             const value = getAt(card, f.path);
             const label = labelOf(f.path);
-            const name = label ? (isList(label) ? LISTS[label][Number(f.path[4])] : TEXTS[label]) : String(f.path.at(-1));
+            // One line of a list (the No button's excuses, say): the list's name over its first line, then numbers.
+            const line = label && isList(label) ? Number(f.path[4]) : null;
+            const name = fieldName(screen, f.path, t);
             const props = {
               dir: "auto" as const,
               value,
@@ -1346,9 +1422,29 @@ export function AllWords({ card, screenId, onChange }: { card: CardData; screenI
               onFocus: selectBlank,
               ...blankMouse,
               onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => onChange(f.path, e.target.value),
-              className: "w-full rounded-xl border border-line bg-background px-3 py-1.5 outline-none focus:border-brand",
+              className: "w-full min-w-0 rounded-xl border-2 border-line bg-background px-3 py-2.5 text-base outline-none focus:border-brand",
             };
-            return value.length > 60 || value.includes("\n") ? <textarea key={f.path.join(".")} rows={3} {...props} /> : <input key={f.path.join(".")} {...props} />;
+            const box = value.length > 60 || value.includes("\n") ? <textarea rows={3} {...props} /> : <input {...props} />;
+            return (
+              <div key={f.path.join(".")}>
+                {line === null ? (
+                  <label className="block space-y-1">
+                    <span className="block text-sm font-bold opacity-75">{name}</span>
+                    {box}
+                  </label>
+                ) : (
+                  <>
+                    {line === 0 && label && isList(label) && <p className="mb-1 text-sm font-bold opacity-75">{t.studio.lineGroups[label]}</p>}
+                    <div className="flex items-center gap-2">
+                      <span aria-hidden className="w-5 shrink-0 text-end text-sm font-bold opacity-75">
+                        {line + 1}
+                      </span>
+                      {box}
+                    </div>
+                  </>
+                )}
+              </div>
+            );
           })}
         </div>
       )}
