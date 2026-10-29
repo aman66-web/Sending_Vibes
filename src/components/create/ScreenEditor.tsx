@@ -372,10 +372,16 @@ function QuizField({ screen, onChange }: { screen: QuizScreen; onChange: Update 
 
 type PhotosScreen = Extract<Screen, { type: "photos" }>;
 
-export function PhotoField({ screen, onChange }: { screen: PhotosScreen; onChange: Update }) {
+// `onBusy` hears photos start uploading (+n) and finish (-1), so nothing moves on without
+// them. As changes rather than a total, uploads carry on counting after the field is gone.
+export function PhotoField({ screen, onChange, onBusy }: { screen: PhotosScreen; onChange: Update; onBusy?: (change: number) => void }) {
   const e = useI18n().t.editor;
   const input = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(0);
+  const busy = (change: number) => {
+    setUploading((n) => n + change);
+    onBusy?.(change);
+  };
   const [error, setError] = useState<string | null>(null);
   const update = (fn: (s: PhotosScreen) => PhotosScreen) => onChange((prev) => (prev.type === "photos" ? fn(prev) : prev));
 
@@ -385,7 +391,7 @@ export function PhotoField({ screen, onChange }: { screen: PhotosScreen; onChang
     const room = MAX_PHOTOS - screen.photos.length;
     const picked = Array.from(files).slice(0, room);
     if (files.length > room) setError(fmt(e.tooManyPhotos, { n: MAX_PHOTOS }));
-    setUploading((n) => n + picked.length);
+    busy(picked.length);
     for (const file of picked) {
       try {
         const url = await uploadPhoto(file);
@@ -393,7 +399,7 @@ export function PhotoField({ screen, onChange }: { screen: PhotosScreen; onChang
       } catch {
         setError(e.uploadFailed);
       } finally {
-        setUploading((n) => n - 1);
+        busy(-1);
       }
     }
     if (input.current) input.current.value = "";

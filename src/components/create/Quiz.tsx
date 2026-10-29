@@ -45,8 +45,11 @@ export type Answers = {
   // Screens and games to include, by screen-kit key. None is "Choose for me".
   include: string[];
   length: Length | "";
-  // Their own words: how it should look (from scratch) or what it should say (a design).
+  // How it should look, in their own words (a card made from scratch).
   describe: string;
+  // What a ready-made design should say. Kept apart from `describe`, so switching
+  // between the two ways never turns one into the other.
+  say: string;
   // A little about them, in their words.
   about: string;
   age: Age | "";
@@ -72,6 +75,7 @@ export const NO_ANSWERS: Answers = {
   include: [],
   length: "",
   describe: "",
+  say: "",
   about: "",
   age: "",
   gentle: false,
@@ -120,7 +124,7 @@ function filledIn(step: Step, a: Answers, design: boolean) {
     case "look":
       return Boolean(a.look || a.music);
     case "about":
-      return Boolean((design ? a.describe : a.about).trim() || a.age || a.colour);
+      return Boolean((design ? a.say : a.about).trim() || a.age || a.colour);
     case "photos":
       return a.photos.length > 0;
     default:
@@ -175,7 +179,7 @@ export function quizPrompt(a: Answers, t: Dict, { design = false } = {}) {
   if (!design && a.gentle) lines.push("Keep the games gentle and easy: slower, bigger and quick to win.");
   if (isColour(a.colour)) lines.push(`${to}'s favourite colour is ${q.colours[a.colour]} (${COLOURS[a.colour]}). Use it as the card's main accent colour.`);
   if (design) {
-    lines.push(`What the card should say: ${a.describe.trim() || "write it however you think they'd love it most."}`);
+    lines.push(`What the card should say: ${a.say.trim() || "write it however you think they'd love it most."}`);
     return lines.join("\n");
   }
   const look = getLook(a.look);
@@ -258,7 +262,11 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
   // The last step makes the card.
   const last = at === steps.length - 1;
   const total = steps.length;
-  const ready = step === "signup" ? Boolean(signUp?.account) : answered(step, answers, q.relations);
+  // Photos still uploading would be left out of the card (or lost leaving for Google), so
+  // nothing moves on until they're in.
+  const [uploading, setUploading] = useState(0);
+  const waiting = uploading > 0 && (step === "photos" || step === "signup");
+  const ready = !waiting && (step === "signup" ? Boolean(signUp?.account) : answered(step, answers, q.relations));
   const toInput = useRef<HTMLInputElement>(null);
   const fromInput = useRef<HTMLInputElement>(null);
   // Which questions have their "Other" box open.
@@ -279,6 +287,20 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
     shownAt.current = performance.now();
     leaving.current = false;
     if (step === "names") toInput.current?.focus({ preventScroll: true });
+  }, [step]);
+  // A new question (not the first, which Creator scrolls to itself) is brought into view
+  // and its title focused, so screen readers say it. On the names the box keeps the focus.
+  const heading = useRef<HTMLHeadingElement>(null);
+  const before = useRef<Step | null>(null);
+  useEffect(() => {
+    const moved = before.current !== null && before.current !== step;
+    before.current = step;
+    const h1 = heading.current;
+    if (!moved || !h1) return;
+    // After a tap far down a long question, the next one would open part-way down. Back
+    // to the top, as Creator does, so the progress bar shows too.
+    if (h1.getBoundingClientRect().top < 0) window.scrollTo({ top: 0 });
+    if (step !== "names") h1.focus({ preventScroll: true });
   }, [step]);
   const tooSoon = (e: { detail: number }) => e.detail > 1 || performance.now() - shownAt.current < 500;
 
@@ -325,7 +347,11 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
   };
   const { title, hint } = titles[step];
   const skip = !last && !filledIn(step, answers, Boolean(design));
-  const label = last ? `${answers.to.trim() ? fmt(q.makeFor, { name: answers.to.trim() }) : q.generate} ✨` : `${skip ? q.skip : q.next} →`;
+  const label = waiting
+    ? q.waitingPhotos
+    : last
+      ? `${answers.to.trim() ? fmt(q.makeFor, { name: answers.to.trim() }) : q.generate} ✨`
+      : `${skip ? q.skip : q.next} →`;
 
   const preview = (className: string) =>
     design ? null : <VibePreview to={answers.to} from={answers.from} occasion={answers.occasion} look={answers.look} className={className} />;
@@ -357,7 +383,7 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
             next();
           }}
         >
-          <h1 dir="auto" className="font-brand text-4xl font-bold leading-tight sm:text-5xl">
+          <h1 ref={heading} tabIndex={-1} dir="auto" className="font-brand text-4xl font-bold leading-tight sm:text-5xl">
             {title}
           </h1>
           {hint && <p className="mt-3 text-lg opacity-70">{hint}</p>}
@@ -518,8 +544,8 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
                 name={name}
                 occasion={answers.occasion}
                 design={Boolean(design)}
-                text={design ? answers.describe : answers.about}
-                onText={(text) => set(design ? "describe" : "about", text)}
+                text={design ? answers.say : answers.about}
+                onText={(text) => set(design ? "say" : "about", text)}
                 age={answers.age}
                 onAge={(age) => choose((a) => ({ ...a, age, touched: { ...a.touched, age: true } }))}
                 gentle={answers.gentle}
@@ -529,7 +555,7 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
               />
             )}
             {step === "signup" && signUp && !signUp.account && (
-              <div className="max-w-md">
+              <div inert={waiting} className={`max-w-md ${waiting ? "opacity-50" : ""}`}>
                 <SignIn google={signUp.google} email={signUp.email} next="/create?resume=1" onSignedIn={signUp.onSignedIn} onGoogle={signUp.onGoogle} />
               </div>
             )}
@@ -542,6 +568,7 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
                     return next.type === "photos" ? { ...a, photos: next.photos, captions: next.captions } : a;
                   })
                 }
+                onBusy={(change) => setUploading((n) => Math.max(0, n + change))}
               />
             )}
             {last && <Recap lines={recapLines({ answers, t, design, steps, go, onChangeDesign })} />}
@@ -618,7 +645,7 @@ function recapLines({
   const feelings = [...a.vibes.filter(isFeeling).map((v) => q.feelings[v].label), a.vibeOther.trim()].filter(Boolean);
   const look = getLook(a.look);
   const picks = a.include.filter((k) => ALL_PICKS.includes(k));
-  const words = (design ? a.describe : a.about).trim();
+  const words = (design ? a.say : a.about).trim();
   const lines: (RecapLine | false)[] = [
     { key: "names", emoji: "💌", text: fmt(r.names, { to: a.to.trim(), from: a.from.trim() }), onChange: () => go("names") },
     { key: "relation", emoji: "💞", text: a.relation.trim(), onChange: () => go("relation") },

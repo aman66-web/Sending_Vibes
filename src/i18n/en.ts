@@ -1188,6 +1188,7 @@ export const en = {
     surpriseSay: "Surprise me! Write it however you think they'd love it most.",
     photosTitle: "Got any photos of you and {name}?",
     photosHint: "Optional. Add up to 6 and they'll go straight into the card. You can change them later.",
+    waitingPhotos: "Waiting for photos…",
     photosHintAdd: "Optional. Add up to 6 and we'll put them on a photo screen just before the ending. You can change them later.",
     comingUp: "Coming up",
     allOccasions: "All occasions",

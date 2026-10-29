@@ -1225,6 +1225,7 @@ export const pl: Dict = {
     surpriseSay: "Zaskocz mnie! Napisz ją tak, żeby jak najbardziej się spodobała.",
     photosTitle: "Masz jakieś wspólne zdjęcia – ty i {name}?",
     photosHint: "To nieobowiązkowe. Dodaj do 6 zdjęć, a trafią prosto do kartki. Później możesz je zmienić.",
+    waitingPhotos: "Czekamy na zdjęcia…",
     photosHintAdd: "To nieobowiązkowe. Dodaj do 6 zdjęć, a umieścimy je na ekranie ze zdjęciami tuż przed zakończeniem. Później możesz je zmienić.",
     comingUp: "Nadchodzące okazje",
     allOccasions: "Wszystkie okazje",

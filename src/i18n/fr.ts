@@ -1222,6 +1222,7 @@ export const fr: Dict = {
     surpriseSay: "Surprends-moi ! Écris-la de la façon qui lui plaira le plus, à ton avis.",
     photosTitle: "As-tu des photos de toi avec {name} ?",
     photosHint: "Facultatif. Ajoutes-en jusqu'à 6 et elles iront directement dans la carte. Tu pourras les changer plus tard.",
+    waitingPhotos: "En attente des photos…",
     photosHintAdd: "Facultatif. Ajoutes-en jusqu'à 6 et on les mettra sur un écran photos juste avant la fin. Tu pourras les changer plus tard.",
     comingUp: "Bientôt",
     allOccasions: "Toutes les occasions",
