@@ -50,7 +50,7 @@ export const OCCASION_DESIGNS: Template[] = [
           body: "modern",
           effect: "stars",
           burst: "sparkles",
-          stickers: [sticker("🎓", 11, 13, 10, -14, "float"), sticker("⭐", 90, 88, 7, 0, "pulse"), sticker("⭐", 10, 90, 5, 12, "pulse")],
+          stickers: [sticker("🎓", 11, 10, 10, -14, "float"), sticker("⭐", 90, 88, 7, 0, "pulse"), sticker("⭐", 10, 90, 5, 12, "pulse")],
         },
         { gotMail: "A letter for the graduate" },
       ),

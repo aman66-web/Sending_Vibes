@@ -34,10 +34,13 @@ const SPOTS = [
   [[10, 16, 10, 10], [9, 90, 12, -8], [90, 92, 10, -12], [95, 55, 8, 8], [5, 66, 8, -10], [5, 32, 7, -6]],
 ] as const;
 
-function place(emojis: string[], layout: number, motion: Motion[], scale = 1): Sticker[] {
+// The opening screen has no Back button, so its top-left sticker sits up in the corner, above the words.
+const OPENING_TOP_LEFT = 8;
+
+function place(emojis: string[], layout: number, motion: Motion[], scale = 1, opening = false): Sticker[] {
   return emojis.slice(0, SPOTS[0].length).map((emoji, i) => {
     const [x, y, size, rotate] = SPOTS[layout % SPOTS.length][i];
-    return { emoji, x, y, size: Math.round(size * scale), rotate, motion: motion[i % motion.length] };
+    return { emoji, x, y: opening && i === 0 ? OPENING_TOP_LEFT : y, size: Math.round(size * scale), rotate, motion: motion[i % motion.length] };
   });
 }
 
@@ -48,7 +51,7 @@ function design<G extends string>(kit: Kit<G>, screens: Record<string, Wear<G>>)
   return Object.fromEntries(
     Object.entries(screens).map(([id, { on, stickers, scale, ...own }], i) => [
       id,
-      { ...kit.grounds[on], heading: kit.heading, body: kit.body, transition: kit.transition, ...own, stickers: place(stickers, i, kit.motion, scale) },
+      { ...kit.grounds[on], heading: kit.heading, body: kit.body, transition: kit.transition, ...own, stickers: place(stickers, i, kit.motion, scale, id === "intro") },
     ]),
   );
 }

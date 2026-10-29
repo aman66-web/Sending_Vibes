@@ -13,8 +13,11 @@ export { BLANK } from "./blanks";
 // Where stickers sit: the corners and the top edge, clear of the words in the middle, the
 // progress dots at the top and the card's own buttons: Back in the top left (from the second
 // screen on) and sound in the top right. So the top spots sit just below Back and beside it.
-// The sides are for the envelope screen, where the envelope leaves room either side.
+// The sides are for the envelope screen, where the envelope leaves room either side. The
+// opening screen has no Back button, so its top-left sticker sits up in the corner (open),
+// above the words.
 const SPOTS = {
+  open: [9, 9],
   tl: [9, 15],
   tc: [30, 13],
   bl: [9, 91],
