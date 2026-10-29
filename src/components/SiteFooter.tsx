@@ -1,9 +1,25 @@
 import Link from "next/link";
+import { Fragment } from "react";
 import { Logo } from "@/components/Logo";
 import { OCCASIONS } from "@/lib/card";
 import { fmt } from "@/i18n/config";
 import { getI18n } from "@/i18n/server";
 import { occasions } from "@/lib/templates";
+import { COMPANY, CONTACT_EMAIL } from "@/lib/terms";
+
+// Text with our email address in it, the address made into a link that opens their email.
+export function WithEmail({ text, linkClass }: { text: string; linkClass: string }) {
+  return text.split(CONTACT_EMAIL).map((part, i) => (
+    <Fragment key={i}>
+      {i > 0 && (
+        <a href={`mailto:${CONTACT_EMAIL}`} className={linkClass}>
+          {CONTACT_EMAIL}
+        </a>
+      )}
+      {part}
+    </Fragment>
+  ));
+}
 
 export async function SiteFooter() {
   const { t } = await getI18n();
@@ -19,6 +35,9 @@ export async function SiteFooter() {
           <Link href="/create" className="btn btn-red mt-5 px-5 py-2.5 text-sm">
             {t.nav.makeCard}
           </Link>
+          <p className="mt-6 max-w-xs text-sm leading-relaxed">
+            <WithEmail text={fmt(t.footer.ask, { email: CONTACT_EMAIL })} linkClass="font-semibold text-cream underline decoration-hot decoration-2 underline-offset-4" />
+          </p>
         </div>
         <div>
           <p className="font-brand text-lg font-bold text-cream">{t.footer.occasions}</p>
@@ -48,6 +67,9 @@ export async function SiteFooter() {
               <Link href="/help" className="transition hover:text-cream">{t.footer.help}</Link>
             </li>
             <li>
+              <a href={`mailto:${CONTACT_EMAIL}`} className="transition hover:text-cream">{t.footer.contact}</a>
+            </li>
+            <li>
               <Link href="/privacy" className="transition hover:text-cream">{t.footer.privacy}</Link>
             </li>
             <li>
@@ -56,8 +78,12 @@ export async function SiteFooter() {
           </ul>
         </div>
       </div>
+      {/* The company details the law asks for. Extra room at the bottom on phones keeps them clear of the chat button. */}
       <div className="border-t border-cream/15">
-        <p className="mx-auto max-w-6xl px-4 py-5 text-xs sm:px-6">{fmt(t.footer.copyright, { year: new Date().getFullYear() })}</p>
+        <div className="mx-auto max-w-6xl space-y-1.5 px-4 py-5 text-xs leading-relaxed max-sm:pb-24 sm:px-6">
+          <p>{fmt(t.footer.company, { name: COMPANY.legalName, number: COMPANY.number, address: `${COMPANY.street}, ${COMPANY.town} ${COMPANY.postcode}` })}</p>
+          <p>{fmt(t.footer.copyright, { year: new Date().getFullYear() })}</p>
+        </div>
       </div>
     </footer>
   );
