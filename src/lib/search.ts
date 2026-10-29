@@ -14,7 +14,7 @@ import { occasions } from "./templates";
 const SOON_DAYS = 30;
 const COMING_DAYS = 75;
 // Occasions without a date, the most popular first.
-const EVERGREEN: Occasion[] = ["anniversary", "thanks", "congrats", "getwell", "newbaby", "wedding", "sorry", "missyou", "friendship", "leaving"];
+const EVERGREEN: Occasion[] = ["anniversary", "thanks", "congrats", "graduation", "getwell", "newbaby", "wedding", "newhome", "retirement", "sorry", "missyou", "friendship", "leaving"];
 
 // Every occasion, in the order to show them today: the next few dates, birthdays (always
 // someone's), the rest of what's coming up, the everyday ones, then dates far off.
@@ -71,7 +71,7 @@ export const OCCASION_WORDS: Partial<Record<Occasion, string[]>> = {
   anniversary: ["anniversary", "wedding anniversary", "years together", "ruby", "silver", "golden", "pearl", "diamond", "saalgirah", "husband", "wife", "together"],
   sorry: ["sorry", "apology", "apologise", "apologize", "forgive", "forgive me", "forgiveness", "my bad", "make up", "oops"],
   thanks: ["thank you", "thankyou", "thanks", "grateful", "gratitude", "appreciation", "teacher", "nurse", "carer", "doctor", "neighbour", "volunteer", "shukriya", "dhanyavad"],
-  congrats: ["congratulations", "congrats", "well done", "proud", "graduation", "graduate", "exam", "exams", "results", "gcse", "gcses", "a levels", "promotion", "new job", "new home", "new house", "housewarming", "driving test", "passed", "achievement", "award", "mubarak ho"],
+  congrats: ["congratulations", "congrats", "well done", "proud", "exam", "exams", "results", "gcse", "gcses", "a levels", "promotion", "new job", "driving test", "passed", "achievement", "award", "mubarak ho"],
   halloween: ["halloween", "spooky", "trick or treat", "pumpkin", "ghost", "ghosts", "witch", "all hallows"],
   newyear: ["new year", "new years", "new years eve", "nye", "hogmanay", "happy new year", "lunar new year", "chinese new year", "countdown"],
   mothersday: ["mothers day", "mothering sunday", "mum", "mom", "mam", "mummy", "mommy", "mother", "mama", "maa", "ammi", "amma"],
@@ -83,7 +83,10 @@ export const OCCASION_WORDS: Partial<Record<Occasion, string[]>> = {
   getwell: ["get well", "get well soon", "feel better", "poorly", "ill", "illness", "sick", "hospital", "operation", "surgery", "recovery", "recover", "speedy recovery", "thinking of you"],
   missyou: ["miss you", "missing you", "thinking of you", "long distance", "far away", "abroad", "apart", "hug", "hugs"],
   friendship: ["friendship", "friend", "friends", "best friend", "bestie", "bff", "mate", "pal", "buddy", "friendship day", "yaar", "dost"],
-  leaving: ["leaving", "goodbye", "farewell", "bon voyage", "retirement", "retiring", "retire", "moving on", "moving away", "new job", "emigrating", "good luck", "last day", "colleague"],
+  leaving: ["leaving", "goodbye", "farewell", "bon voyage", "moving on", "moving away", "new job", "emigrating", "good luck", "last day", "colleague"],
+  graduation: ["graduation", "graduate", "graduates", "graduating", "graduated", "grad", "uni", "university", "degree", "college", "school leaver", "leavers", "cap and gown", "convocation", "masters", "phd"],
+  retirement: ["retirement", "retire", "retiring", "retired", "pension", "pensioner", "out of office", "last day at work", "end of an era"],
+  newhome: ["new home", "new house", "new flat", "new place", "housewarming", "house warming", "moving house", "moved house", "moving in", "moved in", "first home", "keys", "griha pravesh"],
 };
 
 // Words that don't help find a design ("a birthday card for my mum").

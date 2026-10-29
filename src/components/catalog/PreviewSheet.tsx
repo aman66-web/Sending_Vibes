@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useId, useMemo, useRef } from "react";
+import { useEffect, useId, useMemo, useRef, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { CardPlayer } from "@/components/card/CardPlayer";
 import { useI18n } from "@/i18n/client";
@@ -19,12 +19,26 @@ export const onPhone = () => window.matchMedia(PHONE).matches;
 // than leaving the page. Counted, so React's development double start doesn't add two.
 const KEY = "envelettePreview";
 let showing = 0;
+const watchers = new Set<() => void>();
+const tell = () => watchers.forEach((changed) => changed());
 let savedRestoration: ScrollRestoration | null = null;
 const ours = () => Boolean(window.history.state?.[KEY]);
 // Back to how the browser restores scroll, once the preview's entry is gone.
 function restoreScrolling() {
   if (savedRestoration) window.history.scrollRestoration = savedRestoration;
   savedRestoration = null;
+}
+
+// Whether a preview is open, so the tiles hidden behind it can stop playing their own cards.
+export function useSheetOpen() {
+  return useSyncExternalStore(
+    (changed) => {
+      watchers.add(changed);
+      return () => watchers.delete(changed);
+    },
+    () => showing > 0,
+    () => false,
+  );
 }
 
 // Plain clicks only: a second tap of a double-tap lands on whatever has just opened
@@ -63,6 +77,7 @@ export function PreviewSheet({ slug, onClose, names, useHref, onUse, detailsHref
 
   useEffect(() => {
     showing++;
+    tell();
     if (!ours()) window.history.pushState({ [KEY]: true }, "");
     // Leaving the entry mustn't scroll the page back to where it was when the preview opened
     // (after "Use this design" the card maker has moved on to the top of the next step).
@@ -91,6 +106,7 @@ export function PreviewSheet({ slug, onClose, names, useHref, onUse, detailsHref
     }
     return () => {
       showing--;
+      tell();
       window.removeEventListener("popstate", onPop);
       window.removeEventListener("keydown", onKey);
       html.style.overflow = overflow;

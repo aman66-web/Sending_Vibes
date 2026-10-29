@@ -53,6 +53,9 @@ const BY_OCCASION: Partial<Record<Occasion, Recipient[]>> = {
   getwell: ["friend", "grandparent", "family", "colleague"],
   missyou: ["partner", "friend", "family"],
   halloween: ["friend", "child", "sibling"],
+  graduation: ["child", "sibling", "friend", "family", "colleague"],
+  retirement: ["colleague", "mum", "dad", "grandparent", "sibling", "family", "friend", "teacher"],
+  newhome: ["friend", "family", "sibling", "child", "mum", "dad", "grandparent", "colleague"],
 };
 
 const BY_TONE: Record<Tone, Recipient[]> = {
@@ -67,15 +70,18 @@ const BY_TONE: Record<Tone, Recipient[]> = {
 const FESTIVALS = new Set<Occasion>(["diwali", "christmas", "eid", "holi", "newyear"]);
 const FESTIVE_CUTE: Recipient[] = ["child", "family", "friend"];
 
-// Words in a design's name, or the sample name it's shown with ("Mum", "Ammi", "Khala").
+// Words in a design's name, the sample name it's shown with ("Mum", "Ammi", "Khala"), or
+// the start of its blurb when that says who it's for ("For a colleague, a parent or…").
 const HINTS: [RegExp, Recipient[]][] = [
   [/\b(mum|mums|mom|mother|ammi|amma|maa)\b/, ["mum"]],
   [/\b(dad|dads|father|papa|abbu)\b/, ["dad"]],
-  [/\b(gran|grandma|grandad|grandpa|nan|nani|nana|dadi|dada)\b/, ["grandparent"]],
+  // "New parents" are the people with the baby, not someone's mum and dad.
+  [/(?<!new )\b(parent|parents)\b/, ["mum", "dad"]],
+  [/\b(gran|grandma|grandad|grandpa|grandparent|grandparents|elders|nan|nani|nana|dadi|dada)\b/, ["grandparent"]],
   [/\b(sibling|siblings|brother|sister|bhai|didi)\b/, ["sibling"]],
   [/\b(bestie|friend|friends|friendship|bff|pal)\b/, ["friend"]],
-  [/\b(team|colleague|office|boss|secret santa)\b/, ["colleague", "friend"]],
-  [/\b(teacher|class|school)\b/, ["teacher"]],
+  [/\b(team|colleague|colleagues|office|boss|secret santa)\b/, ["colleague", "friend"]],
+  [/\b(teacher|teachers|class|school)\b/, ["teacher"]],
   [/\b(family|khala|khalu|auntie|aunty|aunt|uncle|chacha|chachi|cousin|eidi)\b/, ["family"]],
   [/\b(bridesmaid|bridesmaids)\b/, ["friend", "sibling"]],
 ];
@@ -83,6 +89,8 @@ const HINTS: [RegExp, Recipient[]][] = [
 const ROMANCE = /\b(love|loves|date|kiss)\b/;
 // Grown-up things that aren't for children.
 const NOT_FOR_CHILDREN = /\b(champagne|prosecco|wine|beer|cocktail|pub|hangover|date|kiss|flirt)\b/;
+// A design made for children is only for children.
+const CHILDREN = /\b(children|kids|little ones|a child)\b/;
 // A proposal is only ever for a partner; big baby news goes to the family first.
 const PROPOSAL = /\b(marry|propose|proposal)\b/;
 const BABY_NEWS = /\b(news|reveal|expecting|announcement)\b/;
@@ -128,11 +136,13 @@ export function recipientsOf(tpl: Template): Recipient[] {
   if (cached) return cached;
   const name = words(`${tpl.slug} ${tpl.name}`);
   const sample = words(tpl.demo.to);
+  const lead = words(/^for\s([^:.!?]+)/i.exec(tpl.blurb)?.[1] ?? "");
   let picked: Recipient[];
   if (PROPOSAL.test(name)) picked = ["partner"];
+  else if (CHILDREN.test(lead)) picked = ["child"];
   else if (tpl.occasion === "newbaby" && BABY_NEWS.test(name)) picked = ["mum", "dad", "grandparent", "sibling", "family", "friend"];
   else {
-    const hinted = HINTS.filter(([re]) => re.test(name) || re.test(sample)).flatMap(([, who]) => who);
+    const hinted = HINTS.filter(([re]) => re.test(name) || re.test(sample) || re.test(lead)).flatMap(([, who]) => who);
     picked = [
       ...(BY_OCCASION[tpl.occasion] ?? (FESTIVALS.has(tpl.occasion) && tpl.tone === "cute" ? FESTIVE_CUTE : BY_TONE[tpl.tone])),
       ...hinted,
