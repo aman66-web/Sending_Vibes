@@ -259,11 +259,13 @@ type Props = {
   // A new look for the whole card (Try another look, in the screen's colours); the caller
   // keeps the old one for Undo.
   onNewLook?: (card: CardData) => void;
+  // Their favourite colour, kept by every new look (see NewLook.tsx).
+  favourite?: string | null;
   className?: string;
   children: React.ReactNode;
 };
 
-export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBegin, pick, openSettings = 0, onNewLook, className = "", children }: Props) {
+export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBegin, pick, openSettings = 0, onNewLook, favourite, className = "", children }: Props) {
   const { t } = useI18n();
   const x = t.custom;
   const s = t.studio;
@@ -1150,6 +1152,7 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
           {onNewLook && (
             <NewLookButton
               card={card}
+              favourite={favourite}
               className="w-full"
               onChange={(next) => {
                 // Its own step for Undo, apart from any change to this screen before or after.
