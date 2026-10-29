@@ -23,6 +23,9 @@ import { getI18n } from "@/i18n/server";
 // Re-rendered hourly so the "coming up" dates stay current.
 export const revalidate = 3600;
 
+// One address for search engines, however the page was reached (/en/gbp/ serves it too).
+export const metadata: import("next").Metadata = { alternates: { canonical: "/" } };
+
 // Showcase tabs, soonest occasion first.
 function showcaseOrder(): ShowcaseOccasion[] {
   return [...SHOWCASE].sort((a, b) => (nextDate(a)?.days ?? 999) - (nextDate(b)?.days ?? 999));

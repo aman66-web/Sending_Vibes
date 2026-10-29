@@ -117,9 +117,10 @@ export function ProductView({ slug }: { slug: string }) {
           {card.music && card.music !== "none" && (
             <p className="-mt-4 text-sm font-semibold text-ink/50">{fmt(p.soundOn, { tune: t.labels.music[card.music] })}</p>
           )}
-          <a href={`/cards/${slug}/play`} target="_blank" rel="noreferrer" className="text-sm font-bold underline decoration-hot decoration-2 underline-offset-4">
+          {/* Same tab: a new one loses older visitors, and the full-screen page has its own Back button. */}
+          <Link href={`/cards/${slug}/play`} className="btn btn-paper px-5 py-2.5 text-base">
             {p.fullScreen}
-          </a>
+          </Link>
         </div>
       </div>
 

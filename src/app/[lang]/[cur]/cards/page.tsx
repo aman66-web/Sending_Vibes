@@ -9,7 +9,7 @@ import { getI18n } from "@/i18n/server";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getI18n();
-  return { title: t.cardsPage.metaTitle, description: fmt(t.cardsPage.metaDescription, { n: TEMPLATES.length }) };
+  return { title: t.cardsPage.metaTitle, description: fmt(t.cardsPage.metaDescription, { n: TEMPLATES.length }), alternates: { canonical: "/cards" } };
 }
 
 export default async function CardsPage({ searchParams }: { searchParams: Promise<{ occasion?: string }> }) {

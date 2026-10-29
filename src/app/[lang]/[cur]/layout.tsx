@@ -17,10 +17,12 @@ import {
   Playfair_Display,
 } from "next/font/google";
 import { ChatWidget } from "@/components/ChatWidget";
+import { JsonLd } from "@/components/JsonLd";
 import { I18nProvider } from "@/i18n/client";
 import { LANGUAGES } from "@/i18n/config";
 import { getI18n } from "@/i18n/server";
 import { COMMON_CURRENCIES } from "@/lib/pricing";
+import { siteData } from "@/lib/structured-data";
 import "../../globals.css";
 
 // The site itself: a soft serif for headings and a plain sans for everything else.
@@ -59,6 +61,7 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://envelette.com"),
     title: t.meta.title,
     description: t.meta.description,
+    openGraph: { siteName: "Envelette", type: "website" },
   };
 }
 
@@ -74,6 +77,8 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang={tag} dir={dir}>
       <body className={`${fonts} antialiased`}>
+        {/* Who runs the site, for search results. */}
+        <JsonLd data={siteData()} />
         <I18nProvider locale={locale} currency={currency} t={t}>
           {children}
           {/* The chat only shows once the Claude API key has been added. */}

@@ -4,9 +4,9 @@
 
 export const en = {
   meta: {
-    title: "Envelette: personalised interactive cards they'll actually remember",
+    title: "Envelette: personalised interactive e-cards they'll actually remember",
     description:
-      "Personalised interactive cards for birthdays, Valentine's, Diwali, Eid, Christmas, Halloween and more. Runaway No buttons, mini games, your photos, music and a big finale. Just fill in the blanks.",
+      "Personalised interactive e-cards for birthdays, Diwali, Eid, Christmas, Valentine's and more: mini games, your photos, music and a big finale, sent as a link.",
   },
 
   nav: {
@@ -462,10 +462,10 @@ export const en = {
   },
 
   occasionPage: {
-    metaTitle: "Interactive {label} cards · Envelette",
+    metaTitle: "Interactive {label} e-cards · Envelette",
     metaSuffix: "Personalise one in two minutes, no coding.",
-    // {label} is shown in red.
-    title: "Interactive {label} cards",
+    // {label} is shown in red. Used when an occasion has no heading of its own in occasionSeo.
+    title: "Interactive {label} e-cards",
     next: "{name} is {date}",
     make: "Make a {label} card · {price}",
     see: "See the {n} designs ↓",
@@ -475,15 +475,42 @@ export const en = {
       { title: "Send it as a link", body: "WhatsApp, text or Instagram. It opens in their browser on any phone or computer. Nothing to download." },
     ],
     more: "More occasions",
+    // On the page's link-preview image.
+    ogPrice: "{price} a card · sent as a link",
+    // Above the message ideas from occasionSeo.
+    writeIntro: "Not sure what to say? Borrow one of these and make it sound like you. You can change every word on the card before you send it.",
+    copy: "Copy",
+    copied: "Copied ✓",
+    // Read out by screen readers. {who} is who the message is for, e.g. "For Mum or Dad".
+    copyAria: "Copy the message: {who}",
+    // For occasions whose dates move each year. {name} is from the calendar section.
+    whenQ: "When is {name} in {year}?",
+    whenA: "{name} is on {date}.",
+    whenApprox: "{name} is expected on {date}, though it depends on the moon and can move by a day.",
+    whenSend: "We can email your card so it arrives at 9am your time on the day. You can set that up to {days} days ahead.",
+    // Questions shown for an occasion that has none of its own in occasionSeo yet.
+    faqTitle: "Questions people ask",
+    faqs: [
+      {
+        q: "What is an interactive e-card?",
+        a: "A card that opens from a link instead of an envelope. They tap to open it, then play through a few screens at their own pace: games, your photos, a quiz, a scratch card and more, ending with your message and a big finale.",
+      },
+      { q: "Can it arrive on the day?", a: "Yes. Choose to have us email it, pick the day and it arrives at 9am your time. You can set it up to {days} days ahead, or send the link yourself whenever you like." },
+      { q: "How much does it cost?", a: "{price} per card, paid once, with no subscription. You can play it all the way through before you pay." },
+    ],
   },
 
   product: {
-    metaTitle: "{name} · {occasion} card · Envelette",
+    metaTitle: "{name} · {occasion} e-card · Envelette",
+    // After the design's own description, in search results.
+    metaSuffix: "Personalise this {occasion} e-card and send it as a link.",
+    // The product's name for search engines.
+    schemaName: "{name} – interactive {occasion} e-card",
     onPhone: "📱 On a phone",
     onComputer: "💻 On a computer",
     live: "it's live, tap through it ↑",
     soundOn: "🔊 Sound on: it plays {tune} when you open it",
-    fullScreen: "Open full screen ↗",
+    fullScreen: "▶ Play it full screen",
     perCard: "per card",
     tryNames: "Try it with your names",
     tryNamesHint: "Watch the preview update as you type.",
@@ -1300,10 +1327,726 @@ export const en = {
   reply: {},
 
   // The bar on full-screen demos (components/DemoBar.tsx).
-  demo: {},
+  demo: {
+    metaTitle: "{name}: full-screen demo · Envelette",
+    back: "← Back",
+    make: "Make this card · {price}",
+    note: "This is a sample. Yours will have your own names, words and photos.",
+  },
 
   // More about each occasion on its own page, for visitors and search engines.
-  occasionSeo: {},
+  // Read through lib/occasion-seo.ts, so an occasion without an entry still works.
+  // heading: the page's big heading, with the **red part** marked. In the answers and
+  // paragraphs, {price} and {days} are filled in, and [links](/path) work.
+  occasionSeo: {
+    valentine: {
+      title: "Valentine's e-cards where the No button runs away · Envelette",
+      description:
+        "Ask them to be your Valentine with an interactive e-card: a No button they can't press, your photos, a love letter that writes itself and a shower of hearts.",
+      heading: "Interactive **Valentine's** e-cards",
+      aboutTitle: "A Valentine's card they can't say no to",
+      about: [
+        "The famous one: they open the envelope, read \"Will you be my Valentine?\" and try to press No. It runs away every time, and the Yes button grows. Then come your photos, a little game and a love letter that writes itself out as they watch, ending in a shower of hearts.",
+        "Prefer something softer? There are slow, romantic designs with falling petals and a jar of reasons you love them, and playful ones with a date-night wheel and coupons. Because it's a digital card, it arrives the moment you send it, by WhatsApp, text or email, or we can email it for 9am on the 14th.",
+      ],
+      writeTitle: "What to write in a Valentine's card",
+      ideas: [
+        { who: "For your partner", text: "Every year I look for a card that says it properly, and every year I end up writing the same thing: I'd choose you again, every single time." },
+        { who: "For someone new", text: "I know it's early days, but I couldn't let the 14th go by without telling you that you've made this winter a lot brighter." },
+        { who: "For your husband or wife", text: "Years in, and you still make me laugh at breakfast. Happy Valentine's Day to my favourite person to grow old with." },
+        { who: "Long distance", text: "Miles apart, but you're the first person I think of every morning. Counting down to the day I can say this in person." },
+        { who: "Something funny", text: "Roses are red, this button is too. You can't press No, so it's me and you." },
+        { who: "For your best friend", text: "Happy Galentine's to the friend who's been my plus-one through every disaster. There's no one I'd rather be single, taken or confused with." },
+      ],
+      faqTitle: "Valentine's e-card questions",
+      faqs: [
+        {
+          q: "Can they really not press No?",
+          a: "They can try. The No button runs away whenever they go to press it, and the Yes button grows each time they miss. You can change the question to anything you like, from \"Will you be my Valentine?\" to \"Dinner on Friday?\"",
+        },
+        {
+          q: "Can I send it so it arrives on Valentine's Day?",
+          a: "Yes. Choose to have us email it, pick 14 February and it arrives at 9am your time. You can set it up to {days} days ahead, so you can sort it in January and forget about it. Or send the link yourself whenever you like.",
+        },
+        { q: "Is it private?", a: "Only people with the link can open it. Links are long random codes, and cards are never listed or searchable, so your love letter stays between the two of you." },
+        { q: "How much is a Valentine's e-card?", a: "{price} per card, paid once. You can play your card all the way through before you pay, games and all, so you know exactly what they'll get." },
+      ],
+    },
+    birthday: {
+      title: "Interactive birthday e-cards they can play · Envelette",
+      description: "A birthday e-card they actually play: blow out the candles, smash a piñata, flick through your photos and finish in confetti. Made in minutes, sent as a link.",
+      heading: "Interactive **birthday** e-cards",
+      aboutTitle: "A birthday card that's more like a party",
+      about: [
+        "Instead of a card that's read once and put on the mantelpiece, they get a little party on their phone: candles to blow out, balloons to pop or a piñata to whack, then your photos, your message and a confetti finale, with Happy Birthday playing along.",
+        "Some designs are funny, with gentle teasing about their age or a quiz you write about them; some are simply warm, for parents, partners and best friends. It's a digital birthday card, so it reaches a grandchild across the country or a friend abroad just as easily. Have it emailed at 9am your time on the day, or send the link yourself.",
+      ],
+      writeTitle: "What to write in a birthday card",
+      ideas: [
+        { who: "For Mum or Dad", text: "Happy birthday to the person who taught me everything, including how to blow out candles without setting off the smoke alarm. I love you more every year." },
+        { who: "For Nan or Grandad", text: "Happy birthday! Thank you for the biscuits, the stories and for always being on my side. I hope today is as lovely as you are." },
+        { who: "For a best friend", text: "Another year of being brilliant. Thank you for every voice note, every terrible idea and every time you were right. Happy birthday." },
+        { who: "For a partner", text: "Happy birthday to my favourite person. I'd say I got you something amazing, but honestly, I'm the present. (There's cake too.)" },
+        { who: "For a big birthday", text: "Forty looks good on you. Here's to the best decade yet, and to never admitting how many candles were on the cake." },
+        { who: "For a colleague", text: "Happy birthday from all of us! Thank you for the laughs, the tea rounds and putting up with the office playlist. Have a brilliant day." },
+      ],
+      faqTitle: "Birthday e-card questions",
+      faqs: [
+        {
+          q: "Can I schedule a birthday e-card to arrive on the day?",
+          a: "Yes. Choose to have us email it, pick their birthday and it arrives at 9am your time. You can set it up to {days} days ahead, which is handy for birthdays you'd otherwise remember at 10pm.",
+        },
+        {
+          q: "Can I add a quiz about them?",
+          a: "Yes. Several designs have a quiz, and you write the questions and answers yourself, so it can be about their first car, their worst haircut or how well they know you. You can add a quiz screen to any design, too.",
+        },
+        {
+          q: "Can a few of us send it together?",
+          a: "One person puts the card together, but it can be from as many people as you like: write \"All of us\" in the From line and add photos and messages from everyone. Then share the link in the group chat or have us email it.",
+        },
+        {
+          q: "Will it work on their phone?",
+          a: "Yes. It opens in the web browser on any phone, tablet or computer, with nothing to download and no account to make. If they're not keen on technology, all they do is tap the link, then the envelope.",
+        },
+      ],
+    },
+    diwali: {
+      title: "Diwali e-cards: light the diyas, then fireworks · Envelette",
+      description:
+        "Send Diwali wishes with an interactive e-card: they light the diyas, release sky lanterns and fill the sky with fireworks. Reaches family anywhere, instantly.",
+      heading: "Interactive **Diwali** e-cards",
+      aboutTitle: "A festival of lights on their phone",
+      about: [
+        "A Diwali e-card from Envelette is something to do, not just read. They light the diyas one by one, release glowing sky lanterns or set off their own fireworks, then see your family photos and read your Diwali wishes. Some designs are playful, like a mithai quiz with only one right answer, and some are gentle and graceful, made for parents and elders.",
+        "It's a digital card, so it reaches family in India, Canada, the US or down the road at the same moment, with no postage and no waiting. Send the link on WhatsApp, share it in the family group, or have us email it at 9am your time on Diwali itself.",
+      ],
+      writeTitle: "What to write in a Diwali card",
+      ideas: [
+        { who: "For Mum and Dad", text: "Happy Diwali! Thank you for every Diwali you made special, from the rangoli to the mithai. May this year bring you health, happiness and lots of light." },
+        { who: "For family abroad", text: "We'll be lighting the diyas here and thinking of you there. Wishing you all a Diwali full of light, laughter and far too many sweets." },
+        { who: "For elders", text: "Wishing you a blessed and joyful Diwali. May Lakshmi Ji bring peace, good health and prosperity to your home this year." },
+        { who: "For friends", text: "Happy Diwali! May your year be as bright as your diyas and as sweet as the box of kaju katli you're definitely not sharing." },
+        { who: "For colleagues", text: "Wishing you and your family a very happy Diwali. Thank you for brightening up the team all year, and enjoy the celebrations." },
+        { who: "For your other half", text: "Every Diwali with you feels brighter. Thank you for being my light all year round. Happy Diwali, my love." },
+      ],
+      faqTitle: "Diwali e-card questions",
+      faqs: [
+        {
+          q: "Can I send a Diwali card to family in India or abroad?",
+          a: "Yes. It's sent as a link, so it reaches anyone, anywhere, the moment you send it, with no postage. It costs {price}, and you can pay in your own currency.",
+        },
+        {
+          q: "Can I write my wishes in Hindi, Gujarati or Punjabi?",
+          a: "Yes. Type your words in any language and they'll show on the card just as you wrote them. If you answer our questions in your language, we'll write the card in it too. The buttons on the card stay in English.",
+        },
+        {
+          q: "Is there a design for parents and elders?",
+          a: "Yes. [Diwali Blessings](/cards/diwali-blessings) is a graceful, heartfelt card with your family photos, made with parents and elders in mind, and [Lanterns of Light](/cards/lanterns-of-light) is a calm one with sky lanterns and fireworks. For friends who love their sweets, try [Mithai Mayhem](/cards/mithai-mayhem).",
+        },
+        {
+          q: "Can one card go to the whole family?",
+          a: "Yes. Anyone with the link can open it, so you can share one card in the family WhatsApp group. If you'd rather each person had their own, with their name on the envelope, make one for each.",
+        },
+      ],
+    },
+    christmas: {
+      title: "Interactive Christmas e-cards for family near and far · Envelette",
+      description: "A Christmas e-card that feels like a present: they unwrap it, catch the snow and read your message as Jingle Bells plays. No stamps, no last posting date.",
+      heading: "Interactive **Christmas** e-cards",
+      aboutTitle: "A Christmas card that feels like a present",
+      about: [
+        "They unwrap a present with their finger, catch falling snowflakes and pull your reasons from a jar, with Jingle Bells playing and a gentle snowfall to finish. For the jokers there's Naughty or Nice?, where the Naughty button runs away, and Secret Santa, where every present turns out to be socks.",
+        "There's no last posting date for an e-card. It reaches family abroad instantly, nothing gets lost in the Christmas post, and you can have it emailed at 9am your time on Christmas morning. Make a few at once, add them all to your basket and send each one its own way.",
+      ],
+      writeTitle: "What to write in a Christmas card",
+      ideas: [
+        { who: "For family", text: "Merry Christmas to the people who make it feel like Christmas. Wishing you a cosy day, a full table and a very lazy Boxing Day." },
+        { who: "For family abroad", text: "It doesn't feel quite like Christmas without you here. We'll raise a glass to you on the day, and we're counting down to the next time we're all together." },
+        { who: "For grandchildren", text: "Merry Christmas, my darlings! I hope Father Christmas brings everything on your list, and that you leave him an extra mince pie from me." },
+        { who: "For a partner", text: "My favourite part of Christmas is still you. Thank you for this year, for every terrible cracker joke and for putting up with my singing." },
+        { who: "For friends", text: "Merry Christmas! Here's to mince pies for breakfast, the Christmas jumper you swear is ironic and a much calmer new year." },
+        { who: "For neighbours", text: "Wishing you a very merry Christmas and a happy new year. Thank you for being such good neighbours. Enjoy every minute of the break." },
+      ],
+      faqTitle: "Christmas e-card questions",
+      faqs: [
+        {
+          q: "Will it arrive in time for Christmas?",
+          a: "Always. An e-card is sent as a link, so it arrives the moment you send it, wherever they live. Or choose to have us email it, pick the 25th, and it arrives at 9am your time on Christmas morning. You can set that up to {days} days ahead.",
+        },
+        {
+          q: "Can I send Christmas cards to lots of people?",
+          a: "Yes. Make a card for each person, add them all to your basket and pay once. Each card can be emailed on its own day or sent as a link, and every link is in your receipt email too.",
+        },
+        {
+          q: "Does it play Christmas music?",
+          a: "Yes. The Christmas designs play Jingle Bells when they open the envelope, with sound effects for the games. There's a mute button in the corner if they're somewhere quiet.",
+        },
+        {
+          q: "Can I add our family photos?",
+          a: "Yes, up to 6, each with a caption if you like. They're resized on your phone before upload, which also removes the hidden location data phones add to photos.",
+        },
+      ],
+    },
+    eid: {
+      title: "Eid Mubarak e-cards: interactive Eid cards · Envelette",
+      description: "Send Eid Mubarak wishes with an interactive e-card: catch the stars under the crescent moon, share family photos and your wishes. Reaches family anywhere.",
+      heading: "Interactive **Eid** e-cards",
+      aboutTitle: "Eid wishes, with a little bit of magic",
+      about: [
+        "Under a crescent moon, they catch the stars, receive an Eid hug they press and hold, or spin the wheel to choose the Eid feast. Then come your family photos and your wishes, ending in a sky full of stars. There's a gentle, elegant design for parents and elders, and a cheeky one asking for Eidi where the No button runs away.",
+        "Because it's an e-card, it reaches family in Pakistan, Bangladesh, the Gulf or the next street at the same moment, with no postage. It works for Eid al-Fitr and Eid al-Adha alike, and you can send the link the moment Eid is announced.",
+      ],
+      writeTitle: "What to write in an Eid card",
+      ideas: [
+        { who: "For family", text: "Eid Mubarak! May Allah accept your fasts and prayers and fill your home with peace, happiness and plenty of good food." },
+        { who: "For parents", text: "Eid Mubarak, Ammi and Abbu. Thank you for every Eid you made special for us. May this one bring you health, joy and lots of time together." },
+        { who: "For elders", text: "Wishing you a blessed Eid. May this day bring you peace, good health and happiness, and may we celebrate many more together." },
+        { who: "For friends", text: "Eid Mubarak! Wishing you a day full of food, family and absolutely no one asking when you're getting married." },
+        { who: "For family abroad", text: "We'll miss you at the table this Eid. Sending you all our love and duas from here. Eid Mubarak!" },
+        { who: "Asking for Eidi", text: "Eid Mubarak! I've been very good this year, so I'm sure you'll agree my Eidi should reflect that." },
+      ],
+      faqTitle: "Eid e-card questions",
+      faqs: [
+        { q: "Can I use it for Eid al-Fitr and Eid al-Adha?", a: "Yes. Every Eid design works for both. Write \"Eid Mubarak\" or your own words, and change any line to fit the Eid you're celebrating." },
+        {
+          q: "Eid depends on the moon. Can I still send it on the day?",
+          a: "Yes. Make it in advance, keep the link and send it yourself on WhatsApp or by text the moment Eid is announced. Your link is also in your receipt email, so it's easy to find on the day.",
+        },
+        {
+          q: "Can I write it in Urdu, Arabic or Bengali?",
+          a: "Yes. Type your words in any language and they'll show on the card just as you wrote them. If you answer our questions in your language, we'll write the card in it too. The buttons on the card stay in English.",
+        },
+        {
+          q: "Can I send it to family abroad?",
+          a: "Yes. It's a link, so it reaches anyone, anywhere, straight away and with no postage. One card can be shared in the family group, or you can make one for each person with their own name on it.",
+        },
+      ],
+    },
+    anniversary: {
+      title: "Anniversary e-cards with your story and photos · Envelette",
+      description: "Tell your story moment by moment with an interactive anniversary e-card: your photos, a quiz about your firsts, love coupons and a love letter.",
+      heading: "Interactive **anniversary** e-cards",
+      aboutTitle: "Your story so far, in a card",
+      about: [
+        "An anniversary e-card can hold more than a paper one. Tell your story moment by moment, from the day you met to today, add your favourite photos, set a quiz about your firsts or give them a book of love coupons. Then finish with a letter that writes itself out as they watch.",
+        "There's something for every year: understated and elegant for a milestone, cute and a little cheesy for a first anniversary, and one made for a computer where they type a secret password to unlock a wall of your photos. Change any word, and play it through before you pay.",
+      ],
+      writeTitle: "What to write in an anniversary card",
+      ideas: [
+        { who: "First anniversary", text: "One year down, and somehow you're even better than I thought. Thank you for the best year of my life. Here's to all the rest." },
+        { who: "For your husband or wife", text: "Happy anniversary. After all these years, you're still the one I want to tell everything to first. I'd still choose you, every time." },
+        { who: "For a big anniversary", text: "Twenty-five years, two houses, one very spoilt dog and a lot of laughing. Happy anniversary to my best friend." },
+        { who: "Something funny", text: "Happy anniversary to the only person who'd put up with me this long. Your prize is another year of me. Congratulations?" },
+        { who: "For your parents", text: "Happy anniversary, Mum and Dad. Thank you for showing us what a lifetime of love looks like. We're so proud of you both." },
+        { who: "Long distance", text: "Another year of loving you across the miles, and every one of them is worth it. Happy anniversary, and see you very soon." },
+      ],
+      faqTitle: "Anniversary e-card questions",
+      faqs: [
+        {
+          q: "Can I tell our story with dates and photos?",
+          a: "Yes. The timeline screen shows your moments one at a time, each with its own date and a few words, and you can add up to 6 photos with captions. If a design doesn't have a timeline, you can add one.",
+        },
+        { q: "What are love coupons?", a: "A book of coupons they tap to redeem: breakfast in bed, a foot rub, you pick the film. You write your own, so they can be as sweet or as cheeky as you like." },
+        { q: "Can I send it so it arrives on our anniversary?", a: "Yes. Choose to have us email it, pick the date and it arrives at 9am your time. You can set it up to {days} days ahead." },
+        { q: "Can they keep it?", a: "Yes. The link keeps working, so they can open it again whenever they like, and there's a \"Play it again\" button at the end." },
+      ],
+    },
+    sorry: {
+      title: "Sorry e-cards they can't say no to · Envelette",
+      description: "Say sorry with an interactive e-card: a No button that runs away, a hug they press and hold, and coupons to make it up to them. Funny or sincere.",
+      heading: "Interactive **sorry** e-cards",
+      aboutTitle: "An apology that's hard to ignore",
+      about: [
+        "Sometimes sorry is easier to show than to say. A sorry e-card can be light-hearted, with a \"Will you forgive me?\" where the No button runs away and coupons to make it up to them, or completely sincere, with honest words and a few happier memories. You choose the tone, and every word is yours to change.",
+        "It arrives the moment you send it, so you're not waiting days for the post to do the talking. Send the link on WhatsApp or by text, or have us email it, and they can open it in their own time on any phone or computer.",
+      ],
+      writeTitle: "What to write in a sorry card",
+      ideas: [
+        { who: "For a partner", text: "I'm sorry. I was wrong, and I hate that I upset you. You matter more to me than being right, and I'll do better." },
+        { who: "For small crimes", text: "I'm sorry I ate your leftovers. In my defence, they were delicious. Please accept this card, and a fresh portion, as a peace offering." },
+        { who: "For a friend", text: "I've been a rubbish friend lately and I'm sorry. I miss you. Can I take you for a coffee and say it properly?" },
+        { who: "For family", text: "I'm sorry for what I said. I didn't mean it, and I've felt awful ever since. I love you, and I hope we can talk soon." },
+        { who: "For forgetting a date", text: "I forgot, and there's no good excuse. I'm sorry. Let me make it up to you, starting with dinner: my treat, your choice." },
+        { who: "Short and simple", text: "No excuses, just sorry. I hope you can forgive me." },
+      ],
+      faqTitle: "Sorry card questions",
+      faqs: [
+        {
+          q: "Can it be serious rather than jokey?",
+          a: "Yes. [I'm Really Sorry](/cards/im-really-sorry) is a sincere design with no jokes, just your words and a few photos. You can also change the words on any design, so a playful one can become heartfelt and the other way round.",
+        },
+        {
+          q: "Can they say no?",
+          a: "On the playful designs, the No button runs away, so forgiveness is the only option (on the card, at least). If that feels too cheeky for what happened, choose a design without a question.",
+        },
+        { q: "Will they know it's from me?", a: "Yes. Your name is on the envelope and in the card. If we email it for you, the email says it's from you, with a button to open it." },
+        { q: "Is it private?", a: "Yes. Only people with the link can open it, and cards are never listed or searchable, so what you say stays between you." },
+      ],
+    },
+    thanks: {
+      title: "Thank-you e-cards for teachers, nurses and friends · Envelette",
+      description: "Say thank you with an interactive e-card: they water a flower until it blooms, see your photos and read your message. For teachers, nurses, neighbours and friends.",
+      heading: "Interactive **thank-you** e-cards",
+      aboutTitle: "Thank you, said properly",
+      about: [
+        "A thank-you e-card is a lovely way to tell someone they made a difference. They water a little plant until it blooms, flick through a gallery of photos or play a memory game, then read your message, finishing in confetti or petals. It works just as well for a teacher at the end of term as for a neighbour who fed the cat.",
+        "For a group thank-you, Gallery of Thanks has room for up to 6 photos: one card from the whole class, ward or team. Send it as a link in the group chat, or have us email it for you on the day you choose.",
+      ],
+      writeTitle: "What to write in a thank-you card",
+      ideas: [
+        { who: "For a teacher", text: "Thank you for a brilliant year. You made learning fun, believed in our little one and never ran out of patience. We'll miss you!" },
+        { who: "For a nurse or carer", text: "Thank you for your kindness, your patience and your care when we needed it most. You made a hard time so much easier, and we'll never forget it." },
+        { who: "For a neighbour", text: "Thank you for keeping an eye on the house, taking in the parcels and feeding the cat. We're lucky to live next door to you." },
+        { who: "For a friend", text: "Thank you for turning up when it mattered. I don't say it enough, but I'm so grateful for you." },
+        { who: "For a colleague", text: "Thank you for all your help with this. I couldn't have done it without you, and the biscuits are on me next week." },
+        { who: "For a host", text: "Thank you for having us. The food, the company and the late-night chats were exactly what we needed. Next time, it's our turn." },
+      ],
+      faqTitle: "Thank-you card questions",
+      faqs: [
+        {
+          q: "Can a whole class or team send one card?",
+          a: "Yes. One person makes it, and it can be from everyone: put \"Everyone in Year 6\" in the From line, add group photos and write messages from the whole group. Then share the link or have us email it.",
+        },
+        {
+          q: "Is it a good thank-you for a teacher?",
+          a: "Teachers get a lot of mugs. A card they can play, with photos from the year and words from your child, is something different that they can keep and open again. They don't need to download anything.",
+        },
+        {
+          q: "Can you email it to them?",
+          a: "Yes. Give us their email address in your basket and we'll send it with a button to open it, straight away or at 9am your time on a day you pick, up to {days} days ahead.",
+        },
+        { q: "How much does a thank-you e-card cost?", a: "{price} per card, paid once, with no subscription. Less than a box of chocolates, and it won't melt." },
+      ],
+    },
+    congrats: {
+      title: "Congratulations e-cards for big wins · Envelette",
+      description: "Congratulations e-cards for new jobs, exams, graduations and promotions: pop the balloons, pull the jackpot and tell them just how proud you are.",
+      heading: "Interactive **congrats** e-cards",
+      aboutTitle: "For big wins, and all the others",
+      about: [
+        "New job, exam results, a graduation, a promotion or finally passing their driving test: a congratulations e-card lets them celebrate properly. They pop the balloons, pull a slot machine for the jackpot or take a (very easy) genius test, then try to rate how proud you are on a slider that only goes up.",
+        "It takes a few minutes to make and you get the link as soon as you've paid, so it can be with them while the news is still fresh. Add photos of the big day, change every word, and play it through before you pay.",
+      ],
+      writeTitle: "What to write in a congratulations card",
+      ideas: [
+        { who: "New job", text: "Congratulations on the new job! They're lucky to have you. Go and show them how it's done (and find out where the good biscuits are)." },
+        { who: "Exam results", text: "You worked so hard for this and it shows. Congratulations on your results, we're all so proud of you." },
+        { who: "Graduation", text: "Congratulations, graduate! All those late nights paid off. We can't wait to see what you do next." },
+        { who: "Promotion", text: "Congratulations on the promotion! Nobody deserves it more. Drinks are on you, obviously." },
+        { who: "Driving test", text: "You passed! Congratulations. The roads will never be the same. Please don't ask to borrow the car just yet." },
+        { who: "From the family", text: "Whatever you do next, we'll be cheering you on. We're so proud of you. Congratulations, from all of us." },
+      ],
+      faqTitle: "Congratulations e-card questions",
+      faqs: [
+        {
+          q: "Which occasions are these for?",
+          a: "Anything worth celebrating: new jobs, promotions, exams, graduations, driving tests and big wins of every kind. You can change every word, so the card says exactly what they achieved.",
+        },
+        { q: "Can I add photos of the big day?", a: "Yes, up to 6, each with a caption. If a design has no photos screen, you can add one at no extra cost." },
+        { q: "How quickly can I send it?", a: "Straight away. It takes a few minutes to make, and you get the link as soon as you've paid. Send it on WhatsApp or by text, or have us email it." },
+        { q: "Do they need an app to open it?", a: "No. It opens in their web browser on any phone, tablet or computer, and they don't need an account either." },
+      ],
+    },
+    halloween: {
+      title: "Halloween e-cards: trick or treat, ghosts and sweets · Envelette",
+      description: "A Halloween e-card with a Trick button that runs away, ghosts to whack, sweets to catch and spooky music. Silly, only a little bit scary, sent as a link.",
+      heading: "Interactive **Halloween** e-cards",
+      aboutTitle: "Spooky, silly and only a little bit scary",
+      about: [
+        "\"Trick or treat?\" they're asked, and the Trick button runs away. Then they whack the ghosts, catch falling sweets and finish in a swirl of bats and ghosts, with spooky music playing. There's a cute one for your other half, too, and a haunted house for laptops where they type the password to get in.",
+        "A Halloween e-card is perfect for nieces, nephews and grandchildren who live too far away to trick-or-treat at your door. Send it as a link on the 31st, or have us email it at 9am your time.",
+      ],
+      writeTitle: "What to write in a Halloween card",
+      ideas: [
+        { who: "For children", text: "Happy Halloween! I hope you get loads of sweets and only get a little bit scared. Save me a chocolate!" },
+        { who: "For grandchildren", text: "Happy Halloween from Grandma and Grandad! We can't wait to see your costume. Don't eat all your sweets at once." },
+        { who: "For your other half", text: "Happy Halloween to my favourite boo. You're the only one I'd share my sweets with. Mostly." },
+        { who: "For friends", text: "Happy Halloween! Here's to too many sweets, a terrifying film and someone screaming when the doorbell goes. Probably you." },
+        { who: "Something spooky", text: "Something's watching you... It's us, wishing you a happy Halloween. Mwahaha." },
+        { who: "For the office", text: "Happy Halloween, team! The scariest thing this week is the inbox. Treats are in the kitchen." },
+      ],
+      faqTitle: "Halloween e-card questions",
+      faqs: [
+        {
+          q: "Is it too scary for children?",
+          a: "No. The Halloween cards are silly rather than frightening: cartoon ghosts, bats and sweets, with music that's more fun than fright. If it's too much, the sound can be turned off with the button in the corner.",
+        },
+        {
+          q: "Can I send it to the grandchildren?",
+          a: "Yes. It's a link, so it reaches them anywhere, straight away. Send it to a parent's phone on WhatsApp or have us email it, and they can play it together on a phone, tablet or computer.",
+        },
+        { q: "Does it have sound?", a: "Yes. Halloween designs play spooky music when they open the envelope, with sound effects for the games, and there's a mute button in the corner." },
+        { q: "When should I send it?", a: "Any time in the run-up, or on the day itself. Choose to have us email it, pick the 31st and it arrives at 9am your time, well before the trick-or-treating starts." },
+      ],
+    },
+    newyear: {
+      title: "Happy New Year e-cards with fireworks · Envelette",
+      description: "Wish them a happy New Year with an interactive e-card: midnight fireworks they launch themselves, a resolution wheel and a look back at your year together.",
+      heading: "Interactive **New Year** e-cards",
+      aboutTitle: "Fireworks at midnight, wherever they are",
+      about: [
+        "They launch their own midnight fireworks, spin a wheel for their New Year's resolution (it's rigged, so you choose) or shake their phone like a bottle of bubbly until the cork pops. For a quieter card, look back on your year month by month with your photos and a jar of the best bits.",
+        "A New Year e-card is ideal for friends and family in other time zones: send the link at your midnight or at theirs, or have us email it at 9am your time on New Year's Day. It reaches them instantly, wherever they're celebrating.",
+      ],
+      writeTitle: "What to write in a New Year card",
+      ideas: [
+        { who: "For family", text: "Happy New Year! Thank you for every laugh this year. Here's to health, happiness and more time together in the next one." },
+        { who: "For friends", text: "Happy New Year! Same plan as always: big resolutions on the 1st, cheese board by the 3rd. Wouldn't have it any other way." },
+        { who: "For a partner", text: "Another year with you, and it was my favourite yet. Happy New Year. I can't wait to see what the next one brings us." },
+        { who: "For someone far away", text: "We'll raise a glass to you at midnight. Happy New Year from all of us, and here's to seeing much more of you this year." },
+        { who: "For colleagues", text: "Happy New Year to the best team. Thank you for all your hard work, and here's to an even better year ahead." },
+        { who: "Looking back", text: "What a year. Thank you for being part of all the best bits. Happy New Year, and here's to the next twelve months." },
+      ],
+      faqTitle: "New Year e-card questions",
+      faqs: [
+        {
+          q: "Can it arrive at midnight?",
+          a: "We can email it at 9am your time on the day you choose, so New Year's Day works perfectly. For midnight on the dot, get the link after paying and send it yourself on WhatsApp or by text as the clock strikes twelve.",
+        },
+        {
+          q: "Can it look back on our year?",
+          a: "Yes. [Our Year in Review](/cards/year-in-review) shows your best moments month by month, with up to 6 photos and a jar of highlights. Every moment and caption is yours to write.",
+        },
+        {
+          q: "Is the resolution wheel really rigged?",
+          a: "If you want it to be. You can choose where the wheel lands, so their resolution can be \"more holidays\" or \"ring your mother more\". Or leave it to chance.",
+        },
+        { q: "Can I send one to everyone?", a: "Yes. Anyone with the link can open it, so one card can go in the group chat. Or make a few, add them to your basket and pay for them together." },
+      ],
+    },
+    mothersday: {
+      title: "Mother's Day e-cards: grow Mum a flower · Envelette",
+      description: "A Mother's Day e-card she'll keep opening: she grows a flower, reads your message, sees your photos and gets a coupon book to use all year.",
+      heading: "Interactive **Mother's Day** e-cards",
+      aboutTitle: "For the mum who has everything (except this)",
+      about: [
+        "She waters a little plant until it blooms, reads your message and sees your photos together. Or she gets a coupon book she can actually use all year, a hug she presses and holds to receive, or a quiz about who her favourite child is (with only one right answer).",
+        "A Mother's Day e-card is perfect if you live far away, or if Mum keeps everything on her phone. It's a link, so she just taps it, with nothing to download. Have us email it at 9am your time on Mothering Sunday, or send it on WhatsApp the night before so it's waiting when she wakes up.",
+      ],
+      writeTitle: "What to write in a Mother's Day card",
+      ideas: [
+        { who: "For Mum", text: "Happy Mother's Day, Mum. Thank you for everything you've done, everything you still do and every time you pretended my cooking was nice." },
+        { who: "Heartfelt", text: "Mum, you've been my biggest fan, my safe place and my best advice. I don't say it enough: thank you, and I love you." },
+        { who: "Something funny", text: "Happy Mother's Day to the woman who still knows when I'm fibbing. Just so you know, I'm your favourite. This card proves it." },
+        { who: "From far away", text: "I wish I could be there to bring you breakfast in bed. For now, here's a card, a big hug and a coupon for when I'm home." },
+        { who: "For a new mum", text: "Happy first Mother's Day! You're already an amazing mum. We hope today involves a nap, a hot cup of tea and lots of cuddles." },
+        { who: "For Gran", text: "Happy Mother's Day, Gran. Thank you for the cuddles, the stories and always keeping the biscuit tin full." },
+      ],
+      faqTitle: "Mother's Day e-card questions",
+      faqs: [
+        {
+          q: "Will Mum be able to open it?",
+          a: "Yes. She taps the link and it opens in her web browser on any phone, tablet or computer, with nothing to download and no account to make. Then she taps the envelope, the music starts and the card plays one screen at a time.",
+        },
+        {
+          q: "Can I make her a coupon book?",
+          a: "Yes. [Mum's Coupon Book](/cards/mums-coupon-book) has coupons she can cash in all year, and you write your own: a Sunday roast, a day out, the washing-up for a week. She taps each one to redeem it.",
+        },
+        {
+          q: "Is this for UK Mother's Day?",
+          a: "It works for any Mother's Day, wherever you are. The date we show is Mothering Sunday in the UK, but you can send your card whenever you like, or have us email it on the day you pick.",
+        },
+        { q: "Can I add old family photos?", a: "Yes, up to 6, each with a caption. Take a photo of an old print with your phone and add it like any other picture." },
+      ],
+    },
+    fathersday: {
+      title: "Father's Day e-cards with dad jokes · Envelette",
+      description: "A Father's Day e-card with a quiz of terrible dad jokes, your photos and a proper thank you. Made in minutes and sent to Dad as a link.",
+      heading: "Interactive **Father's Day** e-cards",
+      aboutTitle: "For Dad (and his jokes)",
+      about: [
+        "A quiz of terrible dad jokes he'll pretend not to love, a slider that won't let you call his jokes unfunny and three mystery presents that all turn out to be ties. If you'd rather go heartfelt, tell the story of growing up with Dad, moment by moment, with your photos and a proper thank you.",
+        "A Father's Day e-card works for dads who are always on their phone and dads who aren't: he taps the link and it opens, with nothing to download. Have us email it at 9am your time on the day, or send it on WhatsApp.",
+      ],
+      writeTitle: "What to write in a Father's Day card",
+      ideas: [
+        { who: "For Dad", text: "Happy Father's Day, Dad. Thank you for the lifts, the advice, the terrible jokes and for always being there. I love you." },
+        { who: "Something funny", text: "Happy Father's Day to the man who taught me everything I know. Not the jokes, though. Those are all yours." },
+        { who: "Heartfelt", text: "Dad, you showed me how to be kind, how to work hard and how to laugh at myself. I'm so proud to be your kid." },
+        { who: "From far away", text: "Wish I could be there to buy you a pint. Have one for me, and happy Father's Day from miles away." },
+        { who: "For a new dad", text: "Happy first Father's Day! You're a natural. We hope today involves a lie-in (we know it won't)." },
+        { who: "For Grandad", text: "Happy Father's Day, Grandad. Thank you for the stories, the sweets and the best advice. You're one of a kind." },
+      ],
+      faqTitle: "Father's Day e-card questions",
+      faqs: [
+        {
+          q: "Can I write my own dad jokes?",
+          a: "Please do. [The Dad Joke Quiz](/cards/dad-joke-quiz) comes with some truly awful ones, and you can swap any question or answer for his own favourites.",
+        },
+        {
+          q: "Is there a more sentimental one?",
+          a: "Yes. [Best Dad Ever](/cards/best-dad-ever) tells the story of growing up with Dad, moment by moment, with your photos and a heartfelt thank you. You can change every word.",
+        },
+        {
+          q: "Is this for UK Father's Day?",
+          a: "It works for any Father's Day. The date we show is the third Sunday in June, which is Father's Day in the UK, the US and many other countries, but you can send your card whenever you like.",
+        },
+        { q: "Will Dad need to download anything?", a: "No. He taps the link and it opens in his web browser on any phone, tablet or computer. No app and no account." },
+      ],
+    },
+    rakhi: {
+      title: "Raksha Bandhan e-cards for brothers and sisters · Envelette",
+      description: "Raksha Bandhan e-cards for your brother or sister: a promise they can't refuse, gift coupons they owe you and your photos growing up. Sent anywhere, instantly.",
+      heading: "Interactive **Raksha Bandhan** e-cards",
+      aboutTitle: "For your brother or sister, wherever they are",
+      about: [
+        "A Raksha Bandhan e-card full of the things siblings do best: a promise where \"No\" isn't an option, a book of rakhi gifts they owe you, a quiz to settle who Mum loves most and a slot machine for your rakhi present. Add photos of the two of you growing up and finish with a shower of sparkles.",
+        "If you can't tie a rakhi in person this year, a digital card gets your love there on the day, wherever they live. Send the link on WhatsApp, share it in the family group or have us email it at 9am your time.",
+      ],
+      writeTitle: "What to write in a Raksha Bandhan card",
+      ideas: [
+        { who: "For a brother", text: "Happy Raksha Bandhan, bhaiya. Thank you for always looking out for me, even when I drove you mad. Now, about my gift..." },
+        { who: "For a sister", text: "Happy Rakhi, didi. You've been my protector, my partner in crime and my best friend. I promise to always be there for you." },
+        { who: "From far away", text: "I can't tie your rakhi this year, so this card will have to do. Consider it tied, with all my love. Happy Raksha Bandhan." },
+        { who: "Something funny", text: "Happy Raksha Bandhan! The rakhi's tied, so you now owe me a present. I accept cash, chocolate and compliments." },
+        { who: "For a younger brother", text: "To my little brother, who's somehow taller than me now: happy Rakhi. I'll always have your back, even if I have to look up to do it." },
+        { who: "Heartfelt", text: "Thank you for every fight, every secret and every time you took my side. Happy Raksha Bandhan. I'm so lucky you're mine." },
+      ],
+      faqTitle: "Raksha Bandhan e-card questions",
+      faqs: [
+        {
+          q: "Can I send a rakhi card to my brother abroad?",
+          a: "Yes. It's sent as a link, so it reaches them anywhere in the world the moment you send it, with no postage. It costs {price}, and you can pay in your own currency.",
+        },
+        { q: "Is it for brothers or sisters?", a: "Both. The Raksha Bandhan cards work for brothers, sisters and cousins, and you can change every word to fit whoever you're sending it to." },
+        {
+          q: "Can I tell them which gift I want?",
+          a: "That's what [The Rakhi Promise](/cards/rakhi-promise) is for: a book of rakhi gift coupons they owe you, which you write yourself. [Sibling Rivalry](/cards/sibling-rivalry) has a slot machine that lands on your rakhi present.",
+        },
+        { q: "Can the rest of the family see it?", a: "If you like. Anyone with the link can open it, so you can share it in the family group as well as sending it to them." },
+      ],
+    },
+    holi: {
+      title: "Happy Holi e-cards: throw colours, no stains · Envelette",
+      description: "Send Holi wishes with an interactive e-card: they splash colour across the screen with a finger, spin for their colour and see your photos. No stains.",
+      heading: "Interactive **Holi** e-cards",
+      aboutTitle: "All the colour, none of the stains",
+      about: [
+        "They splash colour all over the screen with a finger, spin a wheel to find out their colour and try to say no to Holi (the button runs away). Then come your Holi photos and wishes, finishing in an explosion of colour.",
+        "A Holi e-card is the next best thing to being there, for family in India or friends who can't make the party. Send the link on WhatsApp the moment the colours start, or have us email it at 9am your time on the day.",
+      ],
+      writeTitle: "What to write in a Holi card",
+      ideas: [
+        { who: "For family", text: "Happy Holi! Wishing you a day full of colour, laughter, gujiya and absolutely no white clothes." },
+        { who: "For friends", text: "Happy Holi! I'd throw a bucket of colour at you if I could, so this card will have to do. Bura na mano, Holi hai!" },
+        { who: "From far away", text: "Wish I was there to cover you in colour. Happy Holi from all of us, and have a brilliant day." },
+        { who: "For a partner", text: "You make every day more colourful. Happy Holi, my love." },
+        { who: "For colleagues", text: "Wishing you and your family a happy and colourful Holi. Enjoy the celebrations!" },
+        { who: "For elders", text: "Wishing you a joyful Holi full of colour, good health and happiness. Sending love and respect from all of us." },
+      ],
+      faqTitle: "Holi e-card questions",
+      faqs: [
+        {
+          q: "How does the colour game work?",
+          a: "They splash colour all over the screen with a finger, or with the mouse on a computer. It's best on a phone, and there's nothing to clean up afterwards.",
+        },
+        {
+          q: "Can I send it to family in India?",
+          a: "Yes. It's a link, so it reaches them instantly, anywhere, with no postage. Send it on WhatsApp or by email, and it opens in their browser with nothing to download.",
+        },
+        { q: "Can I add our Holi photos?", a: "Yes, up to 6, each with a caption. Last year's colourful photos are perfect." },
+        { q: "How much is a Holi e-card?", a: "{price} per card, paid once. You can play it right through before you pay, so you'll know exactly what they'll see." },
+      ],
+    },
+    newbaby: {
+      title: "New baby e-cards and scratch-to-reveal announcements · Envelette",
+      description: "Welcome a new baby with a lullaby e-card, or share big news with a scratch card they reveal with a finger: a pregnancy announcement or a gender reveal.",
+      heading: "Interactive **new baby** e-cards",
+      aboutTitle: "Welcome the little one, or share the big news",
+      about: [
+        "For new parents, there's a soft lullaby, wishes for the baby pulled one by one from a jar and a warm welcome message. For parents-to-be, there are scratch cards: a pregnancy announcement they scratch off with a finger, or a gender reveal where they guess first and then scratch to find out.",
+        "Big news travels fast as a digital card. Grandparents-to-be, aunties and friends abroad all find out the moment you send it, and they can open it again whenever they like. Send one to each person, or share one link in the family group.",
+      ],
+      writeTitle: "What to write in a new baby card",
+      ideas: [
+        { who: "For new parents", text: "Congratulations on your beautiful new arrival! Wishing you all the love in the world, and at least a few hours' sleep." },
+        { who: "Welcome to the world", text: "Welcome to the world, little one! You're already so loved. Congratulations to the proud new parents." },
+        { who: "From grandparents", text: "Our hearts are full. Welcome to the family, little one. We can't wait for all the cuddles (and the spoiling)." },
+        { who: "Something funny", text: "Congratulations! Your days of lie-ins are officially over, but trust us, it's worth it." },
+        { who: "Announcing a pregnancy", text: "We have some news... We're having a baby! It's due in the spring, and we couldn't wait to tell you." },
+        { who: "For a gender reveal", text: "Pink or blue? Make your guess, then scratch to find out. We're so excited to share this with you." },
+      ],
+      faqTitle: "New baby e-card questions",
+      faqs: [
+        {
+          q: "How does scratch to reveal work?",
+          a: "A silver panel covers your news, and they scratch it away with a finger, just like a scratch card. It works with a mouse on a computer too, but it's best on a phone.",
+        },
+        {
+          q: "Can I announce our pregnancy to the grandparents?",
+          a: "Yes, that's what [We Have Big News](/cards/big-news) is for. They answer a question, scratch off the panel and find out. You can change every word, so it says exactly what you want.",
+        },
+        {
+          q: "Can I keep it secret until the day?",
+          a: "Yes. Make it now and have us email it at 9am your time on the day you choose, up to {days} days ahead. Or keep the link and send it yourself when you're ready.",
+        },
+        { q: "Can I add a scan photo or baby photos?", a: "Yes, up to 6 photos, each with a caption. They're resized on your phone before upload, and the hidden location data is removed." },
+      ],
+    },
+    wedding: {
+      title: "Wedding and proposal e-cards · Envelette",
+      description: "Interactive wedding e-cards: propose with a No button that runs away, ask your bridesmaids, or toast the happy couple with photos and confetti.",
+      heading: "Interactive **wedding** e-cards",
+      aboutTitle: "From \"Will you?\" to \"I do\"",
+      about: [
+        "Propose with your story so far, your photos and then the question, with a No button that runs away. Ask your best friend to be a bridesmaid, with a book of bridesmaid perks to sweeten the deal. Or, as a guest, toast the happy couple with their photos, a quiz about the big day and a shower of confetti.",
+        "A wedding e-card is perfect when you can't be there, or when the present is off the list and you want your words to arrive on the day. Have us email it at 9am your time on the wedding morning, or send the link to the couple yourself.",
+      ],
+      writeTitle: "What to write in a wedding card",
+      ideas: [
+        { who: "For the happy couple", text: "Congratulations on your wedding! Wishing you a lifetime of love, laughter and someone else doing the washing-up." },
+        { who: "Heartfelt", text: "Watching you two together is a joy. May your marriage be full of adventure, kindness and the kind of love that grows every year." },
+        { who: "If you can't be there", text: "We're so sorry to miss your big day, but we'll be raising a glass to you from here. Congratulations to you both." },
+        { who: "Asking a bridesmaid", text: "You've been by my side through everything, so it had to be you. Will you be my bridesmaid? (The No button doesn't work, sorry.)" },
+        { who: "A proposal", text: "From our first date to today, every moment has led here. I love you more than I can say. Will you marry me?" },
+        { who: "From family", text: "We're so proud of you both. Welcome to the family, and congratulations on a beautiful day." },
+      ],
+      faqTitle: "Wedding e-card questions",
+      faqs: [
+        {
+          q: "Can I propose with a card?",
+          a: "Yes. [Will You Marry Me?](/cards/will-you-marry-me) tells your story moment by moment, shows your photos and then asks the question. The No button runs away, so there's only one answer. Ring not included.",
+        },
+        {
+          q: "Can I send one if I can't make the wedding?",
+          a: "Of course. [To the Happy Couple](/cards/to-the-happy-couple) has their photos, a quiz about the big day and a toast in confetti. Have us email it at 9am your time on the wedding day, so it's there with all the other cards.",
+        },
+        {
+          q: "Can I ask my bridesmaids with it?",
+          a: "Yes. [Will You Be My Bridesmaid?](/cards/be-my-bridesmaid) asks the question (No runs away) and comes with a book of bridesmaid perks you write yourself. Make one for each bridesmaid, with her own name on the envelope.",
+        },
+        { q: "Can I use our wedding photos?", a: "Yes, up to 6, each with a caption. They're resized on your phone before upload, which also removes hidden location data." },
+      ],
+    },
+    getwell: {
+      title: "Get well soon e-cards with a hug they can hold · Envelette",
+      description: "A get well soon e-card with a hug they press and hold, prescriptions for naps and ice cream, and bubble wrap to pop. Cheers up anyone stuck on the sofa.",
+      heading: "Interactive **get well soon** e-cards",
+      aboutTitle: "A little cheer for the sofa",
+      about: [
+        "A hug they press and hold to receive, a prescription pad from \"Dr You\" with orders for naps and ice cream, and a sheet of bubble wrap to pop while they're stuck in bed. Then a warm message and a gentle finish of floating bubbles.",
+        "A get well soon e-card arrives straight away, which matters when someone's poorly. They can open it in bed on their phone, with nothing to download, and play it again whenever they need cheering up.",
+      ],
+      writeTitle: "What to write in a get well soon card",
+      ideas: [
+        { who: "For a friend", text: "Sorry to hear you're under the weather. Doctor's orders: rest, tea, terrible telly and no checking work emails. Get well soon!" },
+        { who: "After an operation", text: "Thinking of you and hoping you feel a little better every day. Take it slowly, and shout if you need anything at all." },
+        { who: "For family", text: "Sending you the biggest hug and lots of love. We miss you being up and about, so hurry up and get better (but not too fast)." },
+        { who: "For a colleague", text: "Get well soon from all of us. The office is far too quiet without you. Take all the time you need." },
+        { who: "Something funny", text: "Heard you're poorly. I'd bring soup, but you've tasted my cooking. Have this card instead. Get well soon!" },
+        { who: "For a child", text: "Get well soon, superstar! Lots of rest, lots of cuddles and maybe some ice cream. We love you." },
+      ],
+      faqTitle: "Get well soon card questions",
+      faqs: [
+        {
+          q: "Is it right for someone who's quite unwell?",
+          a: "Yes. [Get Well Soon](/cards/get-well-soon) is gentle and warm, with a hug they press and hold and a kind message. You can change every word, so it's right for them, whether it's a cold or something more serious.",
+        },
+        {
+          q: "Can they open it in hospital?",
+          a: "If they have their phone and an internet connection, yes. It opens in the web browser with nothing to download, and there's a mute button for quiet wards.",
+        },
+        { q: "Can I send it straight away?", a: "Yes. It takes a few minutes to make, and you get the link as soon as you've paid. Send it on WhatsApp or by text, or we can email it for you." },
+        { q: "How much is it?", a: "{price} per card, paid once. Cheaper than a bunch of flowers, and it won't wilt." },
+      ],
+    },
+    missyou: {
+      title: "Miss you e-cards for long distance · Envelette",
+      description: "Miss you e-cards for long distance: a hug they press and hold, a jar of things you miss about them and coupons for when you're together again.",
+      heading: "Interactive **miss you** e-cards",
+      aboutTitle: "For when the miles feel long",
+      about: [
+        "For long distance of every kind: a partner on the other side of the world, a child away at university or a best friend who moved away. They press and hold to receive a hug from you, pull notes from a jar of things you miss about them and see your photos together, or count the days on a slider that only goes up.",
+        "Because it's an e-card, it gets there the moment you send it, whatever the time difference. Send it on WhatsApp, by text or by email, and they can open it again whenever they're missing you.",
+      ],
+      writeTitle: "What to write in a miss you card",
+      ideas: [
+        { who: "For a partner", text: "The flat is far too quiet without you. Counting down the days until I can hug you properly. I miss you so much." },
+        { who: "For a child at university", text: "The house is very tidy and very quiet. We miss you loads. Eat a vegetable, ring your mum and come home soon." },
+        { who: "For a best friend", text: "Nobody else gets my jokes. Come back, or at least ring me more. Miss you, always." },
+        { who: "For family abroad", text: "Every time something good happens, you're the first person I want to tell. Missing you from here, and sending all our love." },
+        { who: "For grandparents", text: "We miss you lots and can't wait to see you again. Here's a big hug to keep until we do." },
+        { who: "Short and sweet", text: "Just thinking of you. That's all. Miss you." },
+      ],
+      faqTitle: "Miss you card questions",
+      faqs: [
+        {
+          q: "How does the hug work?",
+          a: "They press and hold their finger on the screen, or the mouse button on a computer, to receive your hug. It's a small, warm moment from far away.",
+        },
+        {
+          q: "Does it work across time zones?",
+          a: "Yes. It's a link, so it reaches them the moment you send it, wherever they are. If we email it on a day you choose, it arrives at 9am your time, so pick a day that suits their morning too.",
+        },
+        {
+          q: "Can I write what we'll do when we're together again?",
+          a: "Yes. [Counting the Days](/cards/counting-the-days) comes with coupons for everything you'll do when you're together again, and you write your own: the first takeaway, the long walk, the lie-in.",
+        },
+        { q: "Can they keep it?", a: "Yes. Cards stay at their link, so they can open it again whenever they miss you. There's a \"Play it again\" button at the end, too." },
+      ],
+    },
+    friendship: {
+      title: "Best friend e-cards with a bestie quiz · Envelette",
+      description: "Best friend e-cards with a bestie quiz, friendship coupons and a gallery of your most iconic photos together. For your favourite person to text.",
+      heading: "Interactive **best friend** e-cards",
+      aboutTitle: "For your favourite person to text",
+      about: [
+        "A bestie quiz to prove how well they know you, a slider rating what a good friend you are (it only goes up), a book of best-friend coupons for 2am chats and emergency snacks, and a gallery of your most iconic photos together. Silly, sweet, or both.",
+        "Send a best friend e-card for a birthday, a hard week or no reason at all. It arrives as a link on WhatsApp or by text, opens in their browser and can be played again every time they need reminding how much you love them.",
+      ],
+      writeTitle: "What to write in a best friend card",
+      ideas: [
+        { who: "Just because", text: "No reason, I just wanted to say you're the best. Thank you for being my person." },
+        { who: "Something funny", text: "You know far too much. That's why we have to stay friends forever." },
+        { who: "Heartfelt", text: "Through every bad haircut, break-up and brilliant night out, you've been there. I'm so lucky to have you." },
+        { who: "After a hard week", text: "I know things have been tough. I'm always here: for chats, for chocolate, for sitting in silence. Love you." },
+        { who: "Friends for years", text: "Twenty years of friendship and you still make me laugh until I cry. Here's to twenty more." },
+        { who: "For a new friend", text: "Funny how quickly you became one of my favourite people. I'm so glad we met." },
+      ],
+      faqTitle: "Best friend card questions",
+      faqs: [
+        {
+          q: "Can I write the quiz questions myself?",
+          a: "Yes. [The Bestie Quiz](/cards/bestie-quiz) comes with questions to get you started, and you can swap any of them for your own inside jokes. Only they'll get the answers right.",
+        },
+        { q: "Is it just for birthdays?", a: "Not at all. Send one for a birthday, to say thank you, to cheer them up or just because. Change every word to fit the moment." },
+        { q: "What are friendship coupons?", a: "A book of coupons they tap to redeem: a 2am chat, emergency snacks, a film night. You write your own, so they can be as daft as your friendship." },
+        { q: "Can I send it to a group of friends?", a: "Yes. Anyone with the link can open it, so you can share one card in the group chat. Or make one for each friend, with their own name on the envelope." },
+      ],
+    },
+    leaving: {
+      title: "Leaving e-cards for colleagues · Envelette",
+      description: "Leaving e-cards for a colleague who's moving on: everything the team will miss, your photos and good luck wishes. Easy to share in the team chat.",
+      heading: "Interactive **leaving** e-cards",
+      aboutTitle: "A proper send-off",
+      about: [
+        "When a colleague moves on, give them a card they'll actually remember: everything the team will miss about them, photos from work, a leaving-present slot machine and good luck wishes from everyone. There's a funny one, too, that flatly refuses to accept they're leaving.",
+        "A leaving e-card is easy for remote and hybrid teams: one person makes it, puts the team's name in the From line and shares the link in the team chat, so everyone can see it. Or have us email it to them on their last day, at 9am your time.",
+      ],
+      writeTitle: "What to write in a leaving card",
+      ideas: [
+        { who: "For a colleague", text: "It won't be the same without you. Thank you for the help, the laughs and the tea. Good luck with everything, and keep in touch!" },
+        { who: "For a manager", text: "Thank you for being such a brilliant manager. You backed us, taught us loads and made work a better place. You'll be missed." },
+        { who: "Something funny", text: "We've decided you're not allowed to leave. If you insist, at least tell us where you hid the good biscuits." },
+        { who: "For a retirement", text: "Congratulations on your retirement! Enjoy the lie-ins, the garden and never setting an alarm again. You've earned every minute." },
+        { who: "Moving abroad", text: "Good luck on your big adventure. Send photos, find the best coffee and remember us when you're famous." },
+        { who: "From the team", text: "From all of us: thank you for everything you've brought to the team. Wherever you go next, they're lucky to have you." },
+      ],
+      faqTitle: "Leaving card questions",
+      faqs: [
+        {
+          q: "Can the whole team sign it?",
+          a: "One person puts it together, and it's from everyone: write the team's name in the From line, add photos from work and messages from the team on the screens. Then share the link in the team chat.",
+        },
+        {
+          q: "Is it suitable for work?",
+          a: "Yes. [Sad to See You Go](/cards/sad-to-see-you-go) is warm and professional, and you can change every word to suit your workplace. [You Can't Leave](/cards/you-cant-leave) is for teams who like a laugh.",
+        },
+        { q: "Can it arrive on their last day?", a: "Yes. Choose to have us email it, pick their last day and it arrives at 9am your time. You can set it up to {days} days ahead." },
+        { q: "Do they need to download anything?", a: "No. It opens in the web browser on any phone or computer, so it works on a work laptop too." },
+      ],
+    },
+  },
 };
 
 // Same keys, any language. Arrays must keep the same number of items.
