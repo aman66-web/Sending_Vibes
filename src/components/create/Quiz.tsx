@@ -578,7 +578,11 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
             <button type="button" onClick={() => (at > 0 ? setIndex(at - 1) : onBack())} className="min-h-12 rounded-full border-2 border-line px-5 py-3 font-semibold hover:border-foreground/40">
               ← {q.back}
             </button>
-            <button disabled={!ready} className="ms-auto min-h-12 rounded-full bg-brand px-7 py-3.5 text-center font-brand text-lg font-semibold text-on-brand shadow-lg disabled:opacity-40">
+            <button
+              disabled={!ready}
+              // Waiting for photos is a message, so it's drawn readable rather than faded.
+              className={`ms-auto min-h-12 rounded-full px-7 py-3.5 text-center font-brand text-lg font-semibold shadow-lg ${waiting ? "bg-panel text-foreground ring-2 ring-line" : "bg-brand text-on-brand disabled:opacity-40"}`}
+            >
               {label}
             </button>
           </div>
