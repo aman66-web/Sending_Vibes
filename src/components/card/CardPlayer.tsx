@@ -7,6 +7,7 @@ import { FONT_VARS, cropStyle, screenLook } from "@/lib/screen-style";
 import { themes } from "@/lib/themes";
 import { Backdrop, BurstContext } from "./effects";
 import { BoxesScreen, CouponsScreen, ReasonsScreen, SliderScreen, TimelineScreen, WheelScreen } from "./more-screens";
+import { PersonalProvider } from "./personal";
 import {
   FinaleScreen,
   GameScreen,
@@ -192,6 +193,8 @@ export function CardPlayer({
 
       {/* Auto margins centre short screens; long ones (lots of coupons, say) scroll inside previews. */}
       <main className={`flex flex-1 flex-col px-5 py-8 ${preview && !grow ? "min-h-0 overflow-y-auto [scrollbar-width:none]" : ""}`}>
+        {/* Their names and photos, for the games to use (games job, see personal.tsx). */}
+        <PersonalProvider card={card}>
         <LabelsContext.Provider value={current.labels}>
         <BurstContext.Provider value={current.style?.burst}>
         <TuneContext.Provider value={current.style?.tune ?? NO_TUNE}>
@@ -230,6 +233,7 @@ export function CardPlayer({
         </TuneContext.Provider>
         </BurstContext.Provider>
         </LabelsContext.Provider>
+        </PersonalProvider>
       </main>
 
       {current?.style && <Decorations key={`${run}-${current.id}`} style={current.style} editing={editing} />}
