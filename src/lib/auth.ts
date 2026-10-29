@@ -40,6 +40,9 @@ export async function currentAccount(): Promise<Account | null> {
   };
 }
 
+// Holds what a Google sign-in started with until Google sends the visitor back.
+export const GOOGLE_COOKIE = "sv-google";
+
 let google: { on: boolean; checked: number } | undefined;
 
 // Whether Google sign-in is switched on in Supabase. Checked at most every few minutes.
