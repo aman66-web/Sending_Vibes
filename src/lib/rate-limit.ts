@@ -19,8 +19,11 @@ export function limiter(windowMs: number, max: number) {
   };
 }
 
+// Vercel sets x-vercel-forwarded-for and x-real-ip itself (and replaces any the visitor
+// sent), so those come first; x-forwarded-for is the fallback off Vercel.
 export function clientIp(headers: Headers) {
-  return headers.get("x-forwarded-for")?.split(",")[0].trim() || headers.get("x-real-ip") || "unknown";
+  const first = (name: string) => headers.get(name)?.split(",")[0].trim();
+  return first("x-vercel-forwarded-for") || first("x-real-ip") || first("x-forwarded-for") || "unknown";
 }
 
 // The visitor's address for limits. A phone or home router on IPv6 gets a whole block of
