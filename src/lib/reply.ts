@@ -12,24 +12,39 @@ export const REACTION_EMOJI: Record<Reaction, string> = { love: "❤️", laugh:
 export const NOTE_MAX = 300;
 export const REPLIES_PER_CARD = 3;
 
-// The card to send back. Some occasions go both ways (Diwali, Eid, Christmas); for the
-// rest, a thank-you is the natural answer.
-const SEND_BACK: Partial<Record<Occasion, Occasion>> = {
+// The card to send back. Some occasions go both ways (Diwali, Eid, Christmas); for
+// one-way ones, a thank-you is the natural answer. Every occasion is listed, so a new one
+// won't type-check until someone picks its answer.
+const SEND_BACK: Record<Occasion, Occasion> = {
+  valentine: "valentine",
   birthday: "thanks",
-  getwell: "thanks",
+  diwali: "diwali",
+  christmas: "christmas",
+  eid: "eid",
+  anniversary: "anniversary",
+  sorry: "friendship",
+  thanks: "friendship",
   congrats: "thanks",
-  newbaby: "thanks",
-  wedding: "thanks",
+  halloween: "halloween",
+  newyear: "newyear",
   mothersday: "thanks",
   fathersday: "thanks",
-  thanks: "friendship",
-  sorry: "friendship",
+  rakhi: "rakhi",
+  holi: "holi",
+  newbaby: "thanks",
+  wedding: "thanks",
+  getwell: "thanks",
+  missyou: "missyou",
+  friendship: "friendship",
   leaving: "missyou",
+  graduation: "thanks",
+  retirement: "thanks",
+  newhome: "thanks",
 };
 
 // The card maker with both names swapped and that occasion's designs showing
 // (app/[lang]/[cur]/create/page.tsx reads these).
 export function sendBackHref(card: { to: string; from: string; occasion: Occasion }) {
-  const params = new URLSearchParams({ occasion: SEND_BACK[card.occasion] ?? card.occasion, to: card.from, from: card.to });
+  const params = new URLSearchParams({ occasion: SEND_BACK[card.occasion], to: card.from, from: card.to });
   return `/create?${params}`;
 }
