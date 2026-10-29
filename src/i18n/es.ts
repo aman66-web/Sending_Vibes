@@ -32,6 +32,7 @@ export const es: Dict = {
     pricing: "Precios",
     help: "Ayuda y preguntas frecuentes",
     privacy: "Privacidad",
+    terms: "Condiciones",
     copyright: "© {year} Envelette. El botón de No sigue sin funcionar.",
   },
 
@@ -39,9 +40,11 @@ export const es: Dict = {
     worldwide: "Llega al instante por enlace, a cualquier parte del mundo.",
     worldwideShort: "Entrega al instante, en todo el mundo",
     currency: "Moneda",
+    commonCurrencies: "Las más usadas",
+    allCurrencies: "Todas las monedas",
     abroad: {
       q: "¿Puedo enviar una tarjeta al extranjero?",
-      a: "Sí. Las tarjetas llegan al instante como enlace, así que llegan a cualquiera, en cualquier parte del mundo, sin sellos ni esperas. Una tarjeta cuesta {gbp} en el Reino Unido y {usd} en el resto del mundo.",
+      a: "Sí. Las tarjetas llegan al instante como enlace, así que llegan a cualquiera, en cualquier parte del mundo, sin sellos ni esperas. Una tarjeta cuesta {price} y puedes pagar en tu propia moneda.",
     },
     perCard: "por tarjeta",
     designs: "{n} diseños",

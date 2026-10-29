@@ -20,6 +20,7 @@ import { ChatWidget } from "@/components/ChatWidget";
 import { I18nProvider } from "@/i18n/client";
 import { LANGUAGES } from "@/i18n/config";
 import { getI18n } from "@/i18n/server";
+import { COMMON_CURRENCIES } from "@/lib/pricing";
 import "../../globals.css";
 
 // The site itself: a soft serif for headings and a plain sans for everything else.
@@ -46,12 +47,10 @@ const arabic = Noto_Sans_Arabic({ subsets: ["arabic"], variable: "--font-arabic"
 
 const fonts = [brand, ui, display, hand, script, rounded, bold, typewriter, marker, spooky, devanagari, gurmukhi, gujarati, bengali, arabic].map((f) => f.variable).join(" ");
 
-// English pages are built ahead of time in both currencies; other languages are built on first visit and then kept.
+// English pages are built ahead of time in the most common currencies; other languages
+// and currencies are built on first visit and then kept.
 export function generateStaticParams() {
-  return [
-    { lang: "en", cur: "gbp" },
-    { lang: "en", cur: "usd" },
-  ];
+  return COMMON_CURRENCIES.map((cur) => ({ lang: "en", cur }));
 }
 
 export async function generateMetadata(): Promise<Metadata> {

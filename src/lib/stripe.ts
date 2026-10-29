@@ -31,7 +31,7 @@ const PRODUCTS: Record<Tier, { lookup: string; name: string; description: string
 export async function cardLineItem(s: Stripe, currency: Currency, tier: Tier, quantity: number): Promise<Stripe.Checkout.SessionCreateParams.LineItem> {
   const product = PRODUCTS[tier];
   const key = `${product.lookup}_${currency}`;
-  const amount = tierPrice(tier);
+  const amount = tierPrice(tier, currency);
   if (!priceIds.has(key)) {
     const found = await s.prices.list({ lookup_keys: [key], active: true, limit: 1 }).catch(() => null);
     const match = found?.data[0];

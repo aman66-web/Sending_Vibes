@@ -28,6 +28,7 @@ export const fr: Dict = {
     pricing: "Tarifs",
     help: "Aide et FAQ",
     privacy: "Confidentialité",
+    terms: "Conditions",
     copyright: "© {year} Envelette. Le bouton Non ne marche toujours pas.",
   },
 
@@ -35,9 +36,11 @@ export const fr: Dict = {
     worldwide: "Livrée instantanément par lien, partout dans le monde.",
     worldwideShort: "Livraison instantanée, partout dans le monde",
     currency: "Devise",
+    commonCurrencies: "Les plus courantes",
+    allCurrencies: "Toutes les devises",
     abroad: {
       q: "Puis-je envoyer une carte à l’étranger ?",
-      a: "Oui. Les cartes arrivent instantanément sous forme de lien : elles atteignent n’importe qui, partout dans le monde, sans timbre ni attente. Une carte coûte {gbp} au Royaume-Uni et {usd} partout ailleurs.",
+      a: "Oui. Les cartes arrivent instantanément sous forme de lien : elles atteignent n’importe qui, partout dans le monde, sans timbre ni attente. Une carte coûte {price}, et tu peux payer dans ta propre devise.",
     },
     perCard: "par carte",
     designs: "{n} modèles",

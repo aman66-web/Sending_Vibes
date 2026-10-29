@@ -65,7 +65,7 @@ export function Basket({ emailReady }: { emailReady: boolean }) {
     );
   }
 
-  const total = formatMoney(items.reduce((sum, i) => sum + tierPrice(i.tier ?? "premade"), 0), currency);
+  const total = formatMoney(items.reduce((sum, i) => sum + tierPrice(i.tier ?? "premade", currency), 0), currency);
 
   const pay = async () => {
     const problems: Record<string, string> = {};
@@ -122,7 +122,7 @@ export function Basket({ emailReady }: { emailReady: boolean }) {
                     {fmt(b.fromLine, { from: item.from })}
                     {template && <span className="text-ink/45"> · {template.name}</span>}
                   </p>
-                  <p className="mt-1 font-semibold">{formatMoney(tierPrice(item.tier ?? "premade"), currency)}</p>
+                  <p className="mt-1 font-semibold">{formatMoney(tierPrice(item.tier ?? "premade", currency), currency)}</p>
                 </div>
                 <button onClick={() => removeFromBasket([item.id])} className="self-start text-sm font-semibold text-ink/60 underline-offset-4 hover:text-ink hover:underline">
                   {b.remove}

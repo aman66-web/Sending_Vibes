@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/i18n/client";
 import { LANGUAGES, LIVE_LOCALES, LOCALES, LOCALE_COOKIE, type Locale } from "@/i18n/config";
-import { CURRENCIES, CURRENCY_COOKIE, type Currency } from "@/lib/pricing";
+import { COMMON_CURRENCIES, CURRENCIES, CURRENCY_COOKIE, currencySymbol, type Currency } from "@/lib/pricing";
 
 // Saves the choice and reloads the same page; the server then sends it in that language or currency.
 function save(cookie: string, value: string) {
@@ -17,7 +17,7 @@ function save(cookie: string, value: string) {
 // With only one language switched on, there's just the currency to choose.
 const PICK_LANGUAGE = LIVE_LOCALES.length > 1;
 
-// The globe button in the top corner: language, and pounds or dollars.
+// The globe button in the top corner: language, and currency.
 export function LanguagePicker() {
   const { locale, currency, t } = useI18n();
   const [open, setOpen] = useState(false);
@@ -44,6 +44,12 @@ export function LanguagePicker() {
     setOpen(false);
     if (next !== currency) save(CURRENCY_COOKIE, next);
   };
+  // Each currency's name in their language ("Australian dollar"), only once the menu is open,
+  // so the page as sent and as first drawn always match.
+  const names = open ? new Intl.DisplayNames([LANGUAGES[locale].tag, "en"], { type: "currency" }) : null;
+  const nameOf = (c: Currency) => names?.of(c.toUpperCase()) ?? c.toUpperCase();
+  // After the most common, the rest in alphabetical order by name.
+  const others = CURRENCIES.filter((c) => !COMMON_CURRENCIES.includes(c)).sort((a, b) => nameOf(a).localeCompare(nameOf(b), LANGUAGES[locale].tag));
 
   return (
     <div ref={box} className="relative">
@@ -58,10 +64,11 @@ export function LanguagePicker() {
           <circle cx="12" cy="12" r="9" />
           <path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z" />
         </svg>
-        <span className="uppercase">{PICK_LANGUAGE ? locale : currency === "gbp" ? "£" : "$"}</span>
+        <span className={PICK_LANGUAGE ? "uppercase" : ""}>{PICK_LANGUAGE ? locale : currencySymbol(currency)}</span>
       </button>
       {open && (
-        <div className="sheet absolute end-0 top-12 z-50 w-56 overflow-hidden p-1.5">
+        // On a phone it spans the screen under the header, so it never hangs off an edge.
+        <div className="sheet fixed inset-x-4 top-16 z-50 overflow-hidden p-1.5 sm:absolute sm:inset-x-auto sm:end-0 sm:top-12 sm:w-64">
           {PICK_LANGUAGE && (
             <ul role="listbox" aria-label={t.nav.language}>
               {LIVE_LOCALES.map((l) => (
@@ -84,18 +91,41 @@ export function LanguagePicker() {
           )}
           <div className={PICK_LANGUAGE ? "mt-1.5 border-t-2 border-dashed border-ink/15 px-2 pb-1 pt-2.5" : "px-2 pb-1 pt-1.5"}>
             <p className="text-xs font-bold text-ink/55">{t.common.currency}</p>
-            <div className="mt-1.5 grid grid-cols-2 gap-1.5" dir="ltr">
-              {CURRENCIES.map((c) => (
+            <p className="mt-2 text-[11px] font-bold uppercase tracking-wide text-ink/45">{t.common.commonCurrencies}</p>
+            <div className="mt-1.5 grid grid-cols-3 gap-1.5" dir="ltr">
+              {COMMON_CURRENCIES.map((c) => (
                 <button
                   key={c}
                   onClick={() => chooseCurrency(c)}
                   aria-pressed={c === currency}
+                  aria-label={`${nameOf(c)} (${c.toUpperCase()})`}
                   className={`rounded-full border-2 py-1.5 text-sm font-bold transition ${c === currency ? "border-ink bg-ink text-paper" : "border-ink/15 hover:border-ink"}`}
                 >
-                  {c === "gbp" ? "£ GBP" : "$ USD"}
+                  {currencySymbol(c)} {c.toUpperCase()}
                 </button>
               ))}
             </div>
+            <p className="mt-3 text-[11px] font-bold uppercase tracking-wide text-ink/45">{t.common.allCurrencies}</p>
+            {/* Scrolls on its own, so the menu stays on the screen. */}
+            <ul className="-mx-1 mt-1 max-h-60 overflow-y-auto overscroll-contain" aria-label={t.common.allCurrencies}>
+              {others.map((c) => (
+                <li key={c}>
+                  <button
+                    onClick={() => chooseCurrency(c)}
+                    aria-pressed={c === currency}
+                    className={`flex w-full items-center gap-2.5 rounded-xl px-2 py-2 text-start text-sm transition hover:bg-cream ${c === currency ? "bg-cream font-bold" : "font-semibold"}`}
+                  >
+                    <span className="w-11 shrink-0 text-center font-bold" dir="ltr">
+                      {currencySymbol(c)}
+                    </span>
+                    <span className="min-w-0 flex-1 truncate">{nameOf(c)}</span>
+                    <span className="shrink-0 text-xs text-ink/50" dir="ltr">
+                      {c === currency ? "✓" : c.toUpperCase()}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       )}

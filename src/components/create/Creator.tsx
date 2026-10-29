@@ -767,7 +767,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
                 {c.fullScreen}
               </button>
               <button ref={basketButton} onClick={() => publish()} disabled={saving} className="flex-[2] rounded-full bg-brand py-3.5 font-brand text-lg font-semibold text-white shadow-lg disabled:opacity-50 lg:w-full">
-                {saving ? c.adding : fmt(c.addToBasket, { price: formatMoney(tierPrice(cardTier(card)), currency) })}
+                {saving ? c.adding : fmt(c.addToBasket, { price: formatMoney(tierPrice(cardTier(card), currency), currency) })}
               </button>
             </div>
             {error && <p className="text-sm font-semibold text-red-600">{error}</p>}

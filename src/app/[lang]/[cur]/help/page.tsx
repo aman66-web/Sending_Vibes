@@ -21,8 +21,6 @@ export default async function HelpPage() {
     o: OCCASIONS.length,
     price: price("card", currency),
     aiPrice: price("custom", currency),
-    gbp: price("card", "gbp"),
-    usd: price("card", "usd"),
     days: MAX_SCHEDULE_DAYS,
   };
   // The "send abroad" answer sits with the basics.
