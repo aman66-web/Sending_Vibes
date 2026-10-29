@@ -45,7 +45,7 @@ export const LOOKS: Look[] = [
     body: "classic",
     ambient: "sparkles",
     stickers: ["🤍", "🕊️"],
-    suits: ["wedding", "anniversary", "thanks", "mothersday", "birthday", "eid", "diwali", "christmas", "newyear", "sorry", "getwell", "newbaby", "leaving", "congrats", "valentine"],
+    suits: ["wedding", "anniversary", "thanks", "mothersday", "birthday", "eid", "diwali", "christmas", "newyear", "sorry", "getwell", "newbaby", "leaving", "congrats", "valentine", "graduation", "retirement"],
     feels: ["elegant", "heartfelt", "blessings", "romantic", "gentle"],
   },
   {
@@ -62,7 +62,7 @@ export const LOOKS: Look[] = [
     pattern: "zigzag",
     ambient: "confetti",
     stickers: ["🎉", "🎈"],
-    suits: ["birthday", "congrats", "friendship", "rakhi", "holi", "newyear", "leaving", "fathersday", "thanks", "halloween"],
+    suits: ["birthday", "congrats", "friendship", "rakhi", "holi", "newyear", "leaving", "fathersday", "thanks", "halloween", "graduation", "retirement", "newhome"],
     feels: ["funny", "festive", "cheeky", "cute"],
   },
   {
@@ -79,7 +79,7 @@ export const LOOKS: Look[] = [
     pattern: "dots",
     ambient: "hearts",
     stickers: ["🧸", "💗"],
-    suits: ["sorry", "valentine", "newbaby", "friendship", "missyou", "birthday", "getwell", "mothersday", "rakhi", "holi", "eid"],
+    suits: ["sorry", "valentine", "newbaby", "friendship", "missyou", "birthday", "getwell", "mothersday", "rakhi", "holi", "eid", "newhome"],
     feels: ["cute", "gentle", "funny", "cheeky", "romantic"],
   },
   {
@@ -95,7 +95,7 @@ export const LOOKS: Look[] = [
     body: "modern",
     ambient: "petals",
     stickers: ["🌷", "🌿"],
-    suits: ["getwell", "mothersday", "thanks", "wedding", "newbaby", "eid", "sorry", "birthday", "friendship", "missyou", "holi"],
+    suits: ["getwell", "mothersday", "thanks", "wedding", "newbaby", "eid", "sorry", "birthday", "friendship", "missyou", "holi", "newhome"],
     feels: ["gentle", "heartfelt", "cute", "blessings"],
   },
   {
@@ -111,7 +111,7 @@ export const LOOKS: Look[] = [
     body: "modern",
     ambient: "stars",
     stickers: ["💫", "⭐"],
-    suits: ["missyou", "eid", "newyear", "diwali", "anniversary", "valentine", "christmas", "halloween", "leaving", "birthday"],
+    suits: ["missyou", "eid", "newyear", "diwali", "anniversary", "valentine", "christmas", "halloween", "leaving", "birthday", "retirement"],
     feels: ["romantic", "heartfelt", "nostalgic", "gentle", "elegant"],
   },
   {
@@ -144,7 +144,7 @@ export const LOOKS: Look[] = [
     ambient: "sparkles",
     burst: "fireworks",
     stickers: ["🥂", "✨"],
-    suits: ["newyear", "congrats", "wedding", "anniversary", "diwali", "birthday", "eid", "christmas", "leaving", "fathersday", "halloween"],
+    suits: ["newyear", "congrats", "wedding", "anniversary", "diwali", "birthday", "eid", "christmas", "leaving", "fathersday", "halloween", "graduation", "retirement"],
     feels: ["elegant", "festive"],
   },
   {
@@ -225,7 +225,7 @@ export const LOOKS: Look[] = [
     body: "modern",
     ambient: "bubbles",
     stickers: ["☁️", "💙"],
-    suits: ["newbaby", "getwell", "fathersday", "missyou", "sorry", "thanks", "birthday", "friendship", "mothersday", "eid"],
+    suits: ["newbaby", "getwell", "fathersday", "missyou", "sorry", "thanks", "birthday", "friendship", "mothersday", "eid", "newhome"],
     feels: ["gentle", "cute", "heartfelt"],
   },
   {
@@ -242,7 +242,7 @@ export const LOOKS: Look[] = [
     pattern: "grid",
     ambient: "balloons",
     stickers: ["✏️", "😜"],
-    suits: ["friendship", "birthday", "fathersday", "leaving", "sorry", "getwell", "valentine", "congrats", "halloween", "rakhi"],
+    suits: ["friendship", "birthday", "fathersday", "leaving", "sorry", "getwell", "valentine", "congrats", "halloween", "rakhi", "graduation", "retirement", "newhome"],
     feels: ["funny", "cheeky", "cute", "nostalgic"],
   },
   {
@@ -259,7 +259,7 @@ export const LOOKS: Look[] = [
     pattern: "stripes",
     ambient: "none",
     stickers: ["📮", "🕰️"],
-    suits: ["fathersday", "leaving", "anniversary", "missyou", "thanks", "christmas", "mothersday", "birthday"],
+    suits: ["fathersday", "leaving", "anniversary", "missyou", "thanks", "christmas", "mothersday", "birthday", "retirement"],
     feels: ["nostalgic", "heartfelt", "gentle"],
   },
   {
@@ -275,7 +275,7 @@ export const LOOKS: Look[] = [
     body: "modern",
     ambient: "none",
     stickers: ["🖤", "✉️"],
-    suits: ["leaving", "thanks", "congrats", "sorry", "getwell", "fathersday", "newbaby", "wedding", "birthday", "newyear"],
+    suits: ["leaving", "thanks", "congrats", "sorry", "getwell", "fathersday", "newbaby", "wedding", "birthday", "newyear", "graduation", "retirement"],
     feels: ["elegant", "heartfelt", "gentle"],
   },
   {
@@ -291,7 +291,7 @@ export const LOOKS: Look[] = [
     body: "modern",
     ambient: "colours",
     stickers: ["🌈", "🎨"],
-    suits: ["holi", "rakhi", "birthday", "friendship", "congrats", "newbaby", "diwali"],
+    suits: ["holi", "rakhi", "birthday", "friendship", "congrats", "newbaby", "diwali", "graduation", "newhome"],
     feels: ["festive", "funny", "cute", "cheeky"],
   },
   {
