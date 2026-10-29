@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { DEFAULT_LOCALE, LOCALE_COOKIE, fmt, isLive } from "@/i18n/config";
 import { DICTS } from "@/i18n/dictionaries";
-import { ALLOWANCE, allowanceLeft, spend, type Kind } from "@/lib/allowance";
+import { ALLOWANCE, claim, type Kind } from "@/lib/allowance";
 import { currentAccount, signInAvailable, type Account } from "@/lib/auth";
 import { briefSchema } from "@/lib/brief";
 import { cardSchema } from "@/lib/card";
@@ -84,13 +84,14 @@ export async function POST(req: NextRequest) {
   let left: number | undefined;
   if (account) {
     try {
-      const allowance = await allowanceLeft(account, kind);
-      if (allowance.left <= 0) {
-        const message = allowance.reason === "day" ? (kind === "card" ? errors.limitDayCards : errors.limitDayChanges) : kind === "card" ? errors.limitCards : errors.limitChanges;
-        return NextResponse.json({ error: fmt(message, { n: allowance.total, more: ALLOWANCE.perCardBought[kind] }), left: 0 }, { status: 429 });
+      // Checked and counted in one step, so two at once can't both get the last one.
+      const claimed = await claim(account, kind);
+      if (!claimed.ok) {
+        const message = claimed.reason === "day" ? (kind === "card" ? errors.limitDayCards : errors.limitDayChanges) : kind === "card" ? errors.limitCards : errors.limitChanges;
+        return NextResponse.json({ error: fmt(message, { n: claimed.total, more: ALLOWANCE.perCardBought[kind] }), left: 0 }, { status: 429 });
       }
-      refund = await spend(account, kind);
-      left = allowance.left - 1;
+      refund = claimed.refund;
+      left = claimed.left;
     } catch (e) {
       console.error("allowance check failed", e);
     }

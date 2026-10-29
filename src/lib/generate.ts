@@ -814,9 +814,6 @@ export async function generateCard(input: GenerateInput, { onProgress, onIdea, s
   // A change is quick work; a new card deserves more thought. Each keeps its own effort,
   // so each keeps its own cached prompt.
   const effort = plan.kind === "change" ? "low" : "medium";
-  // Lets the model hand over to another one if it can't write this card itself. If that's
-  // ever turned down, it's asked for once more without.
-  let fallbacks = true;
   let messages: Anthropic.Beta.Messages.BetaMessageParam[] = [{ role: "user", content: message }];
   // A valid card that wasn't quite what they asked for, kept in case asking again fails.
   let best: { card: CardData; note?: string; idea?: string } | undefined;
@@ -842,13 +839,12 @@ export async function generateCard(input: GenerateInput, { onProgress, onIdea, s
           output_config: { effort },
           system: [{ type: "text", text: SYSTEM, cache_control: { type: "ephemeral" } }],
           messages,
-          ...(fallbacks ? { betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" as const } : {}),
         },
         { signal: signal ? AbortSignal.any([signal, deadline]) : deadline, maxRetries: 1 },
       );
       let shown = "";
       onProgress?.([], []);
-      // Read from all the text so far, not one block: a handover to another model starts a new one.
+      // Read from all the text so far, not one block.
       stream.on("text", (delta) => {
         written += delta;
         if (!idea && !input.card) {
@@ -871,12 +867,6 @@ export async function generateCard(input: GenerateInput, { onProgress, onIdea, s
       reply = await stream.finalMessage();
     } catch (e) {
       log({ attempt, ms: Date.now() - began, error: e instanceof Anthropic.APIError ? (e.status ?? e.name) : e instanceof Error ? e.name : String(e) });
-      if (fallbacks && e instanceof Anthropic.BadRequestError) {
-        console.warn("generate: asking again without fallbacks", e.message);
-        fallbacks = false;
-        attempt--;
-        continue;
-      }
       if (signal?.aborted) throw new GenerateError("failed", "They stopped it");
       if (deadline.aborted) {
         if (best) return finish(best);
