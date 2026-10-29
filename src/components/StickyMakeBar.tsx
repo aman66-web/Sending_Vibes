@@ -16,9 +16,11 @@ export function StickyMakeBar({ href, label, watchId }: { href: string; label: s
 
   useEffect(() => {
     const target = document.getElementById(watchId);
-    // The header is sticky, so a button tucked under it counts as gone.
+    // The header is sticky, so a button tucked under it counts as gone. The area watched
+    // reaches far below the screen, so the button only counts as gone once it's above it:
+    // a jump straight past it (Back putting the page where it was) still counts.
     const top = new IntersectionObserver(([entry]) => setPast(!entry.isIntersecting && entry.boundingClientRect.top < 0), {
-      rootMargin: "-80px 0px 0px 0px",
+      rootMargin: "-80px 0px 100000px 0px",
     });
     if (target) top.observe(target);
     const inView = new Set<Element>();
