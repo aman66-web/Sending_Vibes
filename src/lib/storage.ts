@@ -116,7 +116,8 @@ export async function paidOrderFor(cardId: string): Promise<string | null> {
   if (usingSupabase()) {
     const db = adminSupabase();
     if (!db) return null;
-    const { data, error } = await db.from("orders").select("id").eq("status", "paid").contains("items", [{ cardId }]).order("paid_at").limit(1);
+    // Passed as JSON text: given an array, the client writes a Postgres array ({...}), not JSON.
+    const { data, error } = await db.from("orders").select("id").eq("status", "paid").contains("items", JSON.stringify([{ cardId }])).order("paid_at").limit(1);
     if (error) throw new Error(`Could not find the card's order: ${error.message}`);
     return (data?.[0]?.id as string | undefined) ?? null;
   }

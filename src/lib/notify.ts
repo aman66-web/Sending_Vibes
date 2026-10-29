@@ -68,7 +68,8 @@ export async function sendReplyEmail(order: Order, item: OrderItem, reply: { rea
   const t = words(order.locale);
   const emoji = REACTION_EMOJI[reply.reaction];
   const title = fmt(t.replyTitle[reply.reaction], { to: item.to });
-  const note = fmt(t.replyNote, { to: item.to });
+  // A card we emailed for them came with the buyer's address to reply to, so only say this for links.
+  const note = [fmt(t.replyNote, { to: item.to }), ...(item.delivery !== "email" ? [t.replyPrivate] : [])].join(" ");
   const said = reply.message
     ? `<p style="margin:0 0 6px;color:#5b5247">${esc(t.replySaid)}</p>
 <blockquote style="margin:0 0 22px;padding:14px 18px;background:#ffffff;border-left:4px solid #c23a27;border-radius:8px;font-family:Georgia,'Times New Roman',serif;font-size:18px;white-space:pre-line">${esc(reply.message)}</blockquote>`

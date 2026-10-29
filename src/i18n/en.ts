@@ -788,7 +788,7 @@ export const en = {
         paragraphs: [
           "Anyone with the card's link can open it, so only share it with the people you want to see it. Links are long random codes that can't realistically be guessed, and cards are never listed, searchable or shown anywhere else on the site. We also ask search engines not to index them.",
           "The first time a card is opened, we email the person who sent it to say so. We only keep the time, not who opened it or where.",
-          "If you reply to a card you were sent, we email the person who sent it the reaction you tapped and any words you added, and keep them with the card. You never see their email address.",
+          "If you reply to a card you were sent, we email the person who sent it the reaction you tapped and any words you added, and keep them with the card. The card itself never shows their email address.",
         ],
       },
       {
@@ -1785,7 +1785,8 @@ export const en = {
         party: "{to} thought your card was brilliant",
       },
       replySaid: "They added:",
-      replyNote: "{to} replied from the card itself. We never show them your email address.",
+      replyNote: "{to} replied from the card itself.",
+      replyPrivate: "We never show them your email address.",
     },
   },
 
