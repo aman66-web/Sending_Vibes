@@ -19,6 +19,18 @@ const PER_EMAIL = [
   { max: 12, per: DAY },
 ];
 
+// One inbox, however the address is written, for counting only (the code still goes to
+// the address as typed): name+anything@ is name@, and Gmail ignores dots and also
+// answers to googlemail.com.
+function inbox(email: string) {
+  const at = email.lastIndexOf("@");
+  let name = email.slice(0, at).toLowerCase().replace(/\+.*$/, "");
+  let domain = email.slice(at + 1).toLowerCase();
+  if (domain === "googlemail.com") domain = "gmail.com";
+  if (domain === "gmail.com") name = name.replace(/\./g, "");
+  return `${name}@${domain}`;
+}
+
 export async function POST(req: NextRequest) {
   const lang = req.cookies.get(LOCALE_COOKIE)?.value;
   const locale = isLive(lang) ? lang : DEFAULT_LOCALE;
@@ -32,7 +44,7 @@ export async function POST(req: NextRequest) {
   const parsed = bodySchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return fail(a.badEmail, 400);
   const { email } = parsed.data;
-  if (!(await allow("signin-ip", clientNetwork(req.headers), PER_ADDRESS)) || !(await allow("signin-email", email, PER_EMAIL))) return fail(a.tooMany, 429);
+  if (!(await allow("signin-ip", clientNetwork(req.headers), PER_ADDRESS)) || !(await allow("signin-email", inbox(email), PER_EMAIL))) return fail(a.tooMany, 429);
 
   try {
     const { data, error } = await admin.auth.admin.generateLink({ type: "magiclink", email });
