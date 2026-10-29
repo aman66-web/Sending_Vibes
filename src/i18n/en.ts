@@ -779,7 +779,7 @@ export const en = {
           "any photos you add",
           "the design, colours, music and effects you chose",
         ],
-        after: "To make a card you sign up with Google or your email address. We keep your email address (and your name, if Google shares it) so we can show you your cards. When you pay, Stripe passes us your email address so we can send your receipt and links. If you ask us to email a card, we keep the recipient's email address to send it. We never use any of these for marketing.",
+        after: "To make a card you sign up with Google or your email address. We keep your email address (and your name, if Google shares it) so we can show you your cards. When you pay, Stripe passes us your email address so we can send your receipt and links. If you ask us to email a card, we keep the recipient's email address to send it. That email shows your name, and if they reply to it, the reply comes straight to you, so they'll see your email address. We never use any of these for marketing.",
       },
       {
         title: "Who can see a card",

@@ -8,9 +8,11 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { LANGUAGES, fmt } from "@/i18n/config";
 import { getI18n } from "@/i18n/server";
+import { alertOwner } from "@/lib/alert";
 import { getTemplate } from "@/lib/catalog";
 import { cardStatus, sendsItself } from "@/lib/delivery";
 import { emailReady } from "@/lib/email";
+import { errorFields } from "@/lib/log";
 import { fulfilSession, type Fulfilment } from "@/lib/orders";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -33,6 +35,8 @@ export default async function ThanksPage({ searchParams }: Props) {
     result = session_id ? await fulfilSession(session_id) : null;
   } catch (e) {
     console.error("Could not finish order", e);
+    // The buyer may well have paid, so the owner hears about it straight away.
+    await alertOwner("Thank-you page couldn't check an order", errorFields(e));
     failed = true;
   }
 
