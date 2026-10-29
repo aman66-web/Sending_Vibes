@@ -871,7 +871,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
             </button>
           )}
           {/* On phones the help chat opens from here rather than floating over the page. */}
-          <button onClick={openChat} className="flex items-center gap-1.5 rounded-full border-2 border-foreground/80 px-3 py-1.5 text-sm font-bold lg:hidden">
+          <button onClick={openChat} className="flex min-h-11 items-center gap-1.5 rounded-full border-2 border-foreground/80 px-3 py-1.5 text-sm font-bold lg:hidden">
             <span aria-hidden>💬</span> {t.chat.help}
           </button>
         </div>
@@ -1259,7 +1259,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
             <EditableCard card={card} screenId={viewing} enabled={wordMode === "edit"} onChange={editWords} onScreen={editScreenById} onBegin={remember} pick={pick} stage={stageShown} onNewLook={(next) => change(() => next)} favourite={favourite} className="h-full">
               <CardPlayer card={card} preview sound editing={wordMode === "edit"} focusScreenId={selected} focusNonce={nudge} focusStage={focusStage} onScreenChange={setViewing} />
             </EditableCard>
-            <button onClick={() => setShowPreview(false)} className="absolute start-4 top-4 z-50 rounded-full bg-black/70 px-4 py-2 text-sm font-semibold text-white">
+            <button onClick={() => setShowPreview(false)} className="absolute start-4 top-4 z-50 min-h-11 rounded-full bg-black/70 px-4 py-2 text-sm font-semibold text-white">
               {c.closePreview}
             </button>
             {busy === "change" && (
@@ -1512,8 +1512,9 @@ function DeviceSwitch({ view, setView, compact = false }: { view: "phone" | "com
             aria-label={compact ? words.join(" ") : undefined}
             title={compact ? words.join(" ") : undefined}
             onClick={() => setView(v)}
-            // Compact, it's as tall as the mode switch beside it.
-            className={`rounded-full text-sm font-semibold transition ${compact ? "grid h-11 w-9 place-items-center text-lg leading-none" : "px-4 py-1.5"} ${view === v ? "bg-foreground text-background" : "opacity-75 hover:opacity-100"}`}
+            // Compact, it's as tall as the mode switch beside it, and narrow so they fit side by
+            // side on a small phone, with a finger-sized space around it that catches the tap too.
+            className={`rounded-full text-sm font-semibold transition ${compact ? "relative grid h-11 w-9 place-items-center text-lg leading-none before:absolute before:-inset-x-1 before:inset-y-0" : "px-4 py-1.5"} ${view === v ? "bg-foreground text-background" : "opacity-75 hover:opacity-100"}`}
           >
             {compact ? icon : label}
           </button>
