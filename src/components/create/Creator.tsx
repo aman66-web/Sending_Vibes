@@ -19,7 +19,7 @@ import { fmt } from "@/i18n/config";
 import { useI18n } from "@/i18n/client";
 import { SignIn, type SignedIn } from "@/components/SignIn";
 import { TwoWays } from "@/components/TwoWays";
-import { NO_ANSWERS, Quiz, briefFrom, quizPrompt, type Answers } from "./Quiz";
+import { NO_ANSWERS, Quiz, briefFrom, quizPrompt, withSuggestions, type Answers } from "./Quiz";
 import { Field } from "./ScreenEditor";
 import { openChat } from "@/components/open-chat";
 import { AtComputerSize, AtPhoneSize } from "./AtPhoneSize";
@@ -43,16 +43,17 @@ type Album = { photos: string[]; captions: string[] };
 // A new card being asked for: everything makeCard was given, and which try this is.
 type MakeJob = { prompt: string; names: { to: string; from: string }; source: "quiz" | "describe"; album?: Album; template?: string; brief?: Brief; attempt: number };
 
-// Puts photos added before the card was written into its photos screen. A card made
-// from scratch gets one before the message (or finale) if the writer didn't include
-// one; a ready-made design keeps its screens as they are.
-function withPhotos(card: CardData, album: Album | undefined, title: string, addScreen: boolean): CardData {
+// Puts photos added before the card was written into its photos screen. Without one,
+// a card made from scratch gets one before the message (or finale), and a ready-made
+// design gets one just before its finale, so the rest of it stays in its own order.
+function withPhotos(card: CardData, album: Album | undefined, title: string, fromScratch: boolean): CardData {
   if (!album?.photos.length) return card;
   const { photos, captions } = album;
   const at = card.screens.findIndex((s) => s.type === "photos");
   if (at >= 0) return { ...card, screens: card.screens.map((s, i) => (i === at && s.type === "photos" ? { ...s, photos, captions } : s)) };
-  if (!addScreen) return card;
-  const before = card.screens.findIndex((s) => s.type === "message" || s.type === "finale");
+  // A card can't hold more screens than this (lib/card.ts), and wouldn't save.
+  if (card.screens.length >= 12) return card;
+  const before = card.screens.findIndex((s) => (fromScratch ? s.type === "message" || s.type === "finale" : s.type === "finale"));
   const screens = [...card.screens];
   screens.splice(before > 0 ? before : screens.length, 0, { id: uid(), type: "photos", title, photos, captions });
   return { ...card, screens };
@@ -132,12 +133,13 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   const chosen = getTemplate(initialTemplate);
   const [saved] = useState(() => (resume ? loadQuiz() : null));
   const [draft] = useState(() => (initialOccasion || chosen || initialStart || saved ? null : loadDraft()));
-  // A design picked elsewhere goes straight to the questions; an occasion opens the designs for it.
+  // A design picked elsewhere goes straight to the questions; an occasion opens the designs
+  // for it, unless it came with a personalised start (then it's filled in on the questions).
   const [step, setStep] = useState<Step>(
-    saved ? saved.step : draft ? "edit" : chosen ? "quiz" : initialOccasion || initialStart === "premade" ? "pick" : initialStart === "custom" ? "quiz" : "choose",
+    saved ? saved.step : draft ? "edit" : chosen || initialStart === "custom" ? "quiz" : initialOccasion || initialStart === "premade" ? "pick" : "choose",
   );
   const [mode, setMode] = useState<Mode>(() =>
-    saved ? saved.mode : draft ? loadMode(draft) : chosen || initialOccasion || initialStart === "premade" ? "premade" : "custom",
+    saved ? saved.mode : draft ? loadMode(draft) : chosen || initialStart === "premade" || (initialOccasion && initialStart !== "custom") ? "premade" : "custom",
   );
   const [templateSlug, setTemplateSlug] = useState<string | undefined>(saved ? saved.templateSlug : chosen?.slug);
   const [to, setTo] = useState(saved?.to ?? draft?.to ?? initialTo ?? "");
@@ -185,8 +187,18 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   const [viewing, setViewing] = useState<string | undefined>();
   const [nudge, setNudge] = useState(0);
   const [screenAsk, setScreenAsk] = useState("");
-  // The eight-question quiz. Names from a product page and a design's occasion are filled in already.
-  const [answers, setAnswers] = useState<Answers>(saved?.answers ?? { ...NO_ANSWERS, to: initialTo ?? "", from: initialFrom ?? "", occasion: chosen?.occasion ?? "" });
+  // The questions. Names from a product page, the occasion (a design's, or one asked for),
+  // and the suggestions that follow from it are filled in already. A quiz saved before
+  // the questions last changed is topped up with the newer answers' blanks.
+  const [answers, setAnswers] = useState<Answers>(() =>
+    saved
+      ? { ...NO_ANSWERS, ...saved.answers }
+      : withSuggestions(
+          { ...NO_ANSWERS, to: initialTo ?? "", from: initialFrom ?? "", occasion: chosen?.occasion ?? (initialStart === "custom" ? (initialOccasion ?? "") : "") },
+          t.quiz.relations,
+          chosen,
+        ),
+  );
   const [question, setQuestion] = useState(saved?.question ?? 0);
   // Signing up comes before a new card is made, for anyone not signed in when they start.
   const [auth, setAuth] = useState<{ google: boolean; email: boolean; account: SignedIn | null; needed: boolean } | null>(null);
@@ -249,11 +261,12 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     window.scrollTo({ top: 0 });
   };
 
-  // From the designs to the questions, with the design's occasion filled in.
+  // From the designs to the questions. The design sets the occasion (so it isn't asked)
+  // and suggests its own feeling, unless they've already picked one.
   const toQuestions = () => {
     const tpl = getTemplate(templateSlug);
     if (!tpl) return;
-    setAnswers((a) => (a.occasion || a.occasionOther ? a : { ...a, occasion: tpl.occasion }));
+    setAnswers((a) => withSuggestions({ ...a, occasion: tpl.occasion, occasionOther: "" }, t.quiz.relations, tpl));
     setQuestion(0);
     setStep("quiz");
     window.scrollTo({ top: 0 });
@@ -358,7 +371,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     setTo(answers.to.trim());
     setFrom(answers.from.trim());
     setIdea(prompt);
-    makeCard(prompt, { to: answers.to, from: answers.from }, "quiz", { photos: answers.photos, captions: answers.captions }, design?.slug, briefFrom(answers));
+    makeCard(prompt, { to: answers.to, from: answers.from }, "quiz", { photos: answers.photos, captions: answers.captions }, design?.slug, briefFrom(answers, { design: Boolean(design) }));
   };
 
   // Writes a new card, showing the loading screen; going back returns to where it was asked for.
