@@ -712,6 +712,20 @@ export const en = {
     body: "Like a No button on one of our cards, it's nowhere to be found. If someone sent you a card, check the link was copied in full.",
     home: "Go home",
     browse: "Browse cards",
+    // When something goes wrong: the error screens, and the server saying no.
+    errors: {
+      title: "Sorry, that didn't work",
+      body: "Something went wrong on our side, not yours. Please try again. If it keeps happening, wait a few minutes and come back.",
+      retry: "Try again",
+      // For someone opening a card they were sent.
+      cardTitle: "Your card is safe",
+      cardBody: "It just didn't open properly this time. That can happen when the signal is weak. Tap the button to try again.",
+      cardLater: "Still not working? Wait a few minutes, then open the link again.",
+      saveInvalid: "That card doesn't look right. Check every field is filled in.",
+      saveScreen: "Something on screen {n} doesn't look right. Check everything on it is filled in, then try again.",
+      saveTooMany: "That's a lot of cards saved in a short time. Please wait a few minutes and try again.",
+      uploadTooMany: "That's a lot of photos in a short time. Please wait a few minutes and try again.",
+    },
   },
 
   chat: {
