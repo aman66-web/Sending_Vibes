@@ -13,6 +13,7 @@ import { stagesOf } from "@/lib/stages";
 import { DesignPicker } from "@/components/catalog/DesignPicker";
 import { cardTier, getTemplate } from "@/lib/catalog";
 import { formatMoney, tierPrice } from "@/lib/pricing";
+import { withTheme } from "@/lib/recolour";
 import { themes } from "@/lib/themes";
 import { fmt } from "@/i18n/config";
 import { useI18n } from "@/i18n/client";
@@ -473,7 +474,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       );
       rememberLook(direction);
       // A colour picked on the product page carries over, but only for that design.
-      const coloured = template && initialTheme && template === initialTemplate ? { ...written, theme: initialTheme } : written;
+      const coloured = template && initialTheme && template === initialTemplate ? withTheme(written, initialTheme) : written;
       const filled = withPhotos(coloured, album, t.labels.screens.photos, !template);
       // A ready-made design gets a gentle look of its own (new button and envelope colours,
       // stickers, a font of the same kind), so no two people's copies look the same. Its theme
