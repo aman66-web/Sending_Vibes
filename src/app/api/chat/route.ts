@@ -4,6 +4,7 @@ import { z } from "zod";
 import { DEFAULT_LOCALE, LOCALES, isLive } from "@/i18n/config";
 import { DICTS } from "@/i18n/dictionaries";
 import { CHAT_SYSTEM, chatContext } from "@/lib/chat-prompt";
+import { clientNetwork } from "@/lib/rate-limit";
 
 // The live chat. Streams the reply back as one JSON event per line:
 // {type:"text",text} pieces, {type:"reset"} (throw away what came so far),
@@ -64,7 +65,7 @@ export async function POST(req: Request) {
   const origin = req.headers.get("origin");
   if (origin && (!URL.canParse(origin) || new URL(origin).host !== req.headers.get("host"))) return fail(errors.notAllowed, 403);
 
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || req.headers.get("x-real-ip") || "unknown";
+  const ip = clientNetwork(req.headers);
   if (!allowed(ip)) return fail(errors.tooMany, 429);
 
   const parsed = bodySchema.safeParse(await req.json().catch(() => null));

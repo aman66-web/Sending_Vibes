@@ -7,6 +7,7 @@ import { currentAccount, signInAvailable, type Account } from "@/lib/auth";
 import { briefSchema } from "@/lib/brief";
 import { cardSchema } from "@/lib/card";
 import { GenerateError, generateCard, generateReady } from "@/lib/generate";
+import { clientNetwork } from "@/lib/rate-limit";
 
 // Writes a card from a description, or makes a change to one.
 
@@ -69,7 +70,7 @@ export async function POST(req: NextRequest) {
   const origin = req.headers.get("origin");
   if (origin && (!URL.canParse(origin) || new URL(origin).host !== req.headers.get("host"))) return fail(errors.failed, 403);
   if (!generateReady()) return fail(errors.off, 503);
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || req.headers.get("x-real-ip") || "unknown";
+  const ip = clientNetwork(req.headers);
   if (!allowed(ip)) return fail(errors.tooMany, 429);
 
   const parsed = bodySchema.safeParse(await req.json().catch(() => null));

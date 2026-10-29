@@ -11,6 +11,7 @@ import { createOrder, ordersReady, setOrderSession, type OrderItem } from "@/lib
 import { cardTier } from "@/lib/catalog";
 import { errorFields } from "@/lib/log";
 import { CURRENCY_COOKIE, DEFAULT_CURRENCY, isCurrency, type Tier } from "@/lib/pricing";
+import { clientNetwork } from "@/lib/rate-limit";
 import { getCard } from "@/lib/storage";
 import { cardLineItem, stripe } from "@/lib/stripe";
 
@@ -56,7 +57,7 @@ export async function POST(req: NextRequest) {
   if (origin && (!URL.canParse(origin) || new URL(origin).host !== req.headers.get("host"))) return fail(errors.failed, 403);
   const s = stripe();
   if (!s || !ordersReady()) return fail(errors.notReady, 503);
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || req.headers.get("x-real-ip") || "unknown";
+  const ip = clientNetwork(req.headers);
   if (!allowed(ip)) return fail(errors.tooMany, 429);
 
   const parsed = bodySchema.safeParse(await req.json().catch(() => null));

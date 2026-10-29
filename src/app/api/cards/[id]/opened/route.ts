@@ -1,7 +1,7 @@
 import { after, type NextRequest } from "next/server";
 import { currentAccount } from "@/lib/auth";
 import { isBuyer, sendOpenedEmail, senderOf } from "@/lib/notify";
-import { clientIp, limiter } from "@/lib/rate-limit";
+import { clientNetwork, limiter } from "@/lib/rate-limit";
 import { claimFirstOpen } from "@/lib/storage";
 
 // Sent once by the card's page when its envelope is opened (components/card/OpenedBeacon.tsx).
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const origin = req.headers.get("origin");
   if (origin && (!URL.canParse(origin) || new URL(origin).host !== req.headers.get("host"))) return new Response(null, { status: 403 });
-  if (!/^[A-Za-z0-9]{12}$/.test(id) || !perIp(clientIp(req.headers))) return done();
+  if (!/^[A-Za-z0-9]{12}$/.test(id) || !perIp(clientNetwork(req.headers))) return done();
 
   try {
     const sender = await senderOf(id);
