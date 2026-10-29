@@ -1,5 +1,8 @@
-import type { CardData, Effect, Game, Layout, Music, Occasion, QuizQuestion, Screen, ThemeName, TimelineEvent } from "./card";
+import type { CardData, Effect, Layout, Music, Occasion, Screen, ThemeName } from "./card";
 import type { Tier } from "./pricing";
+import { MORE_DESIGNS } from "./catalog-more";
+import { OCCASION_DESIGNS } from "./catalog-occasions";
+import { P, at, boxes, coupons, finale, game, intro, message, photos, q, question, quiz, reasons, scratch, slider, timeline, typeit, wheel } from "./design-kit";
 
 // The card designs people can browse and start from. Each one is a preset list
 // of building-block screens plus a look; everything stays editable afterwards.
@@ -36,26 +39,7 @@ export type Template = {
   demo: { to: string; from: string; photos?: DemoPhoto[] };
 };
 
-// Small builders so each design reads like a script.
-const intro = (title: string, subtitle: string, button = "Open it"): Screen => ({ id: "intro", type: "intro", title, subtitle, button });
-const question = (q: string, yes: string, no: string, afterYes: string, id = "question"): Screen => ({ id, type: "question", question: q, yes, no, afterYes });
-const photos = (title: string, id = "photos"): Screen => ({ id, type: "photos", title, photos: [], captions: [] });
-const message = (title: string, body: string, id = "message"): Screen => ({ id, type: "message", title, body });
-const game = (g: Game, title: string, instructions: string, winText: string, id = "game"): Screen => ({ id, type: "game", game: g, title, instructions, winText });
-const quiz = (title: string, questions: QuizQuestion[], winText: string, id = "quiz"): Screen => ({ id, type: "quiz", title, questions, winText });
-const scratch = (title: string, instructions: string, hidden: string, id = "scratch"): Screen => ({ id, type: "scratch", title, instructions, hidden });
-const typeit = (title: string, instructions: string, phrase: string, winText: string, id = "typeit"): Screen => ({ id, type: "typeit", title, instructions, phrase, winText });
-const finale = (title: string, body: string, effect: Effect): Screen => ({ id: "finale", type: "finale", title, body, effect });
-const q = (text: string, options: string[], answer: number): QuizQuestion => ({ question: text, options, answer });
-const wheel = (title: string, instructions: string, options: string[], winText: string, landOn = -1, id = "wheel"): Screen => ({ id, type: "wheel", title, instructions, options, landOn, winText });
-const coupons = (title: string, instructions: string, list: string[], id = "coupons"): Screen => ({ id, type: "coupons", title, instructions, coupons: list });
-const reasons = (title: string, instructions: string, list: string[], id = "reasons"): Screen => ({ id, type: "reasons", title, instructions, reasons: list });
-const slider = (title: string, low: string, high: string, winText: string, id = "slider"): Screen => ({ id, type: "slider", title, low, high, winText });
-const timeline = (title: string, events: TimelineEvent[], id = "timeline"): Screen => ({ id, type: "timeline", title, events });
-const boxes = (title: string, instructions: string, prizes: string[], id = "boxes"): Screen => ({ id, type: "boxes", title, instructions, prizes });
-const at = (when: string, what: string): TimelineEvent => ({ when, what });
-
-const OCCASION_MUSIC: Record<Occasion, Music> = {
+export const OCCASION_MUSIC: Record<Occasion, Music> = {
   valentine: "love",
   birthday: "birthday",
   diwali: "festive",
@@ -79,34 +63,6 @@ const OCCASION_MUSIC: Record<Occasion, Music> = {
   leaving: "auld",
 };
 
-const P = {
-  sunset: { src: "/demo/sunset.svg", caption: "Golden hour with you" },
-  coffee: { src: "/demo/coffee.svg", caption: "Where it all started" },
-  lights: { src: "/demo/lights.svg", caption: "Fairy-light nights" },
-  rangoli: { src: "/demo/rangoli.svg", caption: "Our rangoli this year" },
-  diyas: { src: "/demo/lights.svg", caption: "Diwali at home" },
-  fireworks: { src: "/demo/fireworks.svg", caption: "Fireworks from the roof" },
-  cake: { src: "/demo/cake.svg", caption: "Cake o'clock" },
-  balloons: { src: "/demo/balloons.svg", caption: "Up, up and away" },
-  summer: { src: "/demo/sunset.svg", caption: "Last summer" },
-  tree: { src: "/demo/tree.svg", caption: "Tree goals" },
-  crescent: { src: "/demo/crescent.svg", caption: "Chaand raat" },
-  grad: { src: "/demo/grad.svg", caption: "The big day" },
-  bouquet: { src: "/demo/bouquet.svg", caption: "For you" },
-  toast: { src: "/demo/toast.svg", caption: "Cheers to us" },
-  pumpkin: { src: "/demo/pumpkin.svg", caption: "Our spooky pumpkin" },
-  baby: { src: "/demo/baby.svg", caption: "Tiny feet" },
-  rings: { src: "/demo/rings.svg", caption: "The rings" },
-  holi: { src: "/demo/holi.svg", caption: "Holi hai!" },
-  rakhi: { src: "/demo/rakhi.svg", caption: "This year's rakhi" },
-  dad: { src: "/demo/dad.svg", caption: "World's best dad" },
-  friends: { src: "/demo/friends.svg", caption: "Milkshake dates" },
-  teacup: { src: "/demo/teacup.svg", caption: "Tea fixes everything" },
-  desk: { src: "/demo/desk.svg", caption: "Your desk (we'll miss it)" },
-  clock: { src: "/demo/clock.svg", caption: "The countdown" },
-  newyear: { src: "/demo/fireworks.svg", caption: "Midnight fireworks" },
-  mum: { src: "/demo/bouquet.svg", caption: "Flowers for you" },
-};
 
 export const TEMPLATES: Template[] = [
   // ---------- Valentine's ----------
@@ -1772,6 +1728,9 @@ export const TEMPLATES: Template[] = [
     ],
     demo: { to: "Olivia", from: "The team" },
   },
+  // Added in their own files so they can be written alongside the ones above.
+  ...MORE_DESIGNS,
+  ...OCCASION_DESIGNS,
 ];
 
 // Shown with a "New" badge in the shop.

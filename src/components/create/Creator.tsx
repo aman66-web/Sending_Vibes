@@ -19,7 +19,7 @@ import { fmt } from "@/i18n/config";
 import { useI18n } from "@/i18n/client";
 import { SignIn, type SignedIn } from "@/components/SignIn";
 import { TwoWays } from "@/components/TwoWays";
-import { NO_ANSWERS, Quiz, quizPrompt, type Answers } from "./Quiz";
+import { NO_ANSWERS, Quiz, briefFrom, quizPrompt, type Answers } from "./Quiz";
 import { Field } from "./ScreenEditor";
 import { openChat } from "@/components/open-chat";
 import { AtComputerSize, AtPhoneSize } from "./AtPhoneSize";
@@ -27,6 +27,7 @@ import { STUDIO_TABS, ScreenStrip, StudioPanel, type Tab } from "./Studio";
 import { useWide } from "./use-wide";
 import { AllWords, EditableCard, setAt, type Path } from "./WordEditing";
 import { stageFor, stillToWrite } from "@/lib/blanks";
+import type { Brief } from "@/lib/brief";
 
 const DRAFT_KEY = "sv-draft-v1";
 const MODE_KEY = "sv-draft-mode";
@@ -266,7 +267,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   // Asks for a new card from a description, or for a change to the current one. The
   // reply streams in: a line for each screen as it's written, then the finished card.
   const callAi = async (
-    body: { prompt: string; card?: CardData; focus?: string; template?: string; keepDesign?: boolean },
+    body: { prompt: string; card?: CardData; focus?: string; template?: string; keepDesign?: boolean; brief?: Brief },
     names: { to: string; from: string },
     onProgress?: (screens: ScreenType[]) => void,
     signal?: AbortSignal,
@@ -315,12 +316,12 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     setTo(answers.to.trim());
     setFrom(answers.from.trim());
     setIdea(prompt);
-    makeCard(prompt, { to: answers.to, from: answers.from }, "quiz", { photos: answers.photos, captions: answers.captions }, design?.slug);
+    makeCard(prompt, { to: answers.to, from: answers.from }, "quiz", { photos: answers.photos, captions: answers.captions }, design?.slug, briefFrom(answers));
   };
 
   // Writes a new card, showing the loading screen; going back returns to where it was asked for.
   // With a design, only its words are written and everything else stays as the design has it.
-  const makeCard = async (prompt: string, names: { to: string; from: string }, source: "quiz" | "describe", album?: Album, template?: string) => {
+  const makeCard = async (prompt: string, names: { to: string; from: string }, source: "quiz" | "describe", album?: Album, template?: string, brief?: Brief) => {
     const controller = new AbortController();
     making.current = controller;
     clearQuiz();
@@ -330,7 +331,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     setStep("making");
     window.scrollTo({ top: 0 });
     try {
-      const { card: written } = await callAi(template ? { prompt, template, keepDesign: true } : { prompt }, names, setProgress, controller.signal);
+      const { card: written } = await callAi(template ? { prompt, template, keepDesign: true, brief } : { prompt, brief }, names, setProgress, controller.signal);
       // A colour picked on the product page carries over, but only for that design.
       const coloured = template && initialTheme && template === initialTemplate ? { ...written, theme: initialTheme } : written;
       const made = withPhotos(coloured, album, t.labels.screens.photos, !template);

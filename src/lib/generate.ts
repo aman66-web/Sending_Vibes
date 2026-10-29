@@ -4,6 +4,7 @@ import { customAlphabet } from "nanoid";
 import { DIRECTIONS, EFFECTS, FONTS, FRAMES, GAMES, MOTIONS, MUSIC, OCCASIONS, PATTERNS, THEMES, TRANSITIONS, cardSchema, screenStyle, type CardData, type Game, type Screen, type ScreenType } from "./card";
 import { LANGUAGES, type Locale } from "@/i18n/config";
 import { BLANKS_FOR_AI } from "./blanks";
+import type { Brief } from "./brief";
 import { TEMPLATES, buildCard, getTemplate } from "./catalog";
 import { GAME_LABELS, LABELS_ON, LISTS, TEXTS, isList, type LabelKey } from "./labels";
 
@@ -136,6 +137,8 @@ export type GenerateInput = {
   focus?: string;
   // The language the site is shown in, for new cards.
   locale?: Locale;
+  // The choices from the questions, for a new card (see lib/brief.ts).
+  brief?: Brief;
 };
 
 export class GenerateError extends Error {

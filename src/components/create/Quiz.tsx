@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { fmt } from "@/i18n/config";
 import { useI18n } from "@/i18n/client";
 import type { Dict } from "@/i18n/en";
+import type { Brief } from "@/lib/brief";
 import { OCCASIONS, type Occasion } from "@/lib/card";
 import { TONES, type Template, type Tone } from "@/lib/catalog";
 import { price } from "@/lib/pricing";
@@ -64,6 +65,15 @@ export function quizPrompt(a: Answers, t: Dict, { design = false } = {}) {
   if (!design && a.photos.length)
     lines.push(`I've added ${a.photos.length} photo${a.photos.length > 1 ? "s" : ""}. If I haven't said where they go, add a photos screen where it fits.`);
   return lines.join("\n");
+}
+
+// The answers as choices the card writer can act on directly, alongside the prompt.
+export function briefFrom(a: Answers): Brief {
+  return {
+    occasion: a.occasion || undefined,
+    relation: a.relation.trim() || undefined,
+    tones: a.vibes.length ? a.vibes : undefined,
+  };
 }
 
 // Whether a core question has been answered well enough to move on.

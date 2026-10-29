@@ -1289,6 +1289,21 @@ export const en = {
     tooManyPhotos: "You can add up to {n} photos.",
     uploadFailed: "That photo couldn't be added. Try a JPG or PNG.",
   },
+
+  // Picking a look and music before the card is made (components/create/LookStep.tsx).
+  looks: {},
+
+  // A new look for the whole card at a tap (components/create/NewLook.tsx, lib/vary.ts).
+  vary: {},
+
+  // What the person who got the card can send back (components/card/ReplyPanel.tsx).
+  reply: {},
+
+  // The bar on full-screen demos (components/DemoBar.tsx).
+  demo: {},
+
+  // More about each occasion on its own page, for visitors and search engines.
+  occasionSeo: {},
 };
 
 // Same keys, any language. Arrays must keep the same number of items.

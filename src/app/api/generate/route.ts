@@ -4,6 +4,7 @@ import { DEFAULT_LOCALE, LOCALE_COOKIE, fmt, isLive } from "@/i18n/config";
 import { DICTS } from "@/i18n/dictionaries";
 import { ALLOWANCE, allowanceLeft, spend, type Kind } from "@/lib/allowance";
 import { currentAccount, signInAvailable, type Account } from "@/lib/auth";
+import { briefSchema } from "@/lib/brief";
 import { cardSchema } from "@/lib/card";
 import { GenerateError, generateCard, generateReady } from "@/lib/generate";
 
@@ -21,6 +22,8 @@ const bodySchema = z.object({
   template: z.string().max(60).regex(/^[a-z0-9-]*$/).optional(),
   keepDesign: z.boolean().optional(),
   focus: z.string().max(40).optional(),
+  // The choices from the questions, for a new card.
+  brief: briefSchema.optional(),
 });
 
 // Each one costs real money, so keep it to a sensible rate per visitor. In memory, so
