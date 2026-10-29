@@ -9,7 +9,7 @@ import { CATCHING, USUAL_GOAL } from "@/components/card/tune";
 import { FONT_VARS } from "@/lib/screen-style";
 import { LISTS, TEXTS, isList, labelList, labelsOn, type LabelKey, type ListKey } from "@/lib/labels";
 import { uploadPhoto } from "./image";
-import { isBlank } from "./screen-kit";
+import { isBlank } from "@/lib/blanks";
 import { useWide } from "./use-wide";
 
 // Click the words on the live preview to change them, like editing a design.
@@ -55,7 +55,8 @@ function textFields(card: CardData, screenId?: string, withEmpty = false): Field
 
 // Tapping into words that still say what goes there ("Type your question here") selects
 // them, so typing replaces them.
-const selectBlank = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+type WordBox = HTMLInputElement | HTMLTextAreaElement;
+const selectBlank = (e: React.FocusEvent<WordBox>) => {
   const el = e.currentTarget;
   if (!isBlank(el.value)) return;
   // Just the first line, so a message keeps its sign-off. Again a moment later, as iOS
@@ -64,6 +65,18 @@ const selectBlank = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>
   const pick = () => el.setSelectionRange(0, line < 0 ? el.value.length : line);
   pick();
   setTimeout(pick, 0);
+};
+// A click that focuses a box selects on mousedown, then the mouseup puts the caret where
+// it was clicked (Safari, and Chrome sometimes). Keep the selection for that one click.
+let focusingByMouse = false;
+const blankMouse = {
+  onMouseDown: (e: React.MouseEvent<WordBox>) => {
+    focusingByMouse = document.activeElement !== e.currentTarget;
+  },
+  onMouseUp: (e: React.MouseEvent<WordBox>) => {
+    if (focusingByMouse && isBlank(e.currentTarget.value)) e.preventDefault();
+    focusingByMouse = false;
+  },
 };
 
 const labelValue = (own: unknown, usual: string) => (typeof own === "string" && own.trim() ? own : usual);
@@ -1000,12 +1013,13 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
             <div className="max-h-48 space-y-1.5 overflow-y-auto">
               {lines.map((line, j) => (
                 <input
-                  key={j}
+                  key={`${list.join(".")}:${j}`}
                   autoFocus={!sheet && j === list.at(-1)}
                   dir="auto"
                   value={getAt(card, [...list.slice(0, 4), j]) || line}
                   maxLength={80}
                   onFocus={selectBlank}
+                  {...blankMouse}
                   onChange={(e) => edit([...list.slice(0, 4), j], e.target.value)}
                   className="w-full rounded-xl border border-line bg-background px-3 py-1.5 text-sm outline-none focus:border-brand"
                 />
@@ -1013,22 +1027,26 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
             </div>
           ) : long ? (
             <textarea
+              key={open.path.join(".")}
               autoFocus={!sheet}
               rows={4}
               dir="auto"
               value={value}
               maxLength={limitFor(card, open.path)}
               onFocus={selectBlank}
+              {...blankMouse}
               onChange={(e) => edit(open.path, e.target.value)}
               className="w-full resize-y rounded-xl border border-line bg-background px-3 py-2 text-sm outline-none focus:border-brand"
             />
           ) : (
             <input
+              key={open.path.join(".")}
               autoFocus={!sheet}
               dir="auto"
               value={value}
               maxLength={limitFor(card, open.path)}
               onFocus={selectBlank}
+              {...blankMouse}
               onChange={(e) => edit(open.path, e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && close()}
               className="w-full rounded-xl border border-line bg-background px-3 py-2 text-sm outline-none focus:border-brand"
@@ -1273,6 +1291,7 @@ export function AllWords({ card, screenId, onChange }: { card: CardData; screenI
               "aria-label": name,
               maxLength: limitFor(card, f.path),
               onFocus: selectBlank,
+              ...blankMouse,
               onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => onChange(f.path, e.target.value),
               className: "w-full rounded-xl border border-line bg-background px-3 py-1.5 outline-none focus:border-brand",
             };

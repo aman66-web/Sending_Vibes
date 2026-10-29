@@ -26,7 +26,7 @@ import { AtComputerSize, AtPhoneSize } from "./AtPhoneSize";
 import { STUDIO_TABS, ScreenStrip, StudioPanel, type Tab } from "./Studio";
 import { useWide } from "./use-wide";
 import { AllWords, EditableCard, setAt, type Path } from "./WordEditing";
-import { stillToWrite } from "./screen-kit";
+import { stageFor, stillToWrite } from "@/lib/blanks";
 
 const DRAFT_KEY = "sv-draft-v1";
 const MODE_KEY = "sv-draft-mode";
@@ -431,13 +431,15 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
 
   // Screens still saying what to write there ("Type your question here"), checked before
   // the card goes in the basket.
-  const [toWrite, setToWrite] = useState<ReturnType<typeof stillToWrite> | null>(null);
+  // Whether that reminder is up. What it lists is worked out from the card as it is now, so
+  // a change landing while it's open (an AI change, say) can't leave it out of date.
+  const [askToWrite, setAskToWrite] = useState(false);
+  const basketButton = useRef<HTMLButtonElement>(null);
   const publish = async (anyway = false) => {
     if (!card) return;
     if (!card.to.trim() || !card.from.trim()) return setError(c.needNames);
-    const blanks = stillToWrite(card);
-    if (blanks.length && !anyway) return setToWrite(blanks);
-    setToWrite(null);
+    if (!anyway && stillToWrite(card).length) return setAskToWrite(true);
+    setAskToWrite(false);
     setSaving(true);
     setError(null);
     try {
@@ -764,7 +766,7 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
               <button onClick={() => setShowPreview(true)} className="flex-1 rounded-full border-2 border-line py-3.5 font-semibold lg:hidden">
                 {c.fullScreen}
               </button>
-              <button onClick={() => publish()} disabled={saving} className="flex-[2] rounded-full bg-brand py-3.5 font-brand text-lg font-semibold text-white shadow-lg disabled:opacity-50 lg:w-full">
+              <button ref={basketButton} onClick={() => publish()} disabled={saving} className="flex-[2] rounded-full bg-brand py-3.5 font-brand text-lg font-semibold text-white shadow-lg disabled:opacity-50 lg:w-full">
                 {saving ? c.adding : fmt(c.addToBasket, { price: formatMoney(tierPrice(cardTier(card)), currency) })}
               </button>
             </div>
@@ -901,17 +903,19 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
         />
       )}
 
-      {toWrite && card && (
+      {askToWrite && card && stillToWrite(card).length > 0 && (
         <StillToWrite
           card={card}
-          blanks={toWrite}
-          onClose={() => setToWrite(null)}
+          onClose={() => {
+            setAskToWrite(false);
+            requestAnimationFrame(() => basketButton.current?.focus());
+          }}
           onAnyway={() => publish(true)}
-          onGo={(id) => {
-            setToWrite(null);
+          onGo={(id, stage) => {
+            setAskToWrite(false);
             setShowPreview(false);
             setWordMode("edit");
-            goToScreen(id);
+            goToScreen(id, stage);
             requestAnimationFrame(() => cardBox.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
           }}
         />
@@ -958,32 +962,39 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
 
 // Before the basket: the screens whose words still say what to write there, to go and
 // write them, or add the card anyway.
-function StillToWrite({
-  card,
-  blanks,
-  onGo,
-  onAnyway,
-  onClose,
-}: {
-  card: CardData;
-  blanks: ReturnType<typeof stillToWrite>;
-  onGo: (id: string) => void;
-  onAnyway: () => void;
-  onClose: () => void;
-}) {
+function StillToWrite({ card, onGo, onAnyway, onClose }: { card: CardData; onGo: (id: string, stage: number) => void; onAnyway: () => void; onClose: () => void }) {
   const { t } = useI18n();
   const c = t.create;
+  const panel = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") return onClose();
+      // Tab stays within the reminder.
+      const buttons = panel.current?.querySelectorAll<HTMLButtonElement>("button");
+      if (e.key !== "Tab" || !buttons?.length) return;
+      const first = buttons[0];
+      const last = buttons[buttons.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
+  const blanks = stillToWrite(card);
   // One row per screen, with the first couple of its unwritten bits.
   const screens = [...new Set(blanks.map((b) => b.index))];
+  // A second tap of a double-tap lands on whatever has just opened under the finger; it
+  // mustn't close this or add the card anyway.
+  const once = (act: () => void) => (e: React.MouseEvent) => e.detail < 2 && act();
   return (
-    <div role="dialog" aria-modal="true" aria-labelledby="to-write-title" className="fixed inset-0 z-[70] overflow-y-auto bg-black/50" onClick={onClose}>
+    <div role="dialog" aria-modal="true" aria-labelledby="to-write-title" className="fixed inset-0 z-[70] overflow-y-auto bg-black/50" onClick={once(onClose)}>
       <div className="flex min-h-full items-end justify-center p-4 sm:items-center">
-        <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md rounded-3xl border-2 border-foreground bg-background p-5 shadow-2xl">
+        <div ref={panel} onClick={(e) => e.stopPropagation()} className="w-full max-w-md rounded-3xl border-2 border-foreground bg-background p-5 shadow-2xl">
           <h2 id="to-write-title" className="font-brand text-2xl font-bold">
             {c.toWriteTitle}
           </h2>
@@ -992,13 +1003,15 @@ function StillToWrite({
             {screens.map((index) => {
               const screen = card.screens[index];
               const name = screen.type === "game" ? t.labels.games[screen.game] : t.labels.screens[screen.type];
-              const words = blanks.filter((b) => b.index === index).map((b) => `“${b.text}”`);
+              const own = blanks.filter((b) => b.index === index);
+              const words = own.map((b) => `“${b.text}”`);
               return (
                 <button
                   key={screen.id}
                   type="button"
                   autoFocus={index === screens[0]}
-                  onClick={() => onGo(screen.id)}
+                  // To the moment its first blank shows (a box picked, a note out of the jar).
+                  onClick={once(() => onGo(screen.id, stageFor(screen, own[0].path)))}
                   className="flex w-full items-center gap-3 rounded-2xl border-2 border-line px-4 py-3 text-start transition hover:border-brand"
                 >
                   <span className="min-w-0 flex-1">
@@ -1015,11 +1028,12 @@ function StillToWrite({
               );
             })}
           </div>
-          <div className="mt-5 flex flex-col gap-2 sm:flex-row-reverse">
-            <button type="button" onClick={onClose} className="flex-1 rounded-full bg-brand py-3 font-semibold text-white">
+          {/* On a phone, Go back is at the bottom, where the Add to basket button was. */}
+          <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row-reverse">
+            <button type="button" onClick={once(onClose)} className="flex-1 rounded-full bg-brand py-3 font-semibold text-white">
               {c.toWriteBack}
             </button>
-            <button type="button" onClick={onAnyway} className="flex-1 rounded-full border-2 border-line py-3 font-semibold">
+            <button type="button" onClick={once(onAnyway)} className="flex-1 rounded-full border-2 border-line py-3 font-semibold">
               {c.toWriteAnyway}
             </button>
           </div>
