@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { CardData, Screen, ScreenStyle, Transition } from "@/lib/card";
 import { labelText } from "@/lib/labels";
+import { stagesOf } from "@/lib/stages";
 import { FONT_VARS, cropStyle, screenLook } from "@/lib/screen-style";
 import { themes } from "@/lib/themes";
 import { Backdrop, BurstContext, FxLayer } from "./effects";
@@ -24,7 +25,7 @@ import {
   ScratchScreen,
   TypeItScreen,
 } from "./screens";
-import { playMusic, setMuted, SoundEnabled, unlockAudio, useMuted } from "./sound";
+import { playMusic, retainAudio, setMuted, SoundEnabled, unlockAudio, useMuted } from "./sound";
 import { LiveContext, NO_TUNE, TuneContext } from "./tune";
 import { LabelsContext, useWords } from "./words";
 
@@ -68,7 +69,13 @@ type Props = {
   grow?: boolean;
   // Only on the card's own page (c/[id]), for the person it's for: a thank-you and a card back.
   recipient?: Recipient;
+  // When it was sent, for the date on the envelope's postmark; today without one.
+  sentAt?: string;
 };
+
+// Screens that have to be won or worked through before Next shows. Going back to one
+// they've already finished opens it finished, rather than making them do it all again.
+const GATED = new Set<Screen["type"]>(["question", "game", "quiz", "scratch", "typeit", "slider", "reasons", "timeline"]);
 
 export function CardPlayer({
   card,
@@ -82,6 +89,7 @@ export function CardPlayer({
   editing = false,
   grow = false,
   recipient,
+  sentAt,
 }: Props) {
   const screens = useMemo(
     () => card.screens.filter((s) => preview || s.type !== "photos" || s.photos.length > 0),
@@ -133,6 +141,8 @@ export function CardPlayer({
   // Browsers only allow audio after a tap, so nothing plays until their first one.
   const [tapped, setTapped] = useState(false);
   const music = card.music ?? "none";
+  // While it's on the page, the phone may keep its sound playing through the silent switch (sound.ts).
+  useEffect(() => (sound ? retainAudio() : undefined), [sound]);
   useEffect(() => {
     if (!sound || !tapped || muted || music === "none") return;
     return playMusic(music);
@@ -142,12 +152,15 @@ export function CardPlayer({
   const go = (i: number) => {
     moved.current = true;
     setIndex(i);
-    setStage(0);
+    setStage(!preview && i < furthest && GATED.has(screens[i].type) ? stagesOf(screens[i]).length - 1 : 0);
     setFurthest((f) => Math.max(f, i));
   };
   const next = () => go(Math.min(index + 1, screens.length - 1));
+  // Playing it again is from scratch: every game to win again.
   const replay = () => {
     go(0);
+    setStage(0);
+    setFurthest(0);
     setRun((r) => r + 1);
   };
 
@@ -279,7 +292,7 @@ export function CardPlayer({
           className={`m-auto w-full outline-none ${ENTRANCE[current.style?.transition ?? "rise"]} ${wide ? "max-w-4xl" : "max-w-md"}`}
         >
           <ScreenGuard screen={current} last={index >= screens.length - 1} onSkip={index >= screens.length - 1 ? replay : next}>
-          {current.type === "intro" && <IntroScreen screen={current} onNext={next} stage={stage} to={card.to} from={card.from} envelope={look.envelope} occasion={card.occasion} editing={editing} />}
+          {current.type === "intro" && <IntroScreen screen={current} onNext={next} stage={stage} to={card.to} from={card.from} envelope={look.envelope} occasion={card.occasion} sentAt={sentAt} editing={editing} />}
           {current.type === "question" && <QuestionScreen screen={current} onNext={next} stage={stage} />}
           {current.type === "photos" && <PhotosScreen screen={current} onNext={next} stage={stage} wide={wide} />}
           {current.type === "message" && <MessageScreen screen={current} onNext={next} stage={stage} />}

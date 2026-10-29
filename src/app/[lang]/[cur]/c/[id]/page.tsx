@@ -59,9 +59,16 @@ export default async function CardPage({ params }: Props) {
       </InfoPage>
     );
   }
+  // The day it was posted, for the envelope's postmark: the day it was emailed to them if that
+  // was booked for later, otherwise the day it was paid for (or made, for older cards).
+  const sentAt = (sender?.item.delivery === "email" && sender.item.sendAt) || sender?.order.paidAt || card.createdAt || undefined;
   return (
     <>
-      <CardPlayer card={card} recipient={{ cardId: card.id, text: t.reply, canReply: emailReady() && Boolean(sender?.order.buyerEmail) }} />
+      <CardPlayer
+        card={card}
+        sentAt={sentAt}
+        recipient={{ cardId: card.id, text: t.reply, canReply: emailReady() && Boolean(sender?.order.buyerEmail) }}
+      />
       <OpenedBeacon cardId={card.id} hasEnvelope={card.screens.some((s) => s.type === "intro")} />
     </>
   );
