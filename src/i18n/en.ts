@@ -31,6 +31,10 @@ export const en = {
     help: "Help & FAQ",
     privacy: "Privacy",
     terms: "Terms",
+    contact: "Contact us",
+    // {email} becomes a link.
+    ask: "Questions, or a problem with a card? Email us at {email}",
+    company: "Envelette is a trading name of {name}, registered in England and Wales, company no. {number}. Registered office: {address}.",
     copyright: "© {year} Envelette. The No button still doesn't work.",
   },
 
@@ -317,9 +321,13 @@ export const en = {
     cta: "Make your card today →",
     waysTitle: "Two ways to make your card",
     waysIntro: "Both start with a few quick questions about them, and you can change anything before you send it.",
-    reassure: "No app to download. Ready in minutes.",
+    // Under the main button. **Bold** as written.
+    reassure: "**{price} a card.** Play it before you pay.",
+    // The next date coming up, at the top of the page: "🪔 Diwali · Sun 8 Nov · In 10 days".
+    seasonCta: "See the cards",
     comingUp: "Coming up",
     comingUpIntro: "Sort it now and it's one less thing to remember.",
+    comingUpSchedule: "Make it now and we'll email it on the day, at 9am (up to {days} days ahead).",
     allOccasions: "All {n} occasions →",
     featuresTitle: "A card they play, not just read",
     featuresIntro: "Every card is a handful of screens you put together. Here are a few of them. Have a go.",
@@ -347,7 +355,7 @@ export const en = {
     aiCta: "Try it · {price}",
     tryTitle: "Try one now",
     tryIntro: "These are real cards, running live. Tap through them.",
-    popularTitle: "Popular right now",
+    popularTitle: "Some of our favourites",
     popularIntro: "Funny, soppy, cute or festive. Scroll past one and it plays itself.",
     browseAll: "Browse all {n} →",
     howTitle: "How it works",
@@ -364,10 +372,22 @@ export const en = {
     howLink: "Or copy the link for WhatsApp",
     pricingTitle: "Cheaper than a bunch of flowers",
     pricingIntro: "One price per card. No subscription, nothing to cancel.",
-    tierCard: "Ready-made design",
-    tierCardPoints: ["Any of the {n} designs", "We write your words into it", "Up to 6 of your photos", "Every game, quiz and effect"],
-    tierAi: "Personalised",
-    tierAiPoints: ["Made from scratch around your answers", "Every game, quiz and effect", "Make screens and changes with AI", "Add, remove and reorder screens"],
+    priceOne: "per card, whichever way you make it",
+    pricePoints: [
+      "Any of our {n} designs, or one made from scratch around your answers",
+      "Every game, quiz, tune and finale",
+      "Up to 6 of your photos",
+      "Play your whole card before you pay",
+      "We email it on the day you pick (up to {days} days ahead), or you send the link yourself",
+      "No postage: it reaches them in seconds, anywhere in the world",
+      "Sending several? Pay for them all at once",
+    ],
+    // The three promises under the price (and anywhere else people are about to pay).
+    trust: {
+      secure: { title: "Secure payment by Stripe", body: "We never see or store your card details." },
+      play: { title: "Play it before you pay", body: "Try every screen first. You only pay when you're happy with it." },
+      fix: { title: "Fixed or refunded", body: "If your card won't open or something's broken, we'll fix it. If we can't, you get your money back." },
+    },
     faqTitle: "Questions people ask",
     faqs: [
       { q: "Do they need to download an app?", a: "No. It's a link. They tap it and it opens in their browser, on any phone, tablet or computer." },
@@ -378,6 +398,8 @@ export const en = {
       { q: "Is it private?", a: "Only people with the link can open a card. Links are long random codes, and cards aren't listed or searchable anywhere." },
       { q: "Can I use my own photos?", a: "Yes, up to 6. They're resized on your phone before upload, which also strips out location data." },
       { q: "How long does it take to make one?", a: "A few minutes. Answer 6 quick questions, add photos if you like, change anything you want, and you'll get your link." },
+      { q: "Who's behind Envelette?", a: "A small UK business. Envelette is a trading name of {company}, registered in England and Wales (company {number}). Email us any time at {email}." },
+      { q: "What if something goes wrong?", a: "If a card won't open or something on it is broken, email us at {email} and we'll fix it. If we can't, we'll refund you." },
       {
         q: "What does it cost?",
         a: "Every card is {price}, whether it's personalised or a ready-made design. Paid once, no subscription.",
@@ -387,10 +409,16 @@ export const en = {
     finalTitle: "Go on. Make someone's day.",
     finalCta: "Make your card →",
     finalNote: "{price} a card. No app to download.",
+    // The button that stays at the bottom of a phone screen once the top of the page has scrolled away.
+    stickyCta: "Make a card · {price}",
   },
 
   hero: {
-    tryNo: "go on, try pressing No",
+    // {no} is the card's own No button ("No", "Trick"…).
+    tryNo: "go on, try pressing {no}",
+    // When the card starts on a game instead.
+    tapIt: "go on, have a go",
+    cardAria: "A real card you can play",
     onPhone: "and on a phone ↑",
     boxTitle: "Fill in the blanks",
     tryIt: "try it!",
@@ -399,8 +427,8 @@ export const en = {
     theirName: "Their name",
     yourName: "Your name",
     yourPhotos: "your photos",
-    hintEmpty: "Type a name and watch the card on the laptop change.",
-    hintTyped: "See? The card on the laptop just changed. That's all it takes.",
+    hintEmpty: "Type a name and watch the card change.",
+    hintTyped: "See? The card just changed. That's all it takes.",
     finish: "Finish this card →",
   },
 
@@ -562,6 +590,10 @@ export const en = {
           },
           { q: "Do I need an account?", a: "You sign up with Google or your email just before your card is made, so it's saved to your account and you can find it again on any device. It's free and takes a few seconds. The person you send it to doesn't need one." },
           { q: "What occasions do you have cards for?", a: "{o} occasions, from birthdays, Valentine's Day, Diwali, Eid and Christmas to thank-yous, apologies, get-well-soon and leaving cards. See them all on the [occasions page](/occasions)." },
+          {
+            q: "Who runs Envelette, and how do I contact you?",
+            a: "Envelette is run by a small UK business, MARTZEY LTD (registered in England and Wales, company number 14466643). Email us at hello@envelette.com about anything: a question, a problem with a card or a refund.",
+          },
         ],
       },
       {
@@ -610,6 +642,10 @@ export const en = {
         items: [
           { q: "How much does a card cost?", a: "{price} per card, whether it's personalised or a ready-made design. Paid once, no subscription and no hidden extras." },
           { q: "How do I pay?", a: "By card, through Stripe's secure checkout. We never see or store your card details." },
+          {
+            q: "Can I get a refund?",
+            a: "If your card doesn't work as it should, for example it won't open or something on it is broken, email us at hello@envelette.com and we'll fix it. If we can't, we'll refund you. Because cards are digital and delivered straight away, you can't cancel one just because you've changed your mind once it's been delivered. If you think you've been charged by mistake, email us and we'll sort it out. The details are in our [terms](/terms).",
+          },
           { q: "Can I buy more than one card?", a: "Yes. Add as many as you like to your basket and pay for them together. Each card can be sent its own way." },
           { q: "Do you have discount codes?", a: "When we're running an offer, you can enter the code on the checkout page." },
           { q: "Will I get a receipt?", a: "Yes. We email you a receipt with a link to every card in your order, so you can always find them again." },

@@ -197,8 +197,11 @@ export function Chat() {
   };
 
   // On phones the card maker has a Help button in its top bar instead, so this
-  // never sits over an answer or the Next button.
-  const lift = path.startsWith("/create") ? "max-lg:hidden bottom-5" : "bottom-5";
+  // never sits over an answer or the Next button. Where a page has a "Make a card"
+  // bar along the bottom of a phone (StickyMakeBar), this drops into line beside it.
+  const lift = path.startsWith("/create")
+    ? "max-lg:hidden bottom-5"
+    : "bottom-5 max-sm:[html[data-bar]_&]:bottom-[max(0.75rem,env(safe-area-inset-bottom))]";
 
   return (
     <>
@@ -207,7 +210,7 @@ export function Chat() {
         aria-expanded={open}
         aria-controls="site-chat"
         aria-label={open ? c.closeAria : c.openAria}
-        className={`btn btn-ink fixed end-4 z-40 h-14 px-4 shadow-[3px_3px_0_var(--color-hot)] sm:end-5 ${lift} ${open ? "max-sm:hidden" : ""}`}
+        className={`chat-launcher btn btn-ink fixed end-4 z-40 h-14 px-4 shadow-[3px_3px_0_var(--color-hot)] sm:end-5 ${lift} ${open ? "max-sm:hidden" : ""}`}
       >
         {open ? (
           <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
