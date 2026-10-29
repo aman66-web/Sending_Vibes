@@ -1110,6 +1110,7 @@ export const ar: Dict = {
     atStart: "At the very start",
     afterScreen: "After screen {n}: {name}",
     youAreHere: "You're here",
+    putHere: "Put it here",
     cancel: "Cancel",
     groups: { start: "Openings", words: "Messages & photos", fun: "Questions & surprises", games: "Mini games", end: "Endings" },
     kit: {
