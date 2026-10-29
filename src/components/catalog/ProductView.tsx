@@ -6,7 +6,7 @@ import { BrowserFrame } from "@/components/BrowserFrame";
 import { CardPlayer } from "@/components/card/CardPlayer";
 import { fmt } from "@/i18n/config";
 import { useI18n } from "@/i18n/client";
-import type { Dict } from "@/i18n/en";
+import type { ClientDict } from "@/i18n/en";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { StickyMakeBar } from "@/components/StickyMakeBar";
 import { THEMES, type Screen, type ThemeName } from "@/lib/card";
@@ -34,7 +34,7 @@ const SCREEN_ICONS: Record<Screen["type"], string> = {
   finale: "🎆",
 };
 
-function describe(s: Screen, t: Dict): string {
+function describe(s: Screen, t: ClientDict): string {
   const d = t.product.describe;
   switch (s.type) {
     case "intro":

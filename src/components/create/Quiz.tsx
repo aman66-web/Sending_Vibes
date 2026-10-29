@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { fmt } from "@/i18n/config";
 import { useI18n } from "@/i18n/client";
-import type { Dict } from "@/i18n/en";
+import type { ClientDict } from "@/i18n/en";
 import type { Brief } from "@/lib/brief";
 import { dateName, upcoming, whenLabel } from "@/lib/calendar";
 import { MUSIC, OCCASIONS, type Music, type Occasion } from "@/lib/card";
@@ -160,7 +160,7 @@ const AGE_LINES: Record<Age, string> = {
 // The answers written out for the card writer. Labels are in the visitor's language.
 // With a ready-made design the words are what it should say, and the design keeps its
 // own screens; otherwise the card is built around the screens and look they chose.
-export function quizPrompt(a: Answers, t: Dict, { design = false } = {}) {
+export function quizPrompt(a: Answers, t: ClientDict, { design = false } = {}) {
   const q = t.quiz;
   const to = a.to.trim();
   const relation = a.relation.trim();
@@ -607,7 +607,7 @@ function recapLines({
   onChangeDesign,
 }: {
   answers: Answers;
-  t: Dict;
+  t: ClientDict;
   design?: Template;
   steps: Step[];
   go: (step: Step) => void;

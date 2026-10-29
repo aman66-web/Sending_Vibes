@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { fmt } from "@/i18n/config";
 import { useI18n } from "@/i18n/client";
-import type { Dict } from "@/i18n/en";
+import type { ClientDict } from "@/i18n/en";
 import { GAMES, type Game, type Occasion } from "@/lib/card";
 import { TEMPLATES } from "@/lib/catalog";
 import { WriteBox, chip, subhead } from "./quiz-parts";
@@ -67,7 +67,7 @@ export function pickEmoji(key: string) {
   return game ? (GAME_EMOJI[game] ?? "🎮") : (SCREEN_EMOJI[key as ScreenPick] ?? "▫️");
 }
 
-export function pickName(key: string, t: Dict) {
+export function pickName(key: string, t: ClientDict) {
   const game = gameOf(key);
   return game ? (t.labels.games[game] ?? key) : (t.labels.screens[key as ScreenPick] ?? key);
 }

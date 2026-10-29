@@ -1,4 +1,4 @@
-import type { Dict } from "@/i18n/en";
+import type { ClientDict } from "@/i18n/en";
 import { upcoming } from "./calendar";
 import { OCCASIONS, type Occasion } from "./card";
 import { toneInfo, type Template, type Tone } from "./catalog";
@@ -123,8 +123,8 @@ function addWords(out: Set<string>, text: string, phrase: boolean) {
 }
 
 // The index depends on the page's language too, so it's kept per dictionary.
-const indexes = new WeakMap<Dict, Map<string, Set<string>>>();
-function indexOf(tpl: Template, t: Dict): Set<string> {
+const indexes = new WeakMap<ClientDict, Map<string, Set<string>>>();
+function indexOf(tpl: Template, t: ClientDict): Set<string> {
   let byDesign = indexes.get(t);
   if (!byDesign) indexes.set(t, (byDesign = new Map()));
   const cached = byDesign.get(tpl.slug);
@@ -191,7 +191,7 @@ export type Filters = { occasion?: Occasion | "all"; tone?: Tone | "all"; who?: 
 
 // The designs that match, best first. When nothing matches every word of a search,
 // `near` has the ones that match some of them, so there's always somewhere to go.
-export function findDesigns(all: readonly Template[], f: Filters, t: Dict, order: readonly Occasion[]): { designs: Template[]; near: Template[] } {
+export function findDesigns(all: readonly Template[], f: Filters, t: ClientDict, order: readonly Occasion[]): { designs: Template[]; near: Template[] } {
   const chosen = all.filter(
     (tpl) =>
       (!f.occasion || f.occasion === "all" || tpl.occasion === f.occasion) &&

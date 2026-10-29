@@ -1,5 +1,5 @@
 import { fmt } from "@/i18n/config";
-import type { Dict } from "@/i18n/en";
+import type { ClientDict, Dict } from "@/i18n/en";
 import type { Occasion } from "./card";
 
 // When each occasion next comes round, for the "coming up" strip and occasion pages.
@@ -10,7 +10,7 @@ export type DateKey = keyof Dict["calendar"] | "bhaiDooj";
 export type DatedOccasion = { occasion: Occasion; key: DateKey; name: string; date: Date; approx: boolean };
 
 // A date's name in their language, or its English name until the dictionary has one.
-export function dateName(d: { key: DateKey; name: string }, t: Dict) {
+export function dateName(d: { key: DateKey; name: string }, t: ClientDict) {
   return (t.calendar as Partial<Record<DateKey, string>>)[d.key] ?? d.name;
 }
 
@@ -105,7 +105,7 @@ export function nextDate(occasion: Occasion, now = new Date()) {
   return upcoming(now, 50).find((d) => d.occasion === occasion);
 }
 
-export function whenLabel(days: number, t: Dict) {
+export function whenLabel(days: number, t: ClientDict) {
   if (days === 0) return t.when.today;
   if (days === 1) return t.when.tomorrow;
   if (days < 7) return fmt(t.when.days, { n: days });
@@ -115,7 +115,7 @@ export function whenLabel(days: number, t: Dict) {
 }
 
 // `tag` is a language tag such as "en-GB" or "hi-IN".
-export function formatDay(date: Date, tag: string, t: Dict, approx = false) {
+export function formatDay(date: Date, tag: string, t: ClientDict, approx = false) {
   const s = date.toLocaleDateString(tag, { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
   return approx ? fmt(t.when.around, { date: s }) : s;
 }

@@ -2758,3 +2758,7 @@ export const en = {
 
 // Same keys, any language. Arrays must keep the same number of items.
 export type Dict = typeof en;
+
+// What the browser gets (see i18n/client.tsx): everything but the occasion pages' extra
+// words, which only the server uses. Code that runs in the browser takes this, not Dict.
+export type ClientDict = Omit<Dict, "occasionSeo">;

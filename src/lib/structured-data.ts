@@ -1,4 +1,4 @@
-import { CONTACT_EMAIL } from "./terms";
+import { COMPANY, CONTACT_EMAIL } from "./terms";
 
 // The site's public address, with no slash on the end, for anything search engines read:
 // structured data, the sitemap and robots.txt. Pages are reached without /en/gbp, so that
@@ -10,6 +10,7 @@ export const absolute = (path: string) => (path === "/" ? SITE_URL : `${SITE_URL
 const ORGANIZATION_ID = `${SITE_URL}/#organization`;
 
 // Who runs the site, and the site itself, so search results can show the name and logo.
+// The one description of the company: every page has it, and product sellers point to it by @id.
 export function siteData() {
   return {
     "@context": "https://schema.org",
@@ -18,11 +19,13 @@ export function siteData() {
         "@type": "Organization",
         "@id": ORGANIZATION_ID,
         name: "Envelette",
-        legalName: "MARTZEY LTD",
+        legalName: COMPANY.legalName,
         url: SITE_URL,
         logo: absolute("/logo.png"),
         email: CONTACT_EMAIL,
         contactPoint: { "@type": "ContactPoint", contactType: "customer service", email: CONTACT_EMAIL, availableLanguage: "English" },
+        address: { "@type": "PostalAddress", streetAddress: COMPANY.street, addressLocality: COMPANY.town, postalCode: COMPANY.postcode, addressCountry: "GB" },
+        identifier: { "@type": "PropertyValue", propertyID: "Companies House company number", value: COMPANY.number },
       },
       { "@type": "WebSite", "@id": `${SITE_URL}/#website`, name: "Envelette", url: SITE_URL, publisher: { "@id": ORGANIZATION_ID } },
     ],

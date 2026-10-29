@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { openChat } from "@/components/open-chat";
 import { useI18n } from "@/i18n/client";
-import type { Dict } from "@/i18n/en";
+import type { ClientDict } from "@/i18n/en";
 
 // Something that went wrong, shown where the person is looking: brought into view, focused
 // and read out, with a big way forward (try again, go and fix it, or ask us).
@@ -79,7 +79,7 @@ export function ErrorNotice({ message, onRetry, fix, onClose, compact = false }:
 
 // Whether pressing the same button again could work: not when their cards are used up, it's
 // switched off, or what they asked for has to change first.
-export function canRetry(message: string, t: Dict) {
+export function canRetry(message: string, t: ClientDict) {
   const e = t.custom.errors;
   if ([e.off, e.signIn, e.describe, e.refused, e.tooMany, t.account.signInFailed, t.create.needNames].includes(message)) return false;
   // These have numbers filled in, like how many cards they've made.

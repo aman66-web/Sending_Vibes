@@ -1,5 +1,5 @@
 import { fmt } from "@/i18n/config";
-import type { Dict } from "@/i18n/en";
+import type { ClientDict } from "@/i18n/en";
 import type { ScreenType } from "./card";
 import type { Template } from "./catalog";
 
@@ -38,7 +38,7 @@ function kindsOf(tpl: Template) {
 }
 
 // What's inside a design, short enough for its tile: "🎮 2 games · 📸 photos · 💌 letter".
-export function insideLine(tpl: Template, t: Dict, max = 3): string {
+export function insideLine(tpl: Template, t: ClientDict, max = 3): string {
   const { kinds, games } = kindsOf(tpl);
   const words: Partial<Record<ScreenType, string>> = t.catalog.inside;
   return kinds

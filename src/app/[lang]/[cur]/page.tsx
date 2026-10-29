@@ -50,20 +50,6 @@ function season() {
   return { next, slug: defaultTemplate(main).slug, phoneSlug: defaultTemplate(second).slug };
 }
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://envelette.com";
-
-// Tells search engines who runs the shop, the same details as the footer.
-const ORGANIZATION = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "Envelette",
-  legalName: COMPANY.legalName,
-  url: SITE_URL,
-  email: CONTACT_EMAIL,
-  address: { "@type": "PostalAddress", streetAddress: COMPANY.street, addressLocality: COMPANY.town, postalCode: COMPANY.postcode, addressCountry: "GB" },
-  identifier: { "@type": "PropertyValue", propertyID: "Companies House company number", value: COMPANY.number },
-};
-
 export default async function Home() {
   const { t, currency } = await getI18n();
   const h = t.home;
@@ -76,7 +62,6 @@ export default async function Home() {
   const emailLink = "font-semibold underline decoration-hot decoration-2 underline-offset-4";
   return (
     <div className="grain overflow-x-clip bg-cream text-ink">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ORGANIZATION).replace(/</g, "\\u003c") }} />
       <SiteHeader />
 
       {/* Phones: the next date coming up, in place of the scrolling occasions below (moving links are hard to tap). */}
