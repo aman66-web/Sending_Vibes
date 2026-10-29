@@ -6,7 +6,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { fmt, LANGUAGES } from "@/i18n/config";
 import { getI18n } from "@/i18n/server";
-import { formatDay, nextDate, whenLabel } from "@/lib/calendar";
+import { dateName, formatDay, nextDate, whenLabel } from "@/lib/calendar";
 import { OCCASIONS } from "@/lib/card";
 import { TEMPLATES } from "@/lib/catalog";
 import { price } from "@/lib/pricing";
@@ -68,7 +68,7 @@ export default async function OccasionPage({ params }: Props) {
               <p className="mt-4 text-lg text-ink/65">{info.intro}</p>
               {next && (
                 <p className="mt-5 inline-flex items-center gap-2 rounded-full border-2 border-ink bg-paper px-4 py-1.5 text-sm font-bold">
-                  📅 {fmt(t.occasionPage.next, { name: t.calendar[next.key], date: formatDay(next.date, tag, t, next.approx) })} · <span className="text-hot">{whenLabel(next.days, t)}</span>
+                  📅 {fmt(t.occasionPage.next, { name: dateName(next, t), date: formatDay(next.date, tag, t, next.approx) })} · <span className="text-hot">{whenLabel(next.days, t)}</span>
                 </p>
               )}
             </div>

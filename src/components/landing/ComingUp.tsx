@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Postmark } from "@/components/Postmark";
 import { fmt, LANGUAGES } from "@/i18n/config";
 import { getI18n } from "@/i18n/server";
-import { formatDay, upcoming, whenLabel } from "@/lib/calendar";
+import { dateName, formatDay, upcoming, whenLabel } from "@/lib/calendar";
 import { TEMPLATES } from "@/lib/catalog";
 import { occasions } from "@/lib/templates";
 
@@ -29,7 +29,7 @@ export async function ComingUp() {
               className={`absolute -right-6 top-3 w-40 -rotate-[8deg] ${first ? "text-white/90" : "text-hot/85"}`}
             />
             <span className="text-4xl transition group-hover:-rotate-6">{occasions[d.occasion].emoji}</span>
-            <p className="mt-auto pt-8 font-brand text-2xl font-bold leading-tight">{t.calendar[d.key]}</p>
+            <p className="mt-auto pt-8 font-brand text-2xl font-bold leading-tight">{dateName(d, t)}</p>
             <p className={`mt-0.5 text-sm font-semibold ${first ? "text-white/75" : "text-ink/55"}`}>
               {formatDay(d.date, tag, t, d.approx)} · {whenLabel(d.days, t)}
             </p>

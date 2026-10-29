@@ -4,25 +4,35 @@ import type { Occasion } from "./card";
 
 // When each occasion next comes round, for the "coming up" strip and occasion pages.
 
-// `key` names the date in the dictionary (t.calendar); `name` is the English fallback.
-export type DateKey = keyof Dict["calendar"];
+// `key` names the date in the dictionary (t.calendar); `name` is the English fallback,
+// also shown for a date the dictionaries don't name yet (see dateName).
+export type DateKey = keyof Dict["calendar"] | "bhaiDooj";
 export type DatedOccasion = { occasion: Occasion; key: DateKey; name: string; date: Date; approx: boolean };
 
+// A date's name in their language, or its English name until the dictionary has one.
+export function dateName(d: { key: DateKey; name: string }, t: Dict) {
+  return (t.calendar as Partial<Record<DateKey, string>>)[d.key] ?? d.name;
+}
+
 // Festivals that follow the moon move every year, so they're listed by hand.
-// Eid and Raksha Bandhan depend on the moon and can shift by a day.
+// Eid and Raksha Bandhan depend on the moon and can shift by a day. Bhai Dooj (with the
+// Diwali designs) is the UK date from a London panchang; in India it's often a day later.
 // Add the next year's dates before the list runs out (it ends with 2028).
 const LUNAR: { occasion: Occasion; key: DateKey; name: string; date: string; approx?: boolean }[] = [
   { occasion: "diwali", key: "diwali", name: "Diwali", date: "2026-11-08" },
+  { occasion: "diwali", key: "bhaiDooj", name: "Bhai Dooj", date: "2026-11-10", approx: true },
   { occasion: "eid", key: "eidFitr", name: "Eid al-Fitr", date: "2027-03-09", approx: true },
   { occasion: "holi", key: "holi", name: "Holi", date: "2027-03-22" },
   { occasion: "eid", key: "eidAdha", name: "Eid al-Adha", date: "2027-05-16", approx: true },
   { occasion: "rakhi", key: "rakhi", name: "Raksha Bandhan", date: "2027-08-17", approx: true },
   { occasion: "diwali", key: "diwali", name: "Diwali", date: "2027-10-29" },
+  { occasion: "diwali", key: "bhaiDooj", name: "Bhai Dooj", date: "2027-10-30", approx: true },
   { occasion: "eid", key: "eidFitr", name: "Eid al-Fitr", date: "2028-02-27", approx: true },
   { occasion: "holi", key: "holi", name: "Holi", date: "2028-03-10", approx: true },
   { occasion: "eid", key: "eidAdha", name: "Eid al-Adha", date: "2028-05-05", approx: true },
   { occasion: "rakhi", key: "rakhi", name: "Raksha Bandhan", date: "2028-08-04", approx: true },
   { occasion: "diwali", key: "diwali", name: "Diwali", date: "2028-10-17" },
+  { occasion: "diwali", key: "bhaiDooj", name: "Bhai Dooj", date: "2028-10-19", approx: true },
 ];
 
 const FIXED: { occasion: Occasion; key: DateKey; name: string; month: number; day: number }[] = [
