@@ -30,7 +30,7 @@ export function setMuted(value: boolean) {
     localStorage.setItem(MUTE_KEY, value ? "1" : "0");
   } catch {}
   // While muted, let go of the phone's media playback, so their own music or podcast carries on.
-  if (ctx) holdPlayback(!value);
+  if (ctx && (value || users > 0)) holdPlayback(!value);
   listeners.forEach((l) => l());
 }
 
@@ -65,6 +65,37 @@ export function unlockAudio() {
   // Suspended, or "interrupted" on an iPhone after a call.
   if (ctx.state !== "running" && ctx.state !== "closed") ctx.resume().catch(() => {});
   if (!muted) holdPlayback(true);
+  // Let go again if nothing turns out to be using it (see retainAudio).
+  settle();
+}
+
+// What on the page may make sound right now: a card being played (with its sound on), or a
+// tune playing. The phone's media playback is only held while there's at least one, so once
+// they leave the card (to make one back, say) their own music or podcast is left alone, even
+// when they come back to the tab.
+let users = 0;
+let settleTimer: ReturnType<typeof setTimeout> | undefined;
+
+export function retainAudio(): () => void {
+  users += 1;
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    users -= 1;
+    settle();
+  };
+}
+
+// A moment's grace, so a tune's fade-out finishes and a player that's only being swapped
+// for another (the editor's phone and computer views) doesn't let go and grab it again.
+function settle() {
+  clearTimeout(settleTimer);
+  settleTimer = setTimeout(() => {
+    if (users > 0 || !ctx) return;
+    holdPlayback(false);
+    ctx.suspend().catch(() => {});
+  }, 1000);
 }
 
 // iPhones treat web audio like a ringtone: the ring/silent switch mutes it, and very many
@@ -121,14 +152,15 @@ function silentClip(rate: number) {
 }
 
 // Nothing plays while they're in another app or tab (replying on WhatsApp, say), where the
-// music would otherwise carry on in their pocket. It picks up again when they come back.
+// music would otherwise carry on in their pocket. It picks up again when they come back, if
+// the card (or a tune) is still there.
 if (typeof document !== "undefined") {
   document.addEventListener("visibilitychange", () => {
     if (!ctx) return;
     if (document.hidden) {
       ctx.suspend().catch(() => {});
       silence?.pause();
-    } else if (!muted) {
+    } else if (!muted && users > 0) {
       ctx.resume().catch(() => {});
       holdPlayback(true);
     }
@@ -397,10 +429,12 @@ export function playMusic(name: Music): () => void {
   };
   schedule();
   const timer = setInterval(schedule, 120);
+  const release = retainAudio();
   return () => {
     clearInterval(timer);
     out.gain.setTargetAtTime(0.0001, audio.currentTime, 0.15);
     setTimeout(() => out.disconnect(), 4000);
+    release();
   };
 }
 

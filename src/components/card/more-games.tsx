@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { cropStyle } from "@/lib/screen-style";
 import { useReducedMotion } from "./effects";
 import { HeartMark } from "./ornaments";
 import { bySize, isRtl, type PersonalPhoto, shortName, usePersonal } from "./personal";
 import { useSfx } from "./sound";
-import { USUAL_GOAL, useTune } from "./tune";
+import { LiveContext, USUAL_GOAL, useTune } from "./tune";
 import { useWords } from "./words";
 import { DropSprite, GameIcon, GhostSprite, HeadstoneSprite, HeartSprite, type IconName, PinataSprite, StarSprite } from "./sprites";
 
@@ -16,7 +16,8 @@ const PANEL = "relative w-full select-none overflow-hidden rounded-3xl ring-1 ri
 const FOCUS = "outline-none focus-visible:ring-4 focus-visible:ring-[var(--c-accent)]";
 
 // Slower fingers: a timed game still going after a while quietly slows down and its
-// pieces grow, so nobody is left stuck before the rest of their card.
+// pieces grow, so nobody is left stuck before the rest of their card. Only on the real card:
+// previews and the editor keep the speed and size that were chosen.
 const ASSIST = [
   { after: 0, speed: 1, size: 1 },
   { after: 20000, speed: 0.75, size: 1.2 },
@@ -24,13 +25,14 @@ const ASSIST = [
 ];
 
 export function useAssist(won: boolean) {
+  const live = useContext(LiveContext);
   const [level, setLevel] = useState(0);
   useEffect(() => {
-    if (won) return;
+    if (won || !live) return;
     const timers = ASSIST.slice(1).map((step, i) => setTimeout(() => setLevel(i + 1), step.after));
     return () => timers.forEach(clearTimeout);
-  }, [won]);
-  return ASSIST[level];
+  }, [won, live]);
+  return live ? ASSIST[level] : ASSIST[0];
 }
 
 // Past this many, a row of progress pills would run off a phone, so it's counted instead.
