@@ -8,7 +8,7 @@ import { Logo } from "@/components/Logo";
 import { BrowserFrame } from "@/components/BrowserFrame";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { MAX_BASKET, addToBasket, inBasket, readMade, replaceInBasket, saveMade, type Made } from "@/lib/basket";
-import { OCCASIONS, type CardData, type Occasion, type Screen, type ScreenType, type ThemeName } from "@/lib/card";
+import type { CardData, Occasion, Screen, ThemeName } from "@/lib/card";
 import { stagesOf } from "@/lib/stages";
 import { DesignPicker } from "@/components/catalog/DesignPicker";
 import { cardTier, getTemplate } from "@/lib/catalog";

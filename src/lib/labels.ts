@@ -60,10 +60,10 @@ export const TEXTS = {
   hugHolding: "Keep holding…",
   hugLetGo: "Don't let go!",
   hugDone: "Hug delivered!",
-  // Games (games job)
+  // Games
   // On a phone the heart hops about instead of running from a mouse.
   chaseTouchTip: "Tip: tap it before it hops away",
-  // Help to finish, Back, the letter, sending coupons, a screen that won't load (card-readable)
+  // Help to finish, Back, the letter, sending coupons, a screen that won't load
   helpFinish: "Need a hand? Tap here to finish",
   helpReveal: "Need a hand? Tap here to show it",
   helpAnswer: "Need a hand? Show me the answer",
@@ -73,7 +73,7 @@ export const TEXTS = {
   couponMessage: "🎟️ I'm cashing in: {coupons}",
   screenBroken: "Sorry, this part of the card didn't load.",
   screenSkip: "Skip this screen",
-  // Envelope and finale (card-moments)
+  // The envelope and the finale
   soundHint: "Best with the sound on 🔊",
 };
 
