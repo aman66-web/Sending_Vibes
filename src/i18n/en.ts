@@ -363,7 +363,7 @@ export const en = {
     howIntro: "Four simple steps, start to finish.",
     how: [
       { title: "Choose your way", body: "Personalised and made from scratch, or one of our {n} ready-made designs." },
-      { title: "Answer 6 quick questions", body: "Who it's for, the occasion, and exactly how you want your card to look, screen by screen." },
+      { title: "Answer a few quick questions", body: "Who it's for, the occasion, how it should feel and what goes in it. Mostly a tap each, with answers suggested for you." },
       { title: "Make it yours", body: "Type any change you want, or click any words to rewrite them, and swap in your photos. We make it together, with your personal touch." },
       { title: "Check out and send", body: "We email it to them, straight away or on the day you pick. Or you get a link to send however you like." },
     ],
@@ -398,7 +398,7 @@ export const en = {
       },
       { q: "Is it private?", a: "Only people with the link can open a card. Links are long random codes, and cards aren't listed or searchable anywhere." },
       { q: "Can I use my own photos?", a: "Yes, up to 6. They're resized on your phone before upload, which also strips out location data." },
-      { q: "How long does it take to make one?", a: "A few minutes. Answer 6 quick questions, add photos if you like, change anything you want, and you'll get your link." },
+      { q: "How long does it take to make one?", a: "A few minutes. Answer a few quick questions, mostly with a tap, add photos if you like, change anything you want, and you'll get your link." },
       { q: "Who's behind Envelette?", a: "A small UK business. Envelette is a trading name of {company}, registered in England and Wales (company {number}). Email us any time at {email}." },
       { q: "What if something goes wrong?", a: "If a card won't open or something on it is broken, email us at {email} and we'll fix it. If we can't, we'll refund you." },
       {
@@ -1160,7 +1160,7 @@ export const en = {
   },
 
   quiz: {
-    progress: "Question {n} of {total}",
+    progress: "Step {n} of {total}",
     intro: "Answer a few quick questions, mostly with a tap, and we'll make a card just for them. You can change anything afterwards.",
     next: "Next",
     skip: "Skip",

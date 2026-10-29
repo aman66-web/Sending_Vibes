@@ -5,7 +5,7 @@ import { fmt } from "@/i18n/config";
 import { useI18n } from "@/i18n/client";
 import type { Dict } from "@/i18n/en";
 import type { Brief } from "@/lib/brief";
-import { upcoming, whenLabel } from "@/lib/calendar";
+import { dateName, upcoming, whenLabel } from "@/lib/calendar";
 import { MUSIC, OCCASIONS, type Music, type Occasion } from "@/lib/card";
 import type { Template } from "@/lib/catalog";
 import { getLook } from "@/lib/looks";
@@ -270,9 +270,17 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
   // What suits the occasion and who it's for, shown first among the feelings.
   const suggestion = suggest({ occasion: answers.occasion, relation: relationKey(answers.relation, q.relations), design });
 
+  // When this question appeared, and whether a tap is already moving on from it, so the
+  // second tap of a double tap can't land on the next question too (Next sits just where
+  // "Make {name}'s card" appears, and chips move on by themselves).
+  const shownAt = useRef(0);
+  const leaving = useRef(false);
   useEffect(() => {
+    shownAt.current = performance.now();
+    leaving.current = false;
     if (step === "names") toInput.current?.focus({ preventScroll: true });
   }, [step]);
+  const tooSoon = (e: { detail: number }) => e.detail > 1 || performance.now() - shownAt.current < 500;
 
   const set = <K extends keyof Answers>(key: K, value: Answers[K]) => setAnswers((a) => ({ ...a, [key]: value }));
   // An answer that suggestions follow from, with the suggestions brought up to date.
@@ -294,6 +302,8 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
   };
   // Single choices move on by themselves, after a beat so the tap registers.
   const pickAndGo = (apply: () => void) => {
+    if (leaving.current) return;
+    leaving.current = true;
     apply();
     setTimeout(() => setIndex(at + 1), 220);
   };
@@ -336,6 +346,12 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
         <form
           key={step}
           className="mt-8 flex flex-1 animate-screen-in flex-col"
+          // Every tap on the question (its chips, Back, Next) goes through this first.
+          onClickCapture={(e) => {
+            if (!tooSoon(e)) return;
+            e.preventDefault();
+            e.stopPropagation();
+          }}
           onSubmit={(e) => {
             e.preventDefault();
             next();
@@ -424,7 +440,7 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
                             {occasions[d.occasion].emoji}
                           </span>
                           <span className="min-w-0">
-                            <span className="block">{t.calendar[d.key]}</span>
+                            <span className="block">{dateName(d, t)}</span>
                             <span className={`block text-sm font-normal ${answers.occasion === d.occasion ? "text-white/85" : "opacity-70"}`}>{whenLabel(d.days, t)}</span>
                           </span>
                         </button>
