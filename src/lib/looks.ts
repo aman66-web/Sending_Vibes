@@ -18,6 +18,8 @@ export type Look = {
   body: Font;
   pattern?: Pattern;
   ambient: Effect;
+  // What goes off at its big moments (the envelope opening, the finale), when it has its own.
+  burst?: Effect;
   stickers: string[];
   // Occasions it suits best, the one it was made for first; it can be picked for any.
   suits: Occasion[];
@@ -139,7 +141,8 @@ export const LOOKS: Look[] = [
     envelope: "#ead5a0",
     heading: "classic",
     body: "modern",
-    ambient: "fireworks",
+    ambient: "sparkles",
+    burst: "fireworks",
     stickers: ["🥂", "✨"],
     suits: ["newyear", "congrats", "wedding", "anniversary", "diwali", "birthday", "eid", "christmas", "leaving", "fathersday", "halloween"],
     feels: ["elegant", "festive"],

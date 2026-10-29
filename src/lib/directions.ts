@@ -335,7 +335,8 @@ function pickEffects(input: DirectionInput) {
     if (key === "ambient" || key === "burst" || key === "finale") extra.forEach((e) => choices.set(e, (choices.get(e) ?? 0) + 3));
     // Calm cards stay calm.
     if (input.gentle && key === "lively") ["rise", "fade", "zoom"].forEach((e) => choices.set(e, 1));
-    const list = [...choices.keys()].filter((e) => !(input.gentle && key === "lively") || ["rise", "fade", "zoom"].includes(e));
+    // Fireworks only go off at a moment: as a background they're shown as sparkles.
+    const list = [...choices.keys()].filter((e) => (!(input.gentle && key === "lively") || ["rise", "fade", "zoom"].includes(e)) && !(key === "ambient" && e === "fireworks"));
     const chosen = pick(list, (e) => (choices.get(e) ?? 0) * (e === "fireworks" ? 0.4 : 1) * (used.has(e) && e !== "none" ? 0.15 : 1)) ?? list[0];
     if (chosen) used.add(chosen);
     return chosen;
@@ -377,8 +378,8 @@ export function pickDirection(input: DirectionInput): Direction {
   if (twist) lines.push(`- They left it to us, so make it one of a kind: ${twist.text}.`);
   const fx = [
     look ? undefined : `background effect ${quote(effects.ambient ?? "none")}`,
-    `the envelope bursts ${quote(effects.burst ?? "confetti")} when it opens`,
-    `finale effect ${quote(effects.finale ?? "confetti")}`,
+    `the envelope bursts ${quote(look?.burst ?? effects.burst ?? "confetti")} when it opens`,
+    `finale effect ${quote(look?.burst ?? effects.finale ?? "confetti")}`,
     `transition ${quote(effects.lively ?? "rise")} on the playful screens and ${quote(effects.calm ?? "fade")} on the letter`,
     !look && effects.pattern && effects.pattern !== "none" ? `pattern ${quote(effects.pattern)} on one or two light screens` : undefined,
   ].filter(Boolean);

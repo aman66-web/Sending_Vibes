@@ -8,7 +8,7 @@ import { BLANKS_FOR_AI, isBlank } from "./blanks";
 import type { Brief } from "./brief";
 import { buildCard, getTemplate } from "./catalog";
 import { pickDirection, type Direction } from "./directions";
-import { GAME_GUIDE, GENTLE_TUNE, GOAL_MAX, GOAL_NOUNS, LITTLE_TUNE, MOVING, USUAL_GOAL, hasGoal, type GoalGame } from "./games";
+import { GAME_GUIDE, GAME_WORDS, GENTLE_TUNE, GOAL_MAX, LITTLE_TUNE, MOVING, USUAL_GOAL, goalInWords, hasGoal, withGoal } from "./games";
 import { GAME_LABELS, LABELS_ON, LISTS, TEXTS, isList, type LabelKey } from "./labels";
 import { getLook, type Look } from "./looks";
 
@@ -143,7 +143,7 @@ ${labelGuide()}
 
 # Writing it
 - Use everything they told you: names, nicknames, inside jokes, places, hobbies. Specific beats generic every time.
-- If they describe the card screen by screen, or pick the screens, build exactly that: the same screens in the same order (or the order that plays best, if they only picked them), each doing what they described, using the closest screen type and game. Don't add screens they didn't ask for (apart from the intro at the start and the finale at the end) and don't leave any out. If something can't be done with these screens, do the closest thing that can.
+- If they describe the card screen by screen, or pick the screens, build exactly that: the same screens in the same order (or the order that plays best, if they only picked them), each doing what they described, using the closest screen type and game. Don't add screens they didn't ask for (apart from the intro at the start, the finale at the end and, if they didn't ask for one, a heartfelt message just before the finale) and don't leave any out. If something can't be done with these screens, do the closest thing that can.
 - If they don't, design a card that suits these two people and the occasion, in the shape you're given. Include at least two playful screens and a heartfelt message near the end; a photos screen is welcome but not required.
 - Sound like a person, not a greeting card factory: warm, a bit funny where it fits. Use emoji in the words sparingly or not at all.
 - Write in the language their description is written in. If it's only names and choices, use the language you're told the site is in. For English, use British spelling.
@@ -349,16 +349,22 @@ const sameWords = (s: string) =>
 
 // A quiz option said twice is kept once, with the right answer still pointing at it; an
 // answer that isn't one of the options is brought in. Otherwise tapping the second copy of
-// the right answer says "Wrong!".
+// the right answer says "Wrong!". Blanks still to be written ("Type a wrong answer") are
+// all kept: they're the same words on purpose, each waiting for theirs.
 function tidyQuiz(screen: Raw): Raw {
   if (!Array.isArray(screen.questions)) return screen;
   const questions = screen.questions.filter(isObj).flatMap((q) => {
-    const all = Array.isArray(q.options) ? q.options.filter(isText) : [];
+    const all: unknown[] = Array.isArray(q.options) ? q.options : [];
     const given = typeof q.answer === "number" && Number.isFinite(q.answer) ? Math.round(q.answer) : 0;
-    const right = all[Math.min(Math.max(given, 0), Math.max(all.length - 1, 0))];
+    const right = Math.min(Math.max(given, 0), Math.max(all.length - 1, 0));
     const options: string[] = [];
-    for (const o of all) if (!options.some((k) => sameWords(k) === sameWords(o))) options.push(o);
-    let answer = right === undefined ? 0 : Math.max(0, options.findIndex((o) => sameWords(o) === sameWords(right)));
+    // Where each option ended up, so the right answer goes with it.
+    const movedTo = all.map((o) => {
+      if (!isText(o)) return -1;
+      const same = isBlank(o) ? -1 : options.findIndex((k) => !isBlank(k) && sameWords(k) === sameWords(o));
+      return same >= 0 ? same : options.push(o) - 1;
+    });
+    let answer = Math.max(0, movedTo[right] ?? 0);
     // Four at most, keeping the right one.
     let kept = options.slice(0, 4);
     if (answer >= 4) {
@@ -386,23 +392,11 @@ function tidyWheel(screen: Raw): Raw {
   return { ...screen, options, landOn };
 }
 
-const NUMBER_WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty"];
-const BIG_WORDS: Record<string, number> = { thirty: 30, forty: 40 };
-const numberIn = (word: string) => (/^\d+$/.test(word) ? Number(word) : (BIG_WORDS[word.toLowerCase()] ?? NUMBER_WORDS.indexOf(word.toLowerCase())));
-
-// A count just before what the game counts, with up to two words between ("all 7 little
-// candles"), but not "30 years of candles", "Happy 30th" or "one heart at a time".
-function counts(game: GoalGame) {
-  const words = [...NUMBER_WORDS.slice(2), ...Object.keys(BIG_WORDS)].join("|");
-  const between = "(?:\\s+(?!(?:years?|yrs|days?|weeks?|months?|hours?|minutes?|mins?|seconds?)\\b)[\\p{L}'’-]+){0,2}";
-  return new RegExp(`\\b(\\d{1,2}|${words})${between}\\s+(?:${GOAL_NOUNS[game].join("|")})\\b`, "giu");
-}
-
-const GAME_WORDS = ["instructions", "title", "winText"] as const;
-
 // How a game plays, made to match its words and the player: the number in "Blow out all 7
 // candles" is how many it takes to win, never more than the game can show (and the words
-// say so if it was), and gentle cards play slower with bigger pieces.
+// say so if it was), and gentle cards play slower with bigger pieces. On a card being
+// changed, a game whose words weren't touched keeps its goal, which they may have set
+// with the editor's "To win".
 function tidyGame(screen: Raw, fix: Fix): Raw {
   const game = String(screen.game) as Game;
   const style = isObj(screen.style) ? screen.style : {};
@@ -415,13 +409,13 @@ function tidyGame(screen: Raw, fix: Fix): Raw {
   if (hasGoal(game)) {
     const cap = Math.min(GOAL_MAX[game], fix.tune?.goal ?? 40);
     const allowed = (n: number) => Math.min(cap, Math.max(1, Math.round(n)));
-    const said = GAME_WORDS.flatMap((f) => (typeof out[f] === "string" ? [...(out[f] as string).matchAll(counts(game))].map((m) => numberIn(m[1])) : [])).find((n) => n > 0);
+    const before = fix.before?.get(String(out.id));
+    const untouched = before?.type === "game" && before.game === game && GAME_WORDS.every((f) => before[f] === out[f]);
+    if (untouched && typeof tune.goal !== "number" && typeof before.style?.tune?.goal === "number") tune.goal = before.style.tune.goal;
+    const said = untouched ? undefined : goalInWords(game, GAME_WORDS.map((f) => out[f]).filter(isText));
     const goal = said !== undefined ? allowed(said) : typeof tune.goal === "number" ? allowed(tune.goal) : USUAL_GOAL[game] > cap ? allowed(cap) : undefined;
     if (goal !== undefined) tune.goal = goal;
-    if (said !== undefined && goal !== undefined)
-      for (const f of GAME_WORDS) {
-        if (typeof out[f] === "string") out[f] = (out[f] as string).replace(counts(game), (whole, n: string) => (numberIn(n) === goal ? whole : whole.replace(n, String(goal))));
-      }
+    if (said !== undefined && goal !== undefined) for (const f of GAME_WORDS) if (typeof out[f] === "string") out[f] = withGoal(game, out[f] as string, goal);
   }
   if (Object.keys(tune).length) out.style = { ...style, tune };
   return out;
@@ -484,6 +478,8 @@ type Fix = {
   tune?: { size: number; speed: number; goal: number };
   // The screens they picked, by screen-kit key.
   include: string[];
+  // The card's screens before a change, by id.
+  before?: Map<string, Screen>;
 };
 
 // Everything worked out once for a request: how to put the card right, the look they
@@ -547,12 +543,14 @@ function toCard(text: string, input: GenerateInput, urls: string[], plan: Plan):
   // whatever order they've arranged in the editor.
   if (!input.card && (screens[0]?.type !== "intro" || screens.at(-1)?.type !== "finale")) return { problem: "The first screen must be the intro and the last the finale." };
   const card = plan.fix.fresh ? keepChoices(parsed.data, input, plan.look, ownColours) : parsed.data;
-  const missing = plan.fix.fresh ? missingScreens(card, plan.fix.include) : [];
+  // What they picked, and the letter that goes with any card.
+  const needed = plan.fix.include.length && !plan.fix.include.includes("message") ? [...plan.fix.include, "message"] : plan.fix.include;
+  const missing = plan.fix.fresh ? missingScreens(card, needed) : [];
   return {
     card,
     note: note || undefined,
     idea: idea || undefined,
-    problem: missing.length ? `They picked these screens and the card doesn't have them: ${missing.map(screenWords).join(", ")}. Add them, keeping everything else.` : undefined,
+    problem: missing.length ? `The card is missing these screens: ${missing.map(screenWords).join(", ")}. Add them (a message goes just before the finale), keeping everything else.` : undefined,
   };
 }
 
@@ -676,8 +674,10 @@ const GRANDPARENT = /\b(?:gran|granny|grandma|grandmother|grandpa|grandfather|gr
 
 // Who will be playing, from their choices: gentle games for grandparents and anyone who asked.
 function players(brief?: Brief) {
-  const gentle = Boolean(brief?.gentle || brief?.age === "older" || (brief?.relation && GRANDPARENT.test(brief.relation)));
-  return { gentle, little: brief?.age === "little" };
+  // A small child has a guide of their own, even when they asked for gentle games.
+  const little = brief?.age === "little";
+  const gentle = Boolean((brief?.gentle && !little) || brief?.age === "older" || (brief?.relation && GRANDPARENT.test(brief.relation)));
+  return { gentle, little };
 }
 
 // The occasion, from their words, when the questions didn't ask (the describe box).
@@ -729,7 +729,9 @@ function choices(brief: Brief | undefined, include: string[], wordsOnly: boolean
   if (brief.relation) lines.push(`- Who they are to the sender: ${brief.relation}.`);
   if (tones.length) lines.push(`- How it should feel, most important first: ${tones.join(", then ")}. Lead with ${tones[0]}${tones.length > 1 ? "; the others come through in places" : ""}.`);
   if (!wordsOnly && include.length)
-    lines.push(`- The screens they picked: ${include.map(screenWords).join(", ")}. Build exactly these, in the order that plays best, with the intro first and the finale last: no others, and none left out.`);
+    lines.push(
+      `- The screens they picked: ${include.map(screenWords).join(", ")}. Build exactly these, in the order that plays best, with the intro first${include.includes("message") ? "" : ", a heartfelt message just before the finale"} and the finale last: no others, and none left out.`,
+    );
   if (!wordsOnly && brief.length) lines.push(include.length ? `- Length: ${brief.length}, in how much each screen says (the screens are the ones they picked).` : `- Length: ${LENGTHS[brief.length]}.`);
   if (brief.age) lines.push(`- Who's opening it: ${AGES[brief.age]}.`);
   if (gentle && brief.age !== "older") lines.push(wordsOnly ? "- Keep it gentle: short, clear, warm sentences." : '- Keep it gentle and easy: follow the guide for grandparents in "Who\'s playing".');
@@ -770,7 +772,7 @@ function request(input: GenerateInput, plan: Plan): { message: string; urls: str
 
 // What to work out once for a request.
 function planFor(input: GenerateInput): Plan {
-  if (input.card) return { kind: "change", fix: { fresh: false, include: [] } };
+  if (input.card) return { kind: "change", fix: { fresh: false, include: [], before: new Map(input.card.screens.map((s) => [s.id, s])) } };
   if (input.keepDesign && getTemplate(input.template)) return { kind: "card", fix: { fresh: false, include: [] } };
   const brief = input.brief;
   const { gentle, little } = players(brief);
