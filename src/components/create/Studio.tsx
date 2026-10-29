@@ -4,10 +4,10 @@ import { useRef, useState } from "react";
 import { fmt } from "@/i18n/config";
 import { useI18n } from "@/i18n/client";
 import type { CardData, Font, ScreenStyle } from "@/lib/card";
-import { FONT_VARS, screenLook } from "@/lib/screen-style";
-import { themes } from "@/lib/themes";
+import { FONT_VARS } from "@/lib/screen-style";
 import { uploadPhoto } from "./image";
-import { copyScreen, screenEmoji } from "./screen-kit";
+import { copyScreen } from "./screen-kit";
+import { ScreenPreview } from "./ScreenPreview";
 import { ScreensTab } from "./ScreensTab";
 
 // The card designer's panel, like a presentation app's: add text, add screens (ready-made
@@ -278,29 +278,26 @@ export function ScreenStrip({
   return (
     <div className="space-y-2">
       <div className="flex gap-2 overflow-x-auto pb-2" aria-label={s.screens}>
-        {card.screens.map((screen, i) => {
-          const look = screenLook(themes[card.theme], screen.style).theme;
-          return (
-            <button
-              key={screen.id}
-              type="button"
-              onClick={() => onGo(screen.id)}
-              aria-current={i === screenIndex}
-              aria-label={`${i + 1}. ${t.labels.screens[screen.type]}`}
-              className={`relative grid h-20 w-14 shrink-0 place-items-center rounded-lg text-2xl shadow-sm transition ${i === screenIndex ? "ring-[3px] ring-brand ring-offset-2" : "ring-1 ring-black/15 hover:-translate-y-0.5"}`}
-              style={{ background: look.background }}
-            >
-              <span aria-hidden>{screenEmoji(screen)}</span>
-              <span className="absolute bottom-0.5 start-1 text-[10px] font-bold" style={{ color: look.text }}>
-                {i + 1}
-              </span>
-            </button>
-          );
-        })}
+        {/* Each screen as it looks, numbered in order. */}
+        {card.screens.map((screen, i) => (
+          <button
+            key={screen.id}
+            type="button"
+            onClick={() => onGo(screen.id)}
+            aria-current={i === screenIndex}
+            aria-label={`${i + 1}. ${t.labels.screens[screen.type]}`}
+            className={`relative w-14 shrink-0 rounded-lg shadow-sm transition ${i === screenIndex ? "ring-[3px] ring-brand ring-offset-2" : "ring-1 ring-black/15 hover:-translate-y-0.5"}`}
+          >
+            <ScreenPreview card={card} screen={screen} className="w-full rounded-lg border-0" />
+            <span aria-hidden className="absolute bottom-1 start-1 rounded-full bg-black/65 px-1.5 text-[10px] font-bold leading-4 text-white">
+              {i + 1}
+            </span>
+          </button>
+        ))}
         <button
           type="button"
           onClick={onAdd}
-          className="grid h-20 w-14 shrink-0 place-items-center rounded-lg border-2 border-dashed border-foreground/40 text-center text-[11px] font-bold leading-tight opacity-80 hover:opacity-100"
+          className="grid aspect-[3/4] w-14 shrink-0 place-items-center rounded-lg border-2 border-dashed border-foreground/40 text-center text-[11px] font-bold leading-tight opacity-80 hover:opacity-100"
         >
           <span>
             <span aria-hidden className="block text-2xl">

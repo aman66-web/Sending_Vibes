@@ -1,11 +1,10 @@
 "use client";
 
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { fmt } from "@/i18n/config";
 import { useI18n } from "@/i18n/client";
 import type { CardData, Screen } from "@/lib/card";
-import { CardPlayer } from "@/components/card/CardPlayer";
-import { AtPhoneSize } from "./AtPhoneSize";
+import { ScreenPreview } from "./ScreenPreview";
 import { KIT_GROUPS, type KitItem } from "./screen-kit";
 
 // The Screens tab: ready-made screens grouped by what they're for. Each group opens to show
@@ -88,30 +87,6 @@ export function ScreensTab({ card, screenIndex, onAdd, full, onFull }: Props) {
 function KitPreview({ card, item }: { card: CardData; item: KitItem }) {
   const screen = useMemo(() => item.make({ to: card.to, from: card.from }), [item, card.to, card.from]);
   return <ScreenPreview card={card} screen={screen} />;
-}
-
-// One screen played as it'll look on this card, small and not tappable. Only played while
-// it's on screen, so a group full of games stays quick.
-function ScreenPreview({ card, screen, className = "w-full rounded-xl shadow-sm" }: { card: CardData; screen: Screen; className?: string }) {
-  const box = useRef<HTMLDivElement>(null);
-  const [seen, setSeen] = useState(false);
-  useEffect(() => {
-    const el = box.current;
-    if (!el) return;
-    const io = new IntersectionObserver(([entry]) => setSeen(entry.isIntersecting), { rootMargin: "200px" });
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-  const sample = useMemo(() => ({ ...card, ambient: "none" as const, music: "none" as const, screens: [screen] }), [card, screen]);
-  return (
-    <div ref={box} inert aria-hidden className={`pointer-events-none aspect-[3/4] shrink-0 overflow-hidden border border-line bg-background ${className}`}>
-      {seen && (
-        <AtPhoneSize>
-          <CardPlayer card={sample} preview bare />
-        </AtPhoneSize>
-      )}
-    </div>
-  );
 }
 
 // Where a new screen goes: the card's screens in order, each as it looks, with a "Put it
