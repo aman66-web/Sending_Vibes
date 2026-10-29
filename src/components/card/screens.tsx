@@ -10,6 +10,8 @@ import { useSfx } from "./sound";
 import { useTune } from "./tune";
 import { cropStyle } from "@/lib/screen-style";
 import { useWords } from "./words";
+import { Envelope, TapHint, type EnvelopeColours } from "./Envelope";
+import { Keepsake } from "./Keepsake";
 
 type Of<T extends Screen["type"]> = Extract<Screen, { type: T }>;
 // `stage` starts the screen part-way through (see lib/stages.ts), for the editor.
@@ -51,17 +53,26 @@ export function NextButton({ onClick, className = "" }: { onClick?: () => void; 
   );
 }
 
-const ENVELOPE = "#f6efe0";
-const ENVELOPE_SHADE = "#ebe1cb";
-
 export function IntroScreen({
   screen,
   onNext,
   stage = 0,
   to,
   from,
-  envelope = { paper: ENVELOPE, shade: ENVELOPE_SHADE, ink: "#3a3127" },
-}: ScreenProps<"intro"> & { to: string; from: string; envelope?: { paper: string; shade: string; ink: string } }) {
+  envelope,
+  occasion,
+  sentAt,
+  editing = false,
+}: ScreenProps<"intro"> & {
+  to: string;
+  from: string;
+  envelope?: EnvelopeColours;
+  // For the stamp and the postmark's date (see Envelope).
+  occasion?: Occasion;
+  sentAt?: string;
+  // The editor's edit mode, where the envelope keeps still so it's easy to pick.
+  editing?: boolean;
+}) {
   const sfx = useSfx();
   const { text } = useWords();
   const [open, setOpen] = useState(false);
@@ -70,7 +81,6 @@ export function IntroScreen({
   const after = useRef<HTMLDivElement>(null);
   const envelopeButton = useRef<HTMLButtonElement>(null);
   usePressAt(stage, 1, () => envelopeButton.current);
-  const initial = (from.trim()[0] ?? "").toUpperCase() || "\u2665";
 
   // Once it's open, bring the message and button into view: on a short screen (a small
   // phone, or the preview while making a card) they'd otherwise sit below the fold.
@@ -79,7 +89,7 @@ export function IntroScreen({
     const timer = setTimeout(() => {
       setOpened(true);
       after.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
-    }, 1100);
+    }, 1300);
     return () => clearTimeout(timer);
   }, [open]);
 
@@ -88,72 +98,37 @@ export function IntroScreen({
       {/* Nothing usually, unless the card has chosen something to burst out as it opens. */}
       {open && <Burst usual={null} />}
       <div className={`transition-opacity duration-500 ${open ? "opacity-0" : ""}`}>
-        <p className="text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-[var(--c-muted)]">{text("gotMail")}</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--c-muted)]">{text("gotMail")}</p>
         <Flourish className="mx-auto mt-3 text-[var(--c-muted)]" />
       </div>
-      {/* A cream envelope, hand-addressed, closed with a wax seal. It opens and the letter
-          slides up; tapping it again carries on, like the button underneath. */}
-      <button
+      <Envelope
         ref={envelopeButton}
-        data-envelope
-        aria-label={open ? screen.title : "Open the envelope"}
+        open={open}
+        label={open ? screen.title : "Open the envelope"}
+        title={screen.title}
+        to={to}
+        from={from}
+        colours={envelope}
+        occasion={occasion}
+        sentAt={sentAt}
+        still={editing}
         onClick={() => {
           if (opened) return onNext();
           if (open) return;
           setOpen(true);
-          sfx("whoosh");
-          setTimeout(() => sfx("sparkle"), 450);
+          // The seal cracks, the flap lifts, the letter comes out.
+          sfx("crack");
+          setTimeout(() => sfx("whoosh"), 180);
+          setTimeout(() => sfx("sparkle"), 800);
         }}
-        className="group relative mt-16 h-48 w-72 [perspective:900px]"
-      >
-        <span
-          className="absolute inset-0 rounded-md shadow-[0_22px_44px_-20px_rgba(0,0,0,0.6)]"
-          style={{ background: `repeating-linear-gradient(135deg, var(--c-accent) 0 7px, color-mix(in srgb, var(--c-accent) 78%, white) 7px 14px)` }}
-        />
-        <span
-          className={`absolute inset-x-4 bottom-3 top-3 flex flex-col items-center rounded-sm bg-[#fffdf8] px-5 pt-6 text-[#2b2318] shadow transition-transform duration-700 ease-out ${open ? "-translate-y-28 delay-300" : ""}`}
-          style={{ zIndex: 2 }}
-        >
-          <span className="font-display text-xl font-semibold italic leading-tight">{screen.title}</span>
-          <Flourish className="mt-2 w-24 text-[#a8894f]" />
-        </span>
-        <span
-          className="absolute inset-0 rounded-md [clip-path:polygon(0_0,50%_54%,100%_0,100%_100%,0_100%)]"
-          style={{ zIndex: 3, background: `linear-gradient(180deg, ${envelope.paper} 0%, ${envelope.shade} 100%)` }}
-        >
-          {to && (
-            <span className="absolute inset-x-0 bottom-2 truncate px-6 font-hand text-2xl" style={{ color: envelope.ink }}>
-              {to}
-            </span>
-          )}
-        </span>
-        <span
-          className={`absolute inset-x-0 top-0 h-[60%] origin-top rounded-t-md [clip-path:polygon(0_0,100%_0,50%_100%)] ${open ? "[transform:rotateX(180deg)]" : ""}`}
-          style={{
-            zIndex: open ? 1 : 4,
-            background: open ? "color-mix(in srgb, var(--c-accent) 85%, black)" : envelope.shade,
-            filter: "drop-shadow(0 2px 2px rgba(0,0,0,0.12))",
-            transition: "transform 0.5s ease-in-out, z-index 0s linear 0.25s, background 0s linear 0.25s",
-          }}
-        />
-        <span
-          className={`absolute left-1/2 top-[56%] grid h-14 w-14 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full font-display text-xl font-semibold italic text-white/90 transition duration-300 ${open ? "scale-0 opacity-0" : "group-hover:scale-105"}`}
-          style={{
-            zIndex: 5,
-            background: "radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--c-accent) 65%, white) 0%, var(--c-accent) 45%, color-mix(in srgb, var(--c-accent) 55%, black) 100%)",
-            boxShadow: "0 4px 10px rgba(0,0,0,0.35), inset 0 -3px 6px rgba(0,0,0,0.3), inset 0 2px 3px rgba(255,255,255,0.25)",
-          }}
-        >
-          <span className="grid h-10 w-10 place-items-center rounded-full ring-1 ring-white/35">{initial}</span>
-        </span>
-      </button>
+      />
       {open ? (
-        <div ref={after} className="flex animate-screen-in flex-col items-center gap-5 [animation-delay:800ms]">
+        <div ref={after} className="flex animate-screen-in flex-col items-center gap-5 [animation-delay:1100ms]">
           <p className="text-lg text-[var(--c-muted)]">{screen.subtitle}</p>
           <PrimaryButton onClick={onNext}>{screen.button}</PrimaryButton>
         </div>
       ) : (
-        <p className="animate-pulse text-xs font-semibold uppercase tracking-[0.25em] opacity-70">{text("tapEnvelope")}</p>
+        <TapHint tap={text("tapEnvelope")} sound={text("soundHint")} still={editing} />
       )}
     </div>
   );
@@ -356,26 +331,48 @@ export function GameScreen({ screen, onNext, stage = 0, occasion }: ScreenProps<
   );
 }
 
-export function FinaleScreen({ screen, onReplay, footer }: { screen: Of<"finale">; onReplay: () => void; footer?: React.ReactNode }) {
+export function FinaleScreen({
+  screen,
+  onReplay,
+  footer,
+  from = "",
+}: {
+  screen: Of<"finale">;
+  onReplay: () => void;
+  footer?: React.ReactNode;
+  // The sender, to sign and seal the message (see Keepsake).
+  from?: string;
+}) {
   const sfx = useSfx();
   const { text } = useWords();
+  const sealed = from.trim() !== "";
   useEffect(() => {
     const timers = [setTimeout(() => sfx("win"), 150), setTimeout(() => sfx("sparkle"), 700)];
     if (screen.effect === "fireworks") for (let i = 0; i < 4; i++) timers.push(setTimeout(() => sfx("boom"), 900 + i * 800));
+    // A soft thud as the seal is pressed on at the end (keepsake-seal in globals.css).
+    if (sealed) timers.push(setTimeout(() => sfx("stamp"), 2650));
     return () => timers.forEach(clearTimeout);
-  }, [sfx, screen.effect]);
+  }, [sfx, screen.effect, sealed]);
   return (
     <>
       <FinaleEffect effect={screen.effect} />
       {/* Stacked above the effect so the words stay readable. */}
       <div className="relative z-10 flex flex-col items-center gap-6 text-center">
         <Flourish className="text-[var(--c-muted)]" />
-        <h1 className="animate-pop font-display text-5xl font-semibold italic leading-tight">{screen.title}</h1>
-        <p className="text-lg text-[var(--c-muted)]">{screen.body}</p>
-        <button onClick={onReplay} className="text-sm font-semibold underline underline-offset-4 opacity-80 hover:opacity-100">
-          {text("playAgain")}
-        </button>
-        {footer}
+        <h1 className="finale-title text-balance font-display text-[clamp(2.25rem,11cqw,3.25rem)] font-semibold italic leading-[1.1]">{screen.title}</h1>
+        <Keepsake body={screen.body} from={from} />
+        <div className="finale-later flex flex-col items-center gap-2">
+          <button
+            onClick={onReplay}
+            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--c-surface)] px-6 py-2 text-base font-semibold shadow-sm ring-1 ring-current/15 transition active:scale-95"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 12a8 8 0 1 0 2.4-5.7M4 4.5v4.2h4.2" />
+            </svg>
+            {text("playAgain")}
+          </button>
+          {footer}
+        </div>
       </div>
     </>
   );
