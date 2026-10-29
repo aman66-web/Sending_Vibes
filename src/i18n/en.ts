@@ -1299,6 +1299,9 @@ export const en = {
   // What the person who got the card can send back (components/card/ReplyPanel.tsx).
   reply: {},
 
+  // The ready-made screens in the Screens tab (components/create/screen-kit.ts).
+  kit: {},
+
   // The bar on full-screen demos (components/DemoBar.tsx).
   demo: {},
 
