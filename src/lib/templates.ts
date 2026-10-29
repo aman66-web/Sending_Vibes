@@ -29,6 +29,9 @@ export const occasions: Record<Occasion, OccasionInfo> = {
   missyou: { label: "Miss you", emoji: "🫶", tagline: "For long distance: a hug they can actually feel." },
   friendship: { label: "Best friends", emoji: "👯", tagline: "Inside jokes, a bestie quiz and your best photos." },
   leaving: { label: "Leaving", emoji: "👋", tagline: "Send off a colleague with games and good wishes." },
+  graduation: { label: "Graduation", emoji: "🎓", tagline: "Toss the cap, sit one last exam and hear how proud everyone is." },
+  retirement: { label: "Retirement", emoji: "🏖️", tagline: "Out of office, forever. A send-off with games and a big thank you." },
+  newhome: { label: "New home", emoji: "🏡", tagline: "Crack the door code, unpack a box and wish them well in the new place." },
 };
 
 // The first design listed for an occasion is its default.

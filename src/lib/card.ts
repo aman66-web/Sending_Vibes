@@ -27,6 +27,10 @@ export const OCCASIONS = [
   "missyou",
   "friendship",
   "leaving",
+  // Newer ones go at the end, so the order of the rest never changes.
+  "graduation",
+  "retirement",
+  "newhome",
 ] as const;
 export const THEMES = ["rose", "marigold", "party", "midnight", "noel", "crescent", "gold", "lavender", "mint", "sunset", "spooky", "holi", "baby", "ivory", "sky"] as const;
 export const EFFECTS = ["hearts", "fireworks", "confetti", "sparkles", "snow", "stars", "petals", "spooky", "colours", "lanterns", "bubbles", "balloons", "none"] as const;

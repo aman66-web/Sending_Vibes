@@ -30,6 +30,9 @@ const FRONT: Record<Occasion, string> = {
   missyou: "Missing You",
   friendship: "For My Best Friend",
   leaving: "Good Luck",
+  graduation: "Congratulations, Graduate",
+  retirement: "Happy Retirement",
+  newhome: "Happy New Home",
 };
 
 // The front of a card design, like a printed card: its colours, a printed border,

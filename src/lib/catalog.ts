@@ -61,6 +61,9 @@ export const OCCASION_MUSIC: Record<Occasion, Music> = {
   missyou: "love",
   friendship: "festive",
   leaving: "auld",
+  graduation: "joy",
+  retirement: "auld",
+  newhome: "festive",
 };
 
 

@@ -150,6 +150,28 @@ const MOTIFS: Record<Occasion, React.ReactNode> = {
       <path d="M19 17v-4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v4M9 25h30M16 38v3M32 38v3" />
     </>
   ),
+  graduation: (
+    <>
+      <path d="M4 19 24 10l20 9-20 9z" />
+      <path d="M12 22.6V31c0 3.3 5.4 6 12 6s12-2.7 12-6v-8.4" />
+      <path d="M24 19l14 4.5V33M36.6 33h2.8l1 5h-4.8z" />
+    </>
+  ),
+  retirement: (
+    <>
+      <path d="M6 40h36M27 40 14 12M14 40l18-13M32 27h3" />
+      <path d="M14 12c4.5 9 9.5 14.5 18 15" />
+      <circle cx="36" cy="11" r="4" />
+      <path d="M36 4v1.2M36 16.8V18M29 11h1.2M41.8 11H43M31 6l.8.8M40.2 15.2l.8.8M31 16l.8-.8M40.2 6.8l.8-.8" />
+    </>
+  ),
+  newhome: (
+    <>
+      <path d="M7 23 24 9l17 14M11 20v20h26V20M31 14.5V9h4v8.8M4 40h40" />
+      <path d="M20 40v-8a4 4 0 0 1 8 0v8" />
+      <path d="M24 25.5s-3.2-2-3.8-3.8c-.4-1.4.5-2.7 1.8-2.7.9 0 1.6.5 2 1.2.4-.7 1.1-1.2 2-1.2 1.3 0 2.2 1.3 1.8 2.7-.6 1.8-3.8 3.8-3.8 3.8z" />
+    </>
+  ),
 };
 
 export function Motif({ occasion, className = "", style }: { occasion: Occasion; className?: string; style?: React.CSSProperties }) {
