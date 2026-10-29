@@ -56,7 +56,8 @@ export function TwoWays({ onPick }: { onPick?: (way: Way) => void }) {
             </div>
             <div className="flex flex-1 flex-col p-6">
               <h3 className="font-brand text-3xl font-bold leading-tight">{w.title}</h3>
-              <p className="mt-1 text-sm font-bold uppercase tracking-wide text-hot">{w.easy}</p>
+              {/* A deeper red than the brand's, to stay readable on the featured one's yellow. */}
+              <p className="mt-1 text-sm font-bold uppercase tracking-wide text-[#a8301f]">{w.easy}</p>
               <p className="mt-3 leading-relaxed text-ink/75">{w.body}</p>
               <ol className="mt-4 flex-1 space-y-2 text-sm font-semibold">
                 {w.steps.map((step, i) => (

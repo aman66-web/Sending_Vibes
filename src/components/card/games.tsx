@@ -677,7 +677,7 @@ function CursorChase({ onWin, won }: GameProps) {
             </span>
           </button>
         )}
-        <p className="pointer-events-none absolute inset-x-0 bottom-3 text-center text-xs font-semibold uppercase tracking-widest opacity-50">
+        <p className="pointer-events-none absolute inset-x-0 bottom-3 text-center text-sm font-semibold uppercase tracking-widest opacity-75">
           {/* Until they touch it, the screen's own kind of pointer picks the tip. */}
           <span className={touch ? "hidden" : "pointer-coarse:hidden"}>{text("chaseTip")}</span>
           <span className={touch ? "" : "hidden pointer-coarse:inline"}>{text("chaseTouchTip")}</span>
