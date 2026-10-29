@@ -6,9 +6,8 @@ import { OpenedBeacon } from "@/components/card/OpenedBeacon";
 import { InfoPage } from "@/components/InfoPage";
 import { cardEnvelopeLook } from "@/components/OgCardEnvelope";
 import { getI18n } from "@/i18n/server";
-import { currentAccount } from "@/lib/auth";
 import { emailReady } from "@/lib/email";
-import { isBuyer, senderOf } from "@/lib/notify";
+import { senderOf } from "@/lib/notify";
 import { getCard } from "@/lib/storage";
 import { occasions } from "@/lib/templates";
 
@@ -40,15 +39,13 @@ export async function generateViewport({ params }: Props): Promise<Viewport> {
 
 export default async function CardPage({ params }: Props) {
   const { id } = await params;
-  // Who bought it is looked up alongside, to know whether a thank-you can reach them, and
-  // whether this is them looking at their own card.
-  const [card, sender, account] = await Promise.all([
+  // Who bought it is looked up alongside, to know whether a thank-you can reach them.
+  const [card, sender] = await Promise.all([
     getCard(id),
     senderOf(id).catch((e) => {
       console.error("Could not find who sent a card", e);
       return null;
     }),
-    currentAccount().catch(() => null),
   ]);
   if (!card) notFound();
   const { t } = await getI18n();
@@ -70,12 +67,7 @@ export default async function CardPage({ params }: Props) {
       <CardPlayer
         card={card}
         sentAt={sentAt}
-        recipient={{
-          cardId: card.id,
-          text: t.reply,
-          canReply: emailReady() && Boolean(sender?.order.buyerEmail),
-          own: Boolean(account && sender && isBuyer(sender.order, account)),
-        }}
+        recipient={{ cardId: card.id, text: t.reply, canReply: emailReady() && Boolean(sender?.order.buyerEmail) }}
       />
       <OpenedBeacon cardId={card.id} hasEnvelope={card.screens.some((s) => s.type === "intro")} />
     </>

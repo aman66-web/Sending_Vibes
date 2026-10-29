@@ -84,9 +84,9 @@ export const OCCASION_WORDS: Partial<Record<Occasion, string[]>> = {
   missyou: ["miss you", "missing you", "thinking of you", "long distance", "far away", "abroad", "apart", "hug", "hugs"],
   friendship: ["friendship", "friend", "friends", "best friend", "bestie", "bff", "mate", "pal", "buddy", "friendship day", "yaar", "dost"],
   leaving: ["leaving", "goodbye", "farewell", "bon voyage", "moving on", "moving away", "new job", "emigrating", "good luck", "last day", "colleague"],
-  graduation: ["graduation", "graduate", "graduates", "graduating", "graduated", "grad", "uni", "university", "degree", "college", "school leaver", "leavers", "cap and gown", "convocation", "masters", "phd"],
-  retirement: ["retirement", "retire", "retiring", "retired", "pension", "pensioner", "out of office", "last day at work", "end of an era"],
-  newhome: ["new home", "new house", "new flat", "new place", "housewarming", "house warming", "moving house", "moved house", "moving in", "moved in", "first home", "keys", "griha pravesh"],
+  graduation: ["graduation", "graduate", "graduates", "graduating", "graduated", "grad", "uni", "university", "degree", "college", "school leaver", "leavers", "cap and gown", "convocation", "masters", "phd", "congratulations", "congrats", "well done", "proud"],
+  retirement: ["retirement", "retire", "retiring", "retired", "pension", "pensioner", "out of office", "last day at work", "end of an era", "congratulations", "congrats", "farewell", "goodbye", "good luck"],
+  newhome: ["new home", "new house", "new flat", "new place", "housewarming", "house warming", "moving house", "moved house", "moving in", "moved in", "first home", "keys", "griha pravesh", "congratulations", "congrats", "good luck", "welcome home"],
 };
 
 // Words that don't help find a design ("a birthday card for my mum").

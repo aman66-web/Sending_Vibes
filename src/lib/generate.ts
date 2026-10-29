@@ -128,7 +128,7 @@ ${labelGuide()}
 # Who's playing
 - Most people open their card on a phone, with one thumb, so every game must work with taps.
 - Grandparents, anyone they say is older or not used to phones, and any card they want kept gentle: 4 to 7 screens; only easy screens and games (hold-hug, grow-flower, unwrap-gift, light-diyas, release-lanterns, blow-candles, launch-fireworks, a catching game slowed down, scratch, boxes, coupons, reasons, slider, timeline, a yes/no question); on games with moving pieces a tune with speed 0.7 and size 1.5; a goal of 6 or fewer; no typeit, memory-match, shake-it, whack-ghosts or cursor-chase; clear fonts (storybook, classic, rounded or modern for the body, never script for anything long); short, warm sentences and a longer letter. A quiz has at most 3 easy questions.
-- Small children (under 5): 4 to 6 screens, very few words, big pieces (tune size 1.6, speed 0.8, a goal of 8 or fewer), rounded or handwritten fonts, games that are just tapping (catching games, pop-balloons, bubble-wrap, unwrap-gift, hold-hug, grow-flower). No typeit and no quiz: a grown-up will be reading it to them.
+- Small children (under 7): 4 to 6 screens, very few words, big pieces (tune size 1.6, speed 0.8, a goal of 8 or fewer), rounded or handwritten fonts, games that are just tapping (catching games, pop-balloons, bubble-wrap, unwrap-gift, hold-hug, grow-flower). No typeit and no quiz: a grown-up will be reading it to them.
 - Children (5 to 12): bright and silly, short words, any tapping game, a quiz about the things they love.
 - Teenagers: funny and never babyish; quick games (whack-ghosts, shake-it, slot-machine, bubble-wrap) suit them.
 - Colleagues and leaving cards: warm but not intimate.
@@ -395,8 +395,8 @@ function tidyWheel(screen: Raw): Raw {
 // How a game plays, made to match its words and the player: the number in "Blow out all 7
 // candles" is how many it takes to win, never more than the game can show (and the words
 // say so if it was), and gentle cards play slower with bigger pieces. On a card being
-// changed, a game whose words weren't touched keeps its goal, which they may have set
-// with the editor's "To win".
+// changed, a game whose words still say the same count (or none) keeps its goal, which
+// they may have set with the editor's "To win".
 function tidyGame(screen: Raw, fix: Fix): Raw {
   const game = String(screen.game) as Game;
   const style = isObj(screen.style) ? screen.style : {};
@@ -410,9 +410,12 @@ function tidyGame(screen: Raw, fix: Fix): Raw {
     const cap = Math.min(GOAL_MAX[game], fix.tune?.goal ?? 40);
     const allowed = (n: number) => Math.min(cap, Math.max(1, Math.round(n)));
     const before = fix.before?.get(String(out.id));
-    const untouched = before?.type === "game" && before.game === game && GAME_WORDS.every((f) => before[f] === out[f]);
-    if (untouched && typeof tune.goal !== "number" && typeof before.style?.tune?.goal === "number") tune.goal = before.style.tune.goal;
-    const said = untouched ? undefined : goalInWords(game, GAME_WORDS.map((f) => out[f]).filter(isText));
+    const saidNow = goalInWords(game, GAME_WORDS.map((f) => out[f]).filter(isText));
+    // Reworded but saying the same count as before: the goal they set stays.
+    const kept =
+      before?.type === "game" && before.game === game && saidNow === goalInWords(game, GAME_WORDS.map((f) => before[f]).filter(isText)) ? before : undefined;
+    if (kept && typeof tune.goal !== "number" && typeof kept.style?.tune?.goal === "number") tune.goal = kept.style.tune.goal;
+    const said = kept ? undefined : saidNow;
     const goal = said !== undefined ? allowed(said) : typeof tune.goal === "number" ? allowed(tune.goal) : USUAL_GOAL[game] > cap ? allowed(cap) : undefined;
     if (goal !== undefined) tune.goal = goal;
     if (said !== undefined && goal !== undefined) for (const f of GAME_WORDS) if (typeof out[f] === "string") out[f] = withGoal(game, out[f] as string, goal);
@@ -743,7 +746,7 @@ const guessOccasion = (text: string) => OCCASION_WORDS.find(([, words]) => words
 
 const LENGTHS = { short: "short: 4 or 5 screens, and short words", medium: "medium: 6 to 8 screens", long: "long: 9 to 12 screens and a longer letter" };
 const AGES = {
-  little: "a small child, under 5 (follow the guide for small children)",
+  little: "a small child, under 7 (follow the guide for small children)",
   child: "a child, 5 to 12",
   teen: "a teenager",
   adult: "a grown-up",

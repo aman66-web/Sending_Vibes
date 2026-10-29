@@ -362,11 +362,13 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
         return { kind: "photo", index: index === "new" ? "new" : Number(index), el: photo };
       }
       if (screen?.type === "quiz" && asked >= 0) {
-        // An answer button says which answer it is; its words may be the same as another's.
+        // An answer button says which answer it is; its words may be the same as another's. The
+        // question on show is only trusted when its answer has the words that were tapped, as the
+        // card's own arrows can move on without telling the editor.
         const option = e.closest("[data-quiz-option]");
         const k = Number(option?.getAttribute("data-quiz-option"));
         const value = screen.questions[asked]?.options[k];
-        if (option && value !== undefined) return { kind: "words", field: { path: ["screens", screenIndex, "questions", asked, "options", k], value }, el: option };
+        if (option && value !== undefined && norm(option.textContent ?? "") === norm(value)) return { kind: "words", field: { path: ["screens", screenIndex, "questions", asked, "options", k], value }, el: option };
       }
       const found = findField(e, el, fields);
       if (found) {

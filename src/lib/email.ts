@@ -85,13 +85,14 @@ function receipt(order: Order) {
   const rows = order.items
     .map((item) => {
       const status = cardStatus(item);
-      // A link the buyer sends on stays plain; one we're emailing is just for them to watch.
-      const link = sendsItself(status) ? cardUrl(order, item) : ownUrl(order, item);
+      // The plain link, as it's the one people copy and pass on (even for a card we email, if it
+      // ends up in spam), and a "Watch it" link for the buyer's own look.
+      const link = cardUrl(order, item);
       return `<tr><td style="padding:14px 0;border-top:1px solid #e3d9c6">
 <div style="font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:bold">${esc(fmt(t.cardFor, { to: item.to, from: item.from }))}</div>
 <div style="margin:4px 0 10px;color:#5b5247">${esc(receiptNote(order, item, status))}</div>
 <div style="margin-bottom:8px;word-break:break-all"><a href="${esc(link)}" style="color:#2b5aa6">${esc(link)}</a></div>
-${sendsItself(status) ? watchLink(order, item) + shareButtons(order, item) : ""}
+${watchLink(order, item)}${sendsItself(status) ? shareButtons(order, item) : ""}
 </td></tr>`;
     })
     .join("");
@@ -111,7 +112,7 @@ ${sendsItself(status) ? watchLink(order, item) + shareButtons(order, item) : ""}
     ...order.items.map((item) => {
       const status = cardStatus(item);
       const watch = `▶ ${DICTS[order.locale].basket.share.watch}: ${ownUrl(order, item)}`;
-      return `${fmt(t.cardFor, { to: item.to, from: item.from })}\n${receiptNote(order, item, status)}\n${sendsItself(status) ? `${cardUrl(order, item)}\n${watch}` : ownUrl(order, item)}\n`;
+      return `${fmt(t.cardFor, { to: item.to, from: item.from })}\n${receiptNote(order, item, status)}\n${cardUrl(order, item)}\n${watch}\n`;
     }),
   ].join("\n");
   return { subject: t.receiptSubject, html, text };

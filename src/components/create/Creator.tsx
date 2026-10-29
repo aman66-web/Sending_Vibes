@@ -328,8 +328,10 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     setAiDone(false);
     setAiError(null);
     setAiNote(null);
+    setAiHeld(false);
     setAsk("");
     setScreenAsk("");
+    setJob(null);
     setPicked(undefined);
     setAnswers(NO_ANSWERS);
     setQuestion(0);
@@ -349,6 +351,9 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     setPast([]);
     setFuture([]);
     setAiError(null);
+    setAiHeld(false);
+    // Its favourite colour isn't known: the questions it was made from are long gone.
+    setJob(null);
     setWaiting({});
     clearQuiz();
     setStep("edit");
@@ -367,7 +372,8 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
     setQuestion(quiz.question);
     setMode(quiz.mode);
     setTemplateSlug(quiz.templateSlug);
-    setPicked(pickedIn(quiz));
+    // A colour just picked on this design's page wins over the one saved with the questions.
+    setPicked((p) => (p && p.slug === quiz.templateSlug ? p : pickedIn(quiz)));
     setIdea(quiz.idea);
     setTo(quiz.to);
     setFrom(quiz.from);
@@ -509,8 +515,11 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
       // A moment to say it's ready, with the envelope sealed, before it plays for them.
       setOutcome("ready");
       await new Promise((done) => setTimeout(done, 1200));
+      // Gone meanwhile (Back): the questions stay, so coming back brings them back.
+      if (controller.signal.aborted) return;
       // Only now are the questions done with: until the card is here, a reload or Back brings them back.
       clearQuiz();
+      setAiHeld(false);
       setCard(made);
       setSelected(made.screens[0]?.id);
       setMode(template ? "premade" : "custom");

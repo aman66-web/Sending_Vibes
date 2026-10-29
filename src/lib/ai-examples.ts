@@ -121,7 +121,7 @@ const SISTER: AiExample = {
           burst: "confetti",
           transition: "zoom",
           stickers: [
-            { emoji: "🧁", x: 9, y: 50, size: 12, rotate: -12, motion: "float" },
+            { emoji: "🧁", x: 10, y: 90, size: 12, rotate: -12, motion: "float" },
             { emoji: "🍰", x: 89, y: 90, size: 12, rotate: 10, motion: "none" },
           ],
         },

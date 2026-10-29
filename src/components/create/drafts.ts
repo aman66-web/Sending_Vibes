@@ -12,6 +12,8 @@ const DRAFT_KEY = "sv-draft-v1";
 const MODE_KEY = "sv-draft-mode";
 // The basket card the draft is a change to, if it's one.
 const EDIT_KEY = "sv-draft-edit";
+// When the draft was last changed, to tell it from questions started before or since.
+const DRAFT_AT_KEY = "sv-draft-at";
 // Unfinished cards set aside while another card was made or changed. The newest comes back
 // as the draft once the card that took its place is in the basket or thrown away.
 const PARKED_KEY = "sv-draft-parked";
@@ -67,6 +69,7 @@ export function saveDraft({ card, mode, editing }: Draft) {
   try {
     localStorage.setItem(DRAFT_KEY, JSON.stringify(card));
     localStorage.setItem(MODE_KEY, mode);
+    localStorage.setItem(DRAFT_AT_KEY, String(Date.now()));
     if (editing) localStorage.setItem(EDIT_KEY, editing);
     else localStorage.removeItem(EDIT_KEY);
   } catch {}
@@ -122,6 +125,7 @@ export function dropDraft(): Draft | null {
     localStorage.removeItem(DRAFT_KEY);
     localStorage.removeItem(MODE_KEY);
     localStorage.removeItem(EDIT_KEY);
+    localStorage.removeItem(DRAFT_AT_KEY);
   } catch {}
   // A change to a basket card that has since been changed and saved again is out of date:
   // bringing it back would add a second copy of the card.
@@ -200,6 +204,16 @@ export type Begin = {
 // Where the card maker begins. A card from the basket opens to be changed; questions part-way
 // through come back after a reload or signing in with Google; an unfinished card opens
 // straight away unless the link asked for something new, when it's offered instead.
+// When the draft was last changed (0 for one saved before this was kept).
+function draftAt() {
+  try {
+    const at = Number(localStorage.getItem(DRAFT_AT_KEY));
+    return Number.isFinite(at) ? at : 0;
+  } catch {
+    return 0;
+  }
+}
+
 export function resumeFrom({ edit, resume, fresh, search }: { edit?: string; resume?: boolean; fresh: boolean; search: string }): Begin {
   const draft = loadDraft();
   const quiz = loadQuiz();
@@ -214,7 +228,8 @@ export function resumeFrom({ edit, resume, fresh, search }: { edit?: string; res
   }
   const added = loadAdded() ?? undefined;
   if (quiz && (resume || quiz.search === search)) return { quiz, waiting: { draft: draft ?? undefined, added } };
-  // Questions started since the card was left are newer work: both are offered instead.
-  if (draft && !fresh && !added && !(quiz && started(quiz))) return { open: draft, waiting: {} };
+  // Questions started since the card was last changed are newer work: both are offered instead.
+  const newerQuiz = !!quiz && started(quiz) && quiz.at > draftAt();
+  if (draft && !fresh && !added && !newerQuiz) return { open: draft, waiting: {} };
   return { waiting: { draft: draft ?? undefined, quiz: quiz && started(quiz) ? quiz : undefined, added } };
 }

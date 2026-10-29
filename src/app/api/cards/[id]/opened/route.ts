@@ -1,5 +1,6 @@
 import { after, type NextRequest } from "next/server";
 import { currentAccount } from "@/lib/auth";
+import { cardStatus } from "@/lib/delivery";
 import { isBuyer, sendOpenedEmail, senderOf } from "@/lib/notify";
 import { clientNetwork, limiter } from "@/lib/rate-limit";
 import { claimFirstOpen } from "@/lib/storage";
@@ -22,8 +23,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   try {
     const sender = await senderOf(id);
     if (!sender) return done();
-    // A card that's still waiting to be emailed can't have reached them yet: this is its buyer looking.
-    if (sender.item.sendAt && Date.parse(sender.item.sendAt) > Date.now()) return done();
+    // A card that's still waiting to be emailed can't have reached them yet: this is its buyer
+    // looking. One we couldn't email may have been sent on by hand, so that counts.
+    if (cardStatus(sender.item) === "scheduled") return done();
     // The buyer looking at their own card, signed in, isn't the card being opened.
     const account = await currentAccount().catch(() => null);
     if (account && isBuyer(sender.order, account)) return done();
