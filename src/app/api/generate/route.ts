@@ -10,8 +10,10 @@ import { GenerateError, generateCard, generateReady } from "@/lib/generate";
 
 // Writes a card from a description, or makes a change to one.
 
-// A whole card can take half a minute to write, and a bad first try is retried once.
-export const maxDuration = 120;
+// A whole card can take a minute or two to write, and a bad first try is retried once if
+// there's time. lib/generate.ts gives up before this, so the visitor still hears back and
+// gets their go back.
+export const maxDuration = 300;
 
 const bodySchema = z.object({
   // All the answers to the questions can run to a few thousand characters.
@@ -24,6 +26,8 @@ const bodySchema = z.object({
   focus: z.string().max(40).optional(),
   // The choices from the questions, for a new card.
   brief: briefSchema.optional(),
+  // The creative directions of their last few cards, so the next one looks different.
+  avoid: z.array(z.string().max(40)).max(12).optional(),
 });
 
 // Each one costs real money, so keep it to a sensible rate per visitor. In memory, so
@@ -92,8 +96,10 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // Streams one JSON event per line: {type:"progress",screens} as each screen is written,
-  // then {type:"card",card} or {type:"error",error}.
+  // Streams one JSON event per line: {type:"idea",idea} with the card's big idea as soon as
+  // it's written (new cards only), {type:"progress",screens,titles} as each screen and its
+  // title are written (titles[i] is null until screen i's title is), then
+  // {type:"card",card,note,left,direction,idea} or {type:"error",error}.
   const encoder = new TextEncoder();
   const body = new ReadableStream<Uint8Array>({
     async start(controller) {
@@ -104,10 +110,18 @@ export async function POST(req: NextRequest) {
         } catch {}
       };
       try {
-        const { card, note } = await generateCard({ ...parsed.data, locale }, { signal: req.signal, onProgress: (screens) => send({ type: "progress", screens }) });
-        send({ type: "card", card, note, left });
+        const { card, note, direction, idea } = await generateCard(
+          { ...parsed.data, locale },
+          {
+            signal: req.signal,
+            onIdea: (idea) => send({ type: "idea", idea }),
+            onProgress: (screens, titles) => send({ type: "progress", screens, titles }),
+          },
+        );
+        send({ type: "card", card, note, left, direction, idea });
       } catch (e) {
-        await refund?.().catch(() => {});
+        // Whatever went wrong, they get their go back.
+        await refund?.().catch((r) => console.error("allowance refund failed", r));
         if (!req.signal.aborted) console.error("generate failed", e);
         send({ type: "error", error: errors[e instanceof GenerateError ? e.reason : "failed"] });
       }
