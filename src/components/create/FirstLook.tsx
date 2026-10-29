@@ -96,7 +96,7 @@ export function FirstLook({ card, onFinish, onEdit, onNewLook, onUndo }: Props) 
             <button
               type="button"
               onClick={onFinish}
-              className="min-h-13 basis-full rounded-full bg-brand px-5 py-3 font-brand text-lg font-semibold text-white shadow-lg sm:flex-[1.4] sm:basis-0"
+              className="min-h-13 basis-full rounded-full bg-brand px-5 py-3 font-brand text-lg font-semibold text-on-brand shadow-lg sm:flex-[1.4] sm:basis-0"
             >
               {x.happyYes}
             </button>

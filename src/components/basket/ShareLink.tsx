@@ -47,7 +47,7 @@ export function ShareLink({ url, to, from, compact = false }: { url: string; to:
       </button>
       {open && (
         <div className="grid gap-2 sm:grid-cols-2">
-          <a href={`https://wa.me/?text=${encodeURIComponent(`${message} ${url}`)}`} target="_blank" rel="noreferrer" className={`${option} bg-[#25D366] text-white`}>
+          <a href={`https://wa.me/?text=${encodeURIComponent(`${message} ${url}`)}`} target="_blank" rel="noreferrer" className={`${option} bg-[#25D366] text-ink`}>
             {c.whatsapp}
           </a>
           {/* A plain text message, for anyone who doesn't use WhatsApp. "?&body=" works on iPhones and Android. */}

@@ -185,7 +185,7 @@ export function StudioPanel({ card, screenIndex, tab, setTab, change, editScreen
           <p className="text-base font-semibold opacity-75">{fmt(s.onScreen, { n: screenIndex + 1, name: screenName })}</p>
         )}
         {note && (
-          <p role="status" className="text-base font-semibold text-red-700">
+          <p role="status" className="text-base font-semibold text-red-700 dark:text-red-300">
             {note}
           </p>
         )}
@@ -414,7 +414,7 @@ export function ScreenStrip({
       </button>
       <button
         type="button"
-        className={`${action} text-red-700`}
+        className={`${action} text-red-700 dark:text-red-300`}
         disabled={card.screens.length <= 1}
         onClick={(e) => {
           if (!fresh(e)) return;

@@ -305,7 +305,7 @@ function QuizField({ screen, onChange }: { screen: QuizScreen; onChange: Update 
           <div className="flex items-center justify-between">
             <span className="text-lg font-bold">{fmt(e.questionN, { n: qi + 1 })}</span>
             {screen.questions.length > 1 && (
-              <button type="button" onClick={() => update((qs) => qs.filter((_, i) => i !== qi))} className="min-h-11 rounded-full px-3 text-base font-semibold text-red-700 hover:bg-red-50">
+              <button type="button" onClick={() => update((qs) => qs.filter((_, i) => i !== qi))} className="min-h-11 rounded-full px-3 text-base font-semibold text-red-700 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-950">
                 {e.remove}
               </button>
             )}
@@ -448,7 +448,7 @@ export function PhotoField({ screen, onChange }: { screen: PhotosScreen; onChang
       </div>
       <input ref={input} type="file" accept="image/*" multiple hidden onChange={(e) => add(e.target.files)} />
       {error && (
-        <p role="alert" className="text-sm font-semibold text-red-700">
+        <p role="alert" className="text-sm font-semibold text-red-700 dark:text-red-300">
           {error}
         </p>
       )}

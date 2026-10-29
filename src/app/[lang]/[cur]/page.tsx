@@ -366,7 +366,7 @@ export default async function Home() {
           <Reveal delay={100} className="md:col-span-3">
             <div className="sheet flex h-full flex-col bg-hot p-7 text-white sm:p-9">
               <h3 className="font-brand text-3xl font-bold">{h.musicTitle}</h3>
-              <p className="mt-2 text-white/80">{h.musicBody}</p>
+              <p className="mt-2 text-white">{h.musicBody}</p>
               <div className="mt-6 flex flex-1 items-center justify-center">
                 <MusicDemo />
               </div>

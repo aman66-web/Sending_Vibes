@@ -44,7 +44,7 @@ export function DesignPicker({ occasion, onOccasion, chosen, onChoose, onNext, o
     if (onPhone()) setPreviewing(slug);
   };
   const chip = (on: boolean) =>
-    `min-h-11 shrink-0 whitespace-nowrap rounded-full border-2 px-4 py-2 text-sm font-semibold transition ${on ? "border-brand bg-brand text-white" : "border-line bg-panel hover:border-brand"}`;
+    `min-h-11 shrink-0 whitespace-nowrap rounded-full border-2 px-4 py-2 text-sm font-semibold transition ${on ? "border-brand bg-brand text-on-brand" : "border-line bg-panel hover:border-brand"}`;
 
   return (
     <section className="mx-auto max-w-6xl px-4 pb-32 pt-10">
@@ -83,7 +83,7 @@ export function DesignPicker({ occasion, onOccasion, chosen, onChoose, onNext, o
             <button type="button" onClick={() => (who !== "all" ? setWho("all") : onOccasion("all"))} className="min-h-11 rounded-full border-2 border-line px-5 font-semibold">
               {k.clear}
             </button>
-            <button type="button" onClick={onScratch} className="min-h-11 rounded-full bg-brand px-5 font-semibold text-white">
+            <button type="button" onClick={onScratch} className="min-h-11 rounded-full bg-brand px-5 font-semibold text-on-brand">
               {k.scratch}
             </button>
           </div>
@@ -105,7 +105,7 @@ export function DesignPicker({ occasion, onOccasion, chosen, onChoose, onNext, o
             type="button"
             onClick={() => onNext()}
             disabled={!getTemplate(chosen)}
-            className="shrink-0 rounded-full bg-brand px-6 py-3 font-brand text-lg font-semibold text-white shadow-lg disabled:opacity-40"
+            className="shrink-0 rounded-full bg-brand px-6 py-3 font-brand text-lg font-semibold text-on-brand shadow-lg disabled:opacity-40"
           >
             {c.pickNext} →
           </button>
@@ -143,7 +143,7 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
   }, []);
   return (
     <div role="group" aria-label={label}>
-      <p aria-hidden className="mb-1.5 text-xs font-semibold uppercase tracking-wide opacity-60">
+      <p aria-hidden className="mb-1.5 text-xs font-semibold uppercase tracking-wide opacity-75">
         {label}
       </p>
       <div ref={row} className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0">
@@ -163,7 +163,7 @@ function PickTile({ template, on, onTap, onPreview }: { template: Template; on: 
       <button type="button" onClick={onTap} aria-pressed={on} className="block w-full text-start">
         <ProductThumb template={template} />
         <div className="p-3">
-          {on && <span className="mb-1.5 inline-flex rounded-full bg-brand px-2.5 py-1 text-xs font-bold text-white">✓ {c.chosen}</span>}
+          {on && <span className="mb-1.5 inline-flex rounded-full bg-brand px-2.5 py-1 text-xs font-bold text-on-brand">✓ {c.chosen}</span>}
           <p dir="auto" className="font-brand font-bold leading-tight">
             {template.name}
           </p>

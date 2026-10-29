@@ -149,7 +149,7 @@ export function MakingScreen({ to, from, brief, template, typed, photos, concept
             {failed}
           </p>
           <p className="mt-1 opacity-70">{x.makingKept}</p>
-          <button type="button" onClick={onRetry} autoFocus className="mt-6 w-full max-w-sm rounded-full bg-brand py-4 font-brand text-xl font-semibold text-white shadow-lg">
+          <button type="button" onClick={onRetry} autoFocus className="mt-6 w-full max-w-sm rounded-full bg-brand py-4 font-brand text-xl font-semibold text-on-brand shadow-lg">
             ↻ {x.tryAgain}
           </button>
           <button type="button" onClick={onBack} className="mt-2 min-h-11 px-4 font-semibold opacity-70 hover:opacity-100">
@@ -178,7 +178,7 @@ export function MakingScreen({ to, from, brief, template, typed, photos, concept
       )}
 
       <div className="mt-7 w-full rounded-3xl border border-line bg-panel p-5 text-start shadow-sm">
-        <p className="text-xs font-bold uppercase tracking-wide opacity-50">{x.yourChoices}</p>
+        <p className="text-xs font-bold uppercase tracking-wide opacity-75">{x.yourChoices}</p>
         <div className="mt-2 flex items-center gap-4">
           <VibePreview to={to} from={from} occasion={brief?.occasion ?? ""} look={brief?.look ?? ""} className="w-24 shrink-0 sm:w-32" />
           <ul className="flex min-w-0 flex-1 flex-wrap gap-1.5">
@@ -192,7 +192,7 @@ export function MakingScreen({ to, from, brief, template, typed, photos, concept
 
         {showIdea && (
           <div className="mt-4 border-t border-line pt-4">
-            <p className="text-xs font-bold uppercase tracking-wide opacity-50">{concept || !typed ? fmt(x.ideaFor, { name }) : x.yourIdea}</p>
+            <p className="text-xs font-bold uppercase tracking-wide opacity-75">{concept || !typed ? fmt(x.ideaFor, { name }) : x.yourIdea}</p>
             {concept ? (
               <p key="concept" dir="auto" className="mt-1 animate-screen-in font-hand text-2xl leading-snug">
                 “{concept}”
@@ -202,7 +202,7 @@ export function MakingScreen({ to, from, brief, template, typed, photos, concept
                 “{typed}”
               </p>
             ) : (
-              <p className="mt-1 animate-pulse font-hand text-xl opacity-60">{x.ideaThinking}</p>
+              <p className="mt-1 animate-pulse font-hand text-xl opacity-75">{x.ideaThinking}</p>
             )}
           </div>
         )}
@@ -216,7 +216,7 @@ export function MakingScreen({ to, from, brief, template, typed, photos, concept
               if (!text) return null;
               return (
                 <li key={i} className="flex animate-screen-in items-start gap-2">
-                  <span aria-hidden className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-brand text-[11px] text-white">
+                  <span aria-hidden className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-brand text-[11px] text-on-brand">
                     ✓
                   </span>
                   <span dir="auto" className="min-w-0 line-clamp-2">
@@ -241,7 +241,7 @@ export function MakingScreen({ to, from, brief, template, typed, photos, concept
               {x.stopSure}
             </p>
             <div className="mt-3 flex gap-2">
-              <button type="button" autoFocus onClick={() => setStopping(false)} className="min-h-11 flex-1 rounded-full bg-brand px-4 font-semibold text-white">
+              <button type="button" autoFocus onClick={() => setStopping(false)} className="min-h-11 flex-1 rounded-full bg-brand px-4 font-semibold text-on-brand">
                 {x.keepGoing}
               </button>
               <button type="button" onClick={onStop} className="min-h-11 flex-1 rounded-full border-2 border-line px-4 font-semibold">
@@ -250,7 +250,7 @@ export function MakingScreen({ to, from, brief, template, typed, photos, concept
             </div>
           </div>
         ) : (
-          <button type="button" onClick={() => setStopping(true)} className="mt-5 min-h-11 px-4 text-sm font-semibold opacity-60 hover:opacity-100">
+          <button type="button" onClick={() => setStopping(true)} className="mt-5 min-h-11 px-4 text-sm font-semibold opacity-75 hover:opacity-100">
             {x.stop}
           </button>
         ))}

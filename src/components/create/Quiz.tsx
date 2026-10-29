@@ -338,7 +338,7 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
           <div className="h-2 flex-1 overflow-hidden rounded-full bg-line">
             <div className="h-full rounded-full bg-brand transition-[width] duration-500" style={{ width: `${((at + 1) / total) * 100}%` }} />
           </div>
-          <span className="shrink-0 text-sm font-semibold opacity-60">{fmt(q.progress, { n: at + 1, total })}</span>
+          <span className="shrink-0 text-sm font-semibold opacity-75">{fmt(q.progress, { n: at + 1, total })}</span>
         </div>
         {at === 0 && <p className="mt-6 text-lg opacity-70">{design ? q.readyIntro : q.intro}</p>}
         {at === 0 && design && !wide && <DesignChip design={design} onChange={onChangeDesign} />}
@@ -441,7 +441,7 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
                           </span>
                           <span className="min-w-0">
                             <span className="block">{dateName(d, t)}</span>
-                            <span className={`block text-sm font-normal ${answers.occasion === d.occasion ? "text-white/85" : "opacity-70"}`}>{whenLabel(d.days, t)}</span>
+                            <span className={`block text-sm font-normal ${answers.occasion === d.occasion ? "text-on-brand" : "opacity-70"}`}>{whenLabel(d.days, t)}</span>
                           </span>
                         </button>
                       ))}
@@ -551,12 +551,12 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
             <button type="button" onClick={() => (at > 0 ? setIndex(at - 1) : onBack())} className="min-h-12 rounded-full border-2 border-line px-5 py-3 font-semibold hover:border-foreground/40">
               ← {q.back}
             </button>
-            <button disabled={!ready} className="ms-auto min-h-12 rounded-full bg-brand px-7 py-3.5 text-center font-brand text-lg font-semibold text-white shadow-lg disabled:opacity-40">
+            <button disabled={!ready} className="ms-auto min-h-12 rounded-full bg-brand px-7 py-3.5 text-center font-brand text-lg font-semibold text-on-brand shadow-lg disabled:opacity-40">
               {label}
             </button>
           </div>
           {last && (
-            <p className="mt-3 text-end text-sm opacity-60">{design ? fmt(q.readyPrice, { price: price("card", currency) }) : fmt(q.price, { price: price("custom", currency) })}</p>
+            <p className="mt-3 text-end text-sm opacity-75">{design ? fmt(q.readyPrice, { price: price("card", currency) }) : fmt(q.price, { price: price("custom", currency) })}</p>
           )}
         </form>
 

@@ -70,7 +70,7 @@ export function FeelingStep({ occasion, vibes, vibeOther, suggested, isSuggestio
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block text-lg">{q.feelings[f].label}</span>
-                <span className={`block text-base font-normal italic ${on ? "text-white/85" : "opacity-70"}`}>{q.feelings[f].sample}</span>
+                <span className={`block text-base font-normal italic ${on ? "text-on-brand" : "opacity-70"}`}>{q.feelings[f].sample}</span>
               </span>
               {on && <span aria-hidden>✓</span>}
             </button>
@@ -78,7 +78,7 @@ export function FeelingStep({ occasion, vibes, vibeOther, suggested, isSuggestio
         })}
       </div>
       <p aria-live="polite" className="mt-3 min-h-6 font-semibold">
-        {full ? fmt(q.maxFeelings, { n: MAX_FEELINGS }) : isSuggestion && vibes.length ? <span className="opacity-60">✨ {note}</span> : null}
+        {full ? fmt(q.maxFeelings, { n: MAX_FEELINGS }) : isSuggestion && vibes.length ? <span className="opacity-75">✨ {note}</span> : null}
       </p>
       <div className="mt-2 flex flex-wrap gap-2">
         {!more && order.length > shown.length && (

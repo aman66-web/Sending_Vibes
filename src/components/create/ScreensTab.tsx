@@ -103,7 +103,7 @@ export function ScreensTab({ card, screenIndex, onAdd, full, onFull }: Props) {
           placeholder={k.searchPlaceholder}
           enterKeyHint="search"
           autoComplete="off"
-          className="min-h-12 w-full rounded-2xl border-2 border-line bg-panel py-2.5 pe-12 ps-11 text-base outline-none transition placeholder:opacity-50 focus:border-brand [&::-webkit-search-cancel-button]:hidden"
+          className="min-h-12 w-full rounded-2xl border-2 border-line bg-panel py-2.5 pe-12 ps-11 text-base outline-none transition placeholder:opacity-70 focus:border-brand [&::-webkit-search-cancel-button]:hidden"
         />
         {searching && (
           <button
@@ -129,7 +129,7 @@ export function ScreensTab({ card, screenIndex, onAdd, full, onFull }: Props) {
                 setFilter(f);
                 setQuery("");
               }}
-              className={`inline-flex min-h-11 items-center gap-1.5 rounded-full border-2 px-4 text-sm font-bold transition ${on ? "border-brand bg-brand text-white" : "border-line bg-panel hover:border-brand"}`}
+              className={`inline-flex min-h-11 items-center gap-1.5 rounded-full border-2 px-4 text-sm font-bold transition ${on ? "border-brand bg-brand text-on-brand" : "border-line bg-panel hover:border-brand"}`}
             >
               <span aria-hidden>{f === "card" ? occasions[card.occasion].emoji : FILTER_EMOJI[f]}</span>
               {k.filters[f]}
@@ -165,7 +165,7 @@ export function ScreensTab({ card, screenIndex, onAdd, full, onFull }: Props) {
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block font-bold">{s.groups[group.key]}</span>
-                <span className="block text-xs opacity-60">{group.items.length === 1 ? s.oneScreen : fmt(s.screenCount, { n: group.items.length })}</span>
+                <span className="block text-xs opacity-75">{group.items.length === 1 ? s.oneScreen : fmt(s.screenCount, { n: group.items.length })}</span>
               </span>
             </h3>
             <ul className="grid grid-cols-2 gap-3 border-t border-line p-3">
@@ -222,7 +222,7 @@ function KitTile({ card, item, name, about, onPick }: { card: CardData; item: Ki
       <ScreenPreview card={card} screen={screen} />
       <span className="mt-1.5 block px-0.5 text-sm font-bold leading-tight">{name}</span>
       {about && <span className="mt-0.5 block px-0.5 text-xs leading-snug opacity-70">{about}</span>}
-      <span className={`mt-1 block px-0.5 text-xs font-semibold ${needs ? "text-brand" : "opacity-60"}`}>
+      <span className={`mt-1 block px-0.5 text-xs font-semibold ${needs ? "text-brand" : "opacity-75"}`}>
         <span aria-hidden>{needs === "photos" ? "📷 " : needs ? "✏️ " : "✓ "}</span>
         {needs === "photos" ? t.kit.addPhotos : needs ? t.kit.writeYours : t.kit.ready}
       </span>
@@ -254,7 +254,7 @@ function WherePicker({ card, current, name, onChoose, onCancel }: { card: CardDa
       autoFocus={at === suggested}
       aria-label={at === 0 ? s.atStart : fmt(s.afterScreen, { n: at, name: nameOf(card.screens[at - 1]) })}
       onClick={() => onChoose(at)}
-      className={`flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed py-2.5 font-bold transition hover:border-brand hover:bg-brand-soft hover:text-brand ${at === suggested ? "border-brand bg-brand-soft text-brand" : "border-line text-foreground/70"}`}
+      className={`flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed py-2.5 font-bold transition hover:border-brand hover:bg-brand-soft hover:text-on-brand-soft ${at === suggested ? "border-brand bg-brand-soft text-on-brand-soft" : "border-line text-foreground/70"}`}
     >
       <span aria-hidden className="text-lg leading-none">
         ＋
@@ -280,7 +280,7 @@ function WherePicker({ card, current, name, onChoose, onCancel }: { card: CardDa
                     <span className="block font-semibold">
                       {i + 1}. {nameOf(sc)}
                     </span>
-                    {words(sc) && <span className="block truncate text-sm opacity-60">{words(sc)}</span>}
+                    {words(sc) && <span className="block truncate text-sm opacity-75">{words(sc)}</span>}
                   </span>
                   {i === current && <span className="shrink-0 pe-1 text-xs font-bold text-brand">{s.youAreHere}</span>}
                 </li>
