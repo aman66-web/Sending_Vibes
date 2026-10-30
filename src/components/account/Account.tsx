@@ -10,7 +10,22 @@ import { useI18n } from "@/i18n/client";
 import type { Occasion, ThemeName } from "@/lib/card";
 import { themes } from "@/lib/themes";
 
-type Card = { id: string; to: string; from: string; paidAt: string; occasion: Occasion; theme: ThemeName; email?: string; sendOn?: string; openedAt?: string };
+type Card = {
+  id: string;
+  to: string;
+  from: string;
+  paidAt: string;
+  occasion: Occasion;
+  theme: ThemeName;
+  email?: string;
+  emails?: string[];
+  missed?: string[];
+  sendOn?: string;
+  sendTime?: string;
+  timeZone?: string;
+  sendAt?: string;
+  openedAt?: string;
+};
 type State = { enabled: boolean; google: boolean; email: boolean; account: { email: string | null; name: string | null } | null; cards: (Card & Delivery)[]; error?: boolean };
 
 // The signed-in buyer's cards, or a way to sign in (Google or an emailed code).

@@ -13,7 +13,8 @@ export function ScreenPreview({ card, screen, className = "w-full rounded-xl sha
   useEffect(() => {
     const el = box.current;
     if (!el) return;
-    const io = new IntersectionObserver(([entry]) => setSeen(entry.isIntersecting), { rootMargin: "200px" });
+    // A quick jump can bring two changes at once (in view, then out): the last is where it is now.
+    const io = new IntersectionObserver((entries) => setSeen(entries[entries.length - 1].isIntersecting), { rootMargin: "200px" });
     io.observe(el);
     return () => io.disconnect();
   }, []);

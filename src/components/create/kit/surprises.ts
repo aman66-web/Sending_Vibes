@@ -4,7 +4,8 @@ import { LOOK, corners, kit, type KitItem } from "./parts";
 // Questions and surprises: runaway questions, quizzes, scratch cards, passwords, wheels,
 // mystery boxes and sliders. The runaway No buttons get excuses to suit each question.
 
-const QUESTIONS: KitItem[] = [
+// The runaway Yes/No questions get a group of their own in the Screens tab (screen-kit.ts).
+export const QUESTIONS: KitItem[] = [
   kit.question("question", "🙅", ["any"], () => ({ question: BLANK.question, yes: "Yes", no: "No", afterYes: "Good answer" })),
 
   kit.question("question:valentine", "💘", ["valentine"], () => ({
@@ -477,4 +478,4 @@ const SLIDERS: KitItem[] = [
   })),
 ];
 
-export const SURPRISES: KitItem[] = [...QUESTIONS, ...QUIZZES, ...SCRATCHES, ...PASSWORDS, ...WHEELS, ...BOXES, ...SLIDERS];
+export const SURPRISES: KitItem[] = [...QUIZZES, ...SCRATCHES, ...PASSWORDS, ...WHEELS, ...BOXES, ...SLIDERS];

@@ -3,7 +3,7 @@ import { ENDINGS } from "./kit/endings";
 import { GAME_EMOJI, GAMES_KIT } from "./kit/games";
 import { OPENINGS } from "./kit/openings";
 import { FAMILY, FESTIVE, LOVE, uid, type KitItem } from "./kit/parts";
-import { SURPRISES } from "./kit/surprises";
+import { QUESTIONS, SURPRISES } from "./kit/surprises";
 import { WORDS } from "./kit/words";
 
 // Ready-made screens to add to a card, like slide layouts in a presentation: several of
@@ -15,10 +15,12 @@ import { WORDS } from "./kit/words";
 export type { KitItem, KitKey, Names, Tag } from "./kit/parts";
 export { GAME_EMOJI };
 
-export type KitGroupKey = "start" | "words" | "fun" | "games" | "end";
+export type KitGroupKey = "start" | "yesno" | "words" | "fun" | "games" | "end";
 
 export const KIT_GROUPS: { key: KitGroupKey; items: KitItem[] }[] = [
   { key: "start", items: OPENINGS },
+  // The questions whose No button runs away, the card's best-known trick.
+  { key: "yesno", items: QUESTIONS },
   { key: "words", items: WORDS },
   { key: "fun", items: SURPRISES },
   { key: "games", items: GAMES_KIT },

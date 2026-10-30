@@ -2,7 +2,7 @@ import { allowanceLeft } from "@/lib/allowance";
 import { NextResponse } from "next/server";
 import { authReady, currentAccount, emailSignInReady, googleEnabled } from "@/lib/auth";
 import { getTemplate } from "@/lib/catalog";
-import { cardStatus } from "@/lib/delivery";
+import { canSendNow, cardStatus, notReached, recipients } from "@/lib/delivery";
 import { ordersFor } from "@/lib/orders";
 import { getCard, openedTimes } from "@/lib/storage";
 
@@ -35,7 +35,14 @@ export async function GET() {
           template: getTemplate(look?.template)?.slug,
           custom: item.tier === "custom",
           email: item.delivery === "email" ? item.email : undefined,
+          // Everyone it's emailed to, the ones it couldn't reach, and when it's booked for.
+          emails: item.delivery === "email" ? recipients(item) : undefined,
+          missed: item.delivery === "email" ? notReached(item) : undefined,
           sendOn: item.sendOn,
+          sendTime: item.sendTime,
+          timeZone: item.timeZone,
+          sendAt: item.sendAt,
+          sendNow: canSendNow(item),
         };
       }),
     );

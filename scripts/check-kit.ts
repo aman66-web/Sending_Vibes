@@ -84,7 +84,7 @@ for (const group of KIT_GROUPS) {
   if (ranked(group.items, "valentine").length !== group.items.length) fail(group.key, "ranking loses screens");
 }
 console.log(`  first six openings for a Valentine's card: ${ranked(KIT_GROUPS[0].items, "valentine").slice(0, 6).map((i) => i.key).join(", ")}`);
-console.log(`  first six games for a birthday card: ${ranked(KIT_GROUPS[3].items.filter((i) => inFilter(i, "card", "birthday")), "birthday").slice(0, 6).map((i) => i.key).join(", ")}`);
+console.log(`  first six games for a birthday card: ${ranked(KIT_GROUPS.find((g) => g.key === "games")!.items.filter((i) => inFilter(i, "card", "birthday")), "birthday").slice(0, 6).map((i) => i.key).join(", ")}`);
 if (KIT.length < 120) problems.push(`only ${KIT.length} screens; want 120 or more`);
 
 for (const w of warnings) console.log(`warning: ${w}`);

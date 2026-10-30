@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { NextOccasions } from "@/components/basket/NextOccasions";
+import { PaymentWait } from "@/components/basket/PaymentWait";
 import { SendCard } from "@/components/basket/SendCard";
 import { ClearBasket } from "@/components/basket/ShareLink";
 import { Flourish } from "@/components/card/ornaments";
@@ -10,7 +11,7 @@ import { LANGUAGES, fmt } from "@/i18n/config";
 import { getI18n } from "@/i18n/server";
 import { alertOwner } from "@/lib/alert";
 import { getTemplate } from "@/lib/catalog";
-import { cardStatus, sendsItself } from "@/lib/delivery";
+import { canSendNow, cardStatus, emailList, notReached, recipients, sendWhen, sendsItself } from "@/lib/delivery";
 import { emailReady } from "@/lib/email";
 import { errorFields } from "@/lib/log";
 import { fulfilSession, type Fulfilment } from "@/lib/orders";
@@ -40,7 +41,7 @@ export default async function ThanksPage({ searchParams }: Props) {
     failed = true;
   }
 
-  const date = (sendOn: string) => sendOn && new Intl.DateTimeFormat(LANGUAGES[locale].tag, { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${sendOn}T12:00:00Z`));
+  const tag = LANGUAGES[locale].tag;
 
   let body: React.ReactNode;
   if (result?.state === "paid") {
@@ -77,7 +78,16 @@ export default async function ThanksPage({ searchParams }: Props) {
               <p dir="auto" className="font-brand text-2xl font-bold leading-tight">
                 {fmt(t.email.cardFor, { to: item.to, from: item.from })}
               </p>
-              <SendCard url={`${order.site}/c/${item.cardId}`} to={item.to} from={item.from} status={status} email={item.email} date={date(item.sendOn ?? item.sendAt?.slice(0, 10) ?? "")} />
+              <SendCard
+                url={`${order.site}/c/${item.cardId}`}
+                to={item.to}
+                from={item.from}
+                status={status}
+                // Who it's going to, or (if some couldn't be emailed) who it didn't reach.
+                email={emailList(status === "failed" || status === "retrying" ? notReached(item) : recipients(item), tag)}
+                date={sendWhen(t.basket, tag, item)}
+                sendNow={canSendNow(item) && session_id ? { card: item.cardId, session: session_id } : undefined}
+              />
               {design && (
                 <p className="mt-5 border-t-2 border-dashed border-ink/15 pt-2">
                   <Link
@@ -102,16 +112,14 @@ export default async function ThanksPage({ searchParams }: Props) {
         </div>
       </>
     );
+  } else if (failed || result) {
+    // Still being confirmed, or couldn't be checked for a moment: a loading screen that checks
+    // again by itself, and says why if it's taking longer.
+    body = <PaymentWait message={failed ? th.checkFailed : result?.state === "finishing" ? th.finishing : th.processing} />;
   } else {
-    const message = failed ? th.checkFailed : result?.state === "finishing" ? th.finishing : result ? th.processing : th.notFound;
     body = (
       <div className="sheet p-10 text-center">
-        <p className="font-brand text-2xl font-bold">{message}</p>
-        {(failed || result) && (
-          <Link href={`/basket/thanks?session_id=${encodeURIComponent(session_id ?? "")}`} className="btn btn-red mt-6 inline-flex px-6 py-3">
-            {th.refresh}
-          </Link>
-        )}
+        <p className="font-brand text-2xl font-bold">{th.notFound}</p>
       </div>
     );
   }

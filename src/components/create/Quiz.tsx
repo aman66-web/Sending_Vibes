@@ -343,7 +343,7 @@ export function Quiz({ answers, setAnswers, index, setIndex, onGenerate, onBack,
     inside: { title: fmt(q.questions.inside.title, { name }), hint: q.questions.inside.hint },
     about: design ? { title: q.questions.say.title, hint: q.questions.say.hint } : { title: fmt(q.questions.about.title, { name }), hint: q.questions.about.hint },
     photos: { title: fmt(q.photosTitle, { name }), hint: designPhotos ? q.photosHint : q.photosHintAdd },
-    signup: { title: q.signupTitle, hint: signUp?.account ? fmt(q.signedIn, { email: signUp.account.email ?? signUp.account.name ?? "" }) : q.signupHint },
+    signup: { title: signUp?.account ? fmt(q.signedInTitle, { name }) : q.signupTitle, hint: signUp?.account ? fmt(q.signedIn, { email: signUp.account.email ?? signUp.account.name ?? "" }) : q.signupHint },
   };
   const { title, hint } = titles[step];
   const skip = !last && !filledIn(step, answers, Boolean(design));
