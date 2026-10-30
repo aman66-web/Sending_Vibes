@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useId, useMemo, useState, useSyncExternalStore } from "react";
 import { Motif } from "@/components/card/motifs";
 import { RichText } from "@/components/RichText";
 import { LANGUAGES, fmt } from "@/i18n/config";
@@ -255,6 +255,7 @@ type Zone = { zone: string; name: string };
 // arrive in (theirs to start with).
 function EmailOptions({ item, update, own, zones, tag, showErrors }: { item: BasketItem; update: (patch: Partial<BasketItem>) => void; own: string; zones: Zone[]; tag: string; showErrors: boolean }) {
   const b = useI18n().t.basket;
+  const id = useId();
   const emails = emailsOf(item);
   const later = item.sendOn !== undefined;
   const zone = item.timeZone || own;
@@ -271,33 +272,32 @@ function EmailOptions({ item, update, own, zones, tag, showErrors }: { item: Bas
           {emails.map((email, i) => {
             const bad = showErrors && email.trim() !== "" && !EMAIL.test(email.trim());
             return (
-              <li key={i}>
-                <label className="block">
+              <li key={i} className="flex items-end gap-2">
+                <label className="block min-w-0 flex-1">
                   <span className="text-sm font-semibold">{i === 0 ? fmt(b.emailLabel, { name: item.to }) : b.anotherEmail}</span>
-                  <span className="flex items-center gap-2">
-                    <input
-                      type="email"
-                      inputMode="email"
-                      autoComplete="off"
-                      dir="ltr"
-                      value={email}
-                      aria-invalid={bad || undefined}
-                      onChange={(e) => setEmails(emails.map((x, j) => (j === i ? e.target.value : x)))}
-                      className={`${field} ${bad ? "border-hot" : ""}`}
-                    />
-                    {emails.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => setEmails(emails.filter((_, j) => j !== i))}
-                        aria-label={b.removeEmail}
-                        title={b.removeEmail}
-                        className="mt-1 grid h-12 w-12 shrink-0 place-items-center rounded-full border-2 border-ink/20 text-xl font-bold text-ink/70 transition hover:border-ink hover:text-ink"
-                      >
-                        ×
-                      </button>
-                    )}
-                  </span>
+                  <input
+                    type="email"
+                    inputMode="email"
+                    autoComplete="off"
+                    dir="ltr"
+                    value={email}
+                    aria-invalid={bad || undefined}
+                    aria-describedby={i === 0 ? `${id}-emails` : undefined}
+                    onChange={(e) => setEmails(emails.map((x, j) => (j === i ? e.target.value : x)))}
+                    className={`${field} ${bad ? "border-hot" : ""}`}
+                  />
                 </label>
+                {emails.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => setEmails(emails.filter((_, j) => j !== i))}
+                    aria-label={b.removeEmail}
+                    title={b.removeEmail}
+                    className="grid h-12 w-12 shrink-0 place-items-center rounded-full border-2 border-ink/20 text-xl font-bold text-ink/70 transition hover:border-ink hover:text-ink"
+                  >
+                    ×
+                  </button>
+                )}
               </li>
             );
           })}
@@ -311,42 +311,39 @@ function EmailOptions({ item, update, own, zones, tag, showErrors }: { item: Bas
             + {b.addEmail}
           </button>
         )}
-        <p className="mt-2 text-sm text-ink/60">{fmt(b.emailsHint, { n: MAX_EMAILS })}</p>
-        {/* The email's reply address is the buyer's, so say so. */}
-        <p className="mt-1 text-sm text-ink/60">{fmt(b.replyHint, { name: item.to })}</p>
+        <div id={`${id}-emails`} className="mt-2 space-y-1 text-sm text-ink/60">
+          <p>{fmt(b.emailsHint, { n: MAX_EMAILS })}</p>
+          {/* The email's reply address is the buyer's, so say so. */}
+          <p>{fmt(b.replyHint, { name: item.to })}</p>
+        </div>
       </div>
 
-      <label className="block">
-        <span className="text-sm font-semibold">{b.messageLabel}</span>
-        <textarea
-          dir="auto"
-          rows={3}
-          maxLength={MESSAGE_MAX}
-          value={message}
-          placeholder={b.messagePlaceholder}
-          onChange={(e) => update({ message: e.target.value })}
-          className={`${field} min-h-24 resize-y leading-snug`}
-        />
-        <span className="mt-1 flex flex-wrap justify-between gap-x-4 text-sm text-ink/60">
+      <div>
+        <label className="block">
+          <span className="text-sm font-semibold">{b.messageLabel}</span>
+          <textarea
+            dir="auto"
+            rows={3}
+            maxLength={MESSAGE_MAX}
+            value={message}
+            placeholder={b.messagePlaceholder}
+            aria-describedby={`${id}-message`}
+            onChange={(e) => update({ message: e.target.value })}
+            className={`${field} min-h-24 resize-y leading-snug`}
+          />
+        </label>
+        <p id={`${id}-message`} className="mt-1 flex flex-wrap justify-between gap-x-4 text-sm text-ink/60">
           <span>{fmt(b.messageHint, { name: item.to })}</span>
           {message.length > MESSAGE_MAX - 100 && <span aria-live="polite">{fmt(b.messageLeft, { n: MESSAGE_MAX - message.length })}</span>}
-        </span>
-      </label>
+        </p>
+      </div>
 
       <div>
         <p className="text-sm font-semibold">{b.when}</p>
         <div className="mt-2 flex flex-wrap gap-2">
           {[
             { on: !later, label: b.now, patch: { sendOn: undefined } },
-            {
-              on: later,
-              label: b.later,
-              patch: {
-                sendOn: item.sendOn ?? day(1),
-                sendTime: item.sendTime ?? DEFAULT_TIME,
-                timeZone: item.timeZone ?? own,
-              },
-            },
+            { on: later, label: b.later, patch: { sendOn: item.sendOn ?? day(1), sendTime: item.sendTime ?? DEFAULT_TIME, timeZone: item.timeZone ?? own } },
           ].map((choice) => (
             <button
               key={choice.label}
@@ -369,19 +366,21 @@ function EmailOptions({ item, update, own, zones, tag, showErrors }: { item: Bas
               <span className="text-sm font-semibold">{b.time}</span>
               <input type="time" step={60} value={item.sendTime ?? DEFAULT_TIME} onChange={(e) => update({ sendTime: e.target.value })} className={field} />
             </label>
-            <label className="block sm:col-span-2">
-              <span className="text-sm font-semibold">{b.zone}</span>
-              <select value={zone} onChange={(e) => update({ timeZone: e.target.value })} className={field}>
-                {choices.map((z) => (
-                  <option key={z.zone} value={z.zone}>
-                    {z.zone === own ? `${b.ownZone} (${z.name})` : z.name}
-                  </option>
-                ))}
-              </select>
-              <span className="mt-1 block text-sm text-ink/60">
+            <div className="sm:col-span-2">
+              <label className="block">
+                <span className="text-sm font-semibold">{b.zone}</span>
+                <select value={zone} aria-describedby={`${id}-zone`} onChange={(e) => update({ timeZone: e.target.value })} className={field}>
+                  {choices.map((z) => (
+                    <option key={z.zone} value={z.zone}>
+                      {z.zone === own ? `${b.ownZone} (${z.name})` : z.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <p id={`${id}-zone`} className="mt-1 text-sm text-ink/60">
                 {b.zoneHint} {fmt(b.zoneNow, { time: timeThereNow(zone, tag) })}
-              </span>
-            </label>
+              </p>
+            </div>
             <p className="text-sm text-ink/55 sm:col-span-2">{fmt(b.dateHint, { days: SCHEDULE_DAYS })}</p>
           </div>
         )}
