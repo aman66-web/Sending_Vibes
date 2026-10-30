@@ -5,11 +5,9 @@ import { DICTS } from "@/i18n/dictionaries";
 import { emailSignInReady } from "@/lib/auth";
 import { sendSignInCode } from "@/lib/email";
 import { DAY, HOUR, allow, clientNetwork } from "@/lib/rate-limit";
-import { CODE_COOKIE, CODE_DIGITS, CODE_TTL_S, inbox, newCode, seal } from "@/lib/signin-code";
 import { adminSupabase } from "@/lib/storage";
 
-// Emails a sign-in code. Supabase makes the sign-in (and the account the first time); the
-// site makes the 6-digit code and seals the two together in a cookie (lib/signin-code.ts).
+// Emails a sign-in code. Supabase makes the code, and the account the first time.
 
 const bodySchema = z.object({ email: z.string().trim().toLowerCase().max(200).pipe(z.email()) });
 
@@ -20,6 +18,18 @@ const PER_EMAIL = [
   { max: 5, per: HOUR },
   { max: 12, per: DAY },
 ];
+
+// One inbox, however the address is written, for counting only (the code still goes to
+// the address as typed): name+anything@ is name@, and Gmail ignores dots and also
+// answers to googlemail.com.
+function inbox(email: string) {
+  const at = email.lastIndexOf("@");
+  let name = email.slice(0, at).toLowerCase().replace(/\+.*$/, "");
+  let domain = email.slice(at + 1).toLowerCase();
+  if (domain === "googlemail.com") domain = "gmail.com";
+  if (domain === "gmail.com") name = name.replace(/\./g, "");
+  return `${name}@${domain}`;
+}
 
 export async function POST(req: NextRequest) {
   const lang = req.cookies.get(LOCALE_COOKIE)?.value;
@@ -38,19 +48,10 @@ export async function POST(req: NextRequest) {
 
   try {
     const { data, error } = await admin.auth.admin.generateLink({ type: "magiclink", email });
-    if (error || !data.properties?.hashed_token) throw error ?? new Error("No sign-in came back");
-    const code = newCode();
-    await sendSignInCode(email, code, locale);
+    if (error || !data.properties?.email_otp) throw error ?? new Error("No code came back");
+    await sendSignInCode(email, data.properties.email_otp, locale);
     // How long the code is, so the sign-in box can check it as soon as it's all typed.
-    const res = NextResponse.json({ ok: true, digits: CODE_DIGITS });
-    res.cookies.set(CODE_COOKIE, seal({ email, tokenHash: data.properties.hashed_token, type: data.properties.verification_type, code }), {
-      httpOnly: true,
-      secure: req.nextUrl.protocol === "https:",
-      sameSite: "lax",
-      path: "/api/auth",
-      maxAge: CODE_TTL_S,
-    });
-    return res;
+    return NextResponse.json({ ok: true, digits: data.properties.email_otp.length });
   } catch (e) {
     console.error("Sign-in code failed", e);
     return fail(a.codeFailed, 500);
