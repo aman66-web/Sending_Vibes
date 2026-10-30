@@ -1001,6 +1001,7 @@ export const pl: Dict = {
       sendingNow: "Wysyłamy…",
       sendNowFailed: "Nie udało się teraz wysłać kartki, więc nadal czeka na wybrany termin. Spróbuj ponownie za minutę.",
       emailedDone: "Gotowe! Wysłaliśmy ją e-mailem na adres {email}.",
+      checkSpam: "Jeśli nie ma jej w skrzynce odbiorczej, poproś, żeby zajrzeli do folderu Spam lub Wiadomości-śmieci.",
       sendYourself: "Albo wyślij link samodzielnie",
       emailFailed: "Nie udało się wysłać kartki na adres {email}. Wyślij ją samodzielnie przyciskiem poniżej, a {name} i tak ją dostanie.",
       emailRetrying: "Na razie nie udało się wysłać kartki na adres {email}. Będziemy próbować dalej, ale możesz też już teraz wysłać ją samodzielnie, a {name} dostanie ją od razu.",

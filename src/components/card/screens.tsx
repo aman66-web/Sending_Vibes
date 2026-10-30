@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import type { Game, Occasion, Screen } from "@/lib/card";
 import { Burst, FinaleEffect, useReducedMotion } from "./effects";
 import { GameView } from "./games";
@@ -59,9 +59,18 @@ export function HelpButton({ onClick, children }: { onClick: () => void; childre
   );
 }
 
+// Told when a screen's Next button shows, which for a game or question means it's been won,
+// so the card can open it finished if they go back and come forward again (see CardPlayer).
+export const DoneContext = createContext<() => void>(() => {});
+
 // The Next button, in the screen's own words.
 export function NextButton({ onClick, className = "" }: { onClick?: () => void; className?: string }) {
   const { text } = useWords();
+  const done = useContext(DoneContext);
+  const shown = !className.includes("invisible");
+  useEffect(() => {
+    if (shown) done();
+  }, [shown, done]);
   return (
     <PrimaryButton onClick={onClick} className={className}>
       {text("next")}

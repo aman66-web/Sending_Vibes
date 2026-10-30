@@ -961,6 +961,7 @@ export const en = {
       sendingNow: "Sending…",
       sendNowFailed: "We couldn't send it just now, so it's still booked. Please try again in a minute.",
       emailedDone: "All done! We've emailed it to {email}.",
+      checkSpam: "If it's not in their inbox, ask them to check Junk or Spam.",
       sendYourself: "Or send the link yourself",
       emailFailed: "We couldn't email it to {email}. Please send it to {name} yourself with the button below.",
       emailRetrying: "We couldn't email it to {email} just yet. We'll keep trying, or you can send it to {name} yourself now.",
