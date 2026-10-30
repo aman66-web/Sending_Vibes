@@ -28,6 +28,7 @@ import {
 
 const GROUP_EMOJI = {
   start: "💌",
+  yesno: "🏃",
   words: "✉️",
   fun: "🎁",
   games: "🎮",

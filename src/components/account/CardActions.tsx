@@ -1,17 +1,36 @@
 "use client";
 
 import Link from "next/link";
+import { SendNow } from "@/components/basket/SendNow";
 import { ShareLink } from "@/components/basket/ShareLink";
 import { LANGUAGES, fmt } from "@/i18n/config";
 import { useI18n } from "@/i18n/client";
-import { sendsItself, type CardStatus } from "@/lib/delivery";
+import { emailList, sendWhen, sendsItself, type CardStatus } from "@/lib/delivery";
 import type { ThemeName } from "@/lib/card";
 
 // What the account API adds to each card about getting it to them. Optional, so an older
 // response (a tab left open over an update) still shows.
-export type Delivery = { status?: CardStatus; template?: string; custom?: boolean };
+export type Delivery = {
+  status?: CardStatus;
+  template?: string;
+  custom?: boolean;
+};
 
-type Props = { card: { id: string; to: string; from: string; theme: ThemeName; email?: string; sendOn?: string } & Delivery };
+type Props = {
+  card: {
+    id: string;
+    to: string;
+    from: string;
+    theme: ThemeName;
+    email?: string;
+    emails?: string[];
+    missed?: string[];
+    sendOn?: string;
+    sendTime?: string;
+    timeZone?: string;
+    sendAt?: string;
+  } & Delivery;
+};
 
 // Under each card on the account page: how it's reaching them, the way to send it, and one
 // tap to start the next one.
@@ -20,12 +39,15 @@ export function CardActions({ card }: Props) {
   const th = t.basket.thanks;
   const url = `${window.location.origin}/c/${card.id}`;
   const status = card.status ?? (card.email ? "emailed" : "self");
-  const email = card.email ?? "";
-  const day = (sendOn: string) => sendOn && new Intl.DateTimeFormat(LANGUAGES[locale].tag, { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${sendOn}T12:00:00Z`));
+  const tag = LANGUAGES[locale].tag;
+  // Everyone it's going to, or just who it couldn't reach.
+  const everyone = card.emails ?? (card.email ? [card.email] : []);
+  const email = emailList((status === "failed" || status === "retrying") && card.missed?.length ? card.missed : everyone, tag);
+  const when = sendWhen(t.basket, tag, card);
 
   const line =
     status === "scheduled"
-      ? fmt(th.emailLater, { email, date: day(card.sendOn ?? "") })
+      ? fmt(th.emailLater, { email, date: when })
       : status === "emailed"
         ? `✓ ${fmt(th.emailNow, { email })}`
         : status === "failed" || status === "retrying"
@@ -36,6 +58,7 @@ export function CardActions({ card }: Props) {
   return (
     <>
       {line && <p className={`mt-4 font-semibold ${sendsItself(status) ? "text-hot" : "text-ink/75"}`}>{line}</p>}
+      {status === "scheduled" && <SendNow card={card.id} name={card.to} date={when} onSent={() => window.location.reload()} />}
       {sendsItself(status) ? (
         <ShareLink url={url} to={card.to} from={card.from} compact />
       ) : (

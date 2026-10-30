@@ -7,6 +7,9 @@ import type { Tier } from "./pricing";
 export const MAX_BASKET = 20;
 // Resend can schedule an email up to 30 days ahead.
 export const MAX_SCHEDULE_DAYS = 30;
+// How many addresses one card can be emailed to, and how long the buyer's note in the email can be.
+export const MAX_EMAILS = 10;
+export const MESSAGE_MAX = 600;
 
 export type BasketItem = {
   id: string;
@@ -18,10 +21,20 @@ export type BasketItem = {
   // Sets the price shown here; the checkout works it out again from the saved card.
   tier?: Tier;
   delivery: "self" | "email";
+  // Who to email it to. Baskets from before there could be several have just `email`.
+  emails?: string[];
   email?: string;
-  // A later day to email it on (YYYY-MM-DD); empty sends it as soon as it's paid.
+  // The buyer's own words for the email.
+  message?: string;
+  // A later day to email it on (YYYY-MM-DD), and the time (HH:MM) and time zone it should
+  // arrive in; no day sends it as soon as it's paid.
   sendOn?: string;
+  sendTime?: string;
+  timeZone?: string;
 };
+
+// The addresses typed for a card so far, with an empty box to start with.
+export const emailsOf = (item: Pick<BasketItem, "emails" | "email">) => (item.emails?.length ? item.emails : [item.email ?? ""]);
 
 const KEY = "sv-basket";
 const EVENT = "sv-basket";
@@ -75,7 +88,22 @@ export function removeFromBasket(ids: string[]) {
 export function replaceInBasket(oldId: string, item: BasketItem) {
   const items = readBasket();
   if (!items.some((i) => i.id === oldId)) return addToBasket(item);
-  writeBasket(items.map((i) => (i.id === oldId ? { ...item, delivery: i.delivery, email: i.email, sendOn: i.sendOn } : i)));
+  writeBasket(
+    items.map((i) =>
+      i.id === oldId
+        ? {
+            ...item,
+            delivery: i.delivery,
+            emails: i.emails,
+            email: i.email,
+            message: i.message,
+            sendOn: i.sendOn,
+            sendTime: i.sendTime,
+            timeZone: i.timeZone,
+          }
+        : i,
+    ),
+  );
 }
 
 export const inBasket = (id: string) => readBasket().some((i) => i.id === id);

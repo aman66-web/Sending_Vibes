@@ -2,7 +2,24 @@ import "server-only";
 import { Resend } from "resend";
 import { LANGUAGES, fmt, type Locale } from "@/i18n/config";
 import { DICTS } from "@/i18n/dictionaries";
-import { bookAt, cardSender, cardStatus, cardSubject, isFinal, pending, sendsItself, type CardStatus, type EmailResult } from "./delivery";
+import {
+  bookAt,
+  cardSender,
+  cardStatus,
+  cardSubject,
+  emailList,
+  isFinal,
+  notReached,
+  pending,
+  recipients,
+  resultFor,
+  sendWhen,
+  sendsItself,
+  unsent,
+  withResults,
+  type CardStatus,
+  type EmailResult,
+} from "./delivery";
 import type { Order, OrderItem } from "./orders";
 import { formatMoney } from "./pricing";
 
@@ -20,11 +37,11 @@ const cardUrl = (order: Order, item: OrderItem) => `${order.site}/c/${item.cardI
 // The buyer's own look at a card we're emailing for them, so it isn't counted as them opening it.
 const ownUrl = (order: Order, item: OrderItem) => `${cardUrl(order, item)}?me=1`;
 
-// The day the buyer picked, written out in their language.
-function sendDay(order: Order, item: OrderItem) {
-  const day = item.sendOn ? new Date(`${item.sendOn}T12:00:00Z`) : new Date(item.sendAt!);
-  return new Intl.DateTimeFormat(LANGUAGES[order.locale].tag, { dateStyle: "long", timeZone: "UTC" }).format(day);
-}
+// When the buyer picked for it to arrive, written out in their language.
+const sendDay = (order: Order, item: OrderItem) => sendWhen(DICTS[order.locale].basket, LANGUAGES[order.locale].tag, item);
+
+// Everyone it's going to, or just the ones it couldn't reach, as a list in their language.
+const addresses = (order: Order, list: string[]) => emailList(list, LANGUAGES[order.locale].tag);
 
 // `preheader` is the line inboxes show after the subject; it's hidden in the email itself.
 export function layout(locale: Locale, body: string, preheader = "") {
@@ -65,16 +82,17 @@ const watchLink = (order: Order, item: OrderItem) =>
 // What the receipt says about each card, once this attempt's card emails have gone (or not).
 function receiptNote(order: Order, item: OrderItem, status: CardStatus) {
   const t = DICTS[order.locale].email;
-  const email = item.email ?? "";
+  const email = addresses(order, recipients(item));
+  const missed = addresses(order, notReached(item));
   switch (status) {
     case "scheduled":
       return fmt(t.willEmail, { email, date: sendDay(order, item) });
     case "emailed":
       return fmt(t.emailedNow, { email });
     case "failed":
-      return fmt(t.emailFailed, { email, to: item.to });
+      return fmt(t.emailFailed, { email: missed, to: item.to });
     case "retrying":
-      return fmt(t.emailRetrying, { email, to: item.to });
+      return fmt(t.emailRetrying, { email: missed, to: item.to });
     default:
       return fmt(t.sendYourself, { to: item.to });
   }
@@ -124,10 +142,14 @@ ${watchLink(order, item)}${sendsItself(status) ? shareButtons(order, item) : ""}
 function cardEmail(order: Order, item: OrderItem, replies: boolean) {
   const t = DICTS[order.locale].email;
   const url = cardUrl(order, item);
+  // The buyer's own words, as they typed them (line breaks kept), signed with their name.
+  const note = item.message
+    ? `<div dir="auto" style="margin:0 0 20px;padding:16px 18px;background:#ffffff;border:2px solid #1f1b16;border-radius:14px;font-size:18px;line-height:1.5;white-space:pre-line">${esc(item.message)}<div style="margin-top:8px;font-family:Georgia,'Times New Roman',serif;font-weight:bold">${esc(fmt(t.messageSign, { from: item.from }))}</div></div>`
+    : "";
   const html = layout(
     order.locale,
     `<h1 style="margin:0 0 8px;font-family:Georgia,'Times New Roman',serif;font-size:28px;line-height:1.2">${esc(fmt(t.cardTitle, { from: item.from }))}</h1>
-<p style="margin:0 0 20px">${esc(fmt(t.cardBody, { to: item.to }))}</p>
+${note}<p style="margin:0 0 20px">${esc(fmt(t.cardBody, { to: item.to }))}</p>
 <p style="margin:0 0 22px"><a href="${esc(url)}"><img src="${esc(`${url}/opengraph-image`)}" width="464" alt="${esc(fmt(t.envelopeAlt, { to: item.to, from: item.from }))}" style="display:block;width:100%;max-width:464px;height:auto;border:2px solid #1f1b16;border-radius:12px"></a></p>
 <p style="margin:0 0 22px;text-align:center">${button(url, t.cardButton)}</p>
 <p style="margin:0 0 4px;font-size:15px;color:#5b5247">${esc(t.linkHint)}</p>
@@ -136,11 +158,20 @@ ${replies ? `<p style="margin:0 0 6px;font-size:13px;color:#5b5247">${esc(fmt(t.
 <p style="margin:0;font-size:13px;color:#5b5247">${esc(fmt(t.cardFooter, { from: item.from }))}</p>`,
     fmt(t.preheader, { to: item.to, from: item.from }),
   );
-  const text = `${fmt(t.cardTitle, { from: item.from })}\n\n${fmt(t.cardBody, { to: item.to })}\n\n${url}`;
+  const words = item.message ? `${item.message}\n${fmt(t.messageSign, { from: item.from })}\n\n` : "";
+  const text = `${fmt(t.cardTitle, { from: item.from })}\n\n${words}${fmt(t.cardBody, { to: item.to })}\n\n${url}`;
   return { subject: cardSubject(t, item), html, text };
 }
 
-type Message = { from: string; to: string; subject: string; html: string; text: string; replyTo?: string; scheduledAt?: string };
+type Message = {
+  from: string;
+  to: string;
+  subject: string;
+  html: string;
+  text: string;
+  replyTo?: string;
+  scheduledAt?: string;
+};
 
 // Sends what the order still needs (see delivery.ts): each card we're emailing, then the
 // buyer's receipt with every link. Each email is tried on its own, so one bad address
@@ -151,14 +182,23 @@ export async function sendOrderEmails(order: Order, todo = pending(order)) {
   const from = process.env.EMAIL_FROM!;
   const send = async (key: string, message: Message): Promise<EmailResult> => {
     for (let tries = 0; ; tries++) {
-      let error: { name?: string; statusCode?: number | null; message: string } | null;
+      let error: {
+        name?: string;
+        statusCode?: number | null;
+        message: string;
+      } | null;
+      let id: string | undefined;
       try {
-        ({ error } = await resend.emails.send(message, { idempotencyKey: `${order.id}-${key}` }));
+        let data: { id?: string } | null;
+        ({ data, error } = await resend.emails.send(message, {
+          idempotencyKey: `${order.id}-${key}`,
+        }));
+        id = data?.id;
       } catch (e) {
         error = { message: e instanceof Error ? e.message : String(e) };
       }
       const at = new Date().toISOString();
-      if (!error) return { at, ok: true };
+      if (!error) return { at, ok: true, ...(id ? { id } : {}) };
       // Resend takes a few emails a second, which a big basket can go over.
       if (error.name === "rate_limit_exceeded" && tries < 3) {
         await new Promise((resolve) => setTimeout(resolve, 1100));
@@ -168,20 +208,40 @@ export async function sendOrderEmails(order: Order, todo = pending(order)) {
     }
   };
 
-  const cards: Record<string, EmailResult> = {};
+  // Each address gets its own email, so nobody sees the others' addresses and one that bounces
+  // can't stop the rest. Results are kept by address.
+  const cards: Record<string, Record<string, EmailResult>> = {};
   for (const item of todo.cards) {
     const scheduledAt = bookAt(item.sendAt, Date.now());
-    const message = (replies: boolean) => ({ to: item.email!, ...cardEmail(order, item, replies), ...(scheduledAt ? { scheduledAt } : {}) });
     // From "Sam via Envelette", and replies go to Sam.
     const sender = cardSender(from, fmt(DICTS[order.locale].email.fromName, { from: item.from }));
-    let result = await send(`card-${item.cardId}`, { ...message(!!order.buyerEmail), from: sender, ...(order.buyerEmail ? { replyTo: order.buyerEmail } : {}) });
-    // Those are niceties: if Resend won't take them, send it plainly rather than not at all.
-    if (!result.ok && !result.retry) result = await send(`card-${item.cardId}-plain`, { ...message(false), from });
-    cards[item.cardId] = result;
+    const all = recipients(item);
+    const results: Record<string, EmailResult> = {};
+    for (const address of unsent(item)) {
+      const message = (replies: boolean) => ({
+        to: address,
+        ...cardEmail(order, item, replies),
+        ...(scheduledAt ? { scheduledAt } : {}),
+      });
+      // Older orders' one email kept its old key, so a retry can't send it twice.
+      const key = item.emails ? `card-${item.cardId}-${all.indexOf(address)}` : `card-${item.cardId}`;
+      let result = await send(key, {
+        ...message(!!order.buyerEmail),
+        from: sender,
+        ...(order.buyerEmail ? { replyTo: order.buyerEmail } : {}),
+      });
+      // Those are niceties: if Resend won't take them, send it plainly rather than not at all.
+      if (!result.ok && !result.retry) result = await send(`${key}-plain`, { ...message(false), from });
+      results[address] = result;
+    }
+    cards[item.cardId] = results;
   }
 
   // The receipt reflects how the card emails just went, so the buyer knows which to send themselves.
-  const sent: Order = { ...order, items: order.items.map((i) => (cards[i.cardId] ? { ...i, cardEmail: cards[i.cardId] } : i)) };
+  const sent: Order = {
+    ...order,
+    items: order.items.map((i) => withResults(i, cards[i.cardId])),
+  };
   const receiptResult = todo.receipt && order.buyerEmail ? await send("receipt", { from, to: order.buyerEmail, ...receipt(sent) }) : undefined;
   return { cards, receipt: receiptResult };
 }
@@ -199,4 +259,65 @@ export async function sendSignInCode(to: string, code: string, locale: Locale) {
   const text = `${t.codeIntro}\n\n${code}\n\n${t.codeFooter}`;
   const { error } = await new Resend(process.env.RESEND_API_KEY).emails.send({ from: process.env.EMAIL_FROM!, to, subject: fmt(t.codeSubject, { code }), html, text });
   if (error) throw new Error(`Sign-in code email failed: ${error.message}`);
+}
+
+// Resend's booked emails, newest first, for finding one booked before ids were kept.
+async function bookedEmails(resend: Resend) {
+  const found: {
+    id: string;
+    to: string[];
+    scheduled_at: string | null;
+    last_event: string;
+  }[] = [];
+  let after: string | undefined;
+  for (let page = 0; page < 3; page++) {
+    const { data, error } = await resend.emails.list({
+      limit: 100,
+      ...(after ? { after } : {}),
+    });
+    if (error || !data) break;
+    found.push(...data.data.filter((e) => e.last_event === "scheduled"));
+    if (!data.has_more || !data.data.length) break;
+    after = data.data[data.data.length - 1].id;
+  }
+  return found;
+}
+
+// Resend writes times like "2026-10-31 09:00:00+00".
+const parseTime = (at: string | null) => (at ? Date.parse(at.replace(" ", "T").replace(/([+-]\d\d)$/, "$1:00")) : NaN);
+
+// "Send it now" for a booked card: each address's email moves to a minute from now (Resend
+// needs a time ahead), found by the id Resend gave it or, for an order from before ids were
+// kept, among Resend's booked emails. Returns the results that moved, with `movedAt` set, and
+// whether every address's did. Ones that didn't keep their booking, so pressing again is safe.
+export async function moveToNow(item: OrderItem): Promise<{ results: Record<string, EmailResult>; all: boolean }> {
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  const soon = new Date(Date.now() + 60_000).toISOString();
+  const due = item.sendAt ? Date.parse(item.sendAt) : NaN;
+  let booked: Awaited<ReturnType<typeof bookedEmails>> | undefined;
+  const results: Record<string, EmailResult> = {};
+  let all = true;
+  for (const address of recipients(item)) {
+    const result = resultFor(item, address);
+    if (result?.movedAt) continue;
+    if (!result?.ok) {
+      all = false;
+      continue;
+    }
+    let id = result.id;
+    if (!id) {
+      booked ??= await bookedEmails(resend).catch(() => []);
+      const lower = address.toLowerCase();
+      // Booked for the same day (a day either side, whatever the time zone).
+      id = booked.find((e) => e.to.some((to) => to.toLowerCase() === lower) && Math.abs(parseTime(e.scheduled_at) - due) < 86_400_000)?.id;
+    }
+    const { error } = id ? await resend.emails.update({ id, scheduledAt: soon }).catch((e) => ({ error: { message: String(e) } })) : { error: { message: "No booked email found" } };
+    if (error) {
+      console.error(`Couldn't move a booked card email to now: ${error.message}`);
+      all = false;
+      continue;
+    }
+    results[address] = { ...result, id, movedAt: new Date().toISOString() };
+  }
+  return { results, all };
 }

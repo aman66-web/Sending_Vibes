@@ -6,8 +6,8 @@ import type Stripe from "stripe";
 import type { Locale } from "@/i18n/config";
 import type { Occasion, ThemeName } from "./card";
 import { alertOwner } from "./alert";
-import { nothingLeft, pending, type EmailResult } from "./delivery";
-import { emailReady, sendOrderEmails } from "./email";
+import { cardStatus, nothingLeft, pending, withResults, type EmailResult } from "./delivery";
+import { emailReady, moveToNow, sendOrderEmails } from "./email";
 import type { Currency, Tier } from "./pricing";
 import { DATA_DIR, adminSupabase, markCardsPaid, usingSupabase } from "./storage";
 import { stripe } from "./stripe";
@@ -24,16 +24,26 @@ export type OrderItem = {
   // For showing the card in someone's account.
   occasion?: Occasion;
   theme?: ThemeName;
+  // Everyone it's emailed to (up to MAX_EMAILS), and the first of them in `email`. Older
+  // orders only have `email`.
   email?: string;
-  // When the buyer picked a later day: that day as they chose it (YYYY-MM-DD), and the
-  // moment to email it (9am their time).
+  emails?: string[];
+  // The buyer's own words, shown in the email above the button that opens the card.
+  message?: string;
+  // When the buyer picked a later day: that day as they chose it (YYYY-MM-DD), the time and
+  // time zone it should arrive in, and the moment that works out to. Older orders have no
+  // time or zone: theirs went at 9am the buyer's time.
   sendOn?: string;
+  sendTime?: string;
+  timeZone?: string;
   sendAt?: string;
   // The design it was made from, for "send this design to someone else". Older orders don't have it.
   template?: string;
-  // How its emails went: the card to the recipient, and the buyer's receipt with its link.
-  // Kept as they go out, so a retry only sends what's still missing. Older orders don't have these.
+  // How its emails went: the card to each address (`cardEmails`, by address; older orders
+  // kept one result in `cardEmail`), and the buyer's receipt with its link. Kept as they go
+  // out, so a retry only sends what's still missing. Older orders don't have these.
   cardEmail?: EmailResult;
+  cardEmails?: Record<string, EmailResult>;
   receipt?: EmailResult;
   // Set on orders placed since those results were kept. Without it, a claim with no
   // results is an older order whose emails went out before results existed.
@@ -254,7 +264,10 @@ function finished(order: Order) {
 // One Resend refuses for good also emails the owner, since nothing will try it again;
 // the rest are retried, and the webhook's alert covers them if that keeps failing.
 async function report(id: string, sent: Awaited<ReturnType<typeof sendOrderEmails>>) {
-  const failed = [...Object.entries(sent.cards).map(([card, result]) => [`card ${card}`, result] as const), ["receipt", sent.receipt] as const];
+  const failed = [
+    ...Object.entries(sent.cards).flatMap(([card, results]) => Object.values(results).map((result, i) => [`card ${card} (address ${i + 1})`, result] as const)),
+    ["receipt", sent.receipt] as const,
+  ];
   for (const [what, result] of failed) {
     if (!result || result.ok) continue;
     console.error(`Order ${id}: ${what} couldn't be emailed (${result.retry ? "will retry" : "gave up"}): ${result.error}`);
@@ -268,7 +281,10 @@ async function sendEmails(claimed: Order, strict: boolean): Promise<Order> {
   const todo = pending(order);
   if (nothingLeft(todo)) return order;
   const sent = await sendOrderEmails(order, todo);
-  const items = order.items.map((i) => ({ ...i, ...(sent.cards[i.cardId] ? { cardEmail: sent.cards[i.cardId] } : {}), ...(sent.receipt ? { receipt: sent.receipt } : {}) }));
+  const items = order.items.map((i) => ({
+    ...withResults(i, sent.cards[i.cardId]),
+    ...(sent.receipt ? { receipt: sent.receipt } : {}),
+  }));
   const again = !nothingLeft(pending({ ...order, items }));
   await report(order.id, sent);
   try {
@@ -300,8 +316,47 @@ async function deliver(order: Order, strict: boolean): Promise<Order> {
   }
 }
 
+// "Send it now" for a card booked for later: its emails move to a minute from now, and the
+// order says it's been sent. "notBooked" if it isn't waiting to go (already sent, or not
+// emailed by us); "failed" if Resend wouldn't move some of them, which keep their booking.
+export async function sendCardNow(order: Order, cardId: string): Promise<"sent" | "notBooked" | "failed"> {
+  const item = order.items.find((i) => i.cardId === cardId);
+  if (!item || order.status !== "paid" || !emailReady() || cardStatus(item) !== "scheduled") return "notBooked";
+  const { results, all } = await moveToNow(item);
+  // Read again, so anything another caller saved meanwhile (a receipt retry) isn't lost.
+  const now = (await getOrder(order.id)) ?? order;
+  const items = now.items.map((i) => {
+    if (i.cardId !== cardId) return i;
+    const moved = withResults(i, results);
+    // Sent as of now, so it shows as emailed (it lands within the minute).
+    return all ? { ...moved, sendAt: new Date().toISOString() } : moved;
+  });
+  await saveDelivery(order.id, items, false);
+  return all ? "sent" : "failed";
+}
+
+// The order a Checkout session paid for, if it's ours. Throws if Stripe can't be reached.
+export async function orderOfSession(sessionId: string): Promise<Order | null> {
+  const s = stripe();
+  if (!s || !/^cs_[A-Za-z0-9_]+$/.test(sessionId)) return null;
+  const session = await s.checkout.sessions.retrieve(sessionId).catch((e) => {
+    const { code, statusCode } = (e ?? {}) as {
+      code?: string;
+      statusCode?: number;
+    };
+    if (code === "resource_missing" || statusCode === 404) return null;
+    throw e;
+  });
+  const orderId = session?.metadata?.order_id;
+  const order = orderId ? await getOrder(orderId) : null;
+  return order && order.stripeSessionId === session!.id ? order : null;
+}
+
 // "finishing": paid, but the cards couldn't be opened just yet (a database hiccup).
-export type Fulfilment = { order: Order; state: "paid" | "finishing" | "processing" | "unpaid" };
+export type Fulfilment = {
+  order: Order;
+  state: "paid" | "finishing" | "processing" | "unpaid";
+};
 
 // Checks a Checkout session with Stripe and, once it's paid, opens the cards and sends
 // the emails. Called by the webhook and by the thank-you page; every step is safe to repeat.
@@ -317,7 +372,10 @@ export async function fulfilSession(sessionId: string, { strict = false } = {}):
     // Only a session Stripe doesn't have is "no such order". Anything else (an outage, a
     // limit, a key that's changed) throws, so the webhook gets a retry and the thank-you
     // page offers "Check again".
-    const { code, statusCode } = (e ?? {}) as { code?: string; statusCode?: number };
+    const { code, statusCode } = (e ?? {}) as {
+      code?: string;
+      statusCode?: number;
+    };
     if (code === "resource_missing" || statusCode === 404) return null;
     throw e;
   }
