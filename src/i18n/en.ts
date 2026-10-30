@@ -1179,6 +1179,7 @@ export const en = {
     signupTitle: "Last step: sign up to see your card",
     signupHint: "It's free and only takes a moment. Your cards are saved to your account, so you can find them again on any device.",
     signedIn: "You're signed in as {email}. Press the button to make your card.",
+    signedInTitle: "Ready to make {name}'s card?",
     describeLink: "Rather describe it in your own words?",
     other: "Other",
     // Tapped to start a sentence off, so each ends with a space for them to carry on.

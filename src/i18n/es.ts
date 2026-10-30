@@ -1218,6 +1218,7 @@ export const es: Dict = {
     signupTitle: "Último paso: regístrate para ver tu tarjeta",
     signupHint: "Es gratis y solo se tarda un momento. Tus tarjetas se guardan en tu cuenta, así que puedes volver a encontrarlas en cualquier dispositivo.",
     signedIn: "Has iniciado sesión como {email}. Pulsa el botón para crear tu tarjeta.",
+    signedInTitle: "¿Creamos la tarjeta de {name}?",
     describeLink: "¿Prefieres describirla con tus propias palabras?",
     other: "Otro",
     describeStarters: ["Al abrirla, quiero ", "Luego, ", "Después, ", "Al final, "],

@@ -1217,6 +1217,7 @@ export const pl: Dict = {
     signupTitle: "Ostatni krok: zarejestruj się, żeby zobaczyć kartkę",
     signupHint: "To nic nie kosztuje i zajmuje tylko chwilę. Twoje kartki zapisują się na twoim koncie, więc znajdziesz je na każdym urządzeniu.",
     signedIn: "Zalogowano jako {email}. Naciśnij przycisk, żeby zrobić kartkę.",
+    signedInTitle: "Robimy kartkę dla: {name}?",
     describeLink: "Wolisz opisać ją własnymi słowami?",
     other: "Inne",
     describeStarters: ["Po otwarciu chcę ", "Potem ", "Następnie ", "Na koniec "],

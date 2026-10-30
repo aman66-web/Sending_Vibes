@@ -206,19 +206,15 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   const design = mode === "premade" ? getTemplate(templateSlug) : undefined;
   const ideaBox = useRef<HTMLTextAreaElement>(null);
 
-  // Back from signing in with Google, the card is made straight away (see afterGoogle).
-  const afterGoogle = useRef(() => {});
-  const wentOn = useRef(false);
+  // Back from signing in with Google, the sign-up step stays, now saying they're signed in,
+  // with the button to make the card: it's made when they press it, not before.
+  const backFromGoogle = useRef(Boolean(saved?.signingIn && !signInFailed && Date.now() - saved.at < 30 * 60_000));
   useEffect(() => {
     fetch("/api/account", { cache: "no-store" })
       .then((r) => r.json())
       .then((s: { enabled: boolean; google: boolean; email: boolean; account: SignedIn | null; left?: { change: number } }) => {
-        setAuth({ google: s.google, email: s.email, account: s.account, needed: s.enabled && !s.account });
+        setAuth({ google: s.google, email: s.email, account: s.account, needed: s.enabled && (!s.account || backFromGoogle.current) });
         if (s.left) setChangesLeft(s.left.change);
-        if (s.account && !wentOn.current) {
-          wentOn.current = true;
-          afterGoogle.current();
-        }
       })
       .catch(() => {});
   }, []);
@@ -242,25 +238,15 @@ export function Creator({ initialOccasion, initialTemplate, initialTo, initialFr
   useEffect(() => {
     if ((step === "quiz" || step === "describe") && !(waiting.quiz && step === "quiz" && question === 0)) saveQuiz(quizNow());
   });
-  // Signing up is the last thing asked, so once it's done the card is made, with nothing more to press.
-  const carryOnSignedIn = () => {
-    if (step === "quiz") makeFromQuiz();
-    else if (step === "describe" && idea.trim().length >= 3 && to.trim() && from.trim()) makeCard(idea.trim(), { to, from }, "describe");
-  };
-  useEffect(() => {
-    afterGoogle.current = () => {
-      if (saved?.signingIn && !signInFailed && Date.now() - saved.at < 30 * 60_000) carryOnSignedIn();
-    };
-  });
   const signUp = auth?.needed
     ? {
         google: auth.google,
         email: auth.email,
         account: auth.account,
+        // Signed in: the step now says so, and the card is made when they press the button.
         onSignedIn: (account: SignedIn) => {
           setAuth((a) => a && { ...a, account });
           setAiError(null);
-          carryOnSignedIn();
         },
         // Kept while Google signs them in, which leaves the site.
         onGoogle: () => saveQuiz({ ...quizNow(), signingIn: true }),
