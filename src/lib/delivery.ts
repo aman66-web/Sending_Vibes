@@ -86,6 +86,10 @@ export function cardStatus(item: OrderItem, now = Date.now()): CardStatus {
   return item.sendAt && Date.parse(item.sendAt) > now ? "scheduled" : "emailed";
 }
 
+// Whether "Send it now" can work: it's booked for later, and Resend has every address's email
+// booked (none still being sent, none refused).
+export const canSendNow = (item: OrderItem, now = Date.now()) => cardStatus(item, now) === "scheduled" && recipients(item).every((address) => resultFor(item, address)?.ok);
+
 // The addresses, joined the way the visitor's language joins a list ("a, b and c").
 export function emailList(addresses: string[], tag: string) {
   try {

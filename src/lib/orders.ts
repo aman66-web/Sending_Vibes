@@ -6,7 +6,7 @@ import type Stripe from "stripe";
 import type { Locale } from "@/i18n/config";
 import type { Occasion, ThemeName } from "./card";
 import { alertOwner } from "./alert";
-import { cardStatus, nothingLeft, pending, withResults, type EmailResult } from "./delivery";
+import { canSendNow, nothingLeft, pending, recipients, withResults, type EmailResult } from "./delivery";
 import { emailReady, moveToNow, sendOrderEmails } from "./email";
 import type { Currency, Tier } from "./pricing";
 import { DATA_DIR, adminSupabase, markCardsPaid, usingSupabase } from "./storage";
@@ -263,9 +263,13 @@ function finished(order: Order) {
 // This attempt's failures are logged with the order, so the owner can see who to help.
 // One Resend refuses for good also emails the owner, since nothing will try it again;
 // the rest are retried, and the webhook's alert covers them if that keeps failing.
-async function report(id: string, sent: Awaited<ReturnType<typeof sendOrderEmails>>) {
+async function report(id: string, items: OrderItem[], sent: Awaited<ReturnType<typeof sendOrderEmails>>) {
   const failed = [
-    ...Object.entries(sent.cards).flatMap(([card, results]) => Object.values(results).map((result, i) => [`card ${card} (address ${i + 1})`, result] as const)),
+    // Each address by its place in the card's list, never the address itself.
+    ...Object.entries(sent.cards).flatMap(([card, results]) => {
+      const all = recipients(items.find((i) => i.cardId === card) ?? { email: undefined });
+      return Object.entries(results).map(([address, result]) => [`card ${card} (address ${all.indexOf(address) + 1})`, result] as const);
+    }),
     ["receipt", sent.receipt] as const,
   ];
   for (const [what, result] of failed) {
@@ -281,12 +285,12 @@ async function sendEmails(claimed: Order, strict: boolean): Promise<Order> {
   const todo = pending(order);
   if (nothingLeft(todo)) return order;
   const sent = await sendOrderEmails(order, todo);
-  const items = order.items.map((i) => ({
-    ...withResults(i, sent.cards[i.cardId]),
-    ...(sent.receipt ? { receipt: sent.receipt } : {}),
-  }));
+  // Added to the order as it is now, so a change saved while these went out ("Send it now"
+  // on another card, say) isn't lost.
+  const latest = (await getOrder(order.id).catch(() => null)) ?? order;
+  const items = latest.items.map((i) => ({ ...withResults(i, sent.cards[i.cardId]), ...(sent.receipt ? { receipt: sent.receipt } : {}) }));
   const again = !nothingLeft(pending({ ...order, items }));
-  await report(order.id, sent);
+  await report(order.id, items, sent);
   try {
     await saveDelivery(order.id, items, again);
   } catch (e) {
@@ -321,8 +325,10 @@ async function deliver(order: Order, strict: boolean): Promise<Order> {
 // emailed by us); "failed" if Resend wouldn't move some of them, which keep their booking.
 export async function sendCardNow(order: Order, cardId: string): Promise<"sent" | "notBooked" | "failed"> {
   const item = order.items.find((i) => i.cardId === cardId);
-  if (!item || order.status !== "paid" || !emailReady() || cardStatus(item) !== "scheduled") return "notBooked";
-  const { results, all } = await moveToNow(item);
+  if (!item || order.status !== "paid" || !emailReady() || !canSendNow(item)) return "notBooked";
+  const { results, all, restricted } = await moveToNow(order, item);
+  if (restricted) await alertOwner("Send it now needs a Resend API key with full access", { order: order.id });
+  if (!Object.keys(results).length) return "failed";
   // Read again, so anything another caller saved meanwhile (a receipt retry) isn't lost.
   const now = (await getOrder(order.id)) ?? order;
   const items = now.items.map((i) => {

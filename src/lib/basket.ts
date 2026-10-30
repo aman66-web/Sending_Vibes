@@ -10,6 +10,9 @@ export const MAX_SCHEDULE_DAYS = 30;
 // How many addresses one card can be emailed to, and how long the buyer's note in the email can be.
 export const MAX_EMAILS = 10;
 export const MESSAGE_MAX = 600;
+// What counts as an email address, the same in the basket and the checkout (zod's own rule), so
+// the basket never lets through an address the checkout would refuse.
+export const EMAIL = /^(?:[A-Za-z0-9_'+\-]+\.)*[A-Za-z0-9_'+\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$/;
 
 export type BasketItem = {
   id: string;
@@ -88,22 +91,8 @@ export function removeFromBasket(ids: string[]) {
 export function replaceInBasket(oldId: string, item: BasketItem) {
   const items = readBasket();
   if (!items.some((i) => i.id === oldId)) return addToBasket(item);
-  writeBasket(
-    items.map((i) =>
-      i.id === oldId
-        ? {
-            ...item,
-            delivery: i.delivery,
-            emails: i.emails,
-            email: i.email,
-            message: i.message,
-            sendOn: i.sendOn,
-            sendTime: i.sendTime,
-            timeZone: i.timeZone,
-          }
-        : i,
-    ),
-  );
+  const { delivery, emails, email, message, sendOn, sendTime, timeZone } = items.find((i) => i.id === oldId)!;
+  writeBasket(items.map((i) => (i.id === oldId ? { ...item, delivery, emails, email, message, sendOn, sendTime, timeZone } : i)));
 }
 
 export const inBasket = (id: string) => readBasket().some((i) => i.id === id);

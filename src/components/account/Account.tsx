@@ -26,14 +26,7 @@ type Card = {
   sendAt?: string;
   openedAt?: string;
 };
-type State = {
-  enabled: boolean;
-  google: boolean;
-  email: boolean;
-  account: { email: string | null; name: string | null } | null;
-  cards: (Card & Delivery)[];
-  error?: boolean;
-};
+type State = { enabled: boolean; google: boolean; email: boolean; account: { email: string | null; name: string | null } | null; cards: (Card & Delivery)[]; error?: boolean };
 
 // The signed-in buyer's cards, or a way to sign in (Google or an emailed code).
 export function Account() {

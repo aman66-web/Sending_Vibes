@@ -5,7 +5,7 @@ import { DEFAULT_LOCALE, LOCALE_COOKIE, fmt, isLive, type Locale } from "@/i18n/
 import { DICTS } from "@/i18n/dictionaries";
 import { alertOwner } from "@/lib/alert";
 import { currentAccount } from "@/lib/auth";
-import { MAX_BASKET, MAX_EMAILS, MAX_SCHEDULE_DAYS, MESSAGE_MAX } from "@/lib/basket";
+import { EMAIL, MAX_BASKET, MAX_EMAILS, MAX_SCHEDULE_DAYS, MESSAGE_MAX } from "@/lib/basket";
 import { emailReady } from "@/lib/email";
 import { createOrder, ordersReady, setOrderSession, type OrderItem } from "@/lib/orders";
 import { cardTier } from "@/lib/catalog";
@@ -22,13 +22,11 @@ const bodySchema = z.object({
       z.object({
         id: z.string().regex(/^[A-Za-z0-9]{12}$/),
         delivery: z.enum(["self", "email"]),
-        emails: z.array(z.email().max(254)).max(MAX_EMAILS).optional(),
+        // Checked one by one below, so a bad one is shown on its card.
+        emails: z.array(z.string().trim().max(254)).max(MAX_EMAILS).optional(),
         // From a basket page loaded before there could be several.
-        email: z.email().max(254).optional(),
-        message: z
-          .string()
-          .max(MESSAGE_MAX * 2)
-          .optional(),
+        email: z.string().trim().max(254).optional(),
+        message: z.string().max(MESSAGE_MAX * 2).optional(),
         sendOn: z.iso.date().optional(),
         sendTime: z.string().refine(isTime).optional(),
         timeZone: z.string().refine(isZone).optional(),
@@ -93,12 +91,11 @@ export async function POST(req: NextRequest) {
       const item: OrderItem = { cardId: wanted.id, to: card.to, from: card.from, tier: cardTier(card), occasion: card.occasion, theme: card.theme, template: card.template, delivery: wanted.delivery };
       if (wanted.delivery === "email") {
         if (!emailReady()) return fail(errors.noEmail, 400, { id: wanted.id });
-        // Each address once, however it's written.
-        const emails = [...new Map([...(wanted.emails ?? []), ...(wanted.email ? [wanted.email] : [])].map((e) => [e.toLowerCase(), e])).values()];
-        if (!emails.length)
-          return fail(fmt(errors.needEmail, { name: card.to }), 400, {
-            id: wanted.id,
-          });
+        // Each address once, as first written, however it's written again.
+        const all = [...(wanted.emails ?? []), ...(wanted.email ? [wanted.email] : [])].filter(Boolean);
+        const emails = all.filter((e, i) => all.findIndex((x) => x.toLowerCase() === e.toLowerCase()) === i);
+        if (!emails.length) return fail(fmt(errors.needEmail, { name: card.to }), 400, { id: wanted.id });
+        if (emails.some((e) => !EMAIL.test(e))) return fail(errors.badEmail, 400, { id: wanted.id });
         if (emails.length > MAX_EMAILS) return fail(errors.failed, 400, { id: wanted.id });
         Object.assign(item, { email: emails[0], emails });
         // Their words, without control characters (line breaks stay), and only so long.
@@ -118,12 +115,7 @@ export async function POST(req: NextRequest) {
           if (at > now + MAX_SCHEDULE_DAYS * 86_400_000 - 3_600_000) return fail(fmt(errors.tooFar, { days: MAX_SCHEDULE_DAYS - 1 }), 400, { id: wanted.id });
           // A time that's already gone (more than a moment ago) was a slip, not "send it now".
           if (picked && at < now - 60_000) return fail(errors.past, 400, { id: wanted.id });
-          if (at > now + 2 * 60_000)
-            Object.assign(item, {
-              sendAt: new Date(at).toISOString(),
-              sendOn: wanted.sendOn,
-              ...(picked ? { sendTime: wanted.sendTime, timeZone: wanted.timeZone } : {}),
-            });
+          if (at > now + 2 * 60_000) Object.assign(item, { sendAt: new Date(at).toISOString(), sendOn: wanted.sendOn, ...(picked ? { sendTime: wanted.sendTime, timeZone: wanted.timeZone } : {}) });
         }
       }
       items.push(item);

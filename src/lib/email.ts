@@ -144,7 +144,7 @@ function cardEmail(order: Order, item: OrderItem, replies: boolean) {
   const url = cardUrl(order, item);
   // The buyer's own words, as they typed them (line breaks kept), signed with their name.
   const note = item.message
-    ? `<div dir="auto" style="margin:0 0 20px;padding:16px 18px;background:#ffffff;border:2px solid #1f1b16;border-radius:14px;font-size:18px;line-height:1.5;white-space:pre-line">${esc(item.message)}<div style="margin-top:8px;font-family:Georgia,'Times New Roman',serif;font-weight:bold">${esc(fmt(t.messageSign, { from: item.from }))}</div></div>`
+    ? `<div dir="auto" style="margin:0 0 20px;padding:16px 18px;background:#ffffff;border:2px solid #1f1b16;border-radius:14px;font-size:18px;line-height:1.5;white-space:pre-line">${esc(item.message).replace(/\n/g, "<br>")}<div style="margin-top:8px;font-family:Georgia,'Times New Roman',serif;font-weight:bold">${esc(fmt(t.messageSign, { from: item.from }))}</div></div>`
     : "";
   const html = layout(
     order.locale,
@@ -263,19 +263,11 @@ export async function sendSignInCode(to: string, code: string, locale: Locale) {
 
 // Resend's booked emails, newest first, for finding one booked before ids were kept.
 async function bookedEmails(resend: Resend) {
-  const found: {
-    id: string;
-    to: string[];
-    scheduled_at: string | null;
-    last_event: string;
-  }[] = [];
+  const found: { id: string; to: string[]; subject: string; scheduled_at: string | null }[] = [];
   let after: string | undefined;
-  for (let page = 0; page < 3; page++) {
-    const { data, error } = await resend.emails.list({
-      limit: 100,
-      ...(after ? { after } : {}),
-    });
-    if (error || !data) break;
+  for (let page = 0; page < 5; page++) {
+    const { data, error } = await resend.emails.list({ limit: 100, ...(after ? { after } : {}) });
+    if (error) throw new Error(`${error.name}: ${error.message}`);
     found.push(...data.data.filter((e) => e.last_event === "scheduled"));
     if (!data.has_more || !data.data.length) break;
     after = data.data[data.data.length - 1].id;
@@ -286,38 +278,48 @@ async function bookedEmails(resend: Resend) {
 // Resend writes times like "2026-10-31 09:00:00+00".
 const parseTime = (at: string | null) => (at ? Date.parse(at.replace(" ", "T").replace(/([+-]\d\d)$/, "$1:00")) : NaN);
 
+// An older order's booked email to `address`: only when exactly one matches everything it was
+// sent with (the address, the moment and the subject, which names the sender). Anything less
+// sure is left alone, so it can never move someone else's card.
+function olderBooking(booked: Awaited<ReturnType<typeof bookedEmails>>, order: Order, item: OrderItem, address: string) {
+  const due = item.sendAt ? Date.parse(item.sendAt) : NaN;
+  const subject = cardSubject(DICTS[order.locale].email, item);
+  const lower = address.toLowerCase();
+  const matches = booked.filter((e) => e.subject === subject && e.to.some((to) => to.toLowerCase() === lower) && Math.abs(parseTime(e.scheduled_at) - due) < 60_000);
+  return matches.length === 1 ? matches[0].id : undefined;
+}
+
 // "Send it now" for a booked card: each address's email moves to a minute from now (Resend
 // needs a time ahead), found by the id Resend gave it or, for an order from before ids were
 // kept, among Resend's booked emails. Returns the results that moved, with `movedAt` set, and
-// whether every address's did. Ones that didn't keep their booking, so pressing again is safe.
-export async function moveToNow(item: OrderItem): Promise<{ results: Record<string, EmailResult>; all: boolean }> {
+// whether every address's did; ones that didn't keep their booking, so pressing again is safe.
+// `restricted` says Resend's key can only send, so it can't move anything.
+export async function moveToNow(order: Order, item: OrderItem) {
   const resend = new Resend(process.env.RESEND_API_KEY);
   const soon = new Date(Date.now() + 60_000).toISOString();
-  const due = item.sendAt ? Date.parse(item.sendAt) : NaN;
   let booked: Awaited<ReturnType<typeof bookedEmails>> | undefined;
   const results: Record<string, EmailResult> = {};
   let all = true;
+  let restricted = false;
   for (const address of recipients(item)) {
     const result = resultFor(item, address);
     if (result?.movedAt) continue;
-    if (!result?.ok) {
-      all = false;
-      continue;
+    let id = result?.ok ? result.id : undefined;
+    if (result?.ok && !id) {
+      booked ??= await bookedEmails(resend).catch((e) => {
+        console.error(`Couldn't list Resend's booked emails: ${e instanceof Error ? e.message : e}`);
+        return [];
+      });
+      id = olderBooking(booked, order, item, address);
     }
-    let id = result.id;
-    if (!id) {
-      booked ??= await bookedEmails(resend).catch(() => []);
-      const lower = address.toLowerCase();
-      // Booked for the same day (a day either side, whatever the time zone).
-      id = booked.find((e) => e.to.some((to) => to.toLowerCase() === lower) && Math.abs(parseTime(e.scheduled_at) - due) < 86_400_000)?.id;
-    }
-    const { error } = id ? await resend.emails.update({ id, scheduledAt: soon }).catch((e) => ({ error: { message: String(e) } })) : { error: { message: "No booked email found" } };
-    if (error) {
-      console.error(`Couldn't move a booked card email to now: ${error.message}`);
+    const { error } = id ? await resend.emails.update({ id, scheduledAt: soon }).catch((e) => ({ error: { name: "error", message: String(e) } })) : { error: { name: "not_found", message: "No booked email to move" } };
+    if (error || !result) {
+      if (error?.name === "restricted_api_key") restricted = true;
+      console.error(`Couldn't move a booked card email to now: ${error?.message ?? "not booked yet"}`);
       all = false;
       continue;
     }
     results[address] = { ...result, id, movedAt: new Date().toISOString() };
   }
-  return { results, all };
+  return { results, all, restricted };
 }

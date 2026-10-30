@@ -6,21 +6,30 @@ import { Motif } from "@/components/card/motifs";
 import { RichText } from "@/components/RichText";
 import { LANGUAGES, fmt } from "@/i18n/config";
 import { useI18n } from "@/i18n/client";
-import { MAX_EMAILS, MAX_SCHEDULE_DAYS, MESSAGE_MAX, basketSnapshot, emailsOf, madeIds, onBasketChange, removeFromBasket, serverBasket, writeBasket, type BasketItem } from "@/lib/basket";
+import { EMAIL, MAX_EMAILS, MAX_SCHEDULE_DAYS, MESSAGE_MAX, basketSnapshot, emailsOf, madeIds, onBasketChange, removeFromBasket, serverBasket, writeBasket, type BasketItem } from "@/lib/basket";
 import { getTemplate } from "@/lib/catalog";
 import { formatMoney, tierPrice } from "@/lib/pricing";
 import { themes } from "@/lib/themes";
 import { DEFAULT_TIME, ownZone, timeThereNow, zoneChoices, zoneName, zonedMoment } from "@/lib/when";
 
 const noop = () => () => {};
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // The furthest day to pick. One short of Resend's limit, since a time on the last day can be
 // past it, and the email is only booked once payment comes through.
 const SCHEDULE_DAYS = MAX_SCHEDULE_DAYS - 1;
 const MINUTE = 60_000;
 
-// The addresses to send to: typed, each once.
-const cleanEmails = (item: BasketItem) => [...new Map(emailsOf(item).map((e) => [e.trim().toLowerCase(), e.trim()])).values()].filter(Boolean);
+// The addresses to send to: each one typed, once (as first written, however it's written again).
+function cleanEmails(item: BasketItem) {
+  const seen = new Set<string>();
+  return emailsOf(item)
+    .map((e) => e.trim())
+    .filter((e) => {
+      const key = e.toLowerCase();
+      if (!e || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+}
 
 // YYYY-MM-DD for a day offset from today, in the visitor's own time zone.
 function day(offset: number) {
@@ -84,6 +93,11 @@ export function Basket({ emailReady }: { emailReady: boolean }) {
   // The moment a card booked for later should arrive, in milliseconds.
   const due = (item: BasketItem) => zonedMoment(item.sendOn ?? "", item.sendTime || DEFAULT_TIME, item.timeZone || own);
 
+  const showProblem = (id: string, problem: string) => {
+    setError(problem);
+    document.getElementById(`basket-${id}`)?.scrollIntoView({ block: "center" });
+  };
+
   const pay = async () => {
     const problems: Record<string, string> = {};
     const now = Date.now();
@@ -100,7 +114,9 @@ export function Basket({ emailReady }: { emailReady: boolean }) {
       }
     }
     setItemErrors(problems);
-    if (Object.keys(problems).length) return setError(null);
+    const first = Object.keys(problems)[0];
+    // Said by the Pay button too, and the card with the problem brought into view.
+    if (first) return showProblem(first, problems[first]);
     if (!consent) return setError(b.errors.consent);
     setError(null);
     setBusy(true);
@@ -125,7 +141,10 @@ export function Basket({ emailReady }: { emailReady: boolean }) {
       const json = await res.json().catch(() => ({}));
       if (res.ok && json.url) return window.location.assign(json.url);
       if (Array.isArray(json.gone)) removeFromBasket(json.gone);
-      if (json.id) setItemErrors({ [json.id]: json.error ?? b.errors.failed });
+      if (json.id) {
+        setItemErrors({ [json.id]: json.error ?? b.errors.failed });
+        showProblem(json.id, json.error ?? b.errors.failed);
+      }
       else setError(json.error ?? b.errors.failed);
     } catch {
       setError(b.errors.failed);
@@ -140,7 +159,7 @@ export function Basket({ emailReady }: { emailReady: boolean }) {
           const template = getTemplate(item.template);
           const later = item.sendOn !== undefined;
           return (
-            <li key={item.id} className="sheet p-5 sm:p-6">
+            <li key={item.id} id={`basket-${item.id}`} className="sheet p-5 sm:p-6">
               <div className="flex gap-4">
                 <MiniFront item={item} />
                 <div className="min-w-0 flex-1">
@@ -191,7 +210,11 @@ export function Basket({ emailReady }: { emailReady: boolean }) {
                 {emailReady && item.delivery === "email" && (
                   <EmailOptions item={item} update={(patch) => update(item.id, patch)} own={own} zones={zones} tag={tag} showErrors={Boolean(itemErrors[item.id])} />
                 )}
-                {itemErrors[item.id] && <p className="mt-3 text-sm font-semibold text-hot">{itemErrors[item.id]}</p>}
+                {itemErrors[item.id] && (
+                  <p role="alert" className="mt-3 text-base font-semibold text-hot">
+                    {itemErrors[item.id]}
+                  </p>
+                )}
               </fieldset>
             </li>
           );
@@ -358,13 +381,14 @@ function EmailOptions({ item, update, own, zones, tag, showErrors }: { item: Bas
         </div>
         {later && (
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            {/* A cleared box (phones' pickers have a Clear button) keeps what it had, so nothing's booked blank. */}
             <label className="block">
               <span className="text-sm font-semibold">{b.day}</span>
-              <input type="date" min={day(0)} max={day(SCHEDULE_DAYS)} value={item.sendOn} onChange={(e) => update({ sendOn: e.target.value })} className={field} />
+              <input type="date" min={day(0)} max={day(SCHEDULE_DAYS)} value={item.sendOn} onChange={(e) => e.target.value && update({ sendOn: e.target.value })} className={field} />
             </label>
             <label className="block">
               <span className="text-sm font-semibold">{b.time}</span>
-              <input type="time" step={60} value={item.sendTime ?? DEFAULT_TIME} onChange={(e) => update({ sendTime: e.target.value })} className={field} />
+              <input type="time" step={60} value={item.sendTime || DEFAULT_TIME} onChange={(e) => e.target.value && update({ sendTime: e.target.value })} className={field} />
             </label>
             <div className="sm:col-span-2">
               <label className="block">

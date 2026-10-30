@@ -11,7 +11,7 @@ import { LANGUAGES, fmt } from "@/i18n/config";
 import { getI18n } from "@/i18n/server";
 import { alertOwner } from "@/lib/alert";
 import { getTemplate } from "@/lib/catalog";
-import { cardStatus, emailList, notReached, recipients, sendWhen, sendsItself } from "@/lib/delivery";
+import { canSendNow, cardStatus, emailList, notReached, recipients, sendWhen, sendsItself } from "@/lib/delivery";
 import { emailReady } from "@/lib/email";
 import { errorFields } from "@/lib/log";
 import { fulfilSession, type Fulfilment } from "@/lib/orders";
@@ -86,7 +86,7 @@ export default async function ThanksPage({ searchParams }: Props) {
                 // Who it's going to, or (if some couldn't be emailed) who it didn't reach.
                 email={emailList(status === "failed" || status === "retrying" ? notReached(item) : recipients(item), tag)}
                 date={sendWhen(t.basket, tag, item)}
-                sendNow={status === "scheduled" && session_id ? { card: item.cardId, session: session_id } : undefined}
+                sendNow={canSendNow(item) && session_id ? { card: item.cardId, session: session_id } : undefined}
               />
               {design && (
                 <p className="mt-5 border-t-2 border-dashed border-ink/15 pt-2">

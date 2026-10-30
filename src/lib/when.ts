@@ -99,7 +99,10 @@ export function zonedMoment(day: string, time: string, zone: string) {
   const wall = Date.UTC(y, m - 1, d, hh, mm);
   if (Number.isNaN(wall)) return NaN;
   const first = wall - offset(wall, zone);
-  return wall - offset(first, zone);
+  const second = wall - offset(first, zone);
+  // A time the clocks skip (they jump from 2:00 to 3:00, say) doesn't exist: of the two answers,
+  // take the later, just after the jump, as everywhere does.
+  return wall - offset(second, zone) === second ? second : Math.max(first, second);
 }
 
 // What a time zone is called in the visitor's language: the country, and where a country has

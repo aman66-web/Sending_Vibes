@@ -10,11 +10,7 @@ import type { ThemeName } from "@/lib/card";
 
 // What the account API adds to each card about getting it to them. Optional, so an older
 // response (a tab left open over an update) still shows.
-export type Delivery = {
-  status?: CardStatus;
-  template?: string;
-  custom?: boolean;
-};
+export type Delivery = { status?: CardStatus; template?: string; custom?: boolean };
 
 type Props = {
   card: {
@@ -28,6 +24,8 @@ type Props = {
     sendOn?: string;
     sendTime?: string;
     timeZone?: string;
+    // Whether "Send it now" can work for it (lib/delivery.ts).
+    sendNow?: boolean;
     sendAt?: string;
   } & Delivery;
 };
@@ -57,8 +55,8 @@ export function CardActions({ card }: Props) {
 
   return (
     <>
-      {line && <p className={`mt-4 font-semibold ${sendsItself(status) ? "text-hot" : "text-ink/75"}`}>{line}</p>}
-      {status === "scheduled" && <SendNow card={card.id} name={card.to} date={when} onSent={() => window.location.reload()} />}
+      {line && <p className={`mt-4 font-semibold [overflow-wrap:anywhere] ${sendsItself(status) ? "text-hot" : "text-ink/75"}`}>{line}</p>}
+      {status === "scheduled" && card.sendNow && <SendNow card={card.id} name={card.to} date={when} onSent={() => window.location.reload()} />}
       {sendsItself(status) ? (
         <ShareLink url={url} to={card.to} from={card.from} compact />
       ) : (

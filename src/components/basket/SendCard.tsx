@@ -13,22 +13,14 @@ export function Done({ text }: { text: string }) {
       <span aria-hidden className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-emerald-600 text-base text-white">
         ✓
       </span>
-      <span className="pt-0.5">{text}</span>
+      <span className="min-w-0 pt-0.5 [overflow-wrap:anywhere]">{text}</span>
     </p>
   );
 }
 
 // `email` is everyone it's going to (or, if it couldn't be emailed, who it didn't reach),
 // already written as a list. `sendNow` offers sending a booked card straight away.
-type Props = {
-  url: string;
-  to: string;
-  from: string;
-  status: CardStatus;
-  email?: string;
-  date?: string;
-  sendNow?: { card: string; session?: string };
-};
+type Props = { url: string; to: string; from: string; status: CardStatus; email?: string; date?: string; sendNow?: { card: string; session?: string } };
 
 // How a paid card on the thank-you page gets to them. A card we're emailing just says so,
 // with the link tucked away so it isn't sent early and spoils the surprise. The rest get

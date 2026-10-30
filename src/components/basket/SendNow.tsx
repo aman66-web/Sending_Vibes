@@ -22,6 +22,8 @@ export function SendNow({ card, session, name, date, onSent }: Props) {
   const th = useI18n().t.basket.thanks;
   const router = useRouter();
   const [step, setStep] = useState<"idle" | "ask" | "sending" | "failed">("idle");
+  // Focus follows the question there and back, so a screen reader (or a keyboard) isn't lost.
+  const [back, setBack] = useState(false);
 
   const send = async () => {
     setStep("sending");
@@ -44,12 +46,22 @@ export function SendNow({ card, session, name, date, onSent }: Props) {
   if (step === "ask" || step === "sending") {
     return (
       <div className="mt-3 rounded-2xl border-2 border-ink/15 bg-cream/70 p-4">
-        <p className="text-lg font-semibold">{fmt(th.sendNowAsk, { name, date })}</p>
+        <p tabIndex={-1} autoFocus className="text-lg font-semibold outline-none">
+          {fmt(th.sendNowAsk, { name, date })}
+        </p>
         <div className="mt-3 flex flex-wrap gap-3">
           <button type="button" onClick={send} disabled={step === "sending"} className="btn btn-red px-6 py-3 disabled:opacity-60">
             {step === "sending" ? th.sendingNow : th.sendNowYes}
           </button>
-          <button type="button" onClick={() => setStep("idle")} disabled={step === "sending"} className="btn btn-paper px-6 py-3 disabled:opacity-60">
+          <button
+            type="button"
+            onClick={() => {
+              setStep("idle");
+              setBack(true);
+            }}
+            disabled={step === "sending"}
+            className="btn btn-paper px-6 py-3 disabled:opacity-60"
+          >
             {th.sendNowNo}
           </button>
         </div>
@@ -65,6 +77,9 @@ export function SendNow({ card, session, name, date, onSent }: Props) {
       )}
       <button
         type="button"
+        autoFocus={back}
+        // Several booked cards on one page: say whose this is.
+        aria-label={`${th.sendNow}: ${name}`}
         onClick={() => setStep("ask")}
         className="mt-3 inline-flex min-h-12 items-center rounded-full border-2 border-ink bg-paper px-5 text-base font-semibold shadow-[3px_3px_0_0_var(--color-ink)] transition hover:-translate-y-0.5"
       >

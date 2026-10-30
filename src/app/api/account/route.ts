@@ -2,7 +2,7 @@ import { allowanceLeft } from "@/lib/allowance";
 import { NextResponse } from "next/server";
 import { authReady, currentAccount, emailSignInReady, googleEnabled } from "@/lib/auth";
 import { getTemplate } from "@/lib/catalog";
-import { cardStatus, notReached, recipients } from "@/lib/delivery";
+import { canSendNow, cardStatus, notReached, recipients } from "@/lib/delivery";
 import { ordersFor } from "@/lib/orders";
 import { getCard, openedTimes } from "@/lib/storage";
 
@@ -42,6 +42,7 @@ export async function GET() {
           sendTime: item.sendTime,
           timeZone: item.timeZone,
           sendAt: item.sendAt,
+          sendNow: canSendNow(item),
         };
       }),
     );
