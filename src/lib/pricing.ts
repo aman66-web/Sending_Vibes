@@ -120,8 +120,16 @@ const COUNTRIES: Partial<Record<Currency, string[]>> = {
 };
 const BY_COUNTRY = new Map(Object.entries(COUNTRIES).flatMap(([currency, countries]) => countries.map((c) => [c, currency as Currency])));
 
-// A visitor's currency from their country, on their first visit; they can change it.
+// The currency for a country: its own, or dollars.
 export function currencyForCountry(country: string | null | undefined): Currency {
   if (!country) return DEFAULT_CURRENCY;
   return BY_COUNTRY.get(country.toUpperCase()) ?? "usd";
+}
+
+// The currency a visitor sees and pays in: always their own country's (Vercel says where
+// they are), so nobody can see or pay what a card costs somewhere else. Only without a
+// country, as when running the site locally, does a saved one count.
+export function visitorCurrency(country: string | null | undefined, saved: string | null | undefined): Currency {
+  if (country) return currencyForCountry(country);
+  return isCurrency(saved) ? saved : DEFAULT_CURRENCY;
 }

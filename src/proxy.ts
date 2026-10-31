@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { DEFAULT_LOCALE, LOCALE_COOKIE, isLive, isLocale, type Locale } from "@/i18n/config";
-import { CURRENCY_COOKIE, DEFAULT_CURRENCY, currencyForCountry, isCurrency } from "@/lib/pricing";
+import { CURRENCY_COOKIE, DEFAULT_CURRENCY, isCurrency, visitorCurrency } from "@/lib/pricing";
 
 // Every page lives under app/[lang]/[cur]. Visitors never see either in the
 // address: /cards is quietly served from /hi/gbp/cards for someone in the UK
@@ -41,20 +41,26 @@ export function proxy(request: NextRequest) {
     url.pathname = "/" + parts.slice(isCurrency(second) ? 3 : 2).join("/");
     return NextResponse.redirect(url);
   }
-  // Already has both (e.g. /en/gbp/cards): serve it as it is.
-  if (isLive(first) && isCurrency(second)) return NextResponse.next();
+  const savedCurrency = request.cookies.get(CURRENCY_COOKIE)?.value;
+  // Prices are always the visitor's own country's (see visitorCurrency).
+  const currency = visitorCurrency(request.headers.get("x-vercel-ip-country"), savedCurrency);
+  // Already has both (e.g. /en/gbp/cards): serve it as it is, unless it's another country's
+  // prices, which go to the same page in the visitor's own.
+  if (isLive(first) && isCurrency(second)) {
+    if (second === currency) return NextResponse.next();
+    const url = request.nextUrl.clone();
+    url.pathname = `/${first}/${parts.slice(3).join("/")}`;
+    return NextResponse.redirect(url);
+  }
 
   const savedLocale = request.cookies.get(LOCALE_COOKIE)?.value;
-  const savedCurrency = request.cookies.get(CURRENCY_COOKIE)?.value;
   const locale = isLive(first) ? first : isLive(savedLocale) ? savedLocale : (preferred(request.headers.get("accept-language")) ?? DEFAULT_LOCALE);
-  // Vercel says which country the visitor is in. The first answer is kept, so prices don't change mid-trip.
-  const currency = isCurrency(savedCurrency) ? savedCurrency : currencyForCountry(request.headers.get("x-vercel-ip-country"));
 
   const rest = isLive(first) ? pathname.slice(first.length + 1) : pathname;
   const url = request.nextUrl.clone();
   url.pathname = `/${locale}/${currency}${rest === "/" ? "" : rest}`;
   const response = NextResponse.rewrite(url);
-  if (!isCurrency(savedCurrency)) response.cookies.set(CURRENCY_COOKIE, currency, { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
+  if (savedCurrency !== currency) response.cookies.set(CURRENCY_COOKIE, currency, { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
   return response;
 }
 

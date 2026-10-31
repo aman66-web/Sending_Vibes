@@ -10,7 +10,7 @@ import { emailReady } from "@/lib/email";
 import { createOrder, ordersReady, setOrderSession, type OrderItem } from "@/lib/orders";
 import { cardTier } from "@/lib/catalog";
 import { errorFields } from "@/lib/log";
-import { CURRENCY_COOKIE, DEFAULT_CURRENCY, isCurrency, type Tier } from "@/lib/pricing";
+import { CURRENCY_COOKIE, type Tier, visitorCurrency } from "@/lib/pricing";
 import { clientNetwork } from "@/lib/rate-limit";
 import { getCard } from "@/lib/storage";
 import { cardLineItem, stripe } from "@/lib/stripe";
@@ -70,8 +70,8 @@ export async function POST(req: NextRequest) {
   const parsed = bodySchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return fail(errors.failed, 400);
 
-  const cur = req.cookies.get(CURRENCY_COOKIE)?.value;
-  const currency = isCurrency(cur) ? cur : DEFAULT_CURRENCY;
+  // Charged in their own country's currency, whatever the browser says (see visitorCurrency).
+  const currency = visitorCurrency(req.headers.get("x-vercel-ip-country"), req.cookies.get(CURRENCY_COOKIE)?.value);
   const now = Date.now();
   const seen = new Set<string>();
   const items: OrderItem[] = [];
