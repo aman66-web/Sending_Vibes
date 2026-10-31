@@ -5,7 +5,7 @@ Interactive e-cards people actually remember. Instead of a static card, the pers
 ## What's built
 
 - **Landing page** (`/`): pitch, a laptop that plays a card by itself, a "coming up" strip of the next occasions, playable feature tiles (runaway No, prize wheel, music player), a seasonal occasion showcase, a "Shop the cards" product section, how it works, pricing.
-- **Card catalogue** (`/cards`): 78 designs across 21 occasions, with search and filters for occasion, vibe (funny, heartfelt, cute, romantic, festive) and device. Hovering a card shows a play button; new designs get a badge.
+- **Card catalogue** (`/cards`): 93 designs across 24 occasions, with search and filters for occasion, vibe (funny, heartfelt, cute, romantic, festive) and device. Hovering a card shows a play button; new designs get a badge.
 - **Occasion pages** (`/occasions` and `/occasions/<occasion>`): every occasion with its designs and when it next comes round. Dates are in `src/lib/calendar.ts`: fixed dates and UK Mother's/Father's Day are worked out automatically, festivals that follow the moon (Diwali, Eid, Holi, Raksha Bandhan) are listed by hand and need adding each year.
 - **Product pages** (`/cards/<slug>`): the design running live in a phone or browser frame, a "try it with your names" box and colour picker that update the preview, a list of what's inside and what can be customised.
 - **Full-screen demos** (`/cards/<slug>/play`, plus `/demo/<occasion>` for the three flagship occasions).
@@ -109,15 +109,22 @@ What it knows comes from `src/lib/chat-prompt.ts`, built from the real catalogue
 
 ## Roadmap
 
-- [ ] Stripe checkout: every card is paid (£9.99 in the UK, $9.99 elsewhere; AI Custom £14.99 / $14.99)
-- [ ] AI editor: "describe what you want" edits to the card's blocks
-- [x] More occasions: Christmas, Eid, anniversary, sorry, thank you, congrats
-- [x] Quiz, scratch-to-reveal, memory match and more games
-- [x] Raksha Bandhan, new baby, Halloween, New Year, Holi, weddings and more
-- [x] Background music and sound effects
-- [ ] Terms of service and a contact email (the privacy page is there; both need the business details)
+Done:
+
+- [x] Stripe checkout with catalogue prices, so promotion codes work. A personalised card and a ready-made design cost the same: £9.99 in the UK, $9.99 elsewhere
+- [x] AI: a few tap-first questions, then it writes and designs the card, or fills in a ready-made design; and an editor you can describe changes to
+- [x] Emailing a card to up to 10 addresses with the buyer's own message, booked for a day, time and time zone, with "Send it now"
+- [x] Sign-in with Google or a 6-digit email code, and a "My cards" page
+- [x] Terms, privacy, and a contact address (hello@envelette.com, forwarded by ImprovMX)
+- [x] Rate limits on checkout, sign-in codes and the AI (migrations `0007`–`0009`)
+- [x] 93 designs across 24 occasions, each with realistic preview photos (`public/demo/`, chosen per design in `src/lib/demo-photos.ts`)
+- [x] Background music and sound effects; the site in 10 languages
+
+Still to do:
+
 - [ ] Moderation for photos and text, a report button, and card expiry or delete
-- [ ] Rate limiting on uploads and card creation
+- [ ] Festival dates that follow the moon (Diwali, Eid, Holi, Raksha Bandhan) are listed in `src/lib/calendar.ts` up to 2027: add 2028's before late 2027
+- [ ] Watch for a "removeChild" browser error once seen on `/occasions/birthday` (probably a browser extension or auto-translate; not reproduced)
 
 ## Tech
 
