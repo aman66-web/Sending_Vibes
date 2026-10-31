@@ -2,7 +2,7 @@
 
 import { catchError, type ErrorInfo } from "next/error";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CardData, Screen, ScreenStyle, Transition } from "@/lib/card";
 import { labelText } from "@/lib/labels";
 import { stagesOf } from "@/lib/stages";
@@ -14,6 +14,7 @@ import { HeartMark } from "./ornaments";
 import { PersonalProvider } from "./personal";
 import { ReplyPanel, type Recipient } from "./ReplyPanel";
 import {
+  DoneContext,
   FinaleScreen,
   GameScreen,
   IntroScreen,
@@ -102,6 +103,8 @@ export function CardPlayer({
   const [run, setRun] = useState(0);
   // The furthest they've got, so after going back the dots can take them forward again.
   const [furthest, setFurthest] = useState(index);
+  // Screens they've won or worked through, even ones they went back from before pressing Next.
+  const [finished, setFinished] = useState<ReadonlySet<string>>(() => new Set());
   // The layer celebrations are drawn in (see FxLayer), set once it's on the page.
   const [fxLayer, setFxLayer] = useState<HTMLDivElement | null>(null);
   const root = useRef<HTMLDivElement>(null);
@@ -124,6 +127,9 @@ export function CardPlayer({
 
   const current = screens[Math.min(index, screens.length - 1)];
   const currentId = current?.id;
+  const markDone = useCallback(() => {
+    if (currentId) setFinished((f) => (f.has(currentId) ? f : new Set(f).add(currentId)));
+  }, [currentId]);
   // Each screen can have its own colours, fonts and stickers on top of the card's theme.
   const look = screenLook(themes[card.theme], current?.style);
   const theme = look.theme;
@@ -152,7 +158,8 @@ export function CardPlayer({
   const go = (i: number) => {
     moved.current = true;
     setIndex(i);
-    setStage(!preview && i < furthest && GATED.has(screens[i].type) ? stagesOf(screens[i]).length - 1 : 0);
+    const done = i < furthest || finished.has(screens[i].id);
+    setStage(!preview && done && GATED.has(screens[i].type) ? stagesOf(screens[i]).length - 1 : 0);
     setFurthest((f) => Math.max(f, i));
   };
   const next = () => go(Math.min(index + 1, screens.length - 1));
@@ -161,6 +168,7 @@ export function CardPlayer({
     go(0);
     setStage(0);
     setFurthest(0);
+    setFinished(new Set());
     setRun((r) => r + 1);
   };
 
@@ -285,6 +293,7 @@ export function CardPlayer({
         <BurstContext.Provider value={current.style?.burst}>
         <FxLayer.Provider value={fxLayer}>
         <TuneContext.Provider value={current.style?.tune ?? NO_TUNE}>
+        <DoneContext.Provider value={markDone}>
         <div
           key={`${run}-${current.id}-${stage}-${editing}-${JSON.stringify(current.style?.tune ?? "")}`}
           ref={screenBox}
@@ -329,6 +338,7 @@ export function CardPlayer({
           )}
           </ScreenGuard>
         </div>
+        </DoneContext.Provider>
         </TuneContext.Provider>
         </FxLayer.Provider>
         </BurstContext.Provider>
@@ -337,7 +347,7 @@ export function CardPlayer({
         </LiveContext.Provider>
       </main>
 
-      {current?.style && <Decorations key={`${run}-${current.id}`} style={current.style} editing={editing} />}
+      {current?.style && <Decorations key={`${run}-${current.id}`} style={current.style} editing={editing} footer={!preview} back={!preview && index > 0} />}
 
       {!preview && (
         <p className="relative z-10 px-6 pb-4 text-center text-sm opacity-75">
@@ -378,7 +388,9 @@ const ScreenGuard = catchError(function ScreenTrouble(
 // shorter side, so they look the same on a phone and a computer. They let taps through
 // to the card underneath, except while editing, when the editor can pick them out
 // (data-deco) to change or drag them.
-function Decorations({ style, editing }: { style: ScreenStyle; editing: boolean }) {
+// On the card itself, a sticker's bottom edge stays above the "From … · made with Envelette"
+// line, and a top-left one stays below the Back button, even on a shorter card (a demo page).
+function Decorations({ style, editing, footer = false, back = false }: { style: ScreenStyle; editing: boolean; footer?: boolean; back?: boolean }) {
   const { stickers = [], texts = [], images = [] } = style;
   if (!stickers.length && !texts.length && !images.length) return null;
   const place = (x: number, y: number, rotate = 0) => ({ left: `${x}%`, top: `${y}%`, rotate: `${rotate}deg`, translate: "-50% -50%" });
@@ -402,7 +414,13 @@ function Decorations({ style, editing }: { style: ScreenStyle; editing: boolean 
           key={`s${i}`}
           data-deco={`sticker:${i}`}
           className={`${item} animate-pop leading-none`}
-          style={{ ...place(s.x, s.y, s.rotate), fontSize: `${s.size}cqmin`, animationDelay: `${i * 80}ms` }}
+          style={{
+            ...place(s.x, s.y, s.rotate),
+            ...(footer && { top: `min(${s.y}%, calc(100% - 3rem - ${s.size * 0.6}cqmin))` }),
+            ...(back && s.x < 25 && s.y < 50 && { top: `max(${s.y}%, calc(4.25rem + ${s.size * 0.6}cqmin))` }),
+            fontSize: `${s.size}cqmin`,
+            animationDelay: `${i * 80}ms`,
+          }}
         >
           <span className={`block ${s.motion && s.motion !== "none" ? `sticker-${s.motion}` : ""}`} style={{ animationDelay: `${-i * 0.7}s` }}>
             {s.emoji}

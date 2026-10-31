@@ -32,6 +32,7 @@ export function SendCard({ url, to, from, status, email = "", date = "", sendNow
     return (
       <>
         <Done text={status === "scheduled" ? fmt(th.scheduledDone, { email, date }) : fmt(th.emailedDone, { email })} />
+        <p className="mt-2 text-ink/65">{th.checkSpam}</p>
         {status === "scheduled" && sendNow && <SendNow card={sendNow.card} session={sendNow.session} name={to} date={date} />}
         <details className="mt-2">
           <summary className="inline-flex min-h-11 cursor-pointer items-center font-semibold text-ink/70 underline underline-offset-4">{th.sendYourself}</summary>

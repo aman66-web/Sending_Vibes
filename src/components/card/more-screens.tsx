@@ -180,7 +180,7 @@ export function CouponsScreen({ screen, onNext, stage = 0, from = "" }: ScreenPr
             style={{ mask: TICKET_MASK, WebkitMask: TICKET_MASK, borderRadius: 14 }}
           >
             <span className="absolute inset-1.5 rounded-[10px] border-2 border-dashed border-[var(--c-accent)] opacity-40" />
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--c-accent)]">{text("coupon")}</span>
+            <span className="text-sm font-bold uppercase tracking-[0.15em] text-[var(--c-accent)]">{text("coupon")}</span>
             <span className="font-display text-lg font-bold leading-tight">{c}</span>
             <span className={`text-sm font-semibold opacity-75 ${redeemed[i] ? "invisible" : ""}`}>{text("couponTap")}</span>
             {redeemed[i] && (

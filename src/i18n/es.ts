@@ -1002,6 +1002,7 @@ export const es: Dict = {
       sendingNow: "Enviando…",
       sendNowFailed: "Ahora mismo no hemos podido enviarla, así que sigue programada. Vuelve a intentarlo dentro de un minuto.",
       emailedDone: "¡Todo listo! Se la hemos enviado por correo a {email}.",
+      checkSpam: "Si no está en su bandeja de entrada, pídele que mire en Correo no deseado o Spam.",
       sendYourself: "O envía tú el enlace",
       emailFailed: "No hemos podido enviarla por correo a {email}. Envíasela tú a {name} con el botón de abajo.",
       emailRetrying: "Todavía no hemos podido enviarla por correo a {email}. Seguiremos intentándolo, o puedes enviársela tú a {name} ahora.",

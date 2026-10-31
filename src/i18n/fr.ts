@@ -998,6 +998,7 @@ export const fr: Dict = {
       sendingNow: "Envoi en cours…",
       sendNowFailed: "On n'a pas pu l'envoyer pour l'instant, alors elle reste programmée. Réessaie dans une minute, s'il te plaît.",
       emailedDone: "C'est fait ! On l'a envoyée par e-mail à {email}.",
+      checkSpam: "Si elle n'est pas dans leur boîte de réception, demandez-leur de regarder dans les courriers indésirables ou les spams.",
       sendYourself: "Ou envoie le lien toi-même",
       emailFailed: "On n'a pas pu l'envoyer par e-mail à {email}. Envoie-la toi-même à {name} avec le bouton ci-dessous, s'il te plaît.",
       emailRetrying: "On n'a pas encore pu l'envoyer par e-mail à {email}. On continue d'essayer, mais tu peux aussi l'envoyer toi-même à {name} dès maintenant.",

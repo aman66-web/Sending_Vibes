@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { DEFAULT_LOCALE, LOCALE_COOKIE, isLive, isLocale, type Locale } from "@/i18n/config";
-import { CURRENCY_COOKIE, currencyForCountry, isCurrency } from "@/lib/pricing";
+import { CURRENCY_COOKIE, DEFAULT_CURRENCY, currencyForCountry, isCurrency } from "@/lib/pricing";
 
 // Every page lives under app/[lang]/[cur]. Visitors never see either in the
 // address: /cards is quietly served from /hi/gbp/cards for someone in the UK
@@ -24,6 +24,15 @@ const OLD_HOST = "sending-vibes.vercel.app";
 export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   if (request.headers.get("host") === OLD_HOST) return NextResponse.redirect(`https://envelette.com${pathname}${search}`, 308);
+  // A badly encoded address (a stray "%") can't be read at all: show the friendly
+  // not-found page, rather than the bare error Next gives when it can't decode it.
+  try {
+    decodeURIComponent(pathname);
+  } catch {
+    const url = request.nextUrl.clone();
+    url.pathname = `/${DEFAULT_LOCALE}/${DEFAULT_CURRENCY}/missing`;
+    return NextResponse.rewrite(url, { status: 404 });
+  }
   const parts = pathname.split("/");
   const [, first, second] = parts;
   // A language that's switched off (an old /hi/cards link): drop it from the address.
@@ -50,6 +59,8 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Everything except the API, Next's own files and anything with a file extension.
-  matcher: ["/((?!api|_next|.*\\..*).*)"],
+  // Everything except the API, Next's own files and real files (images, robots.txt and so
+  // on). Other addresses with a dot in, or starting "api" (/cards.html, /apis), come
+  // through too, so they get the friendly not-found page instead of a bare one.
+  matcher: ["/((?!api/|api$|_next/|.*\\.(?:svg|png|jpe?g|webp|gif|ico|txt|xml|json|js|css|map|woff2?|webmanifest)$).*)"],
 };
