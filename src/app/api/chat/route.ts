@@ -4,6 +4,7 @@ import { z } from "zod";
 import { DEFAULT_LOCALE, LOCALES, isLive } from "@/i18n/config";
 import { DICTS } from "@/i18n/dictionaries";
 import { CHAT_SYSTEM, chatContext } from "@/lib/chat-prompt";
+import { CURRENCY_COOKIE, visitorCurrency } from "@/lib/pricing";
 import { clientNetwork } from "@/lib/rate-limit";
 
 // The live chat. Streams the reply back as one JSON event per line:
@@ -58,6 +59,7 @@ let client: Anthropic | undefined;
 export async function POST(req: Request) {
   // Errors are shown in the visitor's language, read from the language cookie.
   const saved = req.headers.get("cookie")?.match(/(?:^|;\s*)lang=([a-z]{2})/)?.[1];
+  const currencyCookie = req.headers.get("cookie")?.match(new RegExp(`(?:^|;\\s*)${CURRENCY_COOKIE}=([a-z]{3})`))?.[1];
   const errors = DICTS[isLive(saved) ? saved : DEFAULT_LOCALE].chat.errors;
   if (!process.env.ANTHROPIC_API_KEY) return fail(errors.off, 503);
 
@@ -86,7 +88,7 @@ export async function POST(req: Request) {
     output_config: { effort: "low" },
     system: [
       { type: "text", text: CHAT_SYSTEM, cache_control: { type: "ephemeral" } },
-      { type: "text", text: chatContext(parsed.data.page, parsed.data.locale) },
+      { type: "text", text: chatContext(parsed.data.page, parsed.data.locale, visitorCurrency(req.headers.get("x-vercel-ip-country"), currencyCookie)) },
     ],
     messages,
   });

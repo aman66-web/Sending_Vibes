@@ -41,9 +41,6 @@ export const pl: Dict = {
   common: {
     worldwide: "Dociera od razu przez link, w dowolne miejsce na świecie.",
     worldwideShort: "Dostawa od razu, na cały świat",
-    currency: "Waluta",
-    commonCurrencies: "Najpopularniejsze",
-    allCurrencies: "Wszystkie waluty",
     abroad: {
       q: "Czy mogę wysłać kartkę za granicę?",
       a: "Tak. Kartka dociera od razu jako link, więc trafi do każdego, w dowolne miejsce na świecie, bez znaczków i czekania. Kartka kosztuje {price}, a zapłacić możesz we własnej walucie.",

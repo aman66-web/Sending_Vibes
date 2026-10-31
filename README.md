@@ -86,7 +86,7 @@ Google then posts the sign-in straight back to `/api/auth/google/return`, which 
 
 ## Languages
 
-The site (not the cards) can be shown in English, Hindi, Punjabi, Gujarati, Bengali, Urdu, Arabic, Polish, Spanish and French, picked with the globe button in the header.
+The site (not the cards) is translated into English, Hindi, Punjabi, Gujarati, Bengali, Urdu, Arabic, Polish, Spanish and French. Only the languages in `LIVE_LOCALES` (`src/i18n/config.ts`) are switched on, at the moment just English; with more than one on, a globe button in the header picks between them.
 
 - Every page lives under `src/app/[lang]/[cur]/`. `src/proxy.ts` serves `/cards` from `/hi/gbp/cards` (etc.) based on the `lang` cookie, or the browser's language on a first visit, so addresses stay the same.
 - All site text is in `src/i18n/en.ts`. The other languages in `src/i18n/` are copies with the same keys; TypeScript complains if one is missing a key. Server components use `getI18n()`, client components `useI18n()`.
@@ -95,7 +95,7 @@ The site (not the cards) can be shown in English, Hindi, Punjabi, Gujarati, Beng
 
 ## Prices and currency
 
-A card is £9.99 in the UK and $9.99 everywhere else (`src/lib/pricing.ts`). The proxy picks the currency from the visitor's country (Vercel's `x-vercel-ip-country` header) on their first visit and keeps it in a `cur` cookie, so pages live under `app/[lang]/[cur]` and are static per currency too. Visitors can switch in the globe menu.
+A card costs £9.99 in pounds, $9.99 in US dollars and €9.99 in euros, and about the same in the other currencies in `src/lib/pricing.ts`. Visitors always see and pay their own country's price: the proxy takes the currency from Vercel's `x-vercel-ip-country` header on every visit (`visitorCurrency`), checkout charges in that currency whatever the browser says, an address with another currency in it (`/en/usd/cards`) redirects to the visitor's own, there's no currency menu, and the chat only quotes the visitor's price. Pages live under `app/[lang]/[cur]` so they stay static per currency.
 
 ## Live chat (Claude)
 
@@ -118,7 +118,7 @@ Done:
 - [x] Terms, privacy, and a contact address (hello@envelette.com, forwarded by ImprovMX)
 - [x] Rate limits on checkout, sign-in codes and the AI (migrations `0007`–`0009`)
 - [x] 93 designs across 24 occasions, each with realistic preview photos (`public/demo/`, chosen per design in `src/lib/demo-photos.ts`)
-- [x] Background music and sound effects; the site in 10 languages
+- [x] Background music and sound effects; the site translated into 9 more languages, ready to switch on (only English is on; see Languages)
 
 Still to do:
 
