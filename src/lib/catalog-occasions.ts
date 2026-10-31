@@ -21,7 +21,7 @@ const sticker = (emoji: string, x: number, y: number, size: number, rotate = 0, 
   ...(motion ? { motion } : {}),
 });
 
-const HOME = { src: "/demo/home.svg", caption: "The new front door" };
+const HOME = { src: "/demo/home.jpg", caption: "The new front door" };
 
 // Ready-made designs for the newer occasions. They join the
 // list in catalog.ts and are written with the same pieces (lib/design-kit.ts).
