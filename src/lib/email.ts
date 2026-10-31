@@ -136,15 +136,28 @@ ${watchLink(order, item)}${sendsItself(status) ? shareButtons(order, item) : ""}
   return { subject: t.receiptSubject, html, text };
 }
 
+// Whether their message already ends with their name ("Love, Aman"), so the email doesn't
+// sign it a second time. Trailing punctuation, emoji and kisses ("Aman xx") don't count.
+function signedOff(message: string, from: string) {
+  const bare = (s: string) => s.trim().toLowerCase().replace(/[^\p{L}\p{N}]+$/u, "");
+  const name = bare(from);
+  // A whole name, not the end of a longer word ("Roman" isn't signed "Man").
+  const endsWithName = (end: string) => !!name && end.endsWith(name) && !/[\p{L}\p{N}]/u.test(end.charAt(end.length - name.length - 1));
+  const end = bare(message);
+  return endsWithName(end) || endsWithName(bare(end.replace(/\s+x+$/, "")));
+}
+
 // The card itself, arriving: their envelope (the same picture as the link preview), a big
 // button, and the plain link under it for email apps that hide buttons or pictures.
 // `replies` says whether answering it reaches the buyer.
 function cardEmail(order: Order, item: OrderItem, replies: boolean) {
   const t = DICTS[order.locale].email;
   const url = cardUrl(order, item);
-  // The buyer's own words, as they typed them (line breaks kept), signed with their name.
+  // The buyer's own words, as they typed them (line breaks kept), signed with their name
+  // unless they already signed it themselves.
+  const sign = item.message && !signedOff(item.message, item.from) ? fmt(t.messageSign, { from: item.from }) : "";
   const note = item.message
-    ? `<div dir="auto" style="margin:0 0 20px;padding:16px 18px;background:#ffffff;border:2px solid #1f1b16;border-radius:14px;font-size:18px;line-height:1.5;white-space:pre-line">${esc(item.message).replace(/\n/g, "<br>")}<div style="margin-top:8px;font-family:Georgia,'Times New Roman',serif;font-weight:bold">${esc(fmt(t.messageSign, { from: item.from }))}</div></div>`
+    ? `<div dir="auto" style="margin:0 0 20px;padding:16px 18px;background:#ffffff;border:2px solid #1f1b16;border-radius:14px;font-size:18px;line-height:1.5;white-space:pre-line">${esc(item.message).replace(/\n/g, "<br>")}${sign ? `<div style="margin-top:8px;font-family:Georgia,'Times New Roman',serif;font-weight:bold">${esc(sign)}</div>` : ""}</div>`
     : "";
   const html = layout(
     order.locale,
@@ -158,7 +171,7 @@ ${replies ? `<p style="margin:0 0 6px;font-size:13px;color:#5b5247">${esc(fmt(t.
 <p style="margin:0;font-size:13px;color:#5b5247">${esc(fmt(t.cardFooter, { from: item.from }))}</p>`,
     fmt(t.preheader, { to: item.to, from: item.from }),
   );
-  const words = item.message ? `${item.message}\n${fmt(t.messageSign, { from: item.from })}\n\n` : "";
+  const words = item.message ? `${item.message}\n${sign ? `${sign}\n` : ""}\n` : "";
   const text = `${fmt(t.cardTitle, { from: item.from })}\n\n${words}${fmt(t.cardBody, { to: item.to })}\n\n${url}`;
   return { subject: cardSubject(t, item), html, text };
 }
