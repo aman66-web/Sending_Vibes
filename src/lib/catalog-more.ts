@@ -24,10 +24,10 @@ const stick = (emoji: string, x: number, y: number, size = 10, motion: Motion = 
 
 // Illustrated stand-ins drawn for these designs, alongside the shared ones in design-kit.
 const DEMO = {
-  thali: { src: "/demo/thali.svg", caption: "The thali, ready and waiting" },
-  waterLights: { src: "/demo/water-lights.svg", caption: "Lights on the water" },
-  cosyHome: { src: "/demo/cosy-home.svg", caption: "Home for Christmas" },
-  snowman: { src: "/demo/snowman.svg", caption: "Our snowman" },
+  thali: { src: "/demo/thali.jpg", caption: "The thali, ready and waiting" },
+  waterLights: { src: "/demo/water-lights.jpg", caption: "Lights on the water" },
+  cosyHome: { src: "/demo/cosy-home.jpg", caption: "Home for Christmas" },
+  snowman: { src: "/demo/snowman.jpg", caption: "Our snowman" },
 };
 
 export const MORE_DESIGNS: Template[] = [

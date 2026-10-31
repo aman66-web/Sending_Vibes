@@ -175,7 +175,7 @@ for (const o of NEW) {
 const slugs = TEMPLATES.map((t) => t.slug);
 const repeated = slugs.filter((s, i) => slugs.indexOf(s) !== i);
 if (repeated.length) fail(`design slugs used twice: ${repeated.join(", ")}`);
-for (const t of OCCASION_DESIGNS) if (!TEMPLATES.includes(t)) fail(`${t.slug} isn't in the shop's list`);
+for (const t of OCCASION_DESIGNS) if (!slugs.includes(t.slug)) fail(`${t.slug} isn't in the shop's list`);
 
 console.log(failures ? `\n${failures} problem(s)` : "\nAll good");
 process.exitCode = failures ? 1 : 0;

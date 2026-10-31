@@ -310,7 +310,7 @@ export default async function Home() {
               <h3 className="font-brand text-3xl font-bold">{h.photosTitle}</h3>
               <p className="mt-2 text-ink/65">{h.photosBody}</p>
               <div className="relative mx-auto mt-8 h-48 w-40">
-                {["/demo/coffee.svg", "/demo/balloons.svg", "/demo/sunset.svg"].map((src, i) => (
+                {["/demo/coffee.jpg", "/demo/balloons.jpg", "/demo/sunset.jpg"].map((src, i) => (
                   <div
                     key={src}
                     className="absolute inset-0 bg-white p-2 pb-8 shadow-md ring-1 ring-ink/15 transition duration-500"

@@ -50,6 +50,8 @@ const securityHeaders = [
 const PRIVATE = [{ key: "X-Robots-Tag", value: "noindex, nofollow" }];
 
 const nextConfig: NextConfig = {
+  // app/global-not-found.tsx: the friendly 404 for addresses too broken to reach app/[lang]/[cur].
+  experimental: { globalNotFound: true },
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },

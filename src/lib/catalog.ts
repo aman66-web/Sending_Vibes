@@ -4,6 +4,7 @@ import * as B from "./design-styles-b";
 import { MORE_DESIGNS } from "./catalog-more";
 import { OCCASION_DESIGNS } from "./catalog-occasions";
 import { DESIGN_SCREENS } from "./design-history";
+import { DESIGN_PHOTOS } from "./demo-photos";
 import { BLANK, arcade, bloom, blush, bout, candle, crown, dusk, fizz, flight, gallery, garden, golden, groan, gulal, hush, lilac, lullaby, memo, oak, reveal, splash, stick, sunny, thread, ticket, voyage, zine } from "./design-styles-c";
 import { P, at, boxes, coupons, finale, game, intro, message, photos, q, question, quiz, reasons, scratch, slider, timeline, typeit, wheel } from "./design-kit";
 import { dress, sticker } from "./design-styles-a";
@@ -71,7 +72,7 @@ export const OCCASION_MUSIC: Record<Occasion, Music> = {
 };
 
 
-export const TEMPLATES: Template[] = [
+const DESIGNS: Template[] = [
   // ---------- Valentine's ----------
   {
     slug: "be-my-valentine",
@@ -3272,6 +3273,9 @@ export const TEMPLATES: Template[] = [
   ...MORE_DESIGNS,
   ...OCCASION_DESIGNS,
 ];
+
+// Every design with the realistic photos chosen for its previews (lib/demo-photos.ts).
+export const TEMPLATES: Template[] = DESIGNS.map((t) => (DESIGN_PHOTOS[t.slug] ? { ...t, demo: { ...t.demo, photos: DESIGN_PHOTOS[t.slug] } } : t));
 
 // Shown with a "New" badge in the shop: a handful of recent ones for the season ahead, and
 // every design added in catalog-more.ts and catalog-occasions.ts. Kept short so it means something.

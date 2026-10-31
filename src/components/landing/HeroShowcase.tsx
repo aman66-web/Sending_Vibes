@@ -163,7 +163,7 @@ export function HeroShowcase({ slug, phoneSlug }: { slug: string; phoneSlug: str
           </label>
         </div>
         <div className="mt-4 flex items-center gap-2">
-          {["/demo/sunset.svg", "/demo/coffee.svg", "/demo/lights.svg"].map((src, i) => (
+          {["/demo/sunset.jpg", "/demo/coffee.jpg", "/demo/lights.jpg"].map((src, i) => (
             // eslint-disable-next-line @next/next/no-img-element -- decorative sample photos
             <img key={src} src={src} alt="" className="h-10 w-10 bg-white object-cover p-0.5 shadow-sm ring-1 ring-ink/15" style={{ rotate: `${(i - 1) * 6}deg` }} />
           ))}
