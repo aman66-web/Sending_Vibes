@@ -217,9 +217,10 @@ function hidePhotos(card: CardData) {
     return `photo-${urls.length}`;
   };
   const screens = card.screens.map((s) => {
-    // Photos placed on any screen, as well as a photos screen's own.
+    // Photos placed on any screen, as well as a photos screen's own and a question's.
     const images = s.style?.images?.map((img) => ({ ...img, src: hide(img.src) }));
     const screen = images ? { ...s, style: { ...s.style, images } } : s;
+    if (screen.type === "question" && screen.photo) return { ...screen, photo: hide(screen.photo) };
     return screen.type === "photos" ? { ...screen, photos: screen.photos.map(hide) } : screen;
   });
   return { card: { ...card, screens }, urls };
@@ -231,6 +232,12 @@ function restorePhotos(screen: Raw, urls: string[]) {
   if (style && typeof style === "object" && Array.isArray(style.images)) {
     const images = style.images.map((img) => (img && typeof img === "object" ? { ...img, src: url((img as { src?: unknown }).src) } : img)).filter((img) => img?.src);
     screen = { ...screen, style: { ...style, images } };
+  }
+  if (screen.type === "question" && "photo" in screen) {
+    // Only a photo the card already had; anything else is left off.
+    const { photo, ...rest } = screen;
+    const kept = url(photo);
+    return kept ? { ...rest, photo: kept } : rest;
   }
   if (screen.type !== "photos") return screen;
   const photos = Array.isArray(screen.photos) ? screen.photos : [];

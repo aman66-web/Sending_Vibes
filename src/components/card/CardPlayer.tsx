@@ -3,7 +3,7 @@
 import { catchError, type ErrorInfo } from "next/error";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { CardData, Screen, ScreenStyle, Transition } from "@/lib/card";
+import { ownPhotos, type CardData, type Screen, type ScreenStyle, type Transition } from "@/lib/card";
 import { labelText } from "@/lib/labels";
 import { stagesOf } from "@/lib/stages";
 import { FONT_VARS, cropStyle, screenLook } from "@/lib/screen-style";
@@ -187,7 +187,7 @@ export function CardPlayer({
   // moment its screen comes up rather than loading in front of them.
   useEffect(() => {
     if (preview) return;
-    const urls = new Set(card.screens.flatMap((s) => [...(s.type === "photos" ? s.photos : []), ...(s.style?.images ?? []).map((img) => img.src)]));
+    const urls = new Set(card.screens.flatMap((s) => [...ownPhotos(s), ...(s.style?.images ?? []).map((img) => img.src)]));
     if (!urls.size) return;
     // Held on to while the card is open, so nothing cuts them short.
     const fetched: HTMLImageElement[] = [];

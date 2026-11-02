@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { fmt } from "@/i18n/config";
 import { useI18n } from "@/i18n/client";
-import type { CardData, Font, Screen, ScreenStyle } from "@/lib/card";
+import { ownPhotos, type CardData, type Font, type Screen, type ScreenStyle } from "@/lib/card";
 import { FONT_VARS } from "@/lib/screen-style";
 import { uploadPhoto } from "./image";
 import { useFreshTap } from "./one-tap";
@@ -116,7 +116,7 @@ export function StudioPanel({ card, screenIndex, tab, setTab, change, editScreen
   const addText = (text: string, look: { font?: Font; color?: string; size: number }) => add("texts", { text, x: 50, y: spot.y, ...look }, 8);
   // Photos they've uploaded, kept in this browser, plus any already on the card.
   const [uploads, setUploads] = useState<string[]>(readUploads);
-  const onCard = card.screens.flatMap((sc) => [...(sc.type === "photos" ? sc.photos : []), ...(sc.style?.images ?? []).map((img) => img.src)]);
+  const onCard = card.screens.flatMap((sc) => [...ownPhotos(sc), ...(sc.style?.images ?? []).map((img) => img.src)]);
   const gallery = [...new Set([...uploads, ...onCard])];
   const upload = async (chosen: FileList | null) => {
     const list = Array.from(chosen ?? []).slice(0, 12);

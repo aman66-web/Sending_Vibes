@@ -216,6 +216,8 @@ export const screenSchema = z.discriminatedUnion("type", [
     yes: text(30),
     no: text(30),
     afterYes: text(140),
+    // A photo shown above the question, like a snapshot of what they're asking for.
+    photo: photoUrl.optional(),
   }),
   z.object({
     ...screenBase,
@@ -331,6 +333,10 @@ export const cardSchema = z.object({
 });
 
 export type Screen = z.infer<typeof screenSchema>;
+
+// The photos a screen shows as part of itself, not ones placed on top: a photos screen's,
+// and the snapshot above a question.
+export const ownPhotos = (s: Screen): string[] => (s.type === "photos" ? s.photos : s.type === "question" && s.photo ? [s.photo] : []);
 export type ScreenType = Screen["type"];
 export type QuizQuestion = z.infer<typeof quizQuestion>;
 export type TimelineEvent = z.infer<typeof timelineEvent>;

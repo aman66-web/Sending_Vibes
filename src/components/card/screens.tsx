@@ -190,7 +190,16 @@ export function QuestionScreen({ screen, onNext, stage = 0 }: ScreenProps<"quest
 
   return (
     <div className="flex w-full flex-col items-center gap-4 text-center">
-      <HeartMark className="h-12 w-12 text-[var(--c-accent)]" />
+      {screen.photo ? (
+        // A snapshot above the question, in place of the heart. It gives way on a short
+        // screen, so the question and the No button's play area still fit without scrolling.
+        <span className="block w-[clamp(6rem,calc(100svh_-_33rem),min(12rem,38cqmin))] rotate-[-3deg] animate-pop rounded-sm bg-white p-2 pb-7 shadow-xl">
+          {/* eslint-disable-next-line @next/next/no-img-element -- their own photo, already resized on upload */}
+          <img src={screen.photo} alt="" draggable={false} className="block aspect-square w-full rounded-[2px] object-cover" />
+        </span>
+      ) : (
+        <HeartMark className="h-12 w-12 text-[var(--c-accent)]" />
+      )}
       <h2 className="font-display text-3xl font-semibold leading-tight">{screen.question}</h2>
       <div ref={area} className="relative h-64 w-full">
         {/* Long answers ("Absolutely not") go on two rows rather than off a phone's edges. */}
