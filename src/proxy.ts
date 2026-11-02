@@ -65,8 +65,9 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Everything except the API, Next's own files and real files (images, robots.txt and so
-  // on). Other addresses with a dot in, or starting "api" (/cards.html, /apis), come
-  // through too, so they get the friendly not-found page instead of a bare one.
-  matcher: ["/((?!api/|api$|_next/|.*\\.(?:svg|png|jpe?g|webp|gif|ico|txt|xml|json|js|css|map|woff2?|webmanifest)$).*)"],
+  // Everything except the API, Next's and Vercel's own files (the visitor stats live under
+  // /_vercel) and real files (images, robots.txt and so on). Other addresses with a dot in,
+  // or starting "api" (/cards.html, /apis), come through too, so they get the friendly
+  // not-found page instead of a bare one.
+  matcher: ["/((?!api/|api$|_next/|_vercel/|.*\\.(?:svg|png|jpe?g|webp|gif|ico|txt|xml|json|js|css|map|woff2?|webmanifest)$).*)"],
 };

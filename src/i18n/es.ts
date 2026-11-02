@@ -851,7 +851,10 @@ export const es: Dict = {
       },
       {
         title: "Dónde se guarda",
-        paragraphs: ["La web está alojada en Vercel, las tarjetas, las fotos y los pedidos se guardan en Supabase, y los correos se envían a través de Resend. Tratan estos datos en nuestro nombre para que la web funcione."],
+        paragraphs: [
+          "La web está alojada en Vercel, las tarjetas, las fotos y los pedidos se guardan en Supabase, y los correos se envían a través de Resend. Tratan estos datos en nuestro nombre para que la web funcione.",
+          "Vercel también cuenta las visitas por nosotros: qué páginas se ven, desde qué web o enlace llega la gente y, más o menos, desde qué país y con qué tipo de dispositivo. No usa cookies ni guarda nada en tu dispositivo, no puede saber quién eres y los enlaces privados de las tarjetas quedan ocultos para él.",
+        ],
       },
       {
         title: "Pagos",

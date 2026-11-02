@@ -850,7 +850,10 @@ export const pl: Dict = {
       },
       {
         title: "Gdzie przechowujemy dane",
-        paragraphs: ["Strona jest hostowana przez Vercel, kartki, zdjęcia i zamówienia przechowujemy w Supabase, a e-maile wysyłamy przez Resend. Firmy te przetwarzają dane w naszym imieniu, żeby strona mogła działać."],
+        paragraphs: [
+          "Strona jest hostowana przez Vercel, kartki, zdjęcia i zamówienia przechowujemy w Supabase, a e-maile wysyłamy przez Resend. Firmy te przetwarzają dane w naszym imieniu, żeby strona mogła działać.",
+          "Vercel liczy też dla nas odwiedziny: które strony są oglądane, z jakiej strony lub linku ktoś do nas trafił oraz w przybliżeniu, z jakiego kraju i na jakim urządzeniu. Nie używa plików cookie, nic nie zapisuje na twoim urządzeniu, nie wie, kim jesteś, a prywatne linki do kartek są przed nim ukryte.",
+        ],
       },
       {
         title: "Płatności",
