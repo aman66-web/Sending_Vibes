@@ -298,7 +298,7 @@ export function CardPlayer({
           key={`${run}-${current.id}-${stage}-${editing}-${JSON.stringify(current.style?.tune ?? "")}`}
           ref={screenBox}
           tabIndex={-1}
-          className={`m-auto w-full outline-none ${ENTRANCE[current.style?.transition ?? "rise"]} ${wide ? "max-w-4xl" : "max-w-md"}`}
+          className={`m-auto w-full outline-none ${ENTRANCE[current.style?.transition ?? "rise"]} ${wide ? "max-w-4xl" : current.type === "question" ? "max-w-md @2xl:max-w-2xl" : "max-w-md"}`}
         >
           <ScreenGuard screen={current} last={index >= screens.length - 1} onSkip={index >= screens.length - 1 ? replay : next}>
           {current.type === "intro" && <IntroScreen screen={current} onNext={next} stage={stage} to={card.to} from={card.from} envelope={look.envelope} occasion={card.occasion} sentAt={sentAt} editing={editing} />}

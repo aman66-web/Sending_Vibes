@@ -170,8 +170,8 @@ export function QuestionScreen({ screen, onNext, stage = 0 }: ScreenProps<"quest
     return (
       <div className="flex flex-col items-center gap-6 text-center">
         <Burst />
-        <HeartMark className="h-24 w-24 animate-pop text-[var(--c-accent)]" />
-        <h2 className="font-display text-3xl font-semibold italic">{screen.afterYes}</h2>
+        <HeartMark className="h-24 w-24 animate-pop text-[var(--c-accent)] @2xl:h-32 @2xl:w-32" />
+        <h2 className="font-display text-3xl font-semibold italic @2xl:text-[clamp(1.875rem,5.4svh,3rem)]">{screen.afterYes}</h2>
         <NextButton onClick={onNext} />
       </div>
     );
@@ -182,7 +182,7 @@ export function QuestionScreen({ screen, onNext, stage = 0 }: ScreenProps<"quest
     <button
       {...noProps}
       data-no
-      className={`${moved ? "absolute transition-[left,top] duration-200 ease-out" : ""} min-h-14 whitespace-nowrap rounded-full bg-[var(--c-secondary)] px-6 py-3 text-[1.0625rem] font-semibold tracking-[0.02em] text-[var(--c-text)] shadow-sm ring-1 ring-current/20`}
+      className={`${moved ? "absolute transition-[left,top] duration-200 ease-out" : ""} min-h-14 whitespace-nowrap rounded-full bg-[var(--c-secondary)] px-6 py-3 text-[1.0625rem] font-semibold tracking-[0.02em] text-[var(--c-text)] shadow-sm ring-1 ring-current/20 @2xl:min-h-16 @2xl:px-8 @2xl:text-xl`}
     >
       {label(screen.no)}
     </button>
@@ -191,16 +191,18 @@ export function QuestionScreen({ screen, onNext, stage = 0 }: ScreenProps<"quest
   return (
     <div className="flex w-full flex-col items-center gap-4 text-center">
       {screen.photo ? (
-        // A snapshot above the question, in place of the heart. It gives way on a short
-        // screen, so the question and the No button's play area still fit without scrolling.
-        <span className="block w-[clamp(6rem,calc(100svh_-_33rem),min(12rem,38cqmin))] rotate-[-3deg] animate-pop rounded-sm bg-white p-2 pb-7 shadow-xl">
+        // A snapshot above the question, in place of the heart, bigger on a computer. It gives
+        // way on a short screen, so the question and the No button's play area still fit
+        // without scrolling.
+        <span className="block w-[clamp(6rem,calc(100svh_-_33rem),min(12rem,38cqmin))] rotate-[-3deg] animate-pop rounded-sm bg-white p-2 pb-7 shadow-xl @2xl:w-[clamp(6rem,calc(100svh_-_35.25rem),min(18rem,38cqmin))] @2xl:p-3 @2xl:pb-10">
           {/* eslint-disable-next-line @next/next/no-img-element -- their own photo, already resized on upload */}
           <img src={screen.photo} alt="" draggable={false} className="block aspect-square w-full rounded-[2px] object-cover" />
         </span>
       ) : (
-        <HeartMark className="h-12 w-12 text-[var(--c-accent)]" />
+        <HeartMark className="h-12 w-12 text-[var(--c-accent)] @2xl:h-16 @2xl:w-16" />
       )}
-      <h2 className="font-display text-3xl font-semibold leading-tight">{screen.question}</h2>
+      {/* On a computer the words are bigger, and follow the screen's height so a short window still fits. */}
+      <h2 className="font-display text-3xl font-semibold leading-tight @2xl:text-[clamp(1.875rem,5.4svh,3rem)]">{screen.question}</h2>
       <div ref={area} className="relative h-64 w-full">
         {/* Long answers ("Absolutely not") go on two rows rather than off a phone's edges. */}
         <div className="absolute inset-x-0 top-6 flex flex-wrap items-center justify-center gap-4 px-2">
@@ -212,7 +214,7 @@ export function QuestionScreen({ screen, onNext, stage = 0 }: ScreenProps<"quest
               sfx("win");
             }}
             style={{ transform: `scale(${yesScale})` }}
-            className={`${BUTTON} duration-300`}
+            className={`${BUTTON} duration-300 @2xl:min-h-16 @2xl:px-10 @2xl:text-xl`}
           >
             {screen.yes}
           </button>
