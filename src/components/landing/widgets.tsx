@@ -15,7 +15,7 @@ export function RunawayDemo() {
 function RunawayRound({ onReset }: { onReset: () => void }) {
   const { t } = useI18n();
   const d = t.demos;
-  const { area, yes, noProps, dodges, moved, label } = useRunaway();
+  const { area, yes, noProps, dodges, moved, yesScale, label } = useRunaway({ grow: 0.1, maxGrow: 1.6 });
   const [saidYes, setSaidYes] = useState(false);
 
   const noButton = (
@@ -45,7 +45,7 @@ function RunawayRound({ onReset }: { onReset: () => void }) {
             <button
               ref={yes}
               onClick={() => setSaidYes(true)}
-              style={{ transform: `scale(${Math.min(1 + dodges * 0.1, 1.6)})` }}
+              style={{ transform: `scale(${yesScale})` }}
               className="rounded-full border-2 border-ink bg-hot px-7 py-2 font-brand font-semibold text-white shadow-[3px_3px_0_var(--color-ink)] transition-transform duration-300"
             >
               {d.yes}

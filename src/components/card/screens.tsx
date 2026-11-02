@@ -162,7 +162,7 @@ export function IntroScreen({
 export function QuestionScreen({ screen, onNext, stage = 0 }: ScreenProps<"question">) {
   const sfx = useSfx();
   const { list } = useWords();
-  const { area, yes, noProps, dodges, moved, label } = useRunaway(() => sfx("boing"));
+  const { area, yes, noProps, moved, yesScale, label } = useRunaway({ onDodge: () => sfx("boing"), lines: list("noLines") });
   const [saidYes, setSaidYes] = useState(stage >= 2);
   usePressAt(stage === 1 ? 1 : 0, 1, () => area.current?.querySelector<HTMLElement>("[data-no]"));
 
@@ -177,7 +177,6 @@ export function QuestionScreen({ screen, onNext, stage = 0 }: ScreenProps<"quest
     );
   }
 
-  const yesScale = Math.min(1 + dodges * 0.12, 1.8);
   // Sits next to Yes until the first dodge, then roams the play area.
   const noButton = (
     <button
@@ -185,7 +184,7 @@ export function QuestionScreen({ screen, onNext, stage = 0 }: ScreenProps<"quest
       data-no
       className={`${moved ? "absolute transition-[left,top] duration-200 ease-out" : ""} min-h-14 whitespace-nowrap rounded-full bg-[var(--c-secondary)] px-6 py-3 text-[1.0625rem] font-semibold tracking-[0.02em] text-[var(--c-text)] shadow-sm ring-1 ring-current/20`}
     >
-      {label(screen.no, list("noLines"))}
+      {label(screen.no)}
     </button>
   );
 
