@@ -73,11 +73,12 @@ export type Music = (typeof MUSIC)[number];
 
 const text = (max: number) => z.string().trim().max(max);
 
-// Photos must live in our own storage, never arbitrary third-party URLs.
+// Photos must live in our own storage, never arbitrary third-party URLs, or be one of the
+// photos a ready-made design comes with (public/designs).
 const photoUrl = z
   .string()
   .max(500)
-  .refine((u) => u.startsWith("/api/photos/") || isSupabasePhotoUrl(u), "Invalid photo URL");
+  .refine((u) => u.startsWith("/api/photos/") || /^\/designs\/[\w-]+\.(?:jpg|png|webp)$/.test(u) || isSupabasePhotoUrl(u), "Invalid photo URL");
 
 function isSupabasePhotoUrl(u: string) {
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL;

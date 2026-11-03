@@ -112,6 +112,22 @@ export function CardPlayer({
   // Set when they move to another screen themselves (not when the creator jumps to one).
   const moved = useRef(false);
 
+  // A preview in a box of its own (the editor, a design's page) says how tall it is, as
+  // --card-h, so a screen can fit what it shows to the box rather than the whole window
+  // (the photo above a question). A card on its own page uses the window, its own height.
+  useEffect(() => {
+    const el = root.current;
+    if (!el || !preview || grow) return;
+    const measure = () => el.style.setProperty("--card-h", `${el.clientHeight}px`);
+    measure();
+    const watch = new ResizeObserver(measure);
+    watch.observe(el);
+    return () => {
+      watch.disconnect();
+      el.style.removeProperty("--card-h");
+    };
+  }, [preview, grow]);
+
   // Jump to whichever screen the creator is editing.
   const focusTarget = `${focusScreenId ?? ""}:${focusNonce}`;
   const [focused, setFocused] = useState(focusTarget);

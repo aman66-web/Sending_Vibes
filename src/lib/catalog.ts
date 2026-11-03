@@ -3,6 +3,7 @@ import type { Tier } from "./pricing";
 import * as B from "./design-styles-b";
 import { MORE_DESIGNS } from "./catalog-more";
 import { OCCASION_DESIGNS } from "./catalog-occasions";
+import { QUICK_DESIGNS } from "./catalog-quick";
 import { DESIGN_SCREENS } from "./design-history";
 import { DESIGN_PHOTOS } from "./demo-photos";
 import { BLANK, arcade, bloom, blush, bout, candle, crown, dusk, fizz, flight, gallery, garden, golden, groan, gulal, hush, lilac, lullaby, memo, oak, reveal, splash, stick, sunny, thread, ticket, voyage, zine } from "./design-styles-c";
@@ -3272,13 +3273,15 @@ const DESIGNS: Template[] = [
   // Added in their own files so they can be written alongside the ones above.
   ...MORE_DESIGNS,
   ...OCCASION_DESIGNS,
+  ...QUICK_DESIGNS,
 ];
 
 // Every design with the realistic photos chosen for its previews (lib/demo-photos.ts).
 export const TEMPLATES: Template[] = DESIGNS.map((t) => (DESIGN_PHOTOS[t.slug] ? { ...t, demo: { ...t.demo, photos: DESIGN_PHOTOS[t.slug] } } : t));
 
 // Shown with a "New" badge in the shop: a handful of recent ones for the season ahead, and
-// every design added in catalog-more.ts and catalog-occasions.ts. Kept short so it means something.
+// every design added in catalog-more.ts, catalog-occasions.ts and catalog-quick.ts. Kept short
+// so it means something.
 export const NEW_DESIGNS = new Set<string>([
   "lanterns-of-light",
   "mithai-mayhem",
@@ -3290,6 +3293,7 @@ export const NEW_DESIGNS = new Set<string>([
   "birthday-coupon-book",
   ...MORE_DESIGNS.map((d) => d.slug),
   ...OCCASION_DESIGNS.map((d) => d.slug),
+  ...QUICK_DESIGNS.map((d) => d.slug),
 ]);
 
 export const templatesBySlug = Object.fromEntries(TEMPLATES.map((t) => [t.slug, t])) as Record<string, Template>;
