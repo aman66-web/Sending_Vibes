@@ -809,7 +809,10 @@ export const en = {
       },
       {
         title: "Where it's kept",
-        paragraphs: ["The site is hosted by Vercel, cards, photos and orders are stored with Supabase, and emails are sent through Resend. They process this data on our behalf to run the site."],
+        paragraphs: [
+          "The site is hosted by Vercel, cards, photos and orders are stored with Supabase, and emails are sent through Resend. They process this data on our behalf to run the site.",
+          "Vercel also counts visits for us: which pages are viewed, which site or link brought people here, and roughly which country and kind of device they're on. It doesn't use cookies or store anything on your device, it can't tell who you are, and the private links to cards are hidden from it.",
+        ],
       },
       {
         title: "Payments",

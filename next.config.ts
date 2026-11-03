@@ -48,6 +48,10 @@ const securityHeaders = [
 // Sent cards are private. Their pages already say "noindex", but this header covers their
 // link-preview images too, at both addresses a card can be reached by.
 const PRIVATE = [{ key: "X-Robots-Tag", value: "noindex, nofollow" }];
+// A card's address opens the card, and the thank-you page's (?session_id=) shows the order,
+// so the next page, ours or anyone's, is only told "envelette.com". That keeps them out of
+// the visitor stats too, which record where each visit came from.
+const NO_FULL_REFERRER = [{ key: "Referrer-Policy", value: "strict-origin" }];
 
 const nextConfig: NextConfig = {
   // app/global-not-found.tsx: the friendly 404 for addresses too broken to reach app/[lang]/[cur].
@@ -57,6 +61,11 @@ const nextConfig: NextConfig = {
       { source: "/:path*", headers: securityHeaders },
       { source: "/c/:path*", headers: PRIVATE },
       { source: "/:lang/:cur/c/:path*", headers: PRIVATE },
+      // After the site-wide headers, so this Referrer-Policy is the one sent.
+      { source: "/c/:path*", headers: NO_FULL_REFERRER },
+      { source: "/:lang/:cur/c/:path*", headers: NO_FULL_REFERRER },
+      { source: "/basket/thanks", headers: NO_FULL_REFERRER },
+      { source: "/:lang/:cur/basket/thanks", headers: NO_FULL_REFERRER },
     ];
   },
 };

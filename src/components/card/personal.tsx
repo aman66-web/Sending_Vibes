@@ -16,14 +16,15 @@ export const usePersonal = () => useContext(PersonalContext);
 // As many as a memory game can pair up.
 const MAX_PHOTOS = 6;
 
-// The card's photos in the order they come: each photo screen's, then any placed on a
-// screen, without repeats.
+// The card's photos in the order they come: each photo screen's, then any above a question,
+// then any placed on a screen, without repeats.
 export function cardPhotos(screens: CardData["screens"]): PersonalPhoto[] {
   const out: PersonalPhoto[] = [];
   const add = (src: string, crop?: Crop | null) => {
     if (src && out.length < MAX_PHOTOS && !out.some((p) => p.src === src)) out.push({ src, crop });
   };
   for (const s of screens) if (s.type === "photos") s.photos.forEach((src, i) => add(src, s.crops?.[i]));
+  for (const s of screens) if (s.type === "question" && s.photo) add(s.photo);
   for (const s of screens) for (const img of s.style?.images ?? []) add(img.src, img.crop);
   return out;
 }

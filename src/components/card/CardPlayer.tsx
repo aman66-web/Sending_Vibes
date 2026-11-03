@@ -3,7 +3,7 @@
 import { catchError, type ErrorInfo } from "next/error";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { CardData, Screen, ScreenStyle, Transition } from "@/lib/card";
+import { ownPhotos, type CardData, type Screen, type ScreenStyle, type Transition } from "@/lib/card";
 import { labelText } from "@/lib/labels";
 import { stagesOf } from "@/lib/stages";
 import { FONT_VARS, cropStyle, screenLook } from "@/lib/screen-style";
@@ -112,6 +112,22 @@ export function CardPlayer({
   // Set when they move to another screen themselves (not when the creator jumps to one).
   const moved = useRef(false);
 
+  // A preview in a box of its own (the editor, a design's page) says how tall it is, as
+  // --card-h, so a screen can fit what it shows to the box rather than the whole window
+  // (the photo above a question). A card on its own page uses the window, its own height.
+  useEffect(() => {
+    const el = root.current;
+    if (!el || !preview || grow) return;
+    const measure = () => el.style.setProperty("--card-h", `${el.clientHeight}px`);
+    measure();
+    const watch = new ResizeObserver(measure);
+    watch.observe(el);
+    return () => {
+      watch.disconnect();
+      el.style.removeProperty("--card-h");
+    };
+  }, [preview, grow]);
+
   // Jump to whichever screen the creator is editing.
   const focusTarget = `${focusScreenId ?? ""}:${focusNonce}`;
   const [focused, setFocused] = useState(focusTarget);
@@ -187,7 +203,7 @@ export function CardPlayer({
   // moment its screen comes up rather than loading in front of them.
   useEffect(() => {
     if (preview) return;
-    const urls = new Set(card.screens.flatMap((s) => [...(s.type === "photos" ? s.photos : []), ...(s.style?.images ?? []).map((img) => img.src)]));
+    const urls = new Set(card.screens.flatMap((s) => [...ownPhotos(s), ...(s.style?.images ?? []).map((img) => img.src)]));
     if (!urls.size) return;
     // Held on to while the card is open, so nothing cuts them short.
     const fetched: HTMLImageElement[] = [];
@@ -298,7 +314,7 @@ export function CardPlayer({
           key={`${run}-${current.id}-${stage}-${editing}-${JSON.stringify(current.style?.tune ?? "")}`}
           ref={screenBox}
           tabIndex={-1}
-          className={`m-auto w-full outline-none ${ENTRANCE[current.style?.transition ?? "rise"]} ${wide ? "max-w-4xl" : "max-w-md"}`}
+          className={`m-auto w-full outline-none ${ENTRANCE[current.style?.transition ?? "rise"]} ${wide ? "max-w-4xl" : current.type === "question" ? "max-w-md @2xl:max-w-2xl" : "max-w-md"}`}
         >
           <ScreenGuard screen={current} last={index >= screens.length - 1} onSkip={index >= screens.length - 1 ? replay : next}>
           {current.type === "intro" && <IntroScreen screen={current} onNext={next} stage={stage} to={card.to} from={card.from} envelope={look.envelope} occasion={card.occasion} sentAt={sentAt} editing={editing} />}

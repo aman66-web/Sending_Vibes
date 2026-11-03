@@ -18,6 +18,7 @@ import {
 } from "next/font/google";
 import { ChatWidget } from "@/components/ChatWidget";
 import { JsonLd } from "@/components/JsonLd";
+import { VisitorStats } from "@/components/VisitorStats";
 import { I18nProvider } from "@/i18n/client";
 import { LANGUAGES } from "@/i18n/config";
 import { getI18n } from "@/i18n/server";
@@ -87,6 +88,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           {/* The chat only shows once the Claude API key has been added. */}
           {process.env.ANTHROPIC_API_KEY ? <ChatWidget /> : null}
         </I18nProvider>
+        <VisitorStats />
       </body>
     </html>
   );

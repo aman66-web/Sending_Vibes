@@ -97,4 +97,7 @@ export const DESIGN_SCREENS: Record<string, string[]> = {
   "thank-you-for-everything": ["intro,reasons,game,photos,message,finale"],
   "keys-to-the-castle": ["intro,typeit,boxes,photos,message,finale"],
   "home-sweet-home": ["intro,game,reasons,photos,message,finale"],
+  "caramel-latte-run": ["intro,question,finale"],
+  "sorry-i-fell-asleep": ["intro,question,finale"],
+  "coming-home-for-diwali": ["intro,question,finale"],
 };

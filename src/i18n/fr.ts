@@ -847,7 +847,10 @@ export const fr: Dict = {
       },
       {
         title: "Où c'est conservé",
-        paragraphs: ["Le site est hébergé par Vercel, les cartes, les photos et les commandes sont stockées chez Supabase, et les e-mails sont envoyés via Resend. Ces services traitent les données pour notre compte, afin de faire fonctionner le site."],
+        paragraphs: [
+          "Le site est hébergé par Vercel, les cartes, les photos et les commandes sont stockées chez Supabase, et les e-mails sont envoyés via Resend. Ces services traitent les données pour notre compte, afin de faire fonctionner le site.",
+          "Vercel compte aussi les visites pour nous, c'est-à-dire les pages vues, le site ou le lien d'où viennent les visiteurs et, à peu près, leur pays et leur type d'appareil. Il n'utilise pas de cookies, n'enregistre rien sur ton appareil, ne peut pas savoir qui tu es, et les liens privés des cartes lui sont cachés.",
+        ],
       },
       {
         title: "Paiements",

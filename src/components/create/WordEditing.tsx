@@ -660,6 +660,22 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
       }
       return;
     }
+    // Replacing the snapshot above a yes-or-no question (only ever from its Replace button).
+    if (screen.type === "question") {
+      if (!replace) return;
+      select(null);
+      setUploading((n) => n + 1);
+      try {
+        const url = await uploadPhoto(chosen[0]);
+        begin();
+        onScreen(here, (sc) => (sc.type === "question" ? { ...sc, photo: url } : sc));
+      } catch {
+        setPhotoError(t.editor.uploadFailed);
+      } finally {
+        setUploading((n) => n - 1);
+      }
+      return;
+    }
     if (screen.type !== "photos") return;
     const room = replace ? 1 : MAX_PHOTOS - screen.photos.length;
     const picked = chosen.slice(0, Math.max(room, 0));
@@ -688,7 +704,11 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
   const removePhoto = (i: number) => {
     onBegin?.();
     onScreen(here, (sc) =>
-      sc.type === "photos" ? { ...sc, photos: sc.photos.filter((_, j) => j !== i), captions: sc.captions.filter((_, j) => j !== i), crops: sc.crops?.filter((_, j) => j !== i) } : sc,
+      sc.type === "photos"
+        ? { ...sc, photos: sc.photos.filter((_, j) => j !== i), captions: sc.captions.filter((_, j) => j !== i), crops: sc.crops?.filter((_, j) => j !== i) }
+        : sc.type === "question"
+          ? { ...sc, photo: undefined }
+          : sc,
     );
     select(null);
   };
@@ -1083,6 +1103,22 @@ export function EditableCard({ card, screenId, enabled, onChange, onScreen, onBe
             }}
           />
           </>,
+        )}
+
+      {enabled &&
+        open?.kind === "photo" &&
+        screen?.type === "question" &&
+        controls(
+          place(open.box, 200),
+          x.photoTitle,
+          <div className="grid gap-2">
+            <button type="button" onClick={() => pickPhotos({ deco: false, index: 0 })} className="min-h-11 rounded-full bg-brand px-4 py-2.5 text-base font-semibold text-on-brand">
+              {x.replacePhoto}
+            </button>
+            <button type="button" onClick={(e) => fresh(e) && removePhoto(0)} className="min-h-11 rounded-full border-2 border-line px-4 py-2.5 text-base font-semibold text-red-700 dark:text-red-300">
+              {x.removeThisPhoto}
+            </button>
+          </div>,
         )}
 
       {enabled &&
